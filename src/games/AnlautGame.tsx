@@ -9,76 +9,12 @@ interface AnlautGameProps {
   playError: () => void;
 }
 
-interface EmojiItem {
-  id: string;
-  emoji: string;
-}
-
 // 63 child-friendly emoji keys
-const EMOJI_ITEMS: EmojiItem[] = [
-  { id: 'lion', emoji: '🦁' },
-  { id: 'apple', emoji: '🍎' },
-  { id: 'banana', emoji: '🍌' },
-  { id: 'cat', emoji: '🐈' },
-  { id: 'dog', emoji: '🐕' },
-  { id: 'elephant', emoji: '🐘' },
-  { id: 'fish', emoji: '🐟' },
-  { id: 'giraffe', emoji: '🦒' },
-  { id: 'house', emoji: '🏠' },
-  { id: 'icecream', emoji: '🍦' },
-  { id: 'frog', emoji: '🐸' },
-  { id: 'key', emoji: '🔑' },
-  { id: 'owl', emoji: '🦉' },
-  { id: 'pear', emoji: '🍐' },
-  { id: 'sun', emoji: '☀️' },
-  { id: 'tree', emoji: '🌲' },
-  { id: 'watermelon', emoji: '🍉' },
-  { id: 'zebra', emoji: '🦓' },
-  { id: 'car', emoji: '🚗' },
-  { id: 'boat', emoji: '🛥️' },
-  { id: 'airplane', emoji: '✈️' },
-  { id: 'balloon', emoji: '🎈' },
-  { id: 'bell', emoji: '🔔' },
-  { id: 'book', emoji: '📘' },
-  { id: 'cake', emoji: '🍰' },
-  { id: 'candle', emoji: '🕯️' },
-  { id: 'cheese', emoji: '🧀' },
-  { id: 'cherry', emoji: '🍒' },
-  { id: 'cow', emoji: '🐄' },
-  { id: 'crab', emoji: '🦀' },
-  { id: 'crown', emoji: '👑' },
-  { id: 'duck', emoji: '🦆' },
-  { id: 'egg', emoji: '🥚' },
-  { id: 'flower', emoji: '🌷' },
-  { id: 'grapes', emoji: '🍇' },
-  { id: 'hat', emoji: '👒' },
-  { id: 'lemon', emoji: '🍋' },
-  { id: 'melon', emoji: '🍈' },
-  { id: 'mouse', emoji: '🐭' },
-  { id: 'onion', emoji: '🧅' },
-  { id: 'panda', emoji: '🐼' },
-  { id: 'peach', emoji: '🍑' },
-  { id: 'penguin', emoji: '🐧' },
-  { id: 'pineapple', emoji: '🍍' },
-  { id: 'rabbit', emoji: '🐇' },
-  { id: 'snail', emoji: '🐌' },
-  { id: 'strawberry', emoji: '🍓' },
-  { id: 'tomato', emoji: '🍅' },
-  { id: 'turtle', emoji: '🐢' },
-  { id: 'umbrella', emoji: '☂️' },
-  { id: 'violin', emoji: '🎻' },
-  { id: 'wolf', emoji: '🐺' },
-  { id: 'ship', emoji: '🚢' },
-  { id: 'train', emoji: '🚂' },
-  { id: 'helicopter', emoji: '🚁' },
-  { id: 'rocket', emoji: '🚀' },
-  { id: 'bicycle', emoji: '🚲' },
-  { id: 'rainbow', emoji: '🌈' },
-  { id: 'star', emoji: '🌟' },
-  { id: 'cloud', emoji: '☁️' },
-  { id: 'moon', emoji: '🌙' },
-  { id: 'tiger', emoji: '🐯' },
-  { id: 'monkey', emoji: '🐒' },
+const EMOJI_ITEMS: string[] = [
+  '🦁', '🍎', '🍌', '🐈', '🐕', '🐘', '🐟', '🦒', '🏠', '🍦', '🐸', '🔑', '🦉', '🍐', '☀️', '🌲',
+  '🍉', '🦓', '🚗', '🛥️', '✈️', '🎈', '🔔', '📘', '🍰', '🕯️', '🧀', '🍒', '🐄', '🦀', '👑', '🦆',
+  '🥚', '🌷', '🍇', '👒', '🍋', '🍈', '🐭', '🧅', '🐼', '🍑', '🐧', '🍍', '🐇', '🐌', '🍓', '🍅',
+  '🐢', '☂️', '🎻', '🐺', '🚢', '🚂', '🚁', '🚀', '🚲', '🌈', '🌟', '☁️', '🌙', '🐯', '🐒'
 ];
 
 const getSafeLocalStorage = (key: string, defaultValue: number): number => {
@@ -100,11 +36,11 @@ const setSafeLocalStorage = (key: string, value: number) => {
 };
 
 const generateOptions = (
-  item: EmojiItem,
+  item: string,
   lang: string,
   itemsDict: Record<string, string>
 ): string[] => {
-  const word = itemsDict[item.id] || '';
+  const word = itemsDict[item] || '';
   if (!word) return [];
 
   const correctChar = lang === 'ja' ? word[0] : word[0].toUpperCase();
@@ -145,7 +81,7 @@ const generateOptions = (
 export function AnlautGame({ playPop, playSuccess, playError }: AnlautGameProps) {
   const { language, t } = useTranslation();
 
-  const [currentItem, setCurrentItem] = useState<EmojiItem>(() => {
+  const [currentItem, setCurrentItem] = useState<string>(() => {
     const randomIndex = Math.floor(Math.random() * EMOJI_ITEMS.length);
     return EMOJI_ITEMS[randomIndex];
   });
@@ -164,7 +100,7 @@ export function AnlautGame({ playPop, playSuccess, playError }: AnlautGameProps)
   }, [currentItem, language, t.anlautGame.items]);
 
   const itemsDict = t.anlautGame.items as Record<string, string>;
-  const rawWord = itemsDict[currentItem.id] || '';
+  const rawWord = itemsDict[currentItem] || '';
   const displayWord =
     language === 'ja' ? rawWord : rawWord.charAt(0).toUpperCase() + rawWord.slice(1);
 
@@ -209,7 +145,7 @@ export function AnlautGame({ playPop, playSuccess, playError }: AnlautGameProps)
     // Pick next item (guaranteeing it's different if possible)
     let nextItem = currentItem;
     if (EMOJI_ITEMS.length > 1) {
-      while (nextItem.id === currentItem.id) {
+      while (nextItem === currentItem) {
         const idx = Math.floor(Math.random() * EMOJI_ITEMS.length);
         nextItem = EMOJI_ITEMS[idx];
       }
@@ -274,7 +210,7 @@ export function AnlautGame({ playPop, playSuccess, playError }: AnlautGameProps)
         {/* Emoji Card */}
         <div className="bg-white border-4 border-slate-200 rounded-[3rem] w-48 h-48 flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-105 active:scale-95">
           <span className="text-8xl md:text-9xl drop-shadow-[0_8px_8px_rgba(0,0,0,0.15)] animate-bounce-subtle">
-            {currentItem.emoji}
+            {currentItem}
           </span>
         </div>
 
