@@ -688,7 +688,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
                 onClick={generateMaze}
                 className="shadow-[0_6px_0_0_#059669] active:translate-y-[4px]"
               >
-                🎉 {t.mazeGame.title} Play Again!
+                🎉 {t.mazeGame.title} {t.mazeGame.playAgain}!
               </KidButton>
             </div>
           )}
@@ -706,7 +706,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
             playBtnDisabled ? 'opacity-40 pointer-events-none' : ''
           }`}
         >
-          ▶️ Play
+          ▶️ {t.mazeGame.play}
         </KidButton>
 
         <KidButton
@@ -718,7 +718,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
             isAnimating ? 'opacity-40 pointer-events-none' : ''
           }`}
         >
-          🗑️ Reset
+          🗑️ {t.mazeGame.reset}
         </KidButton>
       </div>
 

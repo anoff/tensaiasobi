@@ -1131,7 +1131,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
               }
             `}
           >
-            {diff === 'easy' ? '🐣 Easy' : diff === 'medium' ? '🦁 Medium' : '🚀 Hard'}
+            {diff === 'easy' ? `🐣 ${t.shapeTrace.easy}` : diff === 'medium' ? `🦁 ${t.shapeTrace.medium}` : `🚀 ${t.shapeTrace.hard}`}
           </button>
         ))}
       </div>
@@ -1169,7 +1169,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
                 onClick={nextShape}
                 className="shadow-[0_6px_0_0_#d81b60] active:translate-y-[4px]"
               >
-                🌈 Next Shape!
+                🌈 {t.shapeTrace.nextShape}
               </KidButton>
             </div>
           )}
@@ -1187,7 +1187,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
             isWon || drawingPoints.length < 5 ? 'opacity-40 pointer-events-none' : ''
           }`}
         >
-          ▶️ Check
+          ▶️ {t.shapeTrace.check}
         </KidButton>
 
         <KidButton
@@ -1196,7 +1196,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
           onClick={handleReset}
           className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
         >
-          🗑️ Reset
+          🗑️ {t.shapeTrace.reset}
         </KidButton>
 
         <KidButton
@@ -1205,7 +1205,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
           onClick={nextShape}
           className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
         >
-          ➡️ Next
+          ➡️ {t.shapeTrace.next}
         </KidButton>
       </div>
 
