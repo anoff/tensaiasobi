@@ -1,4 +1,3 @@
-import React from 'react';
 import KidButton from './KidButton';
 import { useTranslation } from '../hooks/useTranslation';
 

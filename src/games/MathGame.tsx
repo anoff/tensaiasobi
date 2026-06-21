@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Confetti from 'react-confetti';
-import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
 
 type Level = 'easy' | 'medium' | 'hard' | 'expert';
@@ -24,28 +23,11 @@ const LEVEL_EMOJIS: Record<Level, string> = {
   expert: '⭐⭐⭐⭐',
 };
 
-export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
-  const [level, setLevel] = useState<Level>('easy');
-  const [question, setQuestion] = useState<Question | null>(null);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const { t } = useTranslation();
-
-  const [streak, setStreak] = useState(() => {
-    const saved = localStorage.getItem('math_streak');
-    return saved ? parseInt(saved, 10) : 0;
-  });
-  const [highScore, setHighScore] = useState(() => {
-    const saved = localStorage.getItem('math_highscore');
-    return saved ? parseInt(saved, 10) : 0;
-  });
-
-  const generateQuestion = (currentLevel: Level): Question => {
-    let num1 = 0;
-    let num2 = 0;
-    let operator = '+';
-    let answer = 0;
+const generateQuestion = (currentLevel: Level): Question => {
+  let num1: number;
+  let num2: number;
+  let operator: string;
+  let answer: number;
 
     if (currentLevel === 'easy') {
       num1 = Math.floor(Math.random() * 9) + 1;
@@ -117,15 +99,28 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
     };
   };
 
+export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
+  const [level, setLevel] = useState<Level>('easy');
+  const [question, setQuestion] = useState<Question>(() => generateQuestion('easy'));
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { t } = useTranslation();
+
+  const [streak, setStreak] = useState(() => {
+    const saved = localStorage.getItem('math_streak');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [highScore, setHighScore] = useState(() => {
+    const saved = localStorage.getItem('math_highscore');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
   const loadNewQuestion = (currentLevel: Level) => {
     setQuestion(generateQuestion(currentLevel));
     setSelectedAnswer(null);
     setIsCorrect(null);
   };
-
-  useEffect(() => {
-    loadNewQuestion(level);
-  }, [level]);
 
   const handleAnswerSelect = (opt: number) => {
     if (selectedAnswer !== null) return; // Prevent multiple selection before next question
@@ -165,6 +160,7 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
   const handleLevelChange = (newLevel: Level) => {
     playPop();
     setLevel(newLevel);
+    loadNewQuestion(newLevel);
   };
 
   return (
@@ -223,7 +219,6 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
         <div className="w-full grid grid-cols-3 gap-4 max-w-sm">
           {question?.options.map((opt) => {
             const isThisSelected = selectedAnswer === opt;
-            const isThisCorrect = opt === question.answer;
 
             let bubbleColorClass =
               'from-sky-300/40 via-sky-400/70 to-sky-600/90 shadow-[0_10px_20px_rgba(14,165,233,0.3),_inset_0_4px_12px_rgba(255,255,255,0.6)] border-sky-400';

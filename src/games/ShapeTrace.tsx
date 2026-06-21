@@ -908,6 +908,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shapeIndex, drawingPoints, isWon, difficulty]);
 
   const getCanvasCoords = (clientX: number, clientY: number): { x: number; y: number } | null => {
@@ -923,8 +924,8 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isWon) return;
 
-    let clientX = 0;
-    let clientY = 0;
+    let clientX: number;
+    let clientY: number;
 
     if ('touches' in e) {
       if (e.touches.length === 0) return;
@@ -947,8 +948,8 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
   const handlePointerMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current || isWon) return;
 
-    let clientX = 0;
-    let clientY = 0;
+    let clientX: number;
+    let clientY: number;
 
     if ('touches' in e) {
       if (e.touches.length === 0) return;

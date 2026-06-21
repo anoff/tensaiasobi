@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
@@ -267,7 +267,7 @@ export function AnlautGame({ playPop, playSuccess, playError }: AnlautGameProps)
                 'from-sky-300/40 via-sky-400/70 to-sky-600/90 shadow-[0_10px_20px_rgba(14,165,233,0.3),_inset_0_4px_12px_rgba(255,255,255,0.6)] border-sky-400';
 
               if (isThisSelected) {
-                if (isCorrect === true) {
+                if ((isCorrect as boolean) === true) {
                   bubbleColorClass =
                     'from-emerald-300 via-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.4)] border-emerald-400 scale-95 duration-100';
                 } else if (isCorrect === false) {

@@ -12,7 +12,7 @@ interface I18nContextProps {
 const I18nContext = createContext<I18nContextProps | undefined>(undefined);
 
 function getBrowserLanguage(): Language {
-  const lang = navigator.language || (navigator as any).userLanguage || 'en';
+  const lang = navigator.language || (navigator as Navigator & { userLanguage?: string }).userLanguage || 'en';
   const prefix = lang.slice(0, 2).toLowerCase();
   if (prefix === 'de') return 'de';
   if (prefix === 'ja') return 'ja';
@@ -44,6 +44,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTranslation = () => {
   const context = useContext(I18nContext);
   if (!context) {

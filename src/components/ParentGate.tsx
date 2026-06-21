@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface ParentGateProps {
@@ -7,17 +7,11 @@ interface ParentGateProps {
 }
 
 export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
-  const [num1, setNum1] = useState(0);
-  const [num2, setNum2] = useState(0);
+  const [num1] = useState(() => Math.floor(Math.random() * 11) + 5);
+  const [num2] = useState(() => Math.floor(Math.random() * 11) + 5);
   const [answer, setAnswer] = useState('');
   const [error, setError] = useState(false);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    // Generate simple addition puzzle for parents (numbers between 5 and 15)
-    setNum1(Math.floor(Math.random() * 11) + 5);
-    setNum2(Math.floor(Math.random() * 11) + 5);
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

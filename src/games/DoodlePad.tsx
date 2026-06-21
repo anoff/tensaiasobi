@@ -88,8 +88,8 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     if (!canvas) return null;
 
     const rect = canvas.getBoundingClientRect();
-    let clientX = 0;
-    let clientY = 0;
+    let clientX: number;
+    let clientY: number;
 
     if ('touches' in e) {
       if (e.touches.length === 0) return null;
