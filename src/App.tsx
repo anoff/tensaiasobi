@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useSound } from './hooks/useSound';
 import KidButton from './components/KidButton';
@@ -9,16 +9,31 @@ import MathGame from './games/MathGame';
 import OddOneOut from './games/OddOneOut';
 import DoodlePad from './games/DoodlePad';
 import MemoryMatch from './games/MemoryMatch';
+import { I18nProvider, useTranslation } from './hooks/useTranslation';
 
 type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'settings';
 
-function App() {
+function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>('settings_vibration_enabled', true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
   const [showParentGate, setShowParentGate] = useState(false);
 
   const { playPop, playSuccess, playError } = useSound(soundEnabled, vibrationEnabled);
+  const { language, setLanguage, t } = useTranslation();
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!langOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [langOpen]);
 
   const handleScreenChange = (screen: Screen) => {
     playPop();
@@ -68,17 +83,51 @@ function App() {
             <HomeButton onClick={() => handleScreenChange('menu')} />
           )}
         </div>
-        
+
         {currentScreen === 'menu' && (
-          <button
-            onClick={() => {
-              playPop();
-              setShowParentGate(true);
-            }}
-            className="bg-white/90 border-2 border-slate-300 rounded-full px-4 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none"
-          >
-            ⚙️ Parents
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Language Switcher Dropdown */}
+            <div className="relative" ref={langRef}>
+              {(() => {
+                const labelMap = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵' } as const;
+                const options = (['en', 'de', 'ja'] as const).filter((l) => l !== language);
+                return (
+                  <>
+                    <button
+                      onClick={() => { playPop(); setLangOpen((o) => !o); }}
+                      className="flex items-center gap-1 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5 text-base shadow-sm cursor-pointer outline-none hover:bg-slate-50 transition-all"
+                    >
+                      {labelMap[language]}
+                      <span className="text-slate-400 text-xs">{langOpen ? '▲' : '▼'}</span>
+                    </button>
+                    {langOpen && (
+                      <div className="absolute left-0 top-full mt-1 bg-white border-2 border-slate-200 rounded-2xl shadow-lg py-1 flex flex-col z-50 min-w-full">
+                        {options.map((lang) => (
+                          <button
+                            key={lang}
+                            onClick={() => { playPop(); setLanguage(lang); setLangOpen(false); }}
+                            className="px-3 py-1.5 text-base hover:bg-slate-50 cursor-pointer outline-none transition-colors"
+                          >
+                            {labelMap[lang]}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+
+            <button
+              onClick={() => {
+                playPop();
+                setShowParentGate(true);
+              }}
+              className="bg-white/90 border-2 border-slate-300 rounded-full px-4 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none"
+            >
+              ⚙️ {t.menu.parents}
+            </button>
+          </div>
         )}
       </header>
 
@@ -91,7 +140,7 @@ function App() {
               <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-candy-pink via-candy-blue to-candy-purple drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)] animate-pulse">
                 tensaiasobi 🎮
               </h1>
-              <p className="text-slate-400 font-extrabold text-base">Fun play & learn games!</p>
+              <p className="text-slate-400 font-extrabold text-base">{t.menu.subtitle}</p>
             </div>
 
             {/* Launchers Grid */}
@@ -103,7 +152,7 @@ function App() {
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
                 <span className="text-5xl">🎈</span>
-                <span className="text-lg font-black block leading-tight">Math Pop</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.math}</span>
               </KidButton>
 
               <KidButton
@@ -113,7 +162,7 @@ function App() {
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
                 <span className="text-5xl">🧐</span>
-                <span className="text-lg font-black block leading-tight">Odd One</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.odd}</span>
               </KidButton>
 
               <KidButton
@@ -123,7 +172,7 @@ function App() {
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
                 <span className="text-5xl">🎨</span>
-                <span className="text-lg font-black block leading-tight">Doodle</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.doodle}</span>
               </KidButton>
 
               <KidButton
@@ -133,12 +182,12 @@ function App() {
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
                 <span className="text-5xl">🐯</span>
-                <span className="text-lg font-black block leading-tight">Match</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.match}</span>
               </KidButton>
             </div>
 
             <div className="text-center text-xs text-slate-300 font-bold">
-              Made with ❤️ for learning
+              {t.menu.footer}
             </div>
           </div>
         ) : (
@@ -157,6 +206,14 @@ function App() {
         />
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <I18nProvider>
+      <AppContent />
+    </I18nProvider>
   );
 }
 

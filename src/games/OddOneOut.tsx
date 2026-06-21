@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface EmojiItem {
   emoji: string;
@@ -26,6 +27,8 @@ export function OddOneOut({ playPop, playSuccess, playError }: OddOneOutProps) {
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const { t } = useTranslation();
+
   const [streak, setStreak] = useState(() => {
     const saved = localStorage.getItem('odd_streak');
     return saved ? parseInt(saved, 10) : 0;
@@ -139,16 +142,16 @@ export function OddOneOut({ playPop, playSuccess, playError }: OddOneOutProps) {
 
       {/* Header Info */}
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight">Odd One Out! 🧐</h2>
-        <p className="text-slate-500 font-extrabold text-sm">Find the emoji that doesn't fit!</p>
+        <h2 className="text-3xl font-black text-slate-800 tracking-tight">{t.oddOneOut.title}</h2>
+        <p className="text-slate-500 font-extrabold text-sm">{t.oddOneOut.subtitle}</p>
         
         {/* Streak Counters */}
         <div className="flex gap-4 items-center justify-center pt-1">
           <span className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1 rounded-full border-2 border-amber-300 text-xs shadow-sm">
-            🔥 Streak: {streak}
+            ✨ {streak}
           </span>
           <span className="bg-indigo-100 text-indigo-600 font-extrabold px-4 py-1 rounded-full border-2 border-indigo-300 text-xs shadow-sm">
-            🏆 High: {highScore}
+            🏆 {highScore}
           </span>
         </div>
       </div>
@@ -158,7 +161,6 @@ export function OddOneOut({ playPop, playSuccess, playError }: OddOneOutProps) {
         <div className="grid grid-cols-2 gap-6 w-full aspect-square">
           {items.map((item, idx) => {
             const isThisSelected = selectedEmoji === item.emoji;
-            const isThisCorrect = item.isOdd;
             const bgClass = buttonBackgrounds[idx % buttonBackgrounds.length];
             const activeShadowClass = activeShadows[idx % activeShadows.length];
 
@@ -197,8 +199,8 @@ export function OddOneOut({ playPop, playSuccess, playError }: OddOneOutProps) {
         </div>
       </div>
 
-      <div className="text-slate-400 font-extrabold text-xs pb-4">
-        Tap the one that belongs to a different group!
+      <div className="text-slate-400 font-extrabold text-xs pb-4 text-center">
+        {t.oddOneOut.help}
       </div>
     </div>
   );

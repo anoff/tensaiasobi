@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
+import { useTranslation } from '../hooks/useTranslation';
 
 type Level = 'easy' | 'medium' | 'hard' | 'expert';
 
@@ -16,12 +17,21 @@ interface MathGameProps {
   playError: () => void;
 }
 
+const LEVEL_EMOJIS: Record<Level, string> = {
+  easy: '⭐',
+  medium: '⭐⭐',
+  hard: '⭐⭐⭐',
+  expert: '⭐⭐⭐⭐',
+};
+
 export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
   const [level, setLevel] = useState<Level>('easy');
   const [question, setQuestion] = useState<Question | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const { t } = useTranslation();
+
   const [streak, setStreak] = useState(() => {
     const saved = localStorage.getItem('math_streak');
     return saved ? parseInt(saved, 10) : 0;
@@ -175,7 +185,7 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
             key={lvl}
             onClick={() => handleLevelChange(lvl)}
             className={`
-              flex-1 py-2 text-sm font-black rounded-xl capitalize border-b-4 transition-all duration-75 outline-none
+              flex-1 py-2 text-sm font-black rounded-xl capitalize border-b-4 transition-all duration-75 outline-none cursor-pointer
               ${
                 level === lvl
                   ? 'bg-candy-purple text-white border-purple-700 shadow-sm translate-y-[2px]'
@@ -183,15 +193,15 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
               }
             `}
           >
-            {lvl}
+            {LEVEL_EMOJIS[lvl]}
           </button>
         ))}
       </div>
 
       {/* Equation Panel */}
       <div className="flex-1 flex flex-col items-center justify-center my-6 space-y-4">
-        <div className="text-sm font-black tracking-widest text-slate-400 uppercase">
-          Solve the Equation!
+        <div className="text-sm font-black tracking-widest text-slate-400 uppercase text-center">
+          {t.mathGame.title}
         </div>
         <div className="text-7xl md:text-8xl font-black text-slate-800 tracking-tight select-none">
           {question?.text}
@@ -200,10 +210,10 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
         {/* Streak Counter */}
         <div className="flex gap-4 items-center justify-center pt-2">
           <span className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1.5 rounded-full border-2 border-amber-300 text-sm shadow-sm flex items-center gap-1.5 animate-pulse">
-            🔥 Streak: {streak}
+            ✨ {streak}
           </span>
           <span className="bg-indigo-100 text-indigo-600 font-extrabold px-4 py-1.5 rounded-full border-2 border-indigo-300 text-sm shadow-sm">
-            🏆 High: {highScore}
+            🏆 {highScore}
           </span>
         </div>
       </div>
@@ -249,8 +259,8 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
             );
           })}
         </div>
-        <div className="text-slate-400 font-extrabold text-xs">
-          Tap the correct bubble!
+        <div className="text-slate-400 font-extrabold text-xs text-center">
+          {t.mathGame.help}
         </div>
       </div>
     </div>

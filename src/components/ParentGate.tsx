@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ParentGateProps {
   onSuccess: () => void;
@@ -10,6 +11,7 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
   const [num2, setNum2] = useState(0);
   const [answer, setAnswer] = useState('');
   const [error, setError] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Generate simple addition puzzle for parents (numbers between 5 and 15)
@@ -30,9 +32,9 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded-3xl border-4 border-slate-300 p-6 max-w-sm w-full text-center shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">Parents Only 🔒</h2>
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.parentGate.title}</h2>
         <p className="text-slate-600 mb-6 text-sm">
-          Please solve this simple problem to verify you are a parent:
+          {t.parentGate.instruction}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -47,14 +49,14 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
               setError(false);
               setAnswer(e.target.value);
             }}
-            placeholder="Answer"
+            placeholder={t.parentGate.placeholder}
             className="w-full text-center text-3xl font-bold py-3 px-4 border-4 border-slate-200 focus:border-indigo-400 rounded-2xl outline-none transition-colors"
             autoFocus
           />
 
           {error && (
             <p className="text-red-500 font-bold animate-bounce text-sm">
-              Oops! Try again.
+              {t.parentGate.error}
             </p>
           )}
 
@@ -64,13 +66,13 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
               onClick={onClose}
               className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-2xl transition-colors cursor-pointer text-sm"
             >
-              Cancel
+              {t.parentGate.cancel}
             </button>
             <button
               type="submit"
               className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-2xl transition-colors cursor-pointer text-sm"
             >
-              Verify
+              {t.parentGate.verify}
             </button>
           </div>
         </form>

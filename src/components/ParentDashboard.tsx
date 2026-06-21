@@ -1,5 +1,6 @@
 import React from 'react';
 import KidButton from './KidButton';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ParentDashboardProps {
   soundEnabled: boolean;
@@ -18,19 +19,21 @@ export function ParentDashboard({
   onClearProgress,
   onClose,
 }: ParentDashboardProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-md mx-auto w-full select-none animate-in fade-in slide-in-from-bottom-6 duration-200">
       <div className="bg-white rounded-[2rem] border-4 border-slate-200 p-8 w-full shadow-lg space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-slate-800">Settings ⚙️</h2>
-          <p className="text-slate-500 text-sm mt-1">Configure options for your children</p>
+          <h2 className="text-3xl font-extrabold text-slate-800">{t.parentDashboard.title}</h2>
+          <p className="text-slate-500 text-sm mt-1">{t.parentDashboard.subtitle}</p>
         </div>
 
         <div className="space-y-6">
           <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border-2 border-slate-100">
             <div>
-              <span className="text-lg font-bold text-slate-800 block">Sound Effects 🔊</span>
-              <span className="text-xs text-slate-500">Enable/disable synthesized audio cues</span>
+              <span className="text-lg font-bold text-slate-800 block">{t.parentDashboard.sound}</span>
+              <span className="text-xs text-slate-500">{t.parentDashboard.soundDesc}</span>
             </div>
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
@@ -50,8 +53,8 @@ export function ParentDashboard({
 
           <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border-2 border-slate-100">
             <div>
-              <span className="text-lg font-bold text-slate-800 block">Vibrations 📳</span>
-              <span className="text-xs text-slate-500">Enable/disable haptic physical feedback</span>
+              <span className="text-lg font-bold text-slate-800 block">{t.parentDashboard.vibration}</span>
+              <span className="text-xs text-slate-500">{t.parentDashboard.vibrationDesc}</span>
             </div>
             <button
               onClick={() => setVibrationEnabled(!vibrationEnabled)}
@@ -71,25 +74,25 @@ export function ParentDashboard({
 
           <div className="p-4 bg-red-50 rounded-2xl border-2 border-red-100 space-y-3">
             <div>
-              <span className="text-lg font-bold text-red-800 block">Danger Zone ⚠️</span>
-              <span className="text-xs text-red-500">This resets streaks and drawing pads</span>
+              <span className="text-lg font-bold text-red-800 block">{t.parentDashboard.dangerZone}</span>
+              <span className="text-xs text-red-500">{t.parentDashboard.dangerZoneDesc}</span>
             </div>
             <button
               onClick={() => {
-                if (confirm('Are you sure you want to reset all progress?')) {
+                if (confirm(t.parentDashboard.resetConfirm)) {
                   onClearProgress();
                 }
               }}
               className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors cursor-pointer text-sm outline-none"
             >
-              Reset All Progress
+              {t.parentDashboard.resetBtn}
             </button>
           </div>
         </div>
 
         <div className="pt-4 flex justify-center">
           <KidButton color="pink" size="md" onClick={onClose} className="w-full">
-            Close Settings
+            {t.parentDashboard.close}
           </KidButton>
         </div>
       </div>
