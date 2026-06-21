@@ -9,9 +9,11 @@ import MathGame from './games/MathGame';
 import OddOneOut from './games/OddOneOut';
 import DoodlePad from './games/DoodlePad';
 import MemoryMatch from './games/MemoryMatch';
+import MazeGame from './games/MazeGame';
+import ShapeTrace from './games/ShapeTrace';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'settings';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'settings';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
@@ -58,6 +60,10 @@ function AppContent() {
         return <DoodlePad playPop={playPop} />;
       case 'memory':
         return <MemoryMatch playPop={playPop} playSuccess={playSuccess} playError={playError} />;
+      case 'maze':
+        return <MazeGame playPop={playPop} playSuccess={playSuccess} playError={playError} />;
+      case 'trace':
+        return <ShapeTrace playPop={playPop} playSuccess={playSuccess} playError={playError} />;
       case 'settings':
         return (
           <ParentDashboard
@@ -183,6 +189,26 @@ function AppContent() {
               >
                 <span className="text-5xl">🐯</span>
                 <span className="text-lg font-black block leading-tight">{t.menu.match}</span>
+              </KidButton>
+
+              <KidButton
+                color="green"
+                size="lg"
+                onClick={() => handleScreenChange('maze')}
+                className="aspect-square flex-col gap-2 rounded-[2rem]"
+              >
+                <span className="text-5xl">🗺️</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.maze}</span>
+              </KidButton>
+
+              <KidButton
+                color="purple"
+                size="lg"
+                onClick={() => handleScreenChange('trace')}
+                className="aspect-square flex-col gap-2 rounded-[2rem]"
+              >
+                <span className="text-5xl">⭐</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.trace}</span>
               </KidButton>
             </div>
 
