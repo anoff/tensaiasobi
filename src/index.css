@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    overscroll-behavior-y: contain; /* Prevents pull-to-refresh */
+    user-select: none; /* Prevents text highlighting on accidental long-press */
+    -webkit-touch-callout: none; /* Disables iOS popup menu on long press */
+    touch-action: manipulation; /* Disables double-tap to zoom */
+    @apply bg-sky-50 text-slate-800 overflow-hidden w-screen h-[100dvh];
+  }
+}
+
+@layer utilities {
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .animate-shake {
+    animation: shake 0.2s ease-in-out 0s 2;
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}

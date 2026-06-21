@@ -43,9 +43,8 @@ This document outlines the step-by-step process for building the Kids Play & Lea
  * [ ] **Magic Doodle Pad:**
    * Build using a React useRef tied to an HTML5 <canvas> element.
    * **Crucial:** Implement native touch handlers (onTouchStart, onTouchMove, onTouchEnd) rather than mouse handlers to ensure flawless, multi-touch drawing on mobile.
- * [ ] **Animal Memory Match & Sight Word Splat:**
+ * [ ] **Animal Memory Match:**
    * Build out using mobile-optimized grids (e.g., max 3 columns wide on mobile so the emoji cards remain large enough for clumsy fingers).
 ## Phase 6: PWA Conversion & Deployment
  * [ ] **Add to Home Screen (PWA):** Generate a manifest.json and basic Service Worker using a Vite PWA plugin (vite-plugin-pwa). This allows parents to "install" the web app to their phone's home screen.
  * [ ] Set up a GitHub Actions workflow (.github/workflows/deploy.yml) to automatically build and deploy to GitHub Pages.
-```

@@ -35,15 +35,11 @@ A classic memory card game using CSS grid and emojis.
 - **Skills:** Working memory, spatial recall.
 - **Gameplay:** Starts at a simple 2x2 grid for toddlers and scales up. Saves the child's fastest time/fewest flips record.
 
-### 4. Sight Word Splat
-A fast-paced word recognition game for early readers.
-- **Skills:** Kindergarten and 1st-grade sight word reading.
-- **Gameplay:** A target word is displayed, and kids must tap the matching word from a moving group of distractors. 
-
-### 5. Magic Doodle Pad
+### 4. Magic Doodle Pad
 A simple, frustration-free drawing board.
 - **Skills:** Fine motor skills, creativity.
 - **Gameplay:** Drag a finger to draw with rainbow gradients or stamp emojis. Includes a giant "trash can" button to clear the canvas.
+
 
 ## 🚀 Local Development
 
