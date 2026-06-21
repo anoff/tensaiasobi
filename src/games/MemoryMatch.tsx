@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
+import { useTranslation } from '../hooks/useTranslation';
 
 type GameLevel = 'easy' | 'medium' | 'hard';
 
@@ -16,6 +17,12 @@ interface MemoryMatchProps {
   playError: () => void;
 }
 
+const LEVEL_EMOJIS: Record<GameLevel, string> = {
+  easy: '⭐',
+  medium: '⭐⭐',
+  hard: '⭐⭐⭐',
+};
+
 const ANIMAL_POOL = ['🦁', '🐯', '🐼', '🐨', '🦊', '🐰', '🐸', '🐷', '🐮', '🐔', '🐧', '🦉', '🐻', '🐹', '🐭', '🐱'];
 
 export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProps) {
@@ -24,6 +31,7 @@ export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProp
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [matches, setMatches] = useState(0);
+  const { t } = useTranslation();
 
   const initGame = (currentLevel: GameLevel) => {
     let numPairs = 2; // easy (2x2)
@@ -136,8 +144,8 @@ export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProp
 
       {/* Header Info */}
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight">Animal Match! 🐯</h2>
-        <p className="text-slate-500 font-extrabold text-sm">Flip cards to match the animal pairs!</p>
+        <h2 className="text-3xl font-black text-slate-800 tracking-tight">{t.memoryMatch.title}</h2>
+        <p className="text-slate-500 font-extrabold text-sm">{t.memoryMatch.subtitle}</p>
       </div>
 
       {/* Level Selection Tabs */}
@@ -155,7 +163,7 @@ export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProp
               }
             `}
           >
-            {lvl}
+            {LEVEL_EMOJIS[lvl]}
           </button>
         ))}
       </div>
@@ -205,8 +213,8 @@ export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProp
         </div>
       </div>
 
-      <div className="text-slate-400 font-extrabold text-xs pb-4">
-        {showConfetti ? '🎉 Great job! You matched them all!' : 'Tap cards to flip them!'}
+      <div className="text-slate-400 font-extrabold text-xs pb-4 text-center">
+        {showConfetti ? t.memoryMatch.victory : t.memoryMatch.help}
       </div>
     </div>
   );

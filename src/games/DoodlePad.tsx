@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import KidButton from '../components/KidButton';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface DoodlePadProps {
   playPop: () => void;
@@ -30,6 +31,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
   const [brushSize, setBrushSize] = useState(10);
   const [isEraser, setIsEraser] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  const { t } = useTranslation();
 
   // Initialize and resize canvas
   useEffect(() => {
@@ -38,7 +40,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     // Smooth lines configuration
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -64,7 +66,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
       // Re-configure ctx properties after resize
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      
+
       // Draw background
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -115,7 +117,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
 
     ctx.beginPath();
     ctx.moveTo(coords.x, coords.y);
-    
+
     // Set drawing settings
     ctx.lineWidth = brushSize;
     if (isEraser) {
@@ -169,17 +171,11 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-4 w-full select-none max-w-lg mx-auto h-full justify-between">
-      {/* Title */}
-      <div className="text-center mb-2">
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight">Magic Doodle! 🎨</h2>
-        <p className="text-slate-500 font-extrabold text-sm">Draw anything you like with your finger!</p>
-      </div>
-
+    <div className="flex-1 flex flex-col p-2 w-full select-none h-full gap-2">
       {/* Canvas Area */}
       <div
         ref={containerRef}
-        className="flex-1 min-h-[300px] border-4 border-slate-300 rounded-[2rem] overflow-hidden shadow-inner bg-white relative mb-4"
+        className="flex-1 border-4 border-slate-300 rounded-[2rem] overflow-hidden shadow-inner bg-white relative"
       >
         <canvas
           ref={canvasRef}
@@ -194,10 +190,10 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
         />
       </div>
 
-      {/* Controls Container */}
-      <div className="space-y-4 bg-slate-100 p-4 rounded-3xl border-2 border-slate-200">
-        {/* Color Palette Grid */}
-        <div className="grid grid-cols-8 gap-2 justify-items-center">
+      {/* Controls — single compact row */}
+      <div className="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-3xl border-2 border-slate-200">
+        {/* Color Palette */}
+        <div className="flex flex-wrap gap-1.5 flex-1">
           {PRESETS_COLORS.map((c) => (
             <button
               key={c}
@@ -208,7 +204,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
               }}
               style={{ backgroundColor: c }}
               className={`
-                w-7 h-7 md:w-8 md:h-8 rounded-full border-2 transition-transform duration-75 cursor-pointer outline-none
+                w-6 h-6 rounded-full border-2 transition-transform duration-75 cursor-pointer outline-none
                 ${color === c && !isEraser ? 'scale-125 border-slate-800 shadow-md ring-2 ring-white' : 'border-slate-300'}
               `}
             />
@@ -216,54 +212,45 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
 
           {/* Eraser */}
           <button
-            onClick={() => {
-              playPop();
-              setIsEraser(true);
-            }}
+            onClick={() => { playPop(); setIsEraser(true); }}
             className={`
-              w-7 h-7 md:w-8 md:h-8 rounded-full border-2 transition-all duration-75 flex items-center justify-center cursor-pointer outline-none text-base
+              w-6 h-6 rounded-full border-2 transition-all duration-75 flex items-center justify-center cursor-pointer outline-none text-sm
               ${isEraser ? 'scale-125 border-slate-800 bg-slate-300 shadow-md ring-2 ring-white' : 'border-slate-300 bg-white hover:bg-slate-50'}
             `}
-            title="Eraser"
+            title={t.doodlePad.eraser}
           >
             🧽
           </button>
         </div>
 
-        {/* Brush Size & Action Buttons */}
-        <div className="flex gap-4 items-center justify-between">
-          {/* Brush Sizes */}
-          <div className="flex bg-white rounded-2xl border-2 border-slate-200 p-1 gap-1 flex-1 max-w-[200px]">
-            {([5, 12, 24] as const).map((size) => (
-              <button
-                key={size}
-                onClick={() => {
-                  playPop();
-                  setBrushSize(size);
-                }}
-                className={`
-                  flex-1 py-1.5 flex items-center justify-center rounded-xl transition-all duration-75 outline-none cursor-pointer
-                  ${brushSize === size ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:text-slate-600'}
-                `}
-              >
-                <div
-                  style={{ width: `${size === 5 ? 6 : size === 12 ? 12 : 20}px`, height: `${size === 5 ? 6 : size === 12 ? 12 : 20}px` }}
-                  className="rounded-full bg-slate-800"
-                />
-              </button>
-            ))}
-          </div>
-
-          {/* Clear Button */}
-          <KidButton
-            color="red"
-            size="sm"
-            onClick={clearCanvas}
-            className="flex-1 max-w-[120px] !py-2 shadow-[0_4px_0_0_#b91c1c] active:translate-y-[2px] active:shadow-[0_1px_0_0_#b91c1c]"
-          >
-            🗑️ Clear
-          </KidButton>
+        {/* Brush Sizes */}
+        <div className="flex bg-white rounded-2xl border-2 border-slate-200 p-1 gap-1 shrink-0">
+          {([5, 12, 24] as const).map((size) => (
+            <button
+              key={size}
+              onClick={() => { playPop(); setBrushSize(size); }}
+              className={`
+                px-1.5 py-1 flex items-center justify-center rounded-xl transition-all duration-75 outline-none cursor-pointer
+                ${brushSize === size ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:text-slate-600'}
+              `}
+            >
+              <div
+                style={{ width: `${size === 5 ? 6 : size === 12 ? 12 : 20}px`, height: `${size === 5 ? 6 : size === 12 ? 12 : 20}px` }}
+                className="rounded-full bg-slate-800"
+              />
+            </button>
+          ))}
         </div>
+
+        {/* Clear Button */}
+        <KidButton
+          color="red"
+          size="sm"
+          onClick={clearCanvas}
+          className="shrink-0 !py-1 !px-3 shadow-[0_4px_0_0_#b91c1c] active:translate-y-[2px] active:shadow-[0_1px_0_0_#b91c1c]"
+        >
+          🗑️
+        </KidButton>
       </div>
     </div>
   );
