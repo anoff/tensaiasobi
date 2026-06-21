@@ -11,9 +11,10 @@ import DoodlePad from './games/DoodlePad';
 import MemoryMatch from './games/MemoryMatch';
 import MazeGame from './games/MazeGame';
 import ShapeTrace from './games/ShapeTrace';
+import AnlautGame from './games/AnlautGame';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'settings';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'settings';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
@@ -47,6 +48,8 @@ function AppContent() {
     localStorage.removeItem('math_highscore');
     localStorage.removeItem('odd_streak');
     localStorage.removeItem('odd_highscore');
+    localStorage.removeItem('anlaut_streak');
+    localStorage.removeItem('anlaut_highscore');
     playSuccess();
   };
 
@@ -64,6 +67,8 @@ function AppContent() {
         return <MazeGame playPop={playPop} playSuccess={playSuccess} playError={playError} />;
       case 'trace':
         return <ShapeTrace playPop={playPop} playSuccess={playSuccess} playError={playError} />;
+      case 'anlaut':
+        return <AnlautGame playPop={playPop} playSuccess={playSuccess} playError={playError} />;
       case 'settings':
         return (
           <ParentDashboard
@@ -140,7 +145,7 @@ function AppContent() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-y-auto px-4 pb-6">
         {currentScreen === 'menu' ? (
-          <div className="flex-1 flex flex-col justify-between max-w-sm mx-auto w-full py-6 select-none">
+          <div className="flex-1 flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
             {/* Title Block */}
             <div className="text-center space-y-2 mt-4">
               <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-candy-pink via-candy-blue to-candy-purple drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)] animate-pulse">
@@ -150,7 +155,7 @@ function AppContent() {
             </div>
 
             {/* Launchers Grid */}
-            <div className="grid grid-cols-2 gap-4 my-8">
+            <div className="grid grid-cols-3 gap-4 my-8">
               <KidButton
                 color="blue"
                 size="lg"
@@ -209,6 +214,16 @@ function AppContent() {
               >
                 <span className="text-5xl">⭐</span>
                 <span className="text-lg font-black block leading-tight">{t.menu.trace}</span>
+              </KidButton>
+
+              <KidButton
+                color="red"
+                size="lg"
+                onClick={() => handleScreenChange('anlaut')}
+                className="col-span-3 flex-row gap-4 rounded-[2rem] min-h-24"
+              >
+                <span className="text-5xl">🔤</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.anlaut}</span>
               </KidButton>
             </div>
 
