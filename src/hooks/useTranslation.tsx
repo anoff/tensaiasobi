@@ -12,6 +12,8 @@ const translations = {
       odd: "Odd One",
       doodle: "Doodle",
       match: "Match",
+      maze: "Mazes",
+      trace: "Trace",
     },
     parentGate: {
       title: "Parents Only 🔒",
@@ -54,6 +56,19 @@ const translations = {
       subtitle: "Draw anything you like with your finger!",
       eraser: "Eraser",
     },
+    mazeGame: {
+      title: "Magic Mazes! 🗺️",
+      help: "Drag the emoji to its target!",
+      baby: "🐣 4x4",
+      toddler: "🦁 6x6",
+      kid: "🚀 8x8",
+      victory: "🎉 Awesome! You did it!",
+    },
+    shapeTrace: {
+      title: "Shape Tracing! ⭐",
+      help: "Trace the dotted line!",
+      victory: "🎉 Brilliant! Beautiful drawing!",
+    },
   },
   de: {
     menu: {
@@ -64,6 +79,8 @@ const translations = {
       odd: "Finde das Andere",
       doodle: "Malen",
       match: "Paare finden",
+      maze: "Labyrinthe",
+      trace: "Nachzeichnen",
     },
     parentGate: {
       title: "Nur für Eltern 🔒",
@@ -106,6 +123,19 @@ const translations = {
       subtitle: "Male mit deinem Finger, was immer du willst!",
       eraser: "Radiergummi",
     },
+    mazeGame: {
+      title: "Zauber-Labyrinthe! 🗺️",
+      help: "Ziehe das Emoji zum Ziel!",
+      baby: "🐣 4x4",
+      toddler: "🦁 6x6",
+      kid: "🚀 8x8",
+      victory: "🎉 Super! Du hast es geschafft!",
+    },
+    shapeTrace: {
+      title: "Formen nachzeichnen! ⭐",
+      help: "Zeichne die gepunktete Linie nach!",
+      victory: "🎉 Genial! Wunderschön gemalt!",
+    },
   },
   ja: {
     menu: {
@@ -116,6 +146,8 @@ const translations = {
       odd: "なかまはずれ",
       doodle: "おえかき",
       match: "しんけいすいじゃく",
+      maze: "めいろ",
+      trace: "かたちなぞり",
     },
     parentGate: {
       title: "ほごしゃせんよう 🔒",
@@ -157,6 +189,19 @@ const translations = {
       title: "まほうのおえかき！ 🎨",
       subtitle: "ゆびで好きな絵をかいてね！",
       eraser: "けしごむ",
+    },
+    mazeGame: {
+      title: "まほうのめいろ！ 🗺️",
+      help: "えもじをゴールへつれていってね！",
+      baby: "🐣 4x4",
+      toddler: "🦁 6x6",
+      kid: "🚀 8x8",
+      victory: "🎉 やったね！ごーるできたよ！",
+    },
+    shapeTrace: {
+      title: "かたちなぞり！ ⭐",
+      help: "てんせんのうえをなぞってね！",
+      victory: "🎉 すごい！きれいにかけたね！",
     },
   },
 };
