@@ -7,6 +7,7 @@ interface AnlautGameProps {
   playPop: () => void;
   playSuccess: () => void;
   playError: () => void;
+  onStarEarned?: (amount: number) => void;
 }
 
 // 63 child-friendly emoji keys
@@ -78,7 +79,7 @@ const generateOptions = (
   return [correctChar, ...Array.from(wrongOptionsSet)].sort(() => Math.random() - 0.5);
 };
 
-export function AnlautGame({ playPop, playSuccess, playError }: AnlautGameProps) {
+export function AnlautGame({ playPop, playSuccess, playError, onStarEarned }: AnlautGameProps) {
   const { language, t } = useTranslation();
 
   const [currentItem, setCurrentItem] = useState<string>(() => {
@@ -115,6 +116,7 @@ export function AnlautGame({ playPop, playSuccess, playError }: AnlautGameProps)
       setIsCorrect(true);
       setShowConfetti(true);
       playSuccess();
+      onStarEarned?.(2);
 
       const newStreak = streak + 1;
       setStreak(newStreak);

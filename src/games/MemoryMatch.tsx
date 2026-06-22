@@ -15,6 +15,7 @@ interface MemoryMatchProps {
   playPop: () => void;
   playSuccess: () => void;
   playError: () => void;
+  onStarEarned?: (amount: number) => void;
 }
 
 const LEVEL_EMOJIS: Record<GameLevel, string> = {
@@ -25,7 +26,7 @@ const LEVEL_EMOJIS: Record<GameLevel, string> = {
 
 const ANIMAL_POOL = ['🦁', '🐯', '🐼', '🐨', '🦊', '🐰', '🐸', '🐷', '🐮', '🐔', '🐧', '🦉', '🐻', '🐹', '🐭', '🐱'];
 
-export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProps) {
+export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: MemoryMatchProps) {
   const [level, setLevel] = useState<GameLevel>('easy');
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
@@ -102,6 +103,9 @@ export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProp
           const totalPairs = level === 'easy' ? 2 : level === 'medium' ? 6 : 8;
           if (newMatches === totalPairs) {
             setShowConfetti(true);
+            // Award 4 stars × level multiplier
+            const multiplier = level === 'easy' ? 1 : level === 'medium' ? 3 : 5;
+            onStarEarned?.(4 * multiplier);
             setTimeout(() => {
               initGame(level);
             }, 3000);

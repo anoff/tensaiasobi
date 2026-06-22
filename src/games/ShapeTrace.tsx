@@ -698,9 +698,10 @@ interface ShapeTraceProps {
   playPop: () => void;
   playSuccess: () => void;
   playError: () => void;
+  onStarEarned?: (amount: number) => void;
 }
 
-export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps) {
+export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: ShapeTraceProps) {
   const { t } = useTranslation();
   const [shapeIndex, setShapeIndex] = useState(0);
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
@@ -1066,6 +1067,8 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
       setIsWon(true);
       setShowConfetti(true);
       playSuccess();
+      const multiplier = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
+      onStarEarned?.(3 * multiplier);
     } else {
       playError();
       setShowErrorShake(true);
