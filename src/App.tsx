@@ -91,7 +91,7 @@ function AppContent() {
       <header className="flex justify-between items-center p-4 z-10">
         <div>
           {currentScreen !== 'menu' && currentScreen !== 'settings' && (
-            <HomeButton onClick={() => handleScreenChange('menu')} />
+            <HomeButton data-testid="home-button" onClick={() => handleScreenChange('menu')} />
           )}
         </div>
 
@@ -105,6 +105,7 @@ function AppContent() {
                 return (
                   <>
                     <button
+                      data-testid="lang-dropdown-trigger"
                       onClick={() => { playPop(); setLangOpen((o) => !o); }}
                       className="flex items-center gap-1 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5 text-base shadow-sm cursor-pointer outline-none hover:bg-slate-50 transition-all"
                     >
@@ -116,6 +117,7 @@ function AppContent() {
                         {options.map((lang) => (
                           <button
                             key={lang}
+                            data-testid={`lang-select-${lang}`}
                             onClick={() => { playPop(); setLanguage(lang); setLangOpen(false); }}
                             className="px-3 py-1.5 text-base hover:bg-slate-50 cursor-pointer outline-none transition-colors"
                           >
@@ -159,6 +161,7 @@ function AppContent() {
               <KidButton
                 color="blue"
                 size="lg"
+                data-testid="launch-math"
                 onClick={() => handleScreenChange('math')}
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
@@ -169,6 +172,7 @@ function AppContent() {
               <KidButton
                 color="yellow"
                 size="lg"
+                data-testid="launch-odd"
                 onClick={() => handleScreenChange('odd')}
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
@@ -179,6 +183,7 @@ function AppContent() {
               <KidButton
                 color="pink"
                 size="lg"
+                data-testid="launch-doodle"
                 onClick={() => handleScreenChange('doodle')}
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
@@ -189,6 +194,7 @@ function AppContent() {
               <KidButton
                 color="orange"
                 size="lg"
+                data-testid="launch-memory"
                 onClick={() => handleScreenChange('memory')}
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
@@ -199,6 +205,7 @@ function AppContent() {
               <KidButton
                 color="green"
                 size="lg"
+                data-testid="launch-maze"
                 onClick={() => handleScreenChange('maze')}
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
@@ -209,6 +216,7 @@ function AppContent() {
               <KidButton
                 color="purple"
                 size="lg"
+                data-testid="launch-trace"
                 onClick={() => handleScreenChange('trace')}
                 className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
@@ -219,6 +227,7 @@ function AppContent() {
               <KidButton
                 color="red"
                 size="lg"
+                data-testid="launch-anlaut"
                 onClick={() => handleScreenChange('anlaut')}
                 className="col-span-3 flex-row gap-4 rounded-[2rem] min-h-24"
               >

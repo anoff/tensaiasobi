@@ -181,6 +181,7 @@ export function OddOneOut({ playSuccess, playError }: OddOneOutProps) {
             return (
               <button
                 key={item.emoji}
+                data-testid="odd-emoji-option"
                 disabled={selectedEmoji !== null}
                 onClick={() => handleEmojiSelect(item)}
                 className={`

@@ -661,6 +661,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
         >
           <canvas
             ref={canvasRef}
+            data-testid="maze-canvas"
             onMouseDown={handlePointerDown}
             onMouseMove={handlePointerMove}
             onMouseUp={handlePointerUp}
@@ -696,6 +697,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
         <KidButton
           color="green"
           size="md"
+          data-testid="maze-play"
           onClick={handlePlayPath}
           disabled={playBtnDisabled}
           className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
@@ -708,6 +710,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
         <KidButton
           color="red"
           size="md"
+          data-testid="maze-reset"
           onClick={handleClear}
           disabled={isAnimating}
           className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${

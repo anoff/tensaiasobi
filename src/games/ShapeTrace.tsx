@@ -1147,6 +1147,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
         >
           <canvas
             ref={canvasRef}
+            data-testid="trace-canvas"
             onMouseDown={handlePointerDown}
             onMouseMove={handlePointerMove}
             onMouseUp={handlePointerUp}
@@ -1182,6 +1183,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
         <KidButton
           color="green"
           size="md"
+          data-testid="trace-check"
           onClick={handleCheckTrace}
           disabled={isWon || drawingPoints.length < 5}
           className={`px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
@@ -1194,6 +1196,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
         <KidButton
           color="red"
           size="md"
+          data-testid="trace-reset"
           onClick={handleReset}
           className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
         >
@@ -1203,6 +1206,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
         <KidButton
           color="blue"
           size="md"
+          data-testid="trace-next"
           onClick={nextShape}
           className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
         >

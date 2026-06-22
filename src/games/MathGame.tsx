@@ -199,7 +199,7 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
         <div className="text-sm font-black tracking-widest text-slate-400 uppercase text-center">
           {t.mathGame.title}
         </div>
-        <div className="text-7xl md:text-8xl font-black text-slate-800 tracking-tight select-none">
+        <div data-testid="math-equation" className="text-7xl md:text-8xl font-black text-slate-800 tracking-tight select-none">
           {question?.text}
         </div>
         
@@ -236,6 +236,7 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
             return (
               <button
                 key={opt}
+                data-testid="math-answer-option"
                 disabled={selectedAnswer !== null}
                 onClick={() => handleAnswerSelect(opt)}
                 className={`

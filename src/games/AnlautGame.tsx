@@ -279,6 +279,7 @@ export function AnlautGame({ playPop, playSuccess, playError }: AnlautGameProps)
               return (
                 <button
                   key={opt}
+                  data-testid="anlaut-option"
                   disabled={selectedOption !== null}
                   onClick={() => handleOptionSelect(opt)}
                   className={`

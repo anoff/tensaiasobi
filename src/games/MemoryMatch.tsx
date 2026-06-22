@@ -178,6 +178,7 @@ export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProp
             return (
               <button
                 key={card.id}
+                data-testid="memory-card"
                 onClick={() => handleCardClick(card.id)}
                 className={`
                   w-full aspect-square rounded-2xl border-4 text-5xl flex items-center justify-center
