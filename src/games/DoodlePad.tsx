@@ -88,8 +88,8 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     if (!canvas) return null;
 
     const rect = canvas.getBoundingClientRect();
-    let clientX = 0;
-    let clientY = 0;
+    let clientX: number;
+    let clientY: number;
 
     if ('touches' in e) {
       if (e.touches.length === 0) return null;
@@ -179,6 +179,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
       >
         <canvas
           ref={canvasRef}
+          data-testid="doodle-canvas"
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={stopDrawing}
@@ -213,6 +214,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
           {/* Eraser */}
           <button
             onClick={() => { playPop(); setIsEraser(true); }}
+            data-testid="doodle-eraser"
             className={`
               w-6 h-6 rounded-full border-2 transition-all duration-75 flex items-center justify-center cursor-pointer outline-none text-sm
               ${isEraser ? 'scale-125 border-slate-800 bg-slate-300 shadow-md ring-2 ring-white' : 'border-slate-300 bg-white hover:bg-slate-50'}
@@ -246,6 +248,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
         <KidButton
           color="red"
           size="sm"
+          data-testid="doodle-clear"
           onClick={clearCanvas}
           className="shrink-0 !py-1 !px-3 shadow-[0_4px_0_0_#b91c1c] active:translate-y-[2px] active:shadow-[0_1px_0_0_#b91c1c]"
         >

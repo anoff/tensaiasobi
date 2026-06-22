@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -60,6 +60,7 @@ export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProp
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     initGame(level);
   }, [level]);
 
@@ -177,6 +178,7 @@ export function MemoryMatch({ playPop, playSuccess, playError }: MemoryMatchProp
             return (
               <button
                 key={card.id}
+                data-testid="memory-card"
                 onClick={() => handleCardClick(card.id)}
                 className={`
                   w-full aspect-square rounded-2xl border-4 text-5xl flex items-center justify-center

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -22,7 +22,7 @@ const CATEGORIES: Record<string, string[]> = {
   clothing: ['👕', '👖', '👗', '🧥', '🧦', '👟', '👒', '🕶️', '👜', '👑', '🧤', '🧣'],
 };
 
-export function OddOneOut({ playPop, playSuccess, playError }: OddOneOutProps) {
+export function OddOneOut({ playSuccess, playError }: OddOneOutProps) {
   const [items, setItems] = useState<EmojiItem[]>([]);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -76,6 +76,7 @@ export function OddOneOut({ playPop, playSuccess, playError }: OddOneOutProps) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     generatePuzzle();
   }, []);
 
@@ -180,6 +181,7 @@ export function OddOneOut({ playPop, playSuccess, playError }: OddOneOutProps) {
             return (
               <button
                 key={item.emoji}
+                data-testid="odd-emoji-option"
                 disabled={selectedEmoji !== null}
                 onClick={() => handleEmojiSelect(item)}
                 className={`

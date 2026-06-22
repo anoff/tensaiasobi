@@ -908,6 +908,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shapeIndex, drawingPoints, isWon, difficulty]);
 
   const getCanvasCoords = (clientX: number, clientY: number): { x: number; y: number } | null => {
@@ -923,8 +924,8 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isWon) return;
 
-    let clientX = 0;
-    let clientY = 0;
+    let clientX: number;
+    let clientY: number;
 
     if ('touches' in e) {
       if (e.touches.length === 0) return;
@@ -947,8 +948,8 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
   const handlePointerMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current || isWon) return;
 
-    let clientX = 0;
-    let clientY = 0;
+    let clientX: number;
+    let clientY: number;
 
     if ('touches' in e) {
       if (e.touches.length === 0) return;
@@ -1131,7 +1132,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
               }
             `}
           >
-            {diff === 'easy' ? '🐣 Easy' : diff === 'medium' ? '🦁 Medium' : '🚀 Hard'}
+            {diff === 'easy' ? `🐣 ${t.shapeTrace.easy}` : diff === 'medium' ? `🦁 ${t.shapeTrace.medium}` : `🚀 ${t.shapeTrace.hard}`}
           </button>
         ))}
       </div>
@@ -1146,6 +1147,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
         >
           <canvas
             ref={canvasRef}
+            data-testid="trace-canvas"
             onMouseDown={handlePointerDown}
             onMouseMove={handlePointerMove}
             onMouseUp={handlePointerUp}
@@ -1169,7 +1171,7 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
                 onClick={nextShape}
                 className="shadow-[0_6px_0_0_#d81b60] active:translate-y-[4px]"
               >
-                🌈 Next Shape!
+                🌈 {t.shapeTrace.nextShape}
               </KidButton>
             </div>
           )}
@@ -1181,31 +1183,34 @@ export function ShapeTrace({ playPop, playSuccess, playError }: ShapeTraceProps)
         <KidButton
           color="green"
           size="md"
+          data-testid="trace-check"
           onClick={handleCheckTrace}
           disabled={isWon || drawingPoints.length < 5}
           className={`px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
             isWon || drawingPoints.length < 5 ? 'opacity-40 pointer-events-none' : ''
           }`}
         >
-          ▶️ Check
+          ▶️ {t.shapeTrace.check}
         </KidButton>
 
         <KidButton
           color="red"
           size="md"
+          data-testid="trace-reset"
           onClick={handleReset}
           className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
         >
-          🗑️ Reset
+          🗑️ {t.shapeTrace.reset}
         </KidButton>
 
         <KidButton
           color="blue"
           size="md"
+          data-testid="trace-next"
           onClick={nextShape}
           className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
         >
-          ➡️ Next
+          ➡️ {t.shapeTrace.next}
         </KidButton>
       </div>
 

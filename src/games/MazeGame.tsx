@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
@@ -125,7 +125,6 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
   // Animation states
   const [isAnimating, setIsAnimating] = useState(false);
   const [animatingIndex, setAnimatingIndex] = useState(0);
-  const [isReturning, setIsReturning] = useState(false);
   
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -212,12 +211,13 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
     setShowConfetti(false);
     setIsAnimating(false);
     setAnimatingIndex(0);
-    setIsReturning(false);
     particlesRef.current = [];
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     generateMaze();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [difficulty, themeIndex]);
 
   const spawnParticles = (x: number, y: number, color: string) => {
@@ -386,6 +386,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grid, drawingPoints, mappedPath, isAnimating, animatingIndex, themeIndex]);
 
   // Touch coordinates helper
@@ -415,8 +416,8 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isWon || isAnimating) return;
 
-    let clientX = 0;
-    let clientY = 0;
+    let clientX: number;
+    let clientY: number;
 
     if ('touches' in e) {
       if (e.touches.length === 0) return;
@@ -450,8 +451,8 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
   const handlePointerMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current || isWon || isAnimating) return;
 
-    let clientX = 0;
-    let clientY = 0;
+    let clientX: number;
+    let clientY: number;
 
     if ('touches' in e) {
       if (e.touches.length === 0) return;
@@ -525,7 +526,6 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
 
     setIsAnimating(true);
     setAnimatingIndex(0);
-    setIsReturning(false);
 
     // Play loop
     let idx = 0;
@@ -568,9 +568,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
     }, 300);
   };
 
-  // Slide Back to Start Animation
   const handleReturnToStart = () => {
-    setIsReturning(true);
     let idx = mappedPath.length - 1;
     
     const interval = setInterval(() => {
@@ -578,7 +576,6 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
       if (idx <= 0) {
         clearInterval(interval);
         setAnimatingIndex(0);
-        setIsReturning(false);
         setIsAnimating(false);
         playError();
       } else {
@@ -594,7 +591,6 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
     setMappedPath([{ col: 0, row: 0 }]);
     setIsAnimating(false);
     setAnimatingIndex(0);
-    setIsReturning(false);
     setIsWon(false);
     setShowConfetti(false);
     
@@ -665,6 +661,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
         >
           <canvas
             ref={canvasRef}
+            data-testid="maze-canvas"
             onMouseDown={handlePointerDown}
             onMouseMove={handlePointerMove}
             onMouseUp={handlePointerUp}
@@ -688,7 +685,7 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
                 onClick={generateMaze}
                 className="shadow-[0_6px_0_0_#059669] active:translate-y-[4px]"
               >
-                🎉 {t.mazeGame.title} Play Again!
+                🎉 {t.mazeGame.title} {t.mazeGame.playAgain}!
               </KidButton>
             </div>
           )}
@@ -700,25 +697,27 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
         <KidButton
           color="green"
           size="md"
+          data-testid="maze-play"
           onClick={handlePlayPath}
           disabled={playBtnDisabled}
           className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
             playBtnDisabled ? 'opacity-40 pointer-events-none' : ''
           }`}
         >
-          ▶️ Play
+          ▶️ {t.mazeGame.play}
         </KidButton>
 
         <KidButton
           color="red"
           size="md"
+          data-testid="maze-reset"
           onClick={handleClear}
           disabled={isAnimating}
           className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
             isAnimating ? 'opacity-40 pointer-events-none' : ''
           }`}
         >
-          🗑️ Reset
+          🗑️ {t.mazeGame.reset}
         </KidButton>
       </div>
 
