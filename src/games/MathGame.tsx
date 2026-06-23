@@ -14,6 +14,7 @@ interface MathGameProps {
   playPop: () => void;
   playSuccess: () => void;
   playError: () => void;
+  onStarEarned?: (amount: number) => void;
 }
 
 const LEVEL_EMOJIS: Record<Level, string> = {
@@ -99,7 +100,7 @@ const generateQuestion = (currentLevel: Level): Question => {
     };
   };
 
-export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
+export function MathGame({ playPop, playSuccess, playError, onStarEarned }: MathGameProps) {
   const [level, setLevel] = useState<Level>('easy');
   const [question, setQuestion] = useState<Question>(() => generateQuestion('easy'));
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -139,6 +140,10 @@ export function MathGame({ playPop, playSuccess, playError }: MathGameProps) {
         setHighScore(newStreak);
         localStorage.setItem('math_highscore', newStreak.toString());
       }
+
+      // Award stars: base 2 × level multiplier
+      const multiplier = level === 'easy' ? 1 : level === 'medium' ? 3 : 5;
+      onStarEarned?.(2 * multiplier);
 
       setTimeout(() => {
         setShowConfetti(false);

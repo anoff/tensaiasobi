@@ -11,6 +11,7 @@ interface OddOneOutProps {
   playPop: () => void;
   playSuccess: () => void;
   playError: () => void;
+  onStarEarned?: (amount: number) => void;
 }
 
 const CATEGORIES: Record<string, string[]> = {
@@ -22,7 +23,7 @@ const CATEGORIES: Record<string, string[]> = {
   clothing: ['👕', '👖', '👗', '🧥', '🧦', '👟', '👒', '🕶️', '👜', '👑', '🧤', '🧣'],
 };
 
-export function OddOneOut({ playSuccess, playError }: OddOneOutProps) {
+export function OddOneOut({ playSuccess, playError, onStarEarned }: OddOneOutProps) {
   const [items, setItems] = useState<EmojiItem[]>([]);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -98,6 +99,9 @@ export function OddOneOut({ playSuccess, playError }: OddOneOutProps) {
         setHighScore(newStreak);
         localStorage.setItem('odd_highscore', newStreak.toString());
       }
+
+      // Award 2 stars per correct pick
+      onStarEarned?.(2);
 
       setTimeout(() => {
         setShowConfetti(false);

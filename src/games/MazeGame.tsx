@@ -110,9 +110,10 @@ interface MazeGameProps {
   playPop: () => void;
   playSuccess: () => void;
   playError: () => void;
+  onStarEarned?: (amount: number) => void;
 }
 
-export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
+export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: MazeGameProps) {
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<Difficulty>('toddler');
   const [themeIndex, setThemeIndex] = useState(0);
@@ -542,6 +543,8 @@ export function MazeGame({ playPop, playSuccess, playError }: MazeGameProps) {
           setIsWon(true);
           setShowConfetti(true);
           playSuccess();
+          const multiplier = difficulty === 'baby' ? 1 : difficulty === 'toddler' ? 3 : 5;
+          onStarEarned?.(3 * multiplier);
           setIsAnimating(false);
         } else {
           // Play slide back animation

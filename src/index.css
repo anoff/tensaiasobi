@@ -30,4 +30,66 @@
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
   }
+
+  /* ── Star Counter Animations ── */
+  @keyframes star-fly-up {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-60px); }
+  }
+  .star-fly-up {
+    animation: star-fly-up 1s ease-out forwards;
+  }
+
+  @keyframes star-counter-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  .star-counter-pulse {
+    animation: star-counter-pulse 0.3s ease-out;
+  }
+
+  /* ── Town Builder Animations ── */
+  @keyframes town-sway {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-4deg); }
+    75% { transform: rotate(4deg); }
+  }
+  .town-sway {
+    animation: town-sway 3s ease-in-out infinite;
+  }
+
+  @keyframes town-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  .town-bounce {
+    animation: town-bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes town-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  .town-pulse {
+    animation: town-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes town-wobble {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-2deg) scale(1.02); }
+    75% { transform: rotate(2deg) scale(1.02); }
+  }
+  .town-wobble {
+    animation: town-wobble 2.5s ease-in-out infinite;
+  }
+
+  @keyframes town-place {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .town-place {
+    animation: town-place 0.4s ease-out;
+  }
 }

@@ -14,7 +14,14 @@ import ShapeTrace from './games/ShapeTrace';
 import AnlautGame from './games/AnlautGame';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'settings';
+// Gamification imports
+import { StarCounter } from './components/StarCounter';
+import { StarShop } from './components/StarShop';
+import { TownBuilder } from './games/TownBuilder';
+import { useStars } from './hooks/useStars';
+import { useVouchers } from './hooks/useVouchers';
+
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'town' | 'shop' | 'settings';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
@@ -26,6 +33,11 @@ function AppContent() {
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+
+  // Gamification state
+  const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
+  const { vouchers, setVoucherCost, toggleVoucher, redeemVoucher, resetVouchers } = useVouchers();
+  const [pendingVoucherRedeemId, setPendingVoucherRedeemId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!langOpen) return;
@@ -50,25 +62,50 @@ function AppContent() {
     localStorage.removeItem('odd_highscore');
     localStorage.removeItem('anlaut_streak');
     localStorage.removeItem('anlaut_highscore');
+    
+    // Clear gamification progress
+    resetStars();
+    resetVouchers();
+    localStorage.removeItem('gamification_town');
+    
     playSuccess();
   };
 
   const renderActiveScreen = () => {
     switch (currentScreen) {
       case 'math':
-        return <MathGame playPop={playPop} playSuccess={playSuccess} playError={playError} />;
+        return <MathGame playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
       case 'odd':
-        return <OddOneOut playPop={playPop} playSuccess={playSuccess} playError={playError} />;
+        return <OddOneOut playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
       case 'doodle':
         return <DoodlePad playPop={playPop} />;
       case 'memory':
-        return <MemoryMatch playPop={playPop} playSuccess={playSuccess} playError={playError} />;
+        return <MemoryMatch playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
       case 'maze':
-        return <MazeGame playPop={playPop} playSuccess={playSuccess} playError={playError} />;
+        return <MazeGame playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
       case 'trace':
-        return <ShapeTrace playPop={playPop} playSuccess={playSuccess} playError={playError} />;
+        return <ShapeTrace playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
       case 'anlaut':
-        return <AnlautGame playPop={playPop} playSuccess={playSuccess} playError={playError} />;
+        return <AnlautGame playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
+      case 'town':
+        return (
+          <TownBuilder
+            stars={stars}
+            spendStars={spendStars}
+            addStars={(amt) => addStars(amt)}
+            playPop={playPop}
+            playSuccess={playSuccess}
+          />
+        );
+      case 'shop':
+        return (
+          <StarShop
+            stars={stars}
+            vouchers={vouchers}
+            onRedeemVoucher={(id) => setPendingVoucherRedeemId(id)}
+            playPop={playPop}
+          />
+        );
       case 'settings':
         return (
           <ParentDashboard
@@ -76,6 +113,9 @@ function AppContent() {
             setSoundEnabled={setSoundEnabled}
             vibrationEnabled={vibrationEnabled}
             setVibrationEnabled={setVibrationEnabled}
+            vouchers={vouchers}
+            onToggleVoucher={toggleVoucher}
+            onSetVoucherCost={setVoucherCost}
             onClearProgress={handleClearProgress}
             onClose={() => handleScreenChange('menu')}
           />
@@ -95,53 +135,62 @@ function AppContent() {
           )}
         </div>
 
-        {currentScreen === 'menu' && (
-          <div className="flex items-center gap-3">
-            {/* Language Switcher Dropdown */}
-            <div className="relative" ref={langRef}>
-              {(() => {
-                const labelMap = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵' } as const;
-                const options = (['en', 'de', 'ja'] as const).filter((l) => l !== language);
-                return (
-                  <>
-                    <button
-                      data-testid="lang-dropdown-trigger"
-                      onClick={() => { playPop(); setLangOpen((o) => !o); }}
-                      className="flex items-center gap-1 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5 text-base shadow-sm cursor-pointer outline-none hover:bg-slate-50 transition-all"
-                    >
-                      {labelMap[language]}
-                      <span className="text-slate-400 text-xs">{langOpen ? '▲' : '▼'}</span>
-                    </button>
-                    {langOpen && (
-                      <div className="absolute left-0 top-full mt-1 bg-white border-2 border-slate-200 rounded-2xl shadow-lg py-1 flex flex-col z-50 min-w-full">
-                        {options.map((lang) => (
-                          <button
-                            key={lang}
-                            data-testid={`lang-select-${lang}`}
-                            onClick={() => { playPop(); setLanguage(lang); setLangOpen(false); }}
-                            className="px-3 py-1.5 text-base hover:bg-slate-50 cursor-pointer outline-none transition-colors"
-                          >
-                            {labelMap[lang]}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
-            </div>
+        {/* Universal Star Counter displaying earned stars & animating fly-ups */}
+        <div className="flex items-center gap-3 ml-auto">
+          <StarCounter
+            stars={stars}
+            pendingAnimations={pendingAnimations}
+            clearAnimation={clearAnimation}
+          />
 
-            <button
-              onClick={() => {
-                playPop();
-                setShowParentGate(true);
-              }}
-              className="bg-white/90 border-2 border-slate-300 rounded-full px-4 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none"
-            >
-              ⚙️ {t.menu.parents}
-            </button>
-          </div>
-        )}
+          {currentScreen === 'menu' && (
+            <div className="flex items-center gap-3">
+              {/* Language Switcher Dropdown */}
+              <div className="relative" ref={langRef}>
+                {(() => {
+                  const labelMap = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵' } as const;
+                  const options = (['en', 'de', 'ja'] as const).filter((l) => l !== language);
+                  return (
+                    <>
+                      <button
+                        data-testid="lang-dropdown-trigger"
+                        onClick={() => { playPop(); setLangOpen((o) => !o); }}
+                        className="flex items-center gap-1 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5 text-base shadow-sm cursor-pointer outline-none hover:bg-slate-50 transition-all"
+                      >
+                        {labelMap[language]}
+                        <span className="text-slate-400 text-xs">{langOpen ? '▲' : '▼'}</span>
+                      </button>
+                      {langOpen && (
+                        <div className="absolute left-0 top-full mt-1 bg-white border-2 border-slate-200 rounded-2xl shadow-lg py-1 flex flex-col z-50 min-w-full">
+                          {options.map((lang) => (
+                            <button
+                              key={lang}
+                              data-testid={`lang-select-${lang}`}
+                              onClick={() => { playPop(); setLanguage(lang); setLangOpen(false); }}
+                              className="px-3 py-1.5 text-base hover:bg-slate-50 cursor-pointer outline-none transition-colors"
+                            >
+                              {labelMap[lang]}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+
+              <button
+                onClick={() => {
+                  playPop();
+                  setShowParentGate(true);
+                }}
+                className="bg-white/90 border-2 border-slate-300 rounded-full px-4 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none"
+              >
+                ⚙️ {t.menu.parents}
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Main Content Area */}
@@ -234,6 +283,28 @@ function AppContent() {
                 <span className="text-5xl">🔤</span>
                 <span className="text-lg font-black block leading-tight">{t.menu.anlaut}</span>
               </KidButton>
+
+              <KidButton
+                color="green"
+                size="lg"
+                data-testid="launch-town"
+                onClick={() => handleScreenChange('town')}
+                className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
+              >
+                <span className="text-5xl">🏘️</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.town}</span>
+              </KidButton>
+
+              <KidButton
+                color="yellow"
+                size="lg"
+                data-testid="launch-shop"
+                onClick={() => handleScreenChange('shop')}
+                className="col-span-1 flex-col gap-2 rounded-[2rem]"
+              >
+                <span className="text-4xl">🛒</span>
+                <span className="text-base font-black block leading-tight">{t.menu.shop}</span>
+              </KidButton>
             </div>
 
             <div className="text-center text-xs text-slate-300 font-bold">
@@ -253,6 +324,22 @@ function AppContent() {
             setCurrentScreen('settings');
           }}
           onClose={() => setShowParentGate(false)}
+        />
+      )}
+
+      {/* Parent Gate for Voucher Redemption */}
+      {pendingVoucherRedeemId && (
+        <ParentGate
+          onSuccess={() => {
+            const success = redeemVoucher(pendingVoucherRedeemId, spendStars);
+            if (success) {
+              playSuccess();
+            } else {
+              playError();
+            }
+            setPendingVoucherRedeemId(null);
+          }}
+          onClose={() => setPendingVoucherRedeemId(null)}
         />
       )}
     </div>
