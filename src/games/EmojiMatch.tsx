@@ -168,7 +168,17 @@ interface EmojiMatchProps {
 }
 
 export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: EmojiMatchProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+
+  const getPlayerScoreLabel = (playerNum: number) => {
+    if (language === 'ja') {
+      return `プレイヤー ${playerNum}のスコア: `;
+    }
+    if (language === 'de') {
+      return `Spieler ${playerNum} Punkte: `;
+    }
+    return `Player ${playerNum} Score: `;
+  };
 
   // Setup states
   const [gameStarted, setGameStarted] = useState(false);
@@ -636,7 +646,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
               key={`cardA-${cardAKey}`}
               data-testid="emoji-match-card-1"
               className={`
-                w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-white border-4 border-slate-300 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-350
+                w-60 h-60 sm:w-72 sm:h-72 rounded-full bg-white border-4 border-slate-300 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-350
                 ${shakeCard === 'A' ? 'animate-shake' : 'animate-card-in'}
               `}
             >
@@ -655,7 +665,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
                     }}
                     className={`
                       hover:scale-125 active:scale-95 select-none outline-none cursor-pointer transition-all duration-75 text-center leading-none
-                      ${difficulty === 'easy' ? 'text-5xl sm:text-6xl' : difficulty === 'medium' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'}
+                      ${difficulty === 'easy' ? 'text-6xl sm:text-7xl' : difficulty === 'medium' ? 'text-5xl sm:text-6xl' : 'text-4xl sm:text-5xl'}
                       ${isMatched ? 'animate-emoji-pop scale-150 z-30 relative' : ''}
                     `}
                   >
@@ -677,7 +687,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
               key={`cardB-${cardBKey}`}
               data-testid="emoji-match-card-2"
               className={`
-                w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-white border-4 border-slate-300 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-350
+                w-60 h-60 sm:w-72 sm:h-72 rounded-full bg-white border-4 border-slate-300 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-350
                 ${shakeCard === 'B' ? 'animate-shake' : 'animate-card-in'}
               `}
             >
@@ -696,7 +706,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
                     }}
                     className={`
                       hover:scale-125 active:scale-95 select-none outline-none cursor-pointer transition-all duration-75 text-center leading-none
-                      ${difficulty === 'easy' ? 'text-5xl sm:text-6xl' : difficulty === 'medium' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'}
+                      ${difficulty === 'easy' ? 'text-6xl sm:text-7xl' : difficulty === 'medium' ? 'text-5xl sm:text-6xl' : 'text-4xl sm:text-5xl'}
                       ${isMatched ? 'animate-emoji-pop scale-150 z-30 relative' : ''}
                     `}
                   >
@@ -724,7 +734,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
             <div
               key={`duelCard2-${cardAKey}`}
               className={`
-                w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-white border-4 border-pink-400 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-300
+                w-60 h-60 sm:w-72 sm:h-72 rounded-full bg-white border-4 border-pink-400 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-300
                 ${p2Frozen ? 'opacity-50 animate-shake' : 'animate-card-in'}
               `}
             >
@@ -743,7 +753,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
                     }}
                     className={`
                       select-none outline-none text-center leading-none
-                      ${difficulty === 'easy' ? 'text-4xl sm:text-5xl' : difficulty === 'medium' ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'}
+                      ${difficulty === 'easy' ? 'text-5xl sm:text-6xl' : difficulty === 'medium' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'}
                       ${isMatched ? 'animate-emoji-pop scale-150 z-30' : ''}
                     `}
                   >
@@ -764,10 +774,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
             {/* P2 Stats Header */}
             <div className="absolute top-2 left-4 right-4 flex justify-between items-center pointer-events-none">
               <span className="bg-pink-100 border-2 border-pink-300 text-pink-600 font-extrabold px-4 py-1 rounded-full text-xs">
-                Score: {duelScore2} / 10
-              </span>
-              <span className="text-slate-400 font-extrabold text-xs">
-                Player 2 🔴
+                {getPlayerScoreLabel(2)}{duelScore2} / 10
               </span>
             </div>
           </div>
@@ -804,7 +811,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
             <div
               key={`duelCard1-${cardBKey}`}
               className={`
-                w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-white border-4 border-blue-400 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-300
+                w-60 h-60 sm:w-72 sm:h-72 rounded-full bg-white border-4 border-blue-400 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-300
                 ${p1Frozen ? 'opacity-50 animate-shake' : 'animate-card-in'}
               `}
             >
@@ -823,7 +830,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
                     }}
                     className={`
                       select-none outline-none text-center leading-none
-                      ${difficulty === 'easy' ? 'text-4xl sm:text-5xl' : difficulty === 'medium' ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'}
+                      ${difficulty === 'easy' ? 'text-5xl sm:text-6xl' : difficulty === 'medium' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'}
                       ${isMatched ? 'animate-emoji-pop scale-150 z-30' : ''}
                     `}
                   >
@@ -844,10 +851,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
             {/* P1 Stats Header */}
             <div className="absolute top-2 left-4 right-4 flex justify-between items-center pointer-events-none">
               <span className="bg-blue-100 border-2 border-blue-300 text-blue-600 font-extrabold px-4 py-1 rounded-full text-xs">
-                Score: {duelScore1} / 10
-              </span>
-              <span className="text-slate-400 font-extrabold text-xs">
-                Player 1 🔵
+                {getPlayerScoreLabel(1)}{duelScore1} / 10
               </span>
             </div>
           </div>

@@ -288,21 +288,10 @@ function AppContent() {
                 size="lg"
                 data-testid="launch-emojimatch"
                 onClick={() => handleScreenChange('emojiMatch')}
-                className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
+                className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
                 <span className="text-5xl">⚡</span>
                 <span className="text-lg font-black block leading-tight">{t.menu.dobble}</span>
-              </KidButton>
-
-              <KidButton
-                color="yellow"
-                size="lg"
-                data-testid="launch-shop"
-                onClick={() => handleScreenChange('shop')}
-                className="col-span-1 flex-col gap-2 rounded-[2rem]"
-              >
-                <span className="text-4xl">🛒</span>
-                <span className="text-base font-black block leading-tight">{t.menu.shop}</span>
               </KidButton>
 
               <KidButton
@@ -310,22 +299,38 @@ function AppContent() {
                 size="lg"
                 data-testid="launch-anlaut"
                 onClick={() => handleScreenChange('anlaut')}
-                className="col-span-3 flex-row gap-4 rounded-[2rem] min-h-24"
+                className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
               >
                 <span className="text-5xl">🔤</span>
                 <span className="text-lg font-black block leading-tight">{t.menu.anlaut}</span>
               </KidButton>
+            </div>
 
-              <KidButton
-                color="green"
-                size="lg"
-                data-testid="launch-town"
-                onClick={() => handleScreenChange('town')}
-                className="col-span-3 flex-row gap-4 rounded-[2rem] min-h-24"
-              >
-                <span className="text-5xl">🏘️</span>
-                <span className="text-lg font-black block leading-tight">{t.menu.town}</span>
-              </KidButton>
+            {/* Gamification section separated by a gap and border */}
+            <div className="border-t-2 border-slate-200/60 pt-6 mt-2 mb-4">
+              <div className="grid grid-cols-3 gap-4">
+                <KidButton
+                  color="green"
+                  size="lg"
+                  data-testid="launch-town"
+                  onClick={() => handleScreenChange('town')}
+                  className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
+                >
+                  <span className="text-5xl">🏘️</span>
+                  <span className="text-lg font-black block leading-tight">{t.menu.town}</span>
+                </KidButton>
+
+                <KidButton
+                  color="yellow"
+                  size="lg"
+                  data-testid="launch-shop"
+                  onClick={() => handleScreenChange('shop')}
+                  className="aspect-square flex-col gap-2 rounded-[2rem]"
+                >
+                  <span className="text-4xl">🛒</span>
+                  <span className="text-base font-black block leading-tight">{t.menu.shop}</span>
+                </KidButton>
+              </div>
             </div>
 
             <div className="text-center text-xs text-slate-300 font-bold">
