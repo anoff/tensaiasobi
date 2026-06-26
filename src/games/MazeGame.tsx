@@ -347,10 +347,8 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
       const endY = (rows - 1) * cellSize + cellSize / 2;
       ctx.fillText(theme.endEmoji, endX, endY);
 
-      // 7. Draw Avatar Marker (moves along mappedPath during animation, stays at start otherwise)
-      const currentCell = isAnimating && mappedPath.length > 0 
-        ? mappedPath[animatingIndex] || { col: 0, row: 0 } 
-        : { col: 0, row: 0 };
+      // 7. Draw Avatar Marker (moves along mappedPath based on animatingIndex)
+      const currentCell = mappedPath[animatingIndex] || { col: 0, row: 0 };
 
       const playerX = currentCell.col * cellSize + cellSize / 2;
       const playerY = currentCell.row * cellSize + cellSize / 2;
@@ -391,6 +389,16 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grid, drawingPoints, mappedPath, isAnimating, animatingIndex, themeIndex]);
 
+  const getCellCenterCoords = (col: number, row: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const cellSize = canvas.width / cols;
+    return {
+      x: col * cellSize + cellSize / 2,
+      y: row * cellSize + cellSize / 2,
+    };
+  };
+
   const getCellFromCoords = (x: number, y: number): { col: number; row: number } | null => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
@@ -413,16 +421,34 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     const touchedCell = getCellFromCoords(coords.x, coords.y);
     if (!touchedCell) return;
 
-    // Drawing must start near the start position (0, 0)
-    const isNearStart = touchedCell.col === 0 && touchedCell.row === 0;
-    if (isNearStart) {
+    // Check if the touched cell is already in the mappedPath
+    const touchedIdx = mappedPath.findIndex((cell) => cell.col === touchedCell.col && cell.row === touchedCell.row);
+
+    if (touchedIdx !== -1) {
       isDrawingRef.current = true;
       playPop();
-      setDrawingPoints([coords]);
-      setMappedPath([{ col: 0, row: 0 }]);
-      
-      // Reset collected stars
-      const resetGrid = grid.map(row => row.map(cell => ({ ...cell, starCollected: false })));
+
+      const newPath = mappedPath.slice(0, touchedIdx + 1);
+
+      // Reconstruct the drawing points from the centers of the cells in the truncated path,
+      // and append the current coordinates for a smooth start to the new stroke
+      const newPoints = newPath.map((cell) => getCellCenterCoords(cell.col, cell.row));
+      newPoints.push(coords);
+
+      setDrawingPoints(newPoints);
+      setMappedPath(newPath);
+      setAnimatingIndex(touchedIdx);
+
+      // Reset collected stars for cells that are no longer in the path
+      const resetGrid = grid.map((row) =>
+        row.map((cell) => {
+          const inPath = newPath.some((p) => p.col === cell.col && p.row === cell.row);
+          if (!inPath && cell.starCollected) {
+            return { ...cell, starCollected: false };
+          }
+          return cell;
+        })
+      );
       setGrid(resetGrid);
     }
   };
@@ -454,7 +480,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     // Check wall collision between lastCell and touchedCell
     let wallBlocked = false;
     const lastCellGridInfo = grid[lastCell.row][lastCell.col];
-    
+
     if (colDiff === 1) wallBlocked = lastCellGridInfo.walls.right;
     else if (colDiff === -1) wallBlocked = lastCellGridInfo.walls.left;
     else if (rowDiff === 1) wallBlocked = lastCellGridInfo.walls.bottom;
@@ -469,7 +495,11 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
       const secondToLast = mappedPath[mappedPath.length - 2];
       if (touchedCell.col === secondToLast.col && touchedCell.row === secondToLast.row) {
         playPop();
-        setMappedPath((prev) => prev.slice(0, -1));
+        setMappedPath((prev) => {
+          const nextPath = prev.slice(0, -1);
+          setAnimatingIndex(nextPath.length - 1);
+          return nextPath;
+        });
         return;
       }
     }
@@ -480,7 +510,11 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
 
     // Successfully mapped step!
     playPop();
-    setMappedPath((prev) => [...prev, touchedCell]);
+    setMappedPath((prev) => {
+      const nextPath = [...prev, touchedCell];
+      setAnimatingIndex(nextPath.length - 1);
+      return nextPath;
+    });
   };
 
   const handlePointerUp = () => {
