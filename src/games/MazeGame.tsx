@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
+import { getCanvasCoords } from '../utils/canvas';
 
 type Difficulty = 'baby' | 'toddler' | 'kid';
 
@@ -390,14 +391,13 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grid, drawingPoints, mappedPath, isAnimating, animatingIndex, themeIndex]);
 
-  // Touch coordinates helper
-  const getCanvasCoords = (clientX: number, clientY: number): { x: number; y: number } | null => {
+  const getCellCenterCoords = (col: number, row: number) => {
     const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
+    if (!canvas) return { x: 0, y: 0 };
+    const cellSize = canvas.width / cols;
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
+      x: col * cellSize + cellSize / 2,
+      y: row * cellSize + cellSize / 2,
     };
   };
 
@@ -417,34 +417,40 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isWon || isAnimating) return;
 
-    let clientX: number;
-    let clientY: number;
-
-    if ('touches' in e) {
-      if (e.touches.length === 0) return;
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    const coords = getCanvasCoords(clientX, clientY);
+    const coords = getCanvasCoords(canvasRef.current, e);
     if (!coords) return;
 
     const touchedCell = getCellFromCoords(coords.x, coords.y);
     if (!touchedCell) return;
 
-    // Drawing must start near the start position (0, 0)
-    const isNearStart = touchedCell.col === 0 && touchedCell.row === 0;
-    if (isNearStart) {
+    // Check if the touched cell is already in the mappedPath
+    const touchedIdx = mappedPath.findIndex((cell) => cell.col === touchedCell.col && cell.row === touchedCell.row);
+
+    if (touchedIdx !== -1) {
       isDrawingRef.current = true;
       playPop();
-      setDrawingPoints([coords]);
-      setMappedPath([{ col: 0, row: 0 }]);
-      
-      // Reset collected stars
-      const resetGrid = grid.map(row => row.map(cell => ({ ...cell, starCollected: false })));
+
+      const newPath = mappedPath.slice(0, touchedIdx + 1);
+
+      // Reconstruct the drawing points from the centers of the cells in the truncated path,
+      // and append the current coordinates for a smooth start to the new stroke
+      const newPoints = newPath.map((cell) => getCellCenterCoords(cell.col, cell.row));
+      newPoints.push(coords);
+
+      setDrawingPoints(newPoints);
+      setMappedPath(newPath);
+      setAnimatingIndex(touchedIdx);
+
+      // Reset collected stars for cells that are no longer in the path
+      const resetGrid = grid.map((row) =>
+        row.map((cell) => {
+          const inPath = newPath.some((p) => p.col === cell.col && p.row === cell.row);
+          if (!inPath && cell.starCollected) {
+            return { ...cell, starCollected: false };
+          }
+          return cell;
+        })
+      );
       setGrid(resetGrid);
     }
   };
@@ -452,19 +458,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
   const handlePointerMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current || isWon || isAnimating) return;
 
-    let clientX: number;
-    let clientY: number;
-
-    if ('touches' in e) {
-      if (e.touches.length === 0) return;
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    const coords = getCanvasCoords(clientX, clientY);
+    const coords = getCanvasCoords(canvasRef.current, e);
     if (!coords) return;
 
     setDrawingPoints((prev) => [...prev, coords]);
@@ -488,7 +482,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     // Check wall collision between lastCell and touchedCell
     let wallBlocked = false;
     const lastCellGridInfo = grid[lastCell.row][lastCell.col];
-    
+
     if (colDiff === 1) wallBlocked = lastCellGridInfo.walls.right;
     else if (colDiff === -1) wallBlocked = lastCellGridInfo.walls.left;
     else if (rowDiff === 1) wallBlocked = lastCellGridInfo.walls.bottom;
@@ -503,7 +497,11 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
       const secondToLast = mappedPath[mappedPath.length - 2];
       if (touchedCell.col === secondToLast.col && touchedCell.row === secondToLast.row) {
         playPop();
-        setMappedPath((prev) => prev.slice(0, -1));
+        setMappedPath((prev) => {
+          const nextPath = prev.slice(0, -1);
+          setAnimatingIndex(nextPath.length - 1);
+          return nextPath;
+        });
         return;
       }
     }
@@ -514,7 +512,11 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
 
     // Successfully mapped step!
     playPop();
-    setMappedPath((prev) => [...prev, touchedCell]);
+    setMappedPath((prev) => {
+      const nextPath = [...prev, touchedCell];
+      setAnimatingIndex(nextPath.length - 1);
+      return nextPath;
+    });
   };
 
   const handlePointerUp = () => {

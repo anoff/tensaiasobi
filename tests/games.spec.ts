@@ -165,4 +165,38 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
       }
     });
   }
+
+  test('Verify Maze Game drawing continuation and play/reset flow', async ({ page }) => {
+    // 1. Launch Maze Game
+    const launcher = page.getByTestId('launch-maze');
+    await expect(launcher).toBeVisible();
+    await launcher.click();
+
+    const canvas = page.getByTestId('maze-canvas');
+    await expect(canvas).toBeVisible();
+
+    const box = await canvas.boundingBox();
+    expect(box).not.toBeNull();
+    if (box) {
+      // Draw first segment near the top-left start cell
+      await page.mouse.move(box.x + 30, box.y + 30);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 80, box.y + 80);
+      await page.mouse.up();
+
+      // Wait a short time to simulate user release
+      await page.waitForTimeout(100);
+
+      // Continue drawing from the end area
+      await page.mouse.move(box.x + 80, box.y + 80);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 130, box.y + 130);
+      await page.mouse.up();
+
+      // Check if Reset button is visible and active
+      const resetBtn = page.getByTestId('maze-reset');
+      await expect(resetBtn).toBeVisible();
+      await expect(resetBtn).not.toBeDisabled();
+    }
+  });
 });

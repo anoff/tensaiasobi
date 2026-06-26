@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
+import { getCanvasCoords } from '../utils/canvas';
 
 interface DoodlePadProps {
   playPop: () => void;
@@ -83,32 +84,9 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     };
   }, []);
 
-  const getCoordinates = (e: React.MouseEvent | React.TouchEvent): { x: number; y: number } | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-
-    const rect = canvas.getBoundingClientRect();
-    let clientX: number;
-    let clientY: number;
-
-    if ('touches' in e) {
-      if (e.touches.length === 0) return null;
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    };
-  };
-
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault(); // Prevents touch scrolling on iOS/Android
-    const coords = getCoordinates(e);
+    const coords = getCanvasCoords(canvasRef.current, e);
     if (!coords) return;
 
     const canvas = canvasRef.current;
@@ -138,7 +116,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     if (!isDrawing) return;
     e.preventDefault();
 
-    const coords = getCoordinates(e);
+    const coords = getCanvasCoords(canvasRef.current, e);
     if (!coords) return;
 
     const canvas = canvasRef.current;
