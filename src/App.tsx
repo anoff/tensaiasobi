@@ -12,6 +12,7 @@ import MemoryMatch from './games/MemoryMatch';
 import MazeGame from './games/MazeGame';
 import ShapeTrace from './games/ShapeTrace';
 import AnlautGame from './games/AnlautGame';
+import EmojiMatch from './games/EmojiMatch';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 
 // Gamification imports
@@ -21,7 +22,7 @@ import { TownBuilder } from './games/TownBuilder';
 import { useStars } from './hooks/useStars';
 import { useVouchers } from './hooks/useVouchers';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'town' | 'shop' | 'settings';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
@@ -63,6 +64,13 @@ function AppContent() {
     localStorage.removeItem('anlaut_streak');
     localStorage.removeItem('anlaut_highscore');
     
+    // Clear Emoji Match progress
+    localStorage.removeItem('dobble_high_solo_zen_easy');
+    localStorage.removeItem('dobble_high_solo_zen_medium');
+    localStorage.removeItem('dobble_high_solo_zen_hard');
+    localStorage.removeItem('dobble_high_solo_time_medium');
+    localStorage.removeItem('dobble_high_solo_time_hard');
+    
     // Clear gamification progress
     resetStars();
     resetVouchers();
@@ -87,6 +95,8 @@ function AppContent() {
         return <ShapeTrace playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
       case 'anlaut':
         return <AnlautGame playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
+      case 'emojiMatch':
+        return <EmojiMatch playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
       case 'town':
         return (
           <TownBuilder
@@ -274,6 +284,28 @@ function AppContent() {
               </KidButton>
 
               <KidButton
+                color="pink"
+                size="lg"
+                data-testid="launch-emojimatch"
+                onClick={() => handleScreenChange('emojiMatch')}
+                className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
+              >
+                <span className="text-5xl">⚡</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.dobble}</span>
+              </KidButton>
+
+              <KidButton
+                color="yellow"
+                size="lg"
+                data-testid="launch-shop"
+                onClick={() => handleScreenChange('shop')}
+                className="col-span-1 flex-col gap-2 rounded-[2rem]"
+              >
+                <span className="text-4xl">🛒</span>
+                <span className="text-base font-black block leading-tight">{t.menu.shop}</span>
+              </KidButton>
+
+              <KidButton
                 color="red"
                 size="lg"
                 data-testid="launch-anlaut"
@@ -289,21 +321,10 @@ function AppContent() {
                 size="lg"
                 data-testid="launch-town"
                 onClick={() => handleScreenChange('town')}
-                className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
+                className="col-span-3 flex-row gap-4 rounded-[2rem] min-h-24"
               >
                 <span className="text-5xl">🏘️</span>
                 <span className="text-lg font-black block leading-tight">{t.menu.town}</span>
-              </KidButton>
-
-              <KidButton
-                color="yellow"
-                size="lg"
-                data-testid="launch-shop"
-                onClick={() => handleScreenChange('shop')}
-                className="col-span-1 flex-col gap-2 rounded-[2rem]"
-              >
-                <span className="text-4xl">🛒</span>
-                <span className="text-base font-black block leading-tight">{t.menu.shop}</span>
               </KidButton>
             </div>
 
