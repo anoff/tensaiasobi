@@ -347,8 +347,10 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
       const endY = (rows - 1) * cellSize + cellSize / 2;
       ctx.fillText(theme.endEmoji, endX, endY);
 
-      // 7. Draw Avatar Marker (moves along mappedPath based on animatingIndex)
-      const currentCell = mappedPath[animatingIndex] || { col: 0, row: 0 };
+      // 7. Draw Avatar Marker (moves along mappedPath during animation, stays at start otherwise)
+      const currentCell = isAnimating && mappedPath.length > 0 
+        ? mappedPath[animatingIndex] || { col: 0, row: 0 } 
+        : { col: 0, row: 0 };
 
       const playerX = currentCell.col * cellSize + cellSize / 2;
       const playerY = currentCell.row * cellSize + cellSize / 2;
