@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
+import { getCanvasCoords } from '../utils/canvas';
 
 interface Point {
   x: number; // 0 to 100
@@ -912,32 +913,10 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shapeIndex, drawingPoints, isWon, difficulty]);
 
-  const getCanvasCoords = (clientX: number, clientY: number): { x: number; y: number } | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    };
-  };
-
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isWon) return;
 
-    let clientX: number;
-    let clientY: number;
-
-    if ('touches' in e) {
-      if (e.touches.length === 0) return;
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    const coords = getCanvasCoords(clientX, clientY);
+    const coords = getCanvasCoords(canvasRef.current, e);
     if (!coords) return;
 
     isDrawingRef.current = true;
@@ -949,19 +928,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
   const handlePointerMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current || isWon) return;
 
-    let clientX: number;
-    let clientY: number;
-
-    if ('touches' in e) {
-      if (e.touches.length === 0) return;
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    const coords = getCanvasCoords(clientX, clientY);
+    const coords = getCanvasCoords(canvasRef.current, e);
     if (!coords) return;
 
     setDrawingPoints((prev) => [...prev, coords]);

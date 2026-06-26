@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
+import { getCanvasCoords } from '../utils/canvas';
 
 type Difficulty = 'baby' | 'toddler' | 'kid';
 
@@ -390,17 +391,6 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grid, drawingPoints, mappedPath, isAnimating, animatingIndex, themeIndex]);
 
-  // Touch coordinates helper
-  const getCanvasCoords = (clientX: number, clientY: number): { x: number; y: number } | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    };
-  };
-
   const getCellFromCoords = (x: number, y: number): { col: number; row: number } | null => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
@@ -417,19 +407,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isWon || isAnimating) return;
 
-    let clientX: number;
-    let clientY: number;
-
-    if ('touches' in e) {
-      if (e.touches.length === 0) return;
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    const coords = getCanvasCoords(clientX, clientY);
+    const coords = getCanvasCoords(canvasRef.current, e);
     if (!coords) return;
 
     const touchedCell = getCellFromCoords(coords.x, coords.y);
@@ -452,19 +430,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
   const handlePointerMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current || isWon || isAnimating) return;
 
-    let clientX: number;
-    let clientY: number;
-
-    if ('touches' in e) {
-      if (e.touches.length === 0) return;
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    const coords = getCanvasCoords(clientX, clientY);
+    const coords = getCanvasCoords(canvasRef.current, e);
     if (!coords) return;
 
     setDrawingPoints((prev) => [...prev, coords]);
