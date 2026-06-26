@@ -51,7 +51,7 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const repoName = context.repo.repo;
             const owner = context.repo.owner;
-            const previewUrl = `https://${owner}.github.io/${repoName}/pr-preview/pr-${prNumber}/`;
+            const previewUrl = `https://asobi.anoff.io/pr-preview/pr-${prNumber}/`;
             const body = `## 🔍 PR Preview Deployed\n\nYour preview is available at: **[${previewUrl}](${previewUrl})**\n\n_This preview will be cleaned up when the PR is closed._`;
 
             const { data: comments } = await github.rest.issues.listComments({
