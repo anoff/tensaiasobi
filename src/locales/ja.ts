@@ -303,4 +303,17 @@ export const ja: TranslationSchema = {
     nRuleWarning: "「ん」で おわる ことばは しりとり おしまいだよ！ ⚠️",
     nRuleLost: "「ん」がついたので おしまい！負けちゃったよ 😢",
   },
+  challenge: {
+    title: "チャレンジモード 🎯",
+    subtitle: "ごほうびを アンロックするために チャレンジに ちょうせん しよう！",
+    enableChallenge: "チャレンジを はじめる",
+    cancelChallenge: "チャレンジを やめる",
+    starsToGo: "のこりのスター:",
+    remainingStars: "あと {count} こ",
+    allowedGames: "あそべるゲーム",
+    targetStars: "めひょうのスター",
+    completeTitle: "チャレンジ クリア！ 🎉",
+    completeBody: "よくできたね！チャレンジを クリアして ごほうびを ゲットしたよ！",
+    claimStars: "スターを {count} こ もらう！ ⭐",
+  },
 };

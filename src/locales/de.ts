@@ -303,4 +303,17 @@ export const de: TranslationSchema = {
     nRuleLost: "",
     nRuleWarning: "",
   },
+  challenge: {
+    title: "Herausforderungsmodus 🎯",
+    subtitle: "Schließe Herausforderungen ab, um Belohnungen freizuschalten!",
+    enableChallenge: "Herausforderung starten",
+    cancelChallenge: "Herausforderung abbrechen",
+    starsToGo: "Sterne übrig:",
+    remainingStars: "{count} verbleibend",
+    allowedGames: "Erlaubte Spiele",
+    targetStars: "Ziel-Sterne",
+    completeTitle: "Herausforderung gemeistert! 🎉",
+    completeBody: "Super gemacht! Du hast die Herausforderung abgeschlossen und deine Belohnungen freigeschaltet!",
+    claimStars: "Fordere {count} Sterne ein! ⭐",
+  },
 };

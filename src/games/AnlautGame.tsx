@@ -8,6 +8,7 @@ interface AnlautGameProps {
   playSuccess: () => void;
   playError: () => void;
   onStarEarned?: (amount: number) => void;
+  challengeMode?: boolean;
 }
 
 // 63 child-friendly emoji keys
@@ -81,7 +82,7 @@ const generateOptions = (
   return [correctChar, ...Array.from(wrongOptionsSet)].sort(() => Math.random() - 0.5);
 };
 
-export function AnlautGame({ playPop, playSuccess, playError, onStarEarned }: AnlautGameProps) {
+export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: AnlautGameProps) {
   const { language, t } = useTranslation();
 
   const [currentItem, setCurrentItem] = useState<string>(() => {
@@ -134,11 +135,27 @@ export function AnlautGame({ playPop, playSuccess, playError, onStarEarned }: An
       setStreak(0);
       setSafeLocalStorage('anlaut_streak', 0);
 
-      // Reset after 1s so they can try again
-      setTimeout(() => {
-        setSelectedOption(null);
-        setIsCorrect(null);
-      }, 1000);
+      if (challengeMode) {
+        setTimeout(() => {
+          let nextItem = currentItem;
+          if (EMOJI_ITEMS.length > 1) {
+            while (nextItem === currentItem) {
+              const idx = Math.floor(Math.random() * EMOJI_ITEMS.length);
+              nextItem = EMOJI_ITEMS[idx];
+            }
+          }
+          setCurrentItem(nextItem);
+          setSelectedOption(null);
+          setIsCorrect(null);
+          setHintUsed(false);
+        }, 1500);
+      } else {
+        // Reset after 1s so they can try again
+        setTimeout(() => {
+          setSelectedOption(null);
+          setIsCorrect(null);
+        }, 1000);
+      }
     }
   };
 

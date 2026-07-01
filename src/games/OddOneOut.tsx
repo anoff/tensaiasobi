@@ -12,6 +12,7 @@ interface OddOneOutProps {
   playSuccess: () => void;
   playError: () => void;
   onStarEarned?: (amount: number) => void;
+  challengeMode?: boolean;
 }
 
 const CATEGORIES: Record<string, string[]> = {
@@ -23,7 +24,7 @@ const CATEGORIES: Record<string, string[]> = {
   clothing: ['👕', '👖', '👗', '🧥', '🧦', '👟', '👒', '🕶️', '👜', '👑', '🧤', '🧣'],
 };
 
-export function OddOneOut({ playSuccess, playError, onStarEarned }: OddOneOutProps) {
+export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode }: OddOneOutProps) {
   const [items, setItems] = useState<EmojiItem[]>([]);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -113,10 +114,16 @@ export function OddOneOut({ playSuccess, playError, onStarEarned }: OddOneOutPro
       setStreak(0);
       localStorage.setItem('odd_streak', '0');
 
-      setTimeout(() => {
-        setSelectedEmoji(null);
-        setIsCorrect(null);
-      }, 1000);
+      if (challengeMode) {
+        setTimeout(() => {
+          generatePuzzle();
+        }, 1500);
+      } else {
+        setTimeout(() => {
+          setSelectedEmoji(null);
+          setIsCorrect(null);
+        }, 1000);
+      }
     }
   };
 

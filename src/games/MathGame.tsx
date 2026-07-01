@@ -15,6 +15,7 @@ interface MathGameProps {
   playSuccess: () => void;
   playError: () => void;
   onStarEarned?: (amount: number) => void;
+  challengeMode?: boolean;
 }
 
 const LEVEL_EMOJIS: Record<Level, string> = {
@@ -100,7 +101,7 @@ const generateQuestion = (currentLevel: Level): Question => {
     };
   };
 
-export function MathGame({ playPop, playSuccess, playError, onStarEarned }: MathGameProps) {
+export function MathGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: MathGameProps) {
   const [level, setLevel] = useState<Level>('easy');
   const [question, setQuestion] = useState<Question>(() => generateQuestion('easy'));
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -155,10 +156,16 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned }: Math
       setStreak(0);
       localStorage.setItem('math_streak', '0');
 
-      setTimeout(() => {
-        setSelectedAnswer(null);
-        setIsCorrect(null);
-      }, 1000);
+      if (challengeMode) {
+        setTimeout(() => {
+          loadNewQuestion(level);
+        }, 1500);
+      } else {
+        setTimeout(() => {
+          setSelectedAnswer(null);
+          setIsCorrect(null);
+        }, 1000);
+      }
     }
   };
 

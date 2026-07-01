@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import KidButton from './KidButton';
 import { useTranslation } from '../hooks/useTranslation';
 import type { Voucher } from '../types/gamification';
@@ -12,6 +13,11 @@ interface ParentDashboardProps {
   onSetVoucherCost: (id: string, cost: number) => void;
   onClearProgress: () => void;
   onClose: () => void;
+  challengeActive: boolean;
+  challengeStarsTarget: number;
+  challengeAllowedGames: Record<string, boolean>;
+  onStartChallenge: (targetStars: number, allowedGames: Record<string, boolean>) => void;
+  onCancelChallenge: () => void;
 }
 
 export function ParentDashboard({
@@ -24,8 +30,52 @@ export function ParentDashboard({
   onSetVoucherCost,
   onClearProgress,
   onClose,
+  challengeActive,
+  challengeStarsTarget,
+  challengeAllowedGames,
+  onStartChallenge,
+  onCancelChallenge,
 }: ParentDashboardProps) {
   const { t } = useTranslation();
+
+  const [selectedTarget, setSelectedTarget] = useState<number>(challengeStarsTarget || 10);
+  const [allowedGames, setAllowedGames] = useState<Record<string, boolean>>(() => {
+    if (challengeAllowedGames && Object.keys(challengeAllowedGames).length > 0) {
+      return challengeAllowedGames;
+    }
+    return {
+      math: true,
+      odd: true,
+      doodle: true,
+      memory: true,
+      maze: true,
+      trace: true,
+      emojiMatch: true,
+      anlaut: true,
+      shiritori: true,
+    };
+  });
+
+  const gamesList = [
+    { id: 'math', label: t.menu.math, icon: '🎈' },
+    { id: 'odd', label: t.menu.odd, icon: '🧐' },
+    { id: 'doodle', label: t.menu.doodle, icon: '🎨' },
+    { id: 'memory', label: t.menu.match, icon: '🐯' },
+    { id: 'maze', label: t.menu.maze, icon: '🗺️' },
+    { id: 'trace', label: t.menu.trace, icon: '⭐' },
+    { id: 'emojiMatch', label: t.menu.dobble, icon: '⚡' },
+    { id: 'anlaut', label: t.menu.anlaut, icon: '🔤' },
+    { id: 'shiritori', label: t.menu.shiritori, icon: '🔗' },
+  ];
+
+  const toggleGame = (gameId: string) => {
+    setAllowedGames((prev) => ({
+      ...prev,
+      [gameId]: !prev[gameId],
+    }));
+  };
+
+  const hasAllowedGames = Object.values(allowedGames).some(Boolean);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-md mx-auto w-full select-none animate-in fade-in slide-in-from-bottom-6 duration-200">
@@ -136,6 +186,87 @@ export function ParentDashboard({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Challenge Mode Section */}
+          <div className="p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 space-y-4">
+            <div>
+              <span className="text-lg font-bold text-slate-800 block">{t.challenge.title}</span>
+              <span className="text-xs text-slate-500">{t.challenge.subtitle}</span>
+            </div>
+
+            {challengeActive ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-xl border border-purple-200">
+                  <span className="text-2xl">🎯</span>
+                  <div>
+                    <span className="text-sm font-extrabold text-purple-955 block">Challenge Mode is Active</span>
+                    <span className="text-[11px] text-purple-600 block">
+                      Target: {challengeStarsTarget} Stars
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-xs font-bold text-slate-500">
+                  Allowed Games: {gamesList.filter(g => allowedGames[g.id]).map(g => g.label).join(', ')}
+                </div>
+
+                <button
+                  onClick={onCancelChallenge}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl transition-colors cursor-pointer text-sm outline-none"
+                >
+                  {t.challenge.cancelChallenge}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-bold text-slate-700">{t.challenge.targetStars}:</span>
+                  <select
+                    value={selectedTarget}
+                    onChange={(e) => setSelectedTarget(parseInt(e.target.value, 10))}
+                    className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer"
+                  >
+                    {[5, 10, 15, 20, 25, 30, 40, 50].map((num) => (
+                      <option key={num} value={num}>{num} Stars</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-sm font-bold text-slate-700 block">{t.challenge.allowedGames}:</span>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {gamesList.map((game) => (
+                      <button
+                        key={game.id}
+                        type="button"
+                        onClick={() => toggleGame(game.id)}
+                        className={`flex items-center gap-1.5 p-2 rounded-xl border transition-all cursor-pointer font-bold outline-none ${
+                          allowedGames[game.id]
+                            ? 'bg-purple-100 border-purple-300 text-purple-800'
+                            : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>{game.icon}</span>
+                        <span className="truncate">{game.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  disabled={!hasAllowedGames}
+                  onClick={() => onStartChallenge(selectedTarget, allowedGames)}
+                  className={`w-full font-bold py-3 rounded-xl transition-all cursor-pointer text-sm outline-none shadow-sm ${
+                    hasAllowedGames
+                      ? 'bg-purple-600 hover:bg-purple-700 text-white border-b-4 border-purple-800 active:border-b-0 active:translate-y-[4px]'
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+                >
+                  {t.challenge.enableChallenge}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Danger Zone */}

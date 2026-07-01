@@ -301,6 +301,19 @@ export const en = {
     nRuleLost: "",
     nRuleWarning: "",
   },
+  challenge: {
+    title: "Challenge Mode 🎯",
+    subtitle: "Complete challenges to unlock rewards!",
+    enableChallenge: "Start Challenge Mode",
+    cancelChallenge: "Cancel Challenge",
+    starsToGo: "Stars to go:",
+    remainingStars: "{count} remaining",
+    allowedGames: "Allowed Games",
+    targetStars: "Challenge Target",
+    completeTitle: "Challenge Unlocked! 🎉",
+    completeBody: "Great job! You completed the challenge and unlocked your rewards!",
+    claimStars: "Claim {count} Stars! ⭐",
+  },
 };
 
 export type TranslationSchema = typeof en;
