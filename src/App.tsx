@@ -13,6 +13,7 @@ import MazeGame from './games/MazeGame';
 import ShapeTrace from './games/ShapeTrace';
 import AnlautGame from './games/AnlautGame';
 import EmojiMatch from './games/EmojiMatch';
+import Shiritori from './games/Shiritori';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 
 // Gamification imports
@@ -22,7 +23,7 @@ import { TownBuilder } from './games/TownBuilder';
 import { useStars } from './hooks/useStars';
 import { useVouchers } from './hooks/useVouchers';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings' | 'shiritori';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
@@ -63,6 +64,7 @@ function AppContent() {
     localStorage.removeItem('odd_highscore');
     localStorage.removeItem('anlaut_streak');
     localStorage.removeItem('anlaut_highscore');
+    localStorage.removeItem('shiritori_highscore');
     
     // Clear Emoji Match progress
     localStorage.removeItem('dobble_high_solo_zen_easy');
@@ -97,6 +99,8 @@ function AppContent() {
         return <AnlautGame playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
       case 'emojiMatch':
         return <EmojiMatch playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
+      case 'shiritori':
+        return <Shiritori key={language} playPop={playPop} playSuccess={playSuccess} playError={playError} onStarEarned={(amt) => addStars(amt)} />;
       case 'town':
         return (
           <TownBuilder
@@ -299,10 +303,21 @@ function AppContent() {
                 size="lg"
                 data-testid="launch-anlaut"
                 onClick={() => handleScreenChange('anlaut')}
-                className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
+                className="aspect-square flex-col gap-2 rounded-[2rem]"
               >
                 <span className="text-5xl">🔤</span>
                 <span className="text-lg font-black block leading-tight">{t.menu.anlaut}</span>
+              </KidButton>
+
+              <KidButton
+                color="purple"
+                size="lg"
+                data-testid="launch-shiritori"
+                onClick={() => handleScreenChange('shiritori')}
+                className="aspect-square flex-col gap-2 rounded-[2rem]"
+              >
+                <span className="text-5xl">🔗</span>
+                <span className="text-lg font-black block leading-tight">{t.menu.shiritori}</span>
               </KidButton>
             </div>
 
