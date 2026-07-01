@@ -148,6 +148,30 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   };
 
+  const downloadDrawing = () => {
+    playPop();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const filename = `tensaiasobi-${year}-${month}-${day}.png`;
+
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      console.error('Error downloading drawing:', e);
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col p-2 w-full select-none h-full gap-2">
       {/* Canvas Area */}
@@ -221,6 +245,18 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
             </button>
           ))}
         </div>
+
+        {/* Download Button */}
+        <KidButton
+          color="green"
+          size="sm"
+          data-testid="doodle-download"
+          onClick={downloadDrawing}
+          className="shrink-0 !py-1 !px-3 shadow-[0_4px_0_0_#059669] active:translate-y-[2px] active:shadow-[0_1px_0_0_#059669]"
+          title={t.doodlePad.download}
+        >
+          📥
+        </KidButton>
 
         {/* Clear Button */}
         <KidButton

@@ -89,6 +89,22 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
               await page.mouse.up();
             }
 
+            // Verify download behavior
+            const downloadBtn = page.getByTestId('doodle-download');
+            await expect(downloadBtn).toBeVisible();
+
+            const downloadPromise = page.waitForEvent('download');
+            await downloadBtn.click();
+            const download = await downloadPromise;
+
+            // Assert filename matches tensaiasobi-YYYY-MM-DD.png
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const expectedFilename = `tensaiasobi-${year}-${month}-${day}.png`;
+            expect(download.suggestedFilename()).toBe(expectedFilename);
+
             // Click the clear button
             const clearBtn = page.getByTestId('doodle-clear');
             await expect(clearBtn).toBeVisible();
