@@ -63,6 +63,7 @@ export const ja: TranslationSchema = {
     title: "まほうのおえかき！ 🎨",
     subtitle: "ゆびで好きな絵をかいてね！",
     eraser: "けしごむ",
+    download: "ダウンロード",
   },
   mazeGame: {
     title: "まほうのめいろ！ 🗺️",

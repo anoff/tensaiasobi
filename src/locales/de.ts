@@ -63,6 +63,7 @@ export const de: TranslationSchema = {
     title: "Zaubermalen! 🎨",
     subtitle: "Male mit deinem Finger, was immer du willst!",
     eraser: "Radiergummi",
+    download: "Bild herunterladen",
   },
   mazeGame: {
     title: "Zauber-Labyrinthe! 🗺️",

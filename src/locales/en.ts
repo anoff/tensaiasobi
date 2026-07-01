@@ -61,6 +61,7 @@ export const en = {
     title: "Magic Doodle! 🎨",
     subtitle: "Draw anything you like with your finger!",
     eraser: "Eraser",
+    download: "Download Drawing",
   },
   mazeGame: {
     title: "Magic Mazes! 🗺️",
