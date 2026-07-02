@@ -6,19 +6,19 @@ async function solveParentGate(page: Page) {
   const gateTextElement = page.locator('form div.text-4xl');
   await expect(gateTextElement).toBeVisible();
   
-  const text = await gateTextElement.innerText(); // e.g., "7 + 9 = ?"
-  const match = text.match(/(\d+)\s*\+\s*(\d+)/);
-  if (!match) {
-    throw new Error(`Could not parse ParentGate equation from text: "${text}"`);
-  }
-  
-  const num1 = parseInt(match[1], 10);
-  const num2 = parseInt(match[2], 10);
-  const sum = num1 + num2;
+  const text = await gateTextElement.innerText();
+  const cleanExpr = text
+    .replace(/×/g, '*')
+    .replace(/x/g, '*')
+    .replace(/=/g, '')
+    .replace(/\?/g, '')
+    .trim();
+
+  const answer = Function(`"use strict"; return (${cleanExpr})`)();
   
   // Type the sum in the input
   const input = page.locator('form input[type="number"]');
-  await input.fill(sum.toString());
+  await input.fill(answer.toString());
   
   // Submit the form
   await page.locator('form button[type="submit"]').click();

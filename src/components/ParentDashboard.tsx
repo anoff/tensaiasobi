@@ -40,9 +40,6 @@ export function ParentDashboard({
 
   const [selectedTarget, setSelectedTarget] = useState<number>(challengeStarsTarget || 10);
   const [allowedGames, setAllowedGames] = useState<Record<string, boolean>>(() => {
-    if (challengeAllowedGames && Object.keys(challengeAllowedGames).length > 0) {
-      return challengeAllowedGames;
-    }
     return {
       math: true,
       odd: true,
@@ -53,6 +50,7 @@ export function ParentDashboard({
       emojiMatch: true,
       anlaut: true,
       shiritori: true,
+      ...challengeAllowedGames
     };
   });
 
@@ -136,7 +134,7 @@ export function ParentDashboard({
               <span className="text-lg font-bold text-slate-800 block">{t.parentDashboard.vouchersTitle}</span>
               <span className="text-xs text-slate-500">{t.parentDashboard.vouchersDesc}</span>
             </div>
-            
+
             <div className="space-y-3">
               {vouchers.map((voucher) => (
                 <div key={voucher.id} className="flex flex-col gap-2 p-3 bg-white rounded-xl border border-slate-200 shadow-sm">
@@ -154,7 +152,7 @@ export function ParentDashboard({
                         )}
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={() => onToggleVoucher(voucher.id)}
                       className={`
@@ -167,7 +165,7 @@ export function ParentDashboard({
                       {voucher.enabled ? t.parentDashboard.voucherEnabled : 'Disabled'}
                     </button>
                   </div>
-                  
+
                   {voucher.enabled && (
                     <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-xs">
                       <span className="text-slate-500">{t.parentDashboard.voucherCost}:</span>
@@ -227,7 +225,7 @@ export function ParentDashboard({
                     onChange={(e) => setSelectedTarget(parseInt(e.target.value, 10))}
                     className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer"
                   >
-                    {[5, 10, 15, 20, 25, 30, 40, 50].map((num) => (
+                    {[10, 20, 30, 50, 70, 100].map((num) => (
                       <option key={num} value={num}>{num} Stars</option>
                     ))}
                   </select>
@@ -241,11 +239,10 @@ export function ParentDashboard({
                         key={game.id}
                         type="button"
                         onClick={() => toggleGame(game.id)}
-                        className={`flex items-center gap-1.5 p-2 rounded-xl border transition-all cursor-pointer font-bold outline-none ${
-                          allowedGames[game.id]
+                        className={`flex items-center gap-1.5 p-2 rounded-xl border transition-all cursor-pointer font-bold outline-none ${allowedGames[game.id]
                             ? 'bg-purple-100 border-purple-300 text-purple-800'
                             : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
-                        }`}
+                          }`}
                       >
                         <span>{game.icon}</span>
                         <span className="truncate">{game.label}</span>
@@ -256,12 +253,14 @@ export function ParentDashboard({
 
                 <button
                   disabled={!hasAllowedGames}
-                  onClick={() => onStartChallenge(selectedTarget, allowedGames)}
-                  className={`w-full font-bold py-3 rounded-xl transition-all cursor-pointer text-sm outline-none shadow-sm ${
-                    hasAllowedGames
+                  onClick={() => {
+                    onStartChallenge(selectedTarget, allowedGames);
+                    onClose();
+                  }}
+                  className={`w-full font-bold py-3 rounded-xl transition-all cursor-pointer text-sm outline-none shadow-sm ${hasAllowedGames
                       ? 'bg-purple-600 hover:bg-purple-700 text-white border-b-4 border-purple-800 active:border-b-0 active:translate-y-[4px]'
                       : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   {t.challenge.enableChallenge}
                 </button>

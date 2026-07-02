@@ -9,11 +9,11 @@ export interface StarEarnAnimation {
 const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
   math: true,
   odd: true,
-  doodle: true,
+  doodle: false,
   memory: true,
-  maze: true,
-  trace: true,
-  emojiMatch: true,
+  maze: false,
+  trace: false,
+  emojiMatch: false,
   anlaut: true,
   shiritori: true,
 };
@@ -65,12 +65,14 @@ export function useChallenge() {
     setPendingChallengeAnimations((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
+  const allowedGamesMerged = { ...DEFAULT_ALLOWED_GAMES, ...challengeAllowedGames };
+
   return {
     challengeActive,
     challengeStarsTarget,
     challengeStarsEarned,
     challengeStarsRemaining,
-    challengeAllowedGames,
+    challengeAllowedGames: allowedGamesMerged,
     pendingChallengeAnimations,
     startChallenge,
     addChallengeStars,

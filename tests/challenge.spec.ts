@@ -5,24 +5,27 @@ async function solveParentGate(page: Page) {
   const gateTextElement = page.locator('form div.text-4xl');
   await expect(gateTextElement).toBeVisible();
   
-  const text = await gateTextElement.innerText(); // e.g., "7 + 9 = ?"
-  const match = text.match(/(\d+)\s*\+\s*(\d+)/);
-  if (!match) {
-    throw new Error(`Could not parse ParentGate equation from text: "${text}"`);
-  }
-  
-  const num1 = parseInt(match[1], 10);
-  const num2 = parseInt(match[2], 10);
-  const sum = num1 + num2;
+  const text = await gateTextElement.innerText();
+  const cleanExpr = text
+    .replace(/×/g, '*')
+    .replace(/x/g, '*')
+    .replace(/=/g, '')
+    .replace(/\?/g, '')
+    .trim();
+
+  const answer = Function(`"use strict"; return (${cleanExpr})`)();
   
   const input = page.locator('form input[type="number"]');
-  await input.fill(sum.toString());
+  await input.fill(answer.toString());
   
   await page.locator('form button[type="submit"]').click();
 }
 
 test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
+    page.on('console', msg => {
+      console.log(`[BROWSER CONSOLE] ${msg.type()}: ${msg.text()}`);
+    });
     await page.goto('/');
   });
 
@@ -62,8 +65,8 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
       '🔗 Word Chain'
     ];
 
-    for (const gameName of gamesToDisable) {
-      const btn = page.locator('button', { hasText: gameName });
+    for (const name of gamesToDisable) {
+      const btn = page.getByRole('button', { name, exact: true });
       await expect(btn).toBeVisible();
       await btn.click();
     }
@@ -114,8 +117,8 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     const gamesToDisable = [
       '🧐 Odd One', '🎨 Doodle', '🐯 Match', '🗺️ Mazes', '⭐ Trace', '⚡ Emoji Match', '🔤 First Sound', '🔗 Word Chain'
     ];
-    for (const gameName of gamesToDisable) {
-      await page.locator('button', { hasText: gameName }).click();
+    for (const name of gamesToDisable) {
+      await page.getByRole('button', { name, exact: true }).click();
     }
 
     await page.locator('button', { hasText: 'Start Challenge Mode' }).click();
@@ -127,25 +130,22 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     // Solve an equation: get the equation text, calculate correct and wrong answers
     const equationElement = page.getByTestId('math-equation');
     await expect(equationElement).toBeVisible();
-    let text = await equationElement.innerText();
-    let match = text.match(/(\d+)\s*\+\s*(\d+)/);
+    const text = await equationElement.innerText();
+    const match = text.match(/(\d+)\s*\+\s*(\d+)/);
     expect(match).not.toBeNull();
     if (!match) return;
 
-    let num1 = parseInt(match[1], 10);
-    let num2 = parseInt(match[2], 10);
-    let correctAnswer = num1 + num2;
+    const num1 = parseInt(match[1], 10);
+    const num2 = parseInt(match[2], 10);
+    const correctAnswer = num1 + num2;
 
     // Get answer bubbles
     const answerButtons = page.getByTestId('math-answer-option');
     const firstValStr = await answerButtons.nth(0).innerText();
-    const secondValStr = await answerButtons.nth(1).innerText();
 
     const firstVal = parseInt(firstValStr, 10);
-    const secondVal = parseInt(secondValStr, 10);
 
     const wrongButtonIdx = firstVal === correctAnswer ? 1 : 0;
-    const correctButtonIdx = firstVal === correctAnswer ? 0 : 1;
 
     // Test WRONG answer behavior (should reset streak and load NEW question, no retry allowed)
     const originalEquation = text;
