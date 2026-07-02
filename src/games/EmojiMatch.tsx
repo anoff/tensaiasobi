@@ -165,9 +165,10 @@ interface EmojiMatchProps {
   playSuccess: () => void;
   playError: () => void;
   onStarEarned?: (amount: number) => void;
+  challengeMode?: boolean;
 }
 
-export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: EmojiMatchProps) {
+export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, challengeMode }: EmojiMatchProps) {
   const { t, language } = useTranslation();
 
   const getPlayerScoreLabel = (playerNum: number) => {
@@ -398,7 +399,20 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned }: Em
         setTimeLeft((t) => Math.max(t - penalty, 0));
       }
 
-      setTimeout(() => setShakeCard(null), 500);
+      if (challengeMode) {
+        setTimeout(() => {
+          setShakeCard(null);
+          // Classic rule: Card B becomes old Card A, Card A draws a new one
+          setCardB(cardA);
+          setCardBKey(prev => prev + 1);
+          
+          const nextCard = drawCard(deck, deckIndex);
+          setCardA(nextCard);
+          setCardAKey(prev => prev + 1);
+        }, 1500);
+      } else {
+        setTimeout(() => setShakeCard(null), 500);
+      }
     }
   };
 
