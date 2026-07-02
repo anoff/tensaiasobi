@@ -27,6 +27,21 @@ async function solveParentGate(page: Page) {
 test.describe('tensaiasobi Gamification Checks', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    // Unregister service worker to bypass PWA caching
+    await page.evaluate(async () => {
+      const nav = navigator as unknown as {
+        serviceWorker?: {
+          getRegistrations: () => Promise<Array<{ unregister: () => Promise<boolean> }>>;
+        };
+      };
+      if (nav.serviceWorker) {
+        const regs = await nav.serviceWorker.getRegistrations();
+        for (const r of regs) {
+          await r.unregister();
+        }
+      }
+    });
+    await page.reload();
   });
 
   test('Verify Town Builder and Star Shop are accessible and have the core components', async ({ page }) => {
@@ -78,5 +93,73 @@ test.describe('tensaiasobi Gamification Checks', () => {
     // Verify default vouchers (e.g. Gummy Bear, Ice Cream, etc.) are listed
     const gummyBearVoucher = page.locator('span', { hasText: 'Gummy Bear' });
     await expect(gummyBearVoucher).toBeVisible();
+  });
+
+  test('Verify Town Builder Delete All with reimbursement', async ({ page }) => {
+    // 1. Injected 100 stars via localStorage to afford purchases
+    await page.addInitScript(() => {
+      localStorage.setItem('gamification_stars', '100');
+    });
+
+    await page.goto('/');
+
+    // 2. Open Town Builder
+    const townLauncher = page.getByTestId('launch-town');
+    await expect(townLauncher).toBeVisible();
+    await townLauncher.click();
+
+    // 3. Place a House (cost: 10) in the first cell
+    const cells = page.locator('button[aria-label="Tap an empty spot to build!"]');
+    await expect(cells.first()).toBeVisible();
+    await cells.first().click();
+
+    const houseBtn = page.locator('button', { hasText: 'House' });
+    await expect(houseBtn).toBeVisible();
+    await houseBtn.click();
+
+    // 4. Place a Tree (cost: 5) in the second cell
+    await cells.first().click(); // Open catalog on second cell (index 0 of remaining empty cells)
+    
+    // Switch to nature category tab
+    const natureTab = page.locator('button', { hasText: 'Nature' });
+    await expect(natureTab).toBeVisible();
+    await natureTab.click();
+
+    const treeBtn = page.locator('button', { hasText: 'Tree' });
+    await expect(treeBtn).toBeVisible();
+    await treeBtn.click();
+
+    // Verify Delete All button is visible and active
+    const deleteAllBtn = page.getByTestId('town-delete-all');
+    await expect(deleteAllBtn).toBeVisible();
+    await expect(deleteAllBtn).toBeEnabled();
+
+    // 5. Long hold Delete All button to trigger the confirmation prompt
+    // We dispatch pointerdown, wait, then dispatch pointerup
+    await deleteAllBtn.dispatchEvent('pointerdown');
+    await page.waitForTimeout(1200);
+    await deleteAllBtn.dispatchEvent('pointerup');
+
+    // Verify Delete All Confirmation modal is shown
+    const confirmModalTitle = page.locator('p', { hasText: 'Are you sure you want to delete all items and receive a refund?' });
+    await expect(confirmModalTitle).toBeVisible();
+
+    // Verify correct refund amount (5 for house + 2 for tree = 7 stars)
+    const refundAmountText = page.locator('p', { hasText: 'Refund: ⭐ 7' });
+    await expect(refundAmountText).toBeVisible();
+
+    // 6. Confirm Delete All
+    const confirmDeleteBtn = page.getByTestId('town-confirm-delete-all-btn');
+    await expect(confirmDeleteBtn).toBeVisible();
+    await confirmDeleteBtn.click();
+
+    // Verify grid is empty again (36 empty cells)
+    await expect(cells).toHaveCount(36);
+
+    // Verify stars are reimbursed (85 left + 7 refund = 92 stars)
+    // We return home to check the star counter badge
+    await page.getByTestId('home-button').click();
+    const starCountBadge = page.getByTestId('stars-total');
+    await expect(starCountBadge).toHaveText('92');
   });
 });

@@ -27,6 +27,22 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
       console.log(`[BROWSER CONSOLE] ${msg.type()}: ${msg.text()}`);
     });
     await page.goto('/');
+    // Unregister service worker and clear localStorage to bypass PWA caching
+    await page.evaluate(async () => {
+      const nav = navigator as unknown as {
+        serviceWorker?: {
+          getRegistrations: () => Promise<Array<{ unregister: () => Promise<boolean> }>>;
+        };
+      };
+      if (nav.serviceWorker) {
+        const regs = await nav.serviceWorker.getRegistrations();
+        for (const r of regs) {
+          await r.unregister();
+        }
+      }
+      localStorage.clear();
+    });
+    await page.reload();
   });
 
   test('Verify Parent Settings includes Challenge Mode and configuring it limits launchers', async ({ page }) => {
@@ -68,7 +84,10 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     for (const name of gamesToDisable) {
       const btn = page.getByRole('button', { name, exact: true });
       await expect(btn).toBeVisible();
-      await btn.click();
+      const className = await btn.getAttribute('class');
+      if (className && className.includes('bg-purple-100')) {
+        await btn.click();
+      }
     }
 
     // Start Challenge Mode
@@ -118,7 +137,11 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
       '🧐 Odd One', '🎨 Doodle', '🐯 Match', '🗺️ Mazes', '⭐ Trace', '⚡ Emoji Match', '🔤 First Sound', '🔗 Word Chain'
     ];
     for (const name of gamesToDisable) {
-      await page.getByRole('button', { name, exact: true }).click();
+      const btn = page.getByRole('button', { name, exact: true });
+      const className = await btn.getAttribute('class');
+      if (className && className.includes('bg-purple-100')) {
+        await btn.click();
+      }
     }
 
     await page.locator('button', { hasText: 'Start Challenge Mode' }).click();

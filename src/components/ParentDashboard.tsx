@@ -225,8 +225,8 @@ export function ParentDashboard({
                     onChange={(e) => setSelectedTarget(parseInt(e.target.value, 10))}
                     className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer"
                   >
-                    {[10, 20, 30, 50, 70, 100].map((num) => (
-                      <option key={num} value={num}>{num} Stars</option>
+                    {[5, 10, 15, 20, 25, 30, 50, 100].map((num) => (
+                      <option key={num} value={num}>{num} {t.starCounter.stars}</option>
                     ))}
                   </select>
                 </div>
@@ -240,8 +240,8 @@ export function ParentDashboard({
                         type="button"
                         onClick={() => toggleGame(game.id)}
                         className={`flex items-center gap-1.5 p-2 rounded-xl border transition-all cursor-pointer font-bold outline-none ${allowedGames[game.id]
-                            ? 'bg-purple-100 border-purple-300 text-purple-800'
-                            : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+                          ? 'bg-purple-100 border-purple-300 text-purple-800'
+                          : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
                           }`}
                       >
                         <span>{game.icon}</span>
@@ -258,8 +258,8 @@ export function ParentDashboard({
                     onClose();
                   }}
                   className={`w-full font-bold py-3 rounded-xl transition-all cursor-pointer text-sm outline-none shadow-sm ${hasAllowedGames
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white border-b-4 border-purple-800 active:border-b-0 active:translate-y-[4px]'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white border-b-4 border-purple-800 active:border-b-0 active:translate-y-[4px]'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                     }`}
                 >
                   {t.challenge.enableChallenge}
