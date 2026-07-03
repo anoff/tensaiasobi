@@ -8,7 +8,7 @@ export default defineConfig({
   workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:5188',
     trace: 'on-first-retry',
     viewport: { width: 375, height: 812 }, // standard iPhone X size for mobile-first UI
   },
@@ -19,9 +19,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
+    command: 'npm run dev -- --port 5188',
+    url: 'http://localhost:5188',
+    reuseExistingServer: false,
     stdout: 'ignore',
     stderr: 'pipe',
   },

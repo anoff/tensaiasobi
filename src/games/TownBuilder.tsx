@@ -60,6 +60,18 @@ export function TownBuilder({
   const [removeCell, setRemoveCell] = useState<{ row: number; col: number } | null>(null);
   const [justPlaced, setJustPlaced] = useState<string | null>(null); // "row-col"
 
+  const [showDeleteAllPrompt, setShowDeleteAllPrompt] = useState(false);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const holdInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (holdInterval.current) {
+        clearInterval(holdInterval.current);
+      }
+    };
+  }, []);
+
   // long-press tracking
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
@@ -163,6 +175,62 @@ export function TownBuilder({
   }, [removeCell, grid, addStars, playPop]);
 
   // ------------------------------------------------------------------
+  // Remove all items (with 50% refund for each item)
+  // ------------------------------------------------------------------
+
+  const handleConfirmDeleteAll = useCallback(() => {
+    let totalRefund = 0;
+    grid.forEach((row) => {
+      row.forEach((cell) => {
+        if (cell) {
+          const item = getItemById(cell.itemId);
+          if (item) {
+            totalRefund += Math.floor(item.cost / 2);
+          }
+        }
+      });
+    });
+
+    setGrid(createEmptyGrid());
+    if (totalRefund > 0) addStars(totalRefund);
+    setShowDeleteAllPrompt(false);
+    playSuccess();
+  }, [grid, addStars, playSuccess]);
+
+  const startDeleteAllHold = () => {
+    const hasItems = grid.some((row) => row.some((cell) => cell !== null));
+    if (!hasItems) return;
+
+    setHoldProgress(0);
+    const startTime = Date.now();
+    const duration = 1000;
+
+    holdInterval.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(100, (elapsed / duration) * 100);
+      setHoldProgress(progress);
+
+      if (progress >= 100) {
+        if (holdInterval.current) {
+          clearInterval(holdInterval.current);
+          holdInterval.current = null;
+        }
+        setHoldProgress(0);
+        setShowDeleteAllPrompt(true);
+        playPop();
+      }
+    }, 30);
+  };
+
+  const cancelDeleteAllHold = () => {
+    if (holdInterval.current) {
+      clearInterval(holdInterval.current);
+      holdInterval.current = null;
+    }
+    setHoldProgress(0);
+  };
+
+  // ------------------------------------------------------------------
   // Render
   // ------------------------------------------------------------------
 
@@ -219,8 +287,37 @@ export function TownBuilder({
                 {cell ? cell.emoji : '+'}
               </button>
             );
-          }),
+          })
         )}
+      </div>
+
+      {/* Delete All Control */}
+      <div className="flex justify-end w-full px-1">
+        <button
+          type="button"
+          onPointerDown={startDeleteAllHold}
+          onPointerUp={cancelDeleteAllHold}
+          onPointerLeave={cancelDeleteAllHold}
+          onContextMenu={(e) => e.preventDefault()}
+          disabled={!grid.some((row) => row.some((cell) => cell !== null))}
+          className={`relative overflow-hidden px-5 py-2.5 rounded-2xl font-black text-sm tracking-wide border-2 transition-all cursor-pointer select-none active:scale-95 flex items-center justify-center gap-2 ${
+            grid.some((row) => row.some((cell) => cell !== null))
+              ? 'text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-900/60 dark:hover:bg-red-950/20'
+              : 'text-gray-300 border-gray-100 dark:text-gray-700 dark:border-gray-800 cursor-not-allowed opacity-50'
+          }`}
+          data-testid="town-delete-all"
+        >
+          {/* Progress Fill Layer */}
+          {holdProgress > 0 && (
+            <div
+              className="absolute left-0 top-0 bottom-0 bg-red-500/20 dark:bg-red-500/10 pointer-events-none transition-all duration-75"
+              style={{ width: `${holdProgress}%` }}
+            />
+          )}
+          <span className="relative z-10 flex items-center gap-1.5">
+            🗑️ {holdProgress > 0 ? t.town.holdToDeleteAll : t.town.deleteAll}
+          </span>
+        </button>
       </div>
 
       {/* ============================================================= */}
@@ -358,6 +455,65 @@ export function TownBuilder({
                   className="px-5 py-2 rounded-full text-sm font-medium
                              bg-red-500 text-white
                              hover:bg-red-600 active:scale-95 transition-all"
+                >
+                  {t.town.remove}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ============================================================= */}
+      {/* Delete All Confirmation Overlay */}
+      {/* ============================================================= */}
+      {showDeleteAllPrompt && (() => {
+        let totalRefund = 0;
+        grid.forEach((row) => {
+          row.forEach((cell) => {
+            if (cell) {
+              const item = getItemById(cell.itemId);
+              if (item) {
+                totalRefund += Math.floor(item.cost / 2);
+              }
+            }
+          });
+        });
+
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowDeleteAllPrompt(false)}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-6 mx-4 max-w-xs w-full text-center
+                          animate-[scaleIn_0.2s_ease-out]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="text-5xl block mb-3">🗑️</span>
+              <p className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-1">
+                {t.town.confirmDeleteAll}
+              </p>
+              <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-4">
+                {t.town.refund}: ⭐ {totalRefund}
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteAllPrompt(false)}
+                  className="px-5 py-2 rounded-full text-sm font-medium
+                             bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300
+                             hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  {t.town.cancel}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDeleteAll}
+                  className="px-5 py-2 rounded-full text-sm font-medium
+                             bg-red-500 text-white
+                             hover:bg-red-600 active:scale-95 transition-all"
+                  data-testid="town-confirm-delete-all-btn"
                 >
                   {t.town.remove}
                 </button>

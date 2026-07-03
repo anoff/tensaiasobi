@@ -26,7 +26,7 @@ export function StarCounter({ stars, pendingAnimations, clearAnimation }: StarCo
     <div className="relative" ref={counterRef}>
       <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-100 to-yellow-100 border-2 border-amber-300 rounded-full px-3 py-1.5 shadow-sm select-none min-w-[4rem] justify-center">
         <span className="text-lg">⭐</span>
-        <span className="text-base font-black text-amber-800 tabular-nums">{stars}</span>
+        <span className="text-base font-black text-amber-800 tabular-nums" data-testid="stars-total">{stars}</span>
       </div>
 
       {/* Fly-up animations */}

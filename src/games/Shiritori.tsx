@@ -8,6 +8,7 @@ interface ShiritoriProps {
   playSuccess: () => void;
   playError: () => void;
   onStarEarned?: (amount: number) => void;
+  challengeMode?: boolean;
 }
 
 // 88 child-friendly emojis from translation dictionary
@@ -227,7 +228,7 @@ const getPandaPlayChoice = (
   return '';
 };
 
-export function Shiritori({ playPop, playSuccess, playError, onStarEarned }: ShiritoriProps) {
+export function Shiritori({ playPop, playSuccess, playError, onStarEarned, challengeMode }: ShiritoriProps) {
   const { language, t } = useTranslation();
   
   // Memoized items dictionary
@@ -418,7 +419,16 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned }: Shi
       playError();
       setStreak(0);
       setShakeOption(emoji);
-      setTimeout(() => setShakeOption(null), 500);
+
+      if (challengeMode) {
+        setSelectedOption(emoji);
+        setIsCorrect(false);
+        setTimeout(() => {
+          initGame(mode);
+        }, 1500);
+      } else {
+        setTimeout(() => setShakeOption(null), 500);
+      }
     }
   };
 
@@ -663,9 +673,12 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned }: Shi
                 'from-sky-300/40 via-sky-400/70 to-sky-600/90 shadow-[0_10px_20px_rgba(14,165,233,0.25),_inset_0_4px_12px_rgba(255,255,255,0.6)] border-sky-400';
 
               if (isThisSelected) {
-                if (isCorrect) {
+                if (isCorrect === true) {
                   bubbleColorClass =
                     'from-emerald-300 via-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.4)] border-emerald-400 scale-95 duration-100';
+                } else if (isCorrect === false) {
+                  bubbleColorClass =
+                    'from-red-300 via-red-400 to-red-600 shadow-[0_4px_10px_rgba(239,68,68,0.4)] border-red-400 scale-95 duration-100';
                 }
               } else if (isShaking) {
                 bubbleColorClass =
