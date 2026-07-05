@@ -1,6 +1,14 @@
 import { TranslationSchema } from './en';
 
 export const ja: TranslationSchema = {
+  common: {
+    check: "チェック",
+    reset: "リセット",
+    confirmReset: "OK?",
+    download: "ダウンロード",
+    next: "次へ",
+    play: "スタート",
+  },
   menu: {
     subtitle: "たのしく あそんで まなぼう！",
     footer: "まなびのために ❤️ をこめて",
@@ -69,25 +77,14 @@ export const ja: TranslationSchema = {
   mazeGame: {
     title: "まほうのめいろ！ 🗺️",
     help: "えもじをゴールへつれていってね！",
-    baby: "🐣 4x4",
-    toddler: "🦁 6x6",
-    kid: "🚀 8x8",
     victory: "🎉 やったね！ごーるできたよ！",
-    play: "あそぶ",
-    reset: "リセット",
     playAgain: "もういちどあそぶ",
   },
   shapeTrace: {
     title: "かたちなぞり！ ⭐",
     help: "てんせんのうえをなぞってね！",
     victory: "🎉 すごい！きれいにかけたね！",
-    easy: "かんたん",
-    medium: "ふつう",
-    hard: "むずかしい",
     nextShape: "つぎのかたち！",
-    check: "かくにん",
-    reset: "リセット",
-    next: "つぎへ",
   },
   anlautGame: {
     title: "はじまりの おと",

@@ -1,4 +1,12 @@
 export const en = {
+  common: {
+    check: "Check",
+    reset: "Reset",
+    confirmReset: "Sure?",
+    download: "Download",
+    next: "Next",
+    play: "Play",
+  },
   menu: {
     subtitle: "Fun play & learn games!",
     footer: "Made with ❤️ for learning",
@@ -67,25 +75,14 @@ export const en = {
   mazeGame: {
     title: "Magic Mazes! 🗺️",
     help: "Drag the emoji to its target!",
-    baby: "🐣 4x4",
-    toddler: "🦁 6x6",
-    kid: "🚀 8x8",
     victory: "🎉 Awesome! You did it!",
-    play: "Play",
-    reset: "Reset",
     playAgain: "Play Again",
   },
   shapeTrace: {
     title: "Shape Tracing! ⭐",
     help: "Trace the dotted line!",
     victory: "🎉 Brilliant! Beautiful drawing!",
-    easy: "Easy",
-    medium: "Medium",
-    hard: "Hard",
     nextShape: "Next Shape!",
-    check: "Check",
-    reset: "Reset",
-    next: "Next",
   },
   anlautGame: {
     title: "First Sound",

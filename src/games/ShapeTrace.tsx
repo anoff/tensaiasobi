@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
+import ConfirmWipeButton from '../components/ConfirmWipeButton';
+import DifficultySelector from '../components/DifficultySelector';
+import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
 
@@ -682,7 +685,6 @@ const SHAPES: Shape[] = [
   },
 ];
 
-type Difficulty = 'easy' | 'medium' | 'hard';
 
 interface Particle {
   x: number;
@@ -705,12 +707,12 @@ interface ShapeTraceProps {
 export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: ShapeTraceProps) {
   const { t } = useTranslation();
   const [shapeIndex, setShapeIndex] = useState(0);
-  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [drawingPoints, setDrawingPoints] = useState<{ x: number; y: number }[]>([]);
   const [isWon, setIsWon] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showErrorShake, setShowErrorShake] = useState(false);
-  
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isDrawingRef = useRef(false);
@@ -733,6 +735,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
       case 'hard':
         return canvasWidth * 0.045;
     }
+    return 0
   };
 
   const loadShape = (index: number) => {
@@ -1051,7 +1054,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
     setShowErrorShake(false);
   };
 
-  const changeDifficulty = (diff: Difficulty) => {
+  const changeDifficulty = (diff: GameDifficulty) => {
     playPop();
     setDifficulty(diff);
   };
@@ -1075,10 +1078,9 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
             onClick={() => { playPop(); loadShape(idx); }}
             className={`
               w-11 h-11 flex items-center justify-center rounded-2xl text-2xl border-2 transition-all outline-none cursor-pointer shrink-0
-              ${
-                shapeIndex === idx
-                  ? 'border-slate-800 bg-slate-100 scale-110 shadow-sm'
-                  : 'border-slate-200 bg-white hover:bg-slate-50'
+              ${shapeIndex === idx
+                ? 'border-slate-800 bg-slate-100 scale-110 shadow-sm'
+                : 'border-slate-200 bg-white hover:bg-slate-50'
               }
             `}
           >
@@ -1088,32 +1090,19 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
       </div>
 
       {/* Difficulty Sub-menu Selector */}
-      <div className="w-full flex items-center justify-center gap-1.5 bg-slate-100 p-1 rounded-2xl border-2 border-slate-200 mt-2 shrink-0 select-none">
-        {(['easy', 'medium', 'hard'] as Difficulty[]).map((diff) => (
-          <button
-            key={diff}
-            onClick={() => changeDifficulty(diff)}
-            className={`
-              flex-1 py-1 px-3 text-xs font-black rounded-xl capitalize transition-all duration-75 outline-none cursor-pointer
-              ${
-                difficulty === diff
-                  ? 'bg-candy-purple text-white shadow-sm border border-purple-400 scale-105'
-                  : 'text-slate-500 hover:text-slate-700'
-              }
-            `}
-          >
-            {diff === 'easy' ? `🐣 ${t.shapeTrace.easy}` : diff === 'medium' ? `🦁 ${t.shapeTrace.medium}` : `🚀 ${t.shapeTrace.hard}`}
-          </button>
-        ))}
-      </div>
+      <DifficultySelector
+        selected={difficulty}
+        options={['easy', 'medium', 'hard']}
+        onChange={changeDifficulty}
+        className="mt-2 shrink-0"
+      />
 
       {/* Tracing Playground Area */}
       <div className="flex-1 flex flex-col items-center justify-center my-4 w-full h-full min-h-[280px]">
         <div
           ref={containerRef}
-          className={`relative border-8 border-slate-300 rounded-[2.5rem] overflow-hidden shadow-inner bg-white flex items-center justify-center w-full aspect-square max-w-[420px] ${
-            showErrorShake ? 'animate-shake' : ''
-          }`}
+          className={`relative border-8 border-slate-300 rounded-[2.5rem] overflow-hidden shadow-inner bg-white flex items-center justify-center w-full aspect-square max-w-[420px] ${showErrorShake ? 'animate-shake' : ''
+            }`}
         >
           <canvas
             ref={canvasRef}
@@ -1148,40 +1137,29 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
         </div>
       </div>
 
-      {/* Control Actions: Check, Reset, Next */}
+      {/* Control Actions: Check, Reset */}
       <div className="w-full flex justify-center gap-4 py-2 shrink-0 select-none">
         <KidButton
+          variant="primary"
           color="green"
           size="md"
           data-testid="trace-check"
           onClick={handleCheckTrace}
           disabled={isWon || drawingPoints.length < 5}
-          className={`px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
-            isWon || drawingPoints.length < 5 ? 'opacity-40 pointer-events-none' : ''
-          }`}
+          className={`px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${isWon || drawingPoints.length < 5 ? 'opacity-40 pointer-events-none' : ''
+            }`}
         >
-          ▶️ {t.shapeTrace.check}
+          ✅ {t.common.check}
         </KidButton>
 
-        <KidButton
-          color="red"
+        <ConfirmWipeButton
+          onConfirm={handleReset}
           size="md"
           data-testid="trace-reset"
-          onClick={handleReset}
+          label={`🗑️ ${t.common.reset}`}
+          confirmLabel={`🗑️ ${t.common.confirmReset}`}
           className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
-        >
-          🗑️ {t.shapeTrace.reset}
-        </KidButton>
-
-        <KidButton
-          color="blue"
-          size="md"
-          data-testid="trace-next"
-          onClick={nextShape}
-          className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
-        >
-          ➡️ {t.shapeTrace.next}
-        </KidButton>
+        />
       </div>
 
       {/* Bottom Help bar */}

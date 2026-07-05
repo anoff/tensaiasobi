@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import KidButton from '../components/KidButton';
+import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
 
@@ -191,6 +192,17 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
           onTouchEnd={stopDrawing}
           className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
         />
+        {/* Floating Download Button */}
+        <KidButton
+          color="green"
+          size="sm"
+          data-testid="doodle-download"
+          onClick={downloadDrawing}
+          className="absolute top-3 right-3 z-10 !py-1.5 !px-3 shadow-[0_4px_0_0_#059669] active:translate-y-[2px] active:shadow-[0_1px_0_0_#059669] opacity-60 hover:opacity-100 transition-opacity"
+          title={t.doodlePad.download}
+        >
+          📥
+        </KidButton>
       </div>
 
       {/* Controls — single compact row */}
@@ -246,28 +258,15 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
           ))}
         </div>
 
-        {/* Download Button */}
-        <KidButton
-          color="green"
-          size="sm"
-          data-testid="doodle-download"
-          onClick={downloadDrawing}
-          className="shrink-0 !py-1 !px-3 shadow-[0_4px_0_0_#059669] active:translate-y-[2px] active:shadow-[0_1px_0_0_#059669]"
-          title={t.doodlePad.download}
-        >
-          📥
-        </KidButton>
-
-        {/* Clear Button */}
-        <KidButton
-          color="red"
+        {/* Reset Button */}
+        <ConfirmWipeButton
+          onConfirm={clearCanvas}
           size="sm"
           data-testid="doodle-clear"
-          onClick={clearCanvas}
+          label={`🗑️ ${t.common.reset}`}
+          confirmLabel={`🗑️ ${t.common.confirmReset}`}
           className="shrink-0 !py-1 !px-3 shadow-[0_4px_0_0_#b91c1c] active:translate-y-[2px] active:shadow-[0_1px_0_0_#b91c1c]"
-        >
-          🗑️
-        </KidButton>
+        />
       </div>
     </div>
   );

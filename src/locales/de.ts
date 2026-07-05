@@ -1,6 +1,14 @@
 import { TranslationSchema } from './en';
 
 export const de: TranslationSchema = {
+  common: {
+    check: "Prüfen",
+    reset: "Reset",
+    confirmReset: "Sicher?",
+    download: "Download",
+    next: "Weiter",
+    play: "Start",
+  },
   menu: {
     subtitle: "Lern- und Spielspaß!",
     footer: "Mit ❤️ zum Lernen gemacht",
@@ -69,25 +77,14 @@ export const de: TranslationSchema = {
   mazeGame: {
     title: "Zauber-Labyrinthe! 🗺️",
     help: "Ziehe das Emoji zum Ziel!",
-    baby: "🐣 4x4",
-    toddler: "🦁 6x6",
-    kid: "🚀 8x8",
     victory: "🎉 Super! Du hast es geschafft!",
-    play: "Spielen",
-    reset: "Zurücksetzen",
     playAgain: "Nochmal spielen",
   },
   shapeTrace: {
     title: "Formen nachzeichnen! ⭐",
     help: "Zeichne die gepunktete Linie nach!",
     victory: "🎉 Genial! Wunderschön gemalt!",
-    easy: "Leicht",
-    medium: "Mittel",
-    hard: "Schwer",
     nextShape: "Nächste Form!",
-    check: "Prüfen",
-    reset: "Zurücksetzen",
-    next: "Weiter",
   },
   anlautGame: {
     title: "Anlaute",
