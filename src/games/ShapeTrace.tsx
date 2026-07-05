@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
+import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
 
@@ -1148,9 +1149,10 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
         </div>
       </div>
 
-      {/* Control Actions: Check, Reset, Next */}
+      {/* Control Actions: Check, Reset */}
       <div className="w-full flex justify-center gap-4 py-2 shrink-0 select-none">
         <KidButton
+          variant="primary"
           color="green"
           size="md"
           data-testid="trace-check"
@@ -1160,28 +1162,17 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
             isWon || drawingPoints.length < 5 ? 'opacity-40 pointer-events-none' : ''
           }`}
         >
-          ▶️ {t.shapeTrace.check}
+          ✅ {t.shapeTrace.check}
         </KidButton>
 
-        <KidButton
-          color="red"
+        <ConfirmWipeButton
+          onConfirm={handleReset}
           size="md"
           data-testid="trace-reset"
-          onClick={handleReset}
+          label={`🗑️ ${t.common.reset}`}
+          confirmLabel={`🗑️ ${t.common.confirmReset}`}
           className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
-        >
-          🗑️ {t.shapeTrace.reset}
-        </KidButton>
-
-        <KidButton
-          color="blue"
-          size="md"
-          data-testid="trace-next"
-          onClick={nextShape}
-          className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
-        >
-          ➡️ {t.shapeTrace.next}
-        </KidButton>
+        />
       </div>
 
       {/* Bottom Help bar */}

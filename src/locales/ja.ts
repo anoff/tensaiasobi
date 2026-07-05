@@ -1,6 +1,14 @@
 import { TranslationSchema } from './en';
 
 export const ja: TranslationSchema = {
+  common: {
+    check: "チェック",
+    reset: "リセット",
+    confirmReset: "OK?",
+    download: "ダウンロード",
+    next: "次へ",
+    play: "スタート",
+  },
   menu: {
     subtitle: "たのしく あそんで まなぼう！",
     footer: "まなびのために ❤️ をこめて",

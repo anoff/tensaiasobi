@@ -1,6 +1,14 @@
 import { TranslationSchema } from './en';
 
 export const de: TranslationSchema = {
+  common: {
+    check: "Prüfen",
+    reset: "Reset",
+    confirmReset: "Sicher?",
+    download: "Download",
+    next: "Weiter",
+    play: "Start",
+  },
   menu: {
     subtitle: "Lern- und Spielspaß!",
     footer: "Mit ❤️ zum Lernen gemacht",

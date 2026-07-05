@@ -3,12 +3,15 @@ import React from 'react';
 interface KidButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   color?: 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'red';
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** 'primary' adds a glowing ring + scale to signal main action */
+  variant?: 'default' | 'primary';
   children: React.ReactNode;
 }
 
 export function KidButton({
   color = 'blue',
   size = 'md',
+  variant = 'default',
   children,
   className = '',
   ...props
@@ -33,12 +36,28 @@ export function KidButton({
     red: 'shadow-[0_2px_0_0_#b91c1c]',
   };
 
+  /** Glow ring color per button color for the primary variant */
+  const glowRingMap = {
+    pink: 'ring-pink-300/60',
+    blue: 'ring-sky-300/60',
+    green: 'ring-emerald-300/60',
+    yellow: 'ring-amber-300/60',
+    purple: 'ring-purple-300/60',
+    orange: 'ring-orange-300/60',
+    red: 'ring-red-300/60',
+  };
+
   const sizeMap = {
     sm: 'text-xl px-4 py-2 border-b-4 rounded-xl',
     md: 'text-2xl px-6 py-4 border-b-8 rounded-2xl min-h-16',
     lg: 'text-3xl px-8 py-6 border-b-8 rounded-[2rem] min-h-24 min-w-24',
     xl: 'text-4xl px-10 py-8 border-b-[10px] rounded-[2.5rem] min-h-32 min-w-32',
   };
+
+  const primaryClass =
+    variant === 'primary'
+      ? `scale-105 ring-4 ${glowRingMap[color]} animate-kid-btn-glow`
+      : '';
 
   return (
     <button
@@ -50,6 +69,7 @@ export function KidButton({
         ${sizeMap[size]}
         active:${activeShadowColorMap[color]}
         select-none touch-manipulation cursor-pointer outline-none
+        ${primaryClass}
         ${className}
       `}
       {...props}

@@ -1,4 +1,12 @@
 export const en = {
+  common: {
+    check: "Check",
+    reset: "Reset",
+    confirmReset: "Sure?",
+    download: "Download",
+    next: "Next",
+    play: "Play",
+  },
   menu: {
     subtitle: "Fun play & learn games!",
     footer: "Made with ❤️ for learning",

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
+import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
 
@@ -702,6 +703,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
         <KidButton
           color="green"
           size="md"
+          variant="primary"
           data-testid="maze-play"
           onClick={handlePlayPath}
           disabled={playBtnDisabled}
@@ -712,18 +714,16 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
           ▶️ {t.mazeGame.play}
         </KidButton>
 
-        <KidButton
-          color="red"
+        <ConfirmWipeButton
+          onConfirm={handleClear}
           size="md"
           data-testid="maze-reset"
-          onClick={handleClear}
-          disabled={isAnimating}
+          label={`🗑️ ${t.common.reset}`}
+          confirmLabel={`🗑️ ${t.common.confirmReset}`}
           className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
             isAnimating ? 'opacity-40 pointer-events-none' : ''
           }`}
-        >
-          🗑️ {t.mazeGame.reset}
-        </KidButton>
+        />
       </div>
 
       {/* Instruction text */}

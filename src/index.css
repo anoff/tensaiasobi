@@ -111,5 +111,14 @@
   .animate-emoji-pop {
     animation: emoji-pop 0.3s ease-out;
   }
+
+  /* ── KidButton Primary Variant Glow ── */
+  @keyframes kid-btn-glow {
+    0%, 100% { box-shadow: 0 0 8px 0 rgba(255,255,255,0.3); }
+    50% { box-shadow: 0 0 18px 4px rgba(255,255,255,0.5); }
+  }
+  .animate-kid-btn-glow {
+    animation: kid-btn-glow 2s ease-in-out infinite;
+  }
 }
 
