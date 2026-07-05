@@ -712,7 +712,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
   const [isWon, setIsWon] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showErrorShake, setShowErrorShake] = useState(false);
-  
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isDrawingRef = useRef(false);
@@ -735,6 +735,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
       case 'hard':
         return canvasWidth * 0.045;
     }
+    return 0
   };
 
   const loadShape = (index: number) => {
@@ -1077,10 +1078,9 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
             onClick={() => { playPop(); loadShape(idx); }}
             className={`
               w-11 h-11 flex items-center justify-center rounded-2xl text-2xl border-2 transition-all outline-none cursor-pointer shrink-0
-              ${
-                shapeIndex === idx
-                  ? 'border-slate-800 bg-slate-100 scale-110 shadow-sm'
-                  : 'border-slate-200 bg-white hover:bg-slate-50'
+              ${shapeIndex === idx
+                ? 'border-slate-800 bg-slate-100 scale-110 shadow-sm'
+                : 'border-slate-200 bg-white hover:bg-slate-50'
               }
             `}
           >
@@ -1101,9 +1101,8 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
       <div className="flex-1 flex flex-col items-center justify-center my-4 w-full h-full min-h-[280px]">
         <div
           ref={containerRef}
-          className={`relative border-8 border-slate-300 rounded-[2.5rem] overflow-hidden shadow-inner bg-white flex items-center justify-center w-full aspect-square max-w-[420px] ${
-            showErrorShake ? 'animate-shake' : ''
-          }`}
+          className={`relative border-8 border-slate-300 rounded-[2.5rem] overflow-hidden shadow-inner bg-white flex items-center justify-center w-full aspect-square max-w-[420px] ${showErrorShake ? 'animate-shake' : ''
+            }`}
         >
           <canvas
             ref={canvasRef}
@@ -1147,11 +1146,10 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
           data-testid="trace-check"
           onClick={handleCheckTrace}
           disabled={isWon || drawingPoints.length < 5}
-          className={`px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
-            isWon || drawingPoints.length < 5 ? 'opacity-40 pointer-events-none' : ''
-          }`}
+          className={`px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${isWon || drawingPoints.length < 5 ? 'opacity-40 pointer-events-none' : ''
+            }`}
         >
-          ✅ {t.shapeTrace.check}
+          ✅ {t.common.check}
         </KidButton>
 
         <ConfirmWipeButton

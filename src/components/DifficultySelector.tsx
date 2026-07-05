@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface DifficultySelectorProps<T extends string> {
   selected: T;
   options: T[];
@@ -58,10 +56,9 @@ export function DifficultySelector<T extends string>({
             }}
             className={`
               flex-1 py-2.5 text-sm font-black rounded-xl border-b-4 transition-all duration-75 outline-none cursor-pointer select-none
-              ${
-                isActive
-                  ? 'bg-candy-purple text-white border-purple-700 shadow-sm translate-y-[2px]'
-                  : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 active:translate-y-[1px] disabled:opacity-50'
+              ${isActive
+                ? 'bg-candy-purple text-white border-purple-700 shadow-sm translate-y-[2px]'
+                : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 active:translate-y-[1px] disabled:opacity-50'
               }
             `}
           >
