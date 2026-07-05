@@ -252,7 +252,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
   const [highScore, setHighScore] = useState(0);
 
   // Initialize Game Session
-  const initGame = (diff: GameDifficulty, modeSelected: Mode) => {
+  const initGame = (diff: GameDifficulty, gMode: Mode) => {
     const q = getQ(diff);
     const newDeck = buildShuffledDeck(q);
     
