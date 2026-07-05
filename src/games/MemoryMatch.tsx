@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
+import DifficultySelector from '../components/DifficultySelector';
+import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 
-type GameLevel = 'easy' | 'medium' | 'hard';
+
 
 interface Card {
   id: number;
@@ -18,23 +20,17 @@ interface MemoryMatchProps {
   onStarEarned?: (amount: number) => void;
 }
 
-const LEVEL_EMOJIS: Record<GameLevel, string> = {
-  easy: '⭐',
-  medium: '⭐⭐',
-  hard: '⭐⭐⭐',
-};
-
 const ANIMAL_POOL = ['🦁', '🐯', '🐼', '🐨', '🦊', '🐰', '🐸', '🐷', '🐮', '🐔', '🐧', '🦉', '🐻', '🐹', '🐭', '🐱'];
 
 export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: MemoryMatchProps) {
-  const [level, setLevel] = useState<GameLevel>('easy');
+  const [level, setLevel] = useState<GameDifficulty>('easy');
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [matches, setMatches] = useState(0);
   const { t } = useTranslation();
 
-  const initGame = (currentLevel: GameLevel) => {
+  const initGame = (currentLevel: GameDifficulty) => {
     let numPairs = 2; // easy (2x2)
     if (currentLevel === 'medium') numPairs = 6; // (3x4)
     if (currentLevel === 'hard') numPairs = 8; // (4x4)
@@ -125,7 +121,7 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: M
     }
   };
 
-  const handleLevelChange = (lvl: GameLevel) => {
+  const handleLevelChange = (lvl: GameDifficulty) => {
     playPop();
     setLevel(lvl);
   };
@@ -154,24 +150,12 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: M
       </div>
 
       {/* Level Selection Tabs */}
-      <div className="w-full flex justify-between bg-slate-200/80 p-1.5 rounded-2xl border-2 border-slate-300 gap-1.5 mt-4">
-        {(['easy', 'medium', 'hard'] as GameLevel[]).map((lvl) => (
-          <button
-            key={lvl}
-            onClick={() => handleLevelChange(lvl)}
-            className={`
-              flex-1 py-2 text-sm font-black rounded-xl capitalize border-b-4 transition-all duration-75 outline-none cursor-pointer
-              ${
-                level === lvl
-                  ? 'bg-candy-purple text-white border-purple-700 shadow-sm translate-y-[2px]'
-                  : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
-              }
-            `}
-          >
-            {LEVEL_EMOJIS[lvl]}
-          </button>
-        ))}
-      </div>
+      <DifficultySelector
+        selected={level}
+        options={['easy', 'medium', 'hard']}
+        onChange={handleLevelChange}
+        className="mt-4"
+      />
 
       {/* Grid Container */}
       <div className="flex-1 flex items-center justify-center my-6 w-full">

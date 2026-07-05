@@ -75,9 +75,6 @@ export const en = {
   mazeGame: {
     title: "Magic Mazes! 🗺️",
     help: "Drag the emoji to its target!",
-    baby: "🐣 4x4",
-    toddler: "🦁 6x6",
-    kid: "🚀 8x8",
     victory: "🎉 Awesome! You did it!",
     playAgain: "Play Again",
   },
@@ -85,9 +82,6 @@ export const en = {
     title: "Shape Tracing! ⭐",
     help: "Trace the dotted line!",
     victory: "🎉 Brilliant! Beautiful drawing!",
-    easy: "Easy",
-    medium: "Medium",
-    hard: "Hard",
     nextShape: "Next Shape!",
   },
   anlautGame: {

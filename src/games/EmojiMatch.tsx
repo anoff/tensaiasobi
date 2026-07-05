@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
+import DifficultySelector from '../components/DifficultySelector';
+import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 
 // Finite Field arithmetic helper for order q
@@ -157,7 +159,7 @@ function findMatch(cardA: DobbleCard, cardB: DobbleCard): string {
   return '';
 }
 
-type Difficulty = 'easy' | 'medium' | 'hard';
+
 type Mode = 'solo_time' | 'solo_zen' | 'duel';
 
 interface EmojiMatchProps {
@@ -183,7 +185,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
 
   // Setup states
   const [gameStarted, setGameStarted] = useState(false);
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
   const [mode, setMode] = useState<Mode>('solo_zen');
 
   // Solo State
@@ -218,19 +220,19 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const getQ = (diff: Difficulty) => {
+  const getQ = (diff: GameDifficulty) => {
     if (diff === 'easy') return 4;   // 5 emojis
     if (diff === 'medium') return 5; // 6 emojis
     return 7;                        // 8 emojis
   };
 
-  const getStars = (diff: Difficulty) => {
+  const getStars = (diff: GameDifficulty) => {
     if (diff === 'easy') return 1;
     if (diff === 'medium') return 2;
     return 3;
   };
 
-  const loadHighScore = (diff: Difficulty, gameMode: Mode) => {
+  const loadHighScore = (diff: GameDifficulty, gameMode: Mode) => {
     try {
       const saved = localStorage.getItem(`dobble_high_${gameMode}_${diff}`);
       return saved ? parseInt(saved, 10) : 0;
@@ -239,7 +241,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
     }
   };
 
-  const saveHighScore = (diff: Difficulty, gameMode: Mode, val: number) => {
+  const saveHighScore = (diff: GameDifficulty, gameMode: Mode, val: number) => {
     try {
       localStorage.setItem(`dobble_high_${gameMode}_${diff}`, val.toString());
     } catch (e) {
@@ -250,7 +252,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
   const [highScore, setHighScore] = useState(0);
 
   // Initialize Game Session
-  const initGame = (diff: Difficulty, gMode: Mode) => {
+  const initGame = (diff: GameDifficulty, modeSelected: Mode) => {
     const q = getQ(diff);
     const newDeck = buildShuffledDeck(q);
     
@@ -506,35 +508,11 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
             <span className="text-slate-400 font-black text-xs uppercase tracking-wider block text-center">
               1. {t.shapeTrace.victory.includes('🎉') ? 'Difficulty' : 'Schwierigkeit / 難易度'}
             </span>
-            <div className="grid grid-cols-3 bg-slate-200/80 p-1.5 rounded-2xl border-2 border-slate-300 gap-2">
-              {(['easy', 'medium', 'hard'] as Difficulty[]).map((diff) => {
-                const isActive = difficulty === diff;
-                let activeColor = 'bg-candy-green border-emerald-600';
-                if (diff === 'medium') activeColor = 'bg-candy-orange border-orange-600';
-                if (diff === 'hard') activeColor = 'bg-candy-pink border-pink-600';
-
-                return (
-                  <button
-                    key={diff}
-                    data-testid={`difficulty-${diff}`}
-                    onClick={() => { playPop(); setDifficulty(diff); }}
-                    className={`
-                      py-2.5 text-sm font-black rounded-xl capitalize border-b-4 transition-all duration-75 outline-none cursor-pointer
-                      ${
-                        isActive
-                          ? `${activeColor} text-white shadow-sm translate-y-[2px]`
-                          : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
-                      }
-                    `}
-                  >
-                    {t.emojiMatch[diff]}
-                    <span className="block text-[10px] font-bold opacity-75">
-                      {diff === 'easy' ? '5 Emojis' : diff === 'medium' ? '6 Emojis' : '8 Emojis'}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <DifficultySelector
+              selected={difficulty}
+              options={['easy', 'medium', 'hard']}
+              onChange={(diff) => { playPop(); setDifficulty(diff); }}
+            />
           </div>
 
           {/* Game Modes selector */}

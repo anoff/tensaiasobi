@@ -77,9 +77,6 @@ export const ja: TranslationSchema = {
   mazeGame: {
     title: "まほうのめいろ！ 🗺️",
     help: "えもじをゴールへつれていってね！",
-    baby: "🐣 4x4",
-    toddler: "🦁 6x6",
-    kid: "🚀 8x8",
     victory: "🎉 やったね！ごーるできたよ！",
     playAgain: "もういちどあそぶ",
   },
@@ -87,9 +84,6 @@ export const ja: TranslationSchema = {
     title: "かたちなぞり！ ⭐",
     help: "てんせんのうえをなぞってね！",
     victory: "🎉 すごい！きれいにかけたね！",
-    easy: "かんたん",
-    medium: "ふつう",
-    hard: "むずかしい",
     nextShape: "つぎのかたち！",
   },
   anlautGame: {

@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
 import ConfirmWipeButton from '../components/ConfirmWipeButton';
+import DifficultySelector from '../components/DifficultySelector';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
 
-type Difficulty = 'baby' | 'toddler' | 'kid';
+import { GameDifficulty } from '../types/game';
 
 interface Cell {
   col: number;
@@ -117,18 +118,18 @@ interface MazeGameProps {
 
 export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: MazeGameProps) {
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<Difficulty>('toddler');
+  const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
   const [themeIndex, setThemeIndex] = useState(0);
   const [grid, setGrid] = useState<Cell[][]>([]);
   const [drawingPoints, setDrawingPoints] = useState<{ x: number; y: number }[]>([]);
   const [mappedPath, setMappedPath] = useState<{ col: number; row: number }[]>([]);
   const [isWon, setIsWon] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  
+
   // Animation states
   const [isAnimating, setIsAnimating] = useState(false);
   const [animatingIndex, setAnimatingIndex] = useState(0);
-  
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isDrawingRef = useRef(false);
@@ -136,15 +137,18 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
   const animationFrameRef = useRef<number | null>(null);
 
   const theme = THEMES[themeIndex];
-  
-  const getGridSize = (diff: Difficulty): { cols: number; rows: number } => {
+
+  const getGridSize = (diff: GameDifficulty): { cols: number; rows: number } => {
     switch (diff) {
-      case 'baby':
+      case 'easy':
         return { cols: 4, rows: 4 };
-      case 'toddler':
+      case 'medium':
         return { cols: 6, rows: 6 };
-      case 'kid':
+      case 'hard':
+      case 'expert':
         return { cols: 8, rows: 8 };
+      default:
+        return { cols: 6, rows: 6 };
     }
   };
 
@@ -349,8 +353,8 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
       ctx.fillText(theme.endEmoji, endX, endY);
 
       // 7. Draw Avatar Marker (moves along mappedPath during animation, stays at start otherwise)
-      const currentCell = isAnimating && mappedPath.length > 0 
-        ? mappedPath[animatingIndex] || { col: 0, row: 0 } 
+      const currentCell = isAnimating && mappedPath.length > 0
+        ? mappedPath[animatingIndex] || { col: 0, row: 0 }
         : { col: 0, row: 0 };
 
       const playerX = currentCell.col * cellSize + cellSize / 2;
@@ -537,7 +541,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
       idx += 1;
       if (idx >= mappedPath.length) {
         clearInterval(interval);
-        
+
         // Check if destination reached
         const finalCell = mappedPath[mappedPath.length - 1];
         const reachedGoal = finalCell.col === cols - 1 && finalCell.row === rows - 1;
@@ -546,7 +550,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
           setIsWon(true);
           setShowConfetti(true);
           playSuccess();
-          const multiplier = difficulty === 'baby' ? 1 : difficulty === 'toddler' ? 3 : 5;
+          const multiplier = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
           onStarEarned?.(3 * multiplier);
           setIsAnimating(false);
         } else {
@@ -576,7 +580,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
 
   const handleReturnToStart = () => {
     let idx = mappedPath.length - 1;
-    
+
     const interval = setInterval(() => {
       idx -= 1;
       if (idx <= 0) {
@@ -599,7 +603,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     setAnimatingIndex(0);
     setIsWon(false);
     setShowConfetti(false);
-    
+
     // Reset star status
     const resetGrid = grid.map(row => row.map(cell => ({ ...cell, starCollected: false })));
     setGrid(resetGrid);
@@ -610,7 +614,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     setThemeIndex((prev) => (prev + 1) % THEMES.length);
   };
 
-  const changeDifficulty = (diff: Difficulty) => {
+  const changeDifficulty = (diff: GameDifficulty) => {
     playPop();
     setDifficulty(diff);
   };
@@ -630,30 +634,18 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
 
       {/* Header Controls */}
       <div className="w-full flex items-center justify-between gap-3 bg-white/80 p-2 rounded-3xl border-2 border-slate-200 shadow-sm shrink-0 animate-fade-in">
-        <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
-          {(['baby', 'toddler', 'kid'] as Difficulty[]).map((diff) => (
-            <button
-              key={diff}
-              disabled={isAnimating}
-              onClick={() => changeDifficulty(diff)}
-              className={`
-                px-3 py-1.5 text-xs font-black rounded-xl capitalize transition-all duration-75 outline-none cursor-pointer
-                ${
-                  difficulty === diff
-                    ? 'bg-candy-purple text-white shadow-sm border border-purple-400 scale-105'
-                    : 'text-slate-500 hover:text-slate-700 disabled:opacity-50'
-                }
-              `}
-            >
-              {diff === 'baby' ? t.mazeGame.baby : diff === 'toddler' ? t.mazeGame.toddler : t.mazeGame.kid}
-            </button>
-          ))}
-        </div>
+        <DifficultySelector
+          selected={difficulty}
+          options={['easy', 'medium', 'hard']}
+          onChange={changeDifficulty}
+          disabled={isAnimating}
+          className="!w-auto flex-1 max-w-[220px]"
+        />
 
         <button
           onClick={changeTheme}
           disabled={isAnimating}
-          className="flex items-center gap-1.5 bg-candy-blue border-b-4 border-sky-600 active:border-b-0 active:translate-y-[4px] text-white font-extrabold text-xs px-4 py-2.5 rounded-2xl cursor-pointer shadow-sm select-none outline-none hover:scale-105 disabled:opacity-50"
+          className="flex items-center gap-2 bg-candy-blue border-b-4 border-sky-600 active:border-b-0 active:translate-y-[4px] text-white text-2xl font-extrabold p-2 rounded-2xl cursor-pointer shadow-sm select-none outline-none hover:scale-105 disabled:opacity-50"
         >
           🎨 {theme.startEmoji} → {theme.endEmoji}
         </button>
@@ -707,11 +699,10 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
           data-testid="maze-play"
           onClick={handlePlayPath}
           disabled={playBtnDisabled}
-          className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
-            playBtnDisabled ? 'opacity-40 pointer-events-none' : ''
-          }`}
+          className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${playBtnDisabled ? 'opacity-40 pointer-events-none' : ''
+            }`}
         >
-          ▶️ {t.mazeGame.play}
+          ▶️ {t.common.play}
         </KidButton>
 
         <ConfirmWipeButton
@@ -720,9 +711,8 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
           data-testid="maze-reset"
           label={`🗑️ ${t.common.reset}`}
           confirmLabel={`🗑️ ${t.common.confirmReset}`}
-          className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${
-            isAnimating ? 'opacity-40 pointer-events-none' : ''
-          }`}
+          className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${isAnimating ? 'opacity-40 pointer-events-none' : ''
+            }`}
         />
       </div>
 

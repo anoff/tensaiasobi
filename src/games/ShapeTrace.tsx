@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
 import ConfirmWipeButton from '../components/ConfirmWipeButton';
+import DifficultySelector from '../components/DifficultySelector';
+import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
 
@@ -683,7 +685,6 @@ const SHAPES: Shape[] = [
   },
 ];
 
-type Difficulty = 'easy' | 'medium' | 'hard';
 
 interface Particle {
   x: number;
@@ -706,7 +707,7 @@ interface ShapeTraceProps {
 export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: ShapeTraceProps) {
   const { t } = useTranslation();
   const [shapeIndex, setShapeIndex] = useState(0);
-  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [drawingPoints, setDrawingPoints] = useState<{ x: number; y: number }[]>([]);
   const [isWon, setIsWon] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -1052,7 +1053,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
     setShowErrorShake(false);
   };
 
-  const changeDifficulty = (diff: Difficulty) => {
+  const changeDifficulty = (diff: GameDifficulty) => {
     playPop();
     setDifficulty(diff);
   };
@@ -1089,24 +1090,12 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
       </div>
 
       {/* Difficulty Sub-menu Selector */}
-      <div className="w-full flex items-center justify-center gap-1.5 bg-slate-100 p-1 rounded-2xl border-2 border-slate-200 mt-2 shrink-0 select-none">
-        {(['easy', 'medium', 'hard'] as Difficulty[]).map((diff) => (
-          <button
-            key={diff}
-            onClick={() => changeDifficulty(diff)}
-            className={`
-              flex-1 py-1 px-3 text-xs font-black rounded-xl capitalize transition-all duration-75 outline-none cursor-pointer
-              ${
-                difficulty === diff
-                  ? 'bg-candy-purple text-white shadow-sm border border-purple-400 scale-105'
-                  : 'text-slate-500 hover:text-slate-700'
-              }
-            `}
-          >
-            {diff === 'easy' ? `🐣 ${t.shapeTrace.easy}` : diff === 'medium' ? `🦁 ${t.shapeTrace.medium}` : `🚀 ${t.shapeTrace.hard}`}
-          </button>
-        ))}
-      </div>
+      <DifficultySelector
+        selected={difficulty}
+        options={['easy', 'medium', 'hard']}
+        onChange={changeDifficulty}
+        className="mt-2 shrink-0"
+      />
 
       {/* Tracing Playground Area */}
       <div className="flex-1 flex flex-col items-center justify-center my-4 w-full h-full min-h-[280px]">
