@@ -79,8 +79,6 @@ export const en = {
     toddler: "🦁 6x6",
     kid: "🚀 8x8",
     victory: "🎉 Awesome! You did it!",
-    play: "Play",
-    reset: "Reset",
     playAgain: "Play Again",
   },
   shapeTrace: {
@@ -91,9 +89,6 @@ export const en = {
     medium: "Medium",
     hard: "Hard",
     nextShape: "Next Shape!",
-    check: "Check",
-    reset: "Reset",
-    next: "Next",
   },
   anlautGame: {
     title: "First Sound",

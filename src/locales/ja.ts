@@ -81,8 +81,6 @@ export const ja: TranslationSchema = {
     toddler: "🦁 6x6",
     kid: "🚀 8x8",
     victory: "🎉 やったね！ごーるできたよ！",
-    play: "あそぶ",
-    reset: "リセット",
     playAgain: "もういちどあそぶ",
   },
   shapeTrace: {
@@ -93,9 +91,6 @@ export const ja: TranslationSchema = {
     medium: "ふつう",
     hard: "むずかしい",
     nextShape: "つぎのかたち！",
-    check: "かくにん",
-    reset: "リセット",
-    next: "つぎへ",
   },
   anlautGame: {
     title: "はじまりの おと",
