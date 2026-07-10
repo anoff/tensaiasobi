@@ -121,7 +121,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
   const [themeIndex, setThemeIndex] = useState(0);
   const [grid, setGrid] = useState<Cell[][]>([]);
-  const [drawingPoints, setDrawingPoints] = useState<{ x: number; y: number }[]>([]);
+  const activePointerCoordsRef = useRef<{ x: number; y: number } | null>(null);
   const [mappedPath, setMappedPath] = useState<{ col: number; row: number }[]>([]);
   const [isWon, setIsWon] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -212,7 +212,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     }
 
     setGrid(tempGrid);
-    setDrawingPoints([]);
+    activePointerCoordsRef.current = null;
     setMappedPath([{ col: 0, row: 0 }]);
     setIsWon(false);
     setShowConfetti(false);
@@ -283,14 +283,28 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
 
 
 
-      // 3. Draw Raw Overlay Crayon Drawing Line
-      if (drawingPoints.length > 1) {
+      // 3. Draw Crayon Path Line
+      const pathPoints: { x: number; y: number }[] = [];
+      const maxPathIndex = isAnimating ? animatingIndex : mappedPath.length - 1;
+      for (let i = 0; i <= maxPathIndex && i < mappedPath.length; i++) {
+        const cell = mappedPath[i];
+        pathPoints.push({
+          x: cell.col * cellSize + cellSize / 2,
+          y: cell.row * cellSize + cellSize / 2,
+        });
+      }
+
+      if (isDrawingRef.current && activePointerCoordsRef.current && mappedPath.length > 0) {
+        pathPoints.push(activePointerCoordsRef.current);
+      }
+
+      if (pathPoints.length > 1) {
         ctx.strokeStyle = '#E91E63'; // Bright crayon pink
         ctx.lineWidth = Math.max(5, cellSize * 0.15);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.beginPath();
-        drawingPoints.forEach((pt, idx) => {
+        pathPoints.forEach((pt, idx) => {
           if (idx === 0) ctx.moveTo(pt.x, pt.y);
           else ctx.lineTo(pt.x, pt.y);
         });
@@ -394,17 +408,9 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [grid, drawingPoints, mappedPath, isAnimating, animatingIndex, themeIndex]);
+  }, [grid, mappedPath, isAnimating, animatingIndex, themeIndex]);
 
-  const getCellCenterCoords = (col: number, row: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    const cellSize = canvas.width / cols;
-    return {
-      x: col * cellSize + cellSize / 2,
-      y: row * cellSize + cellSize / 2,
-    };
-  };
+
 
   const getCellFromCoords = (x: number, y: number): { col: number; row: number } | null => {
     const canvas = canvasRef.current;
@@ -433,16 +439,11 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
 
     if (touchedIdx !== -1) {
       isDrawingRef.current = true;
+      activePointerCoordsRef.current = coords;
       playPop();
 
       const newPath = mappedPath.slice(0, touchedIdx + 1);
 
-      // Reconstruct the drawing points from the centers of the cells in the truncated path,
-      // and append the current coordinates for a smooth start to the new stroke
-      const newPoints = newPath.map((cell) => getCellCenterCoords(cell.col, cell.row));
-      newPoints.push(coords);
-
-      setDrawingPoints(newPoints);
       setMappedPath(newPath);
       setAnimatingIndex(touchedIdx);
 
@@ -466,7 +467,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     const coords = getCanvasCoords(canvasRef.current, e);
     if (!coords) return;
 
-    setDrawingPoints((prev) => [...prev, coords]);
+    activePointerCoordsRef.current = coords;
 
     const touchedCell = getCellFromCoords(coords.x, coords.y);
     if (!touchedCell) return;
@@ -526,6 +527,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
 
   const handlePointerUp = () => {
     isDrawingRef.current = false;
+    activePointerCoordsRef.current = null;
   };
 
   // Play Path Execution Animation
@@ -597,7 +599,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
   // Control button actions
   const handleClear = () => {
     playPop();
-    setDrawingPoints([]);
+    activePointerCoordsRef.current = null;
     setMappedPath([{ col: 0, row: 0 }]);
     setIsAnimating(false);
     setAnimatingIndex(0);
