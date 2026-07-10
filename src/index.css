@@ -120,5 +120,14 @@
   .animate-kid-btn-glow {
     animation: kid-btn-glow 2s ease-in-out infinite;
   }
+
+  /* ── Hide scrollbars but keep functionality ── */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
 }
 
