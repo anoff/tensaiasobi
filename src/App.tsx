@@ -319,9 +319,9 @@ function AppContent() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-y-auto px-4 pb-6">
+      <main className="flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6">
         {currentScreen === 'menu' ? (
-          <div className="flex-1 flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
+          <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
             {/* Title Block */}
             <div className="text-center space-y-2 mt-4">
               <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-candy-pink via-candy-blue to-candy-purple drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)] animate-pulse">
