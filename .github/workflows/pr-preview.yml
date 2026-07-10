@@ -35,6 +35,7 @@ jobs:
         run: npm run build
         env:
           VITE_BASE_PATH: /pr-preview/pr-${{ github.event.pull_request.number }}/
+          GIT_HASH: ${{ github.event.pull_request.head.sha }}
 
       - name: Deploy PR preview
         uses: peaceiris/actions-gh-pages@v4

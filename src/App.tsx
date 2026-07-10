@@ -82,19 +82,19 @@ function AppContent() {
     localStorage.removeItem('anlaut_streak');
     localStorage.removeItem('anlaut_highscore');
     localStorage.removeItem('shiritori_highscore');
-    
+
     // Clear Emoji Match progress
     localStorage.removeItem('dobble_high_solo_zen_easy');
     localStorage.removeItem('dobble_high_solo_zen_medium');
     localStorage.removeItem('dobble_high_solo_zen_hard');
     localStorage.removeItem('dobble_high_solo_time_medium');
     localStorage.removeItem('dobble_high_solo_time_hard');
-    
+
     // Clear gamification progress
     resetStars();
     resetVouchers();
     localStorage.removeItem('gamification_town');
-    
+
     playSuccess();
   };
 
@@ -481,6 +481,11 @@ function AppContent() {
 
             <div className="text-center text-xs text-slate-300 font-bold">
               {t.menu.footer}
+              <div className="text-[10px] text-slate-400/80 font-mono mt-1" data-testid="git-hash">
+                <a href="https://github.com/anoff/tensaiasobi" target="_blank">
+                  v-{__GIT_HASH__}
+                </a>
+              </div>
             </div>
           </div>
         ) : (
@@ -527,7 +532,7 @@ function AppContent() {
             <p className="text-slate-500 font-extrabold text-sm">
               {t.challenge.completeBody}
             </p>
-            
+
             <div className="flex justify-center items-center gap-1.5 bg-yellow-100 border-2 border-yellow-300 rounded-2xl py-3 px-6 animate-pulse">
               <span className="text-2xl">⭐</span>
               <span className="text-xl font-black text-yellow-800">+{challengeStarsTarget} Stars!</span>

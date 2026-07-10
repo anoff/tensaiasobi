@@ -2,8 +2,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const rawHash = process.env.GIT_HASH || 'UNKNOWN'
+const gitHash = rawHash !== 'UNKNOWN' ? rawHash.slice(0, 7) : 'UNKNOWN'
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __GIT_HASH__: JSON.stringify(gitHash),
+  },
   plugins: [
     react(),
     VitePWA({

@@ -28,6 +28,7 @@ jobs:
         run: npm run build
         env:
           VITE_BASE_PATH: /
+          GIT_HASH: ${{ github.sha }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
