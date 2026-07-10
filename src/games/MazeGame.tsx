@@ -672,9 +672,9 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
 
           {/* Victory Overlay Screen */}
           {isWon && (
-            <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 space-y-6 z-20">
-              <span className="text-8xl animate-bounce">{theme.startEmoji}🏆{theme.endEmoji}</span>
-              <h2 className="text-3xl font-black text-slate-800 text-center leading-tight">
+            <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 space-y-4 z-20 overflow-y-auto">
+              <span className="text-5xl sm:text-6xl animate-bounce">{theme.startEmoji}🏆{theme.endEmoji}</span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-800 text-center leading-tight">
                 {t.mazeGame.victory}
               </h2>
               <KidButton
@@ -683,7 +683,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
                 onClick={generateMaze}
                 className="shadow-[0_6px_0_0_#059669] active:translate-y-[4px]"
               >
-                🎉 {t.mazeGame.title} {t.mazeGame.playAgain}!
+                🎉 {t.mazeGame.playAgain}!
               </KidButton>
             </div>
           )}

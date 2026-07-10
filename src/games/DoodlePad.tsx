@@ -174,7 +174,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-2 w-full select-none h-full gap-2">
+    <div className="flex-1 flex flex-col p-2 w-full select-none h-full gap-2 overflow-hidden">
       {/* Canvas Area */}
       <div
         ref={containerRef}
@@ -192,23 +192,12 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
           onTouchEnd={stopDrawing}
           className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
         />
-        {/* Floating Download Button */}
-        <KidButton
-          color="green"
-          size="sm"
-          data-testid="doodle-download"
-          onClick={downloadDrawing}
-          className="absolute top-3 right-3 z-10 !py-1.5 !px-3 shadow-[0_4px_0_0_#059669] active:translate-y-[2px] active:shadow-[0_1px_0_0_#059669] opacity-60 hover:opacity-100 transition-opacity"
-          title={t.doodlePad.download}
-        >
-          📥
-        </KidButton>
       </div>
 
       {/* Controls — single compact row */}
-      <div className="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-3xl border-2 border-slate-200">
-        {/* Color Palette */}
-        <div className="flex flex-wrap gap-1.5 flex-1">
+      <div className="flex items-center gap-3 bg-slate-100 px-3 py-2 rounded-3xl border-2 border-slate-200 shrink-0 select-none w-full overflow-hidden">
+        {/* Color Palette (Scrollable row) */}
+        <div className="flex items-center gap-2 flex-1 overflow-x-auto scrollbar-hide py-1 pr-1">
           {PRESETS_COLORS.map((c) => (
             <button
               key={c}
@@ -219,8 +208,8 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
               }}
               style={{ backgroundColor: c }}
               className={`
-                w-6 h-6 rounded-full border-2 transition-transform duration-75 cursor-pointer outline-none
-                ${color === c && !isEraser ? 'scale-125 border-slate-800 shadow-md ring-2 ring-white' : 'border-slate-300'}
+                w-7 h-7 rounded-full border-2 transition-transform duration-75 cursor-pointer outline-none shrink-0
+                ${color === c && !isEraser ? 'scale-110 border-slate-800 shadow-md ring-2 ring-white' : 'border-slate-300'}
               `}
             />
           ))}
@@ -230,8 +219,8 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
             onClick={() => { playPop(); setIsEraser(true); }}
             data-testid="doodle-eraser"
             className={`
-              w-6 h-6 rounded-full border-2 transition-all duration-75 flex items-center justify-center cursor-pointer outline-none text-sm
-              ${isEraser ? 'scale-125 border-slate-800 bg-slate-300 shadow-md ring-2 ring-white' : 'border-slate-300 bg-white hover:bg-slate-50'}
+              w-7 h-7 rounded-full border-2 transition-all duration-75 flex items-center justify-center cursor-pointer outline-none text-sm shrink-0
+              ${isEraser ? 'scale-110 border-slate-800 bg-slate-300 shadow-md ring-2 ring-white' : 'border-slate-300 bg-white hover:bg-slate-50'}
             `}
             title={t.doodlePad.eraser}
           >
@@ -258,15 +247,28 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
           ))}
         </div>
 
-        {/* Reset Button */}
-        <ConfirmWipeButton
-          onConfirm={clearCanvas}
-          size="sm"
-          data-testid="doodle-clear"
-          label={`🗑️ ${t.common.reset}`}
-          confirmLabel={`🗑️ ${t.common.confirmReset}`}
-          className="shrink-0 !py-1 !px-3 shadow-[0_4px_0_0_#b91c1c] active:translate-y-[2px] active:shadow-[0_1px_0_0_#b91c1c]"
-        />
+        {/* Action Buttons: Download & Reset */}
+        <div className="flex gap-1.5 shrink-0">
+          <KidButton
+            color="green"
+            size="sm"
+            data-testid="doodle-download"
+            onClick={downloadDrawing}
+            className="!py-1.5 !px-3 shadow-[0_4px_0_0_#059669] active:translate-y-[2px] active:shadow-[0_1px_0_0_#059669]"
+            title={t.doodlePad.download}
+          >
+            📥
+          </KidButton>
+
+          <ConfirmWipeButton
+            onConfirm={clearCanvas}
+            size="sm"
+            data-testid="doodle-clear"
+            label="🗑"
+            confirmLabel="🗑️?"
+            className="!py-1.5 !px-3 shadow-[0_4px_0_0_#b91c1c] active:translate-y-[2px] active:shadow-[0_1px_0_0_#b91c1c]"
+          />
+        </div>
       </div>
     </div>
   );

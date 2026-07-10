@@ -1119,16 +1119,16 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
 
           {/* Victory Overlay Screen */}
           {isWon && (
-            <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center p-6 space-y-6 z-20">
-              <span className="text-9xl animate-bounce">{shape.emoji}</span>
-              <h2 className="text-3xl font-black text-slate-800 text-center leading-tight">
+            <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center p-4 space-y-4 z-20 overflow-y-auto">
+              <span className="text-6xl sm:text-7xl animate-bounce">{shape.emoji}</span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-800 text-center leading-tight">
                 {t.shapeTrace.victory}
               </h2>
               <KidButton
                 color="pink"
                 size="md"
                 onClick={nextShape}
-                className="shadow-[0_6px_0_0_#d81b60] active:translate-y-[4px]"
+                className="shadow-[0_6px_0_0_#d81b60] active:translate-y-[4px] whitespace-nowrap"
               >
                 🌈 {t.shapeTrace.nextShape}
               </KidButton>
