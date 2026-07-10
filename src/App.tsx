@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useSound } from './hooks/useSound';
+import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
@@ -554,6 +555,7 @@ function AppContent() {
 }
 
 function App() {
+  useWakeLock();
   return (
     <I18nProvider>
       <AppContent />
