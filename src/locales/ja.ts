@@ -24,6 +24,7 @@ export const ja: TranslationSchema = {
     shop: "おみせ",
     dobble: "えもじマッチ",
     shiritori: "しりとり",
+    puzzle: "まほうパズル",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -302,6 +303,19 @@ export const ja: TranslationSchema = {
     victory: "🎉 すごい！大せいこう！",
     nRuleWarning: "「ん」で おわる ことばは しりとり おしまいだよ！ ⚠️",
     nRuleLost: "「ん」がついたので おしまい！負けちゃったよ 😢",
+  },
+  puzzleGame: {
+    title: "まほうパズル! 🧩",
+    subtitle: "ピースを いれかえて、えを かんせい させよう！",
+    help: "２つの ピースを タップして、ばしょを いれかえてね！",
+    victory: "🎉 すごい！パズルが かんせい したよ！",
+    preview: "おてほんを みる 🖼️",
+    selectImage: "えを えらんでね：",
+    rainbow: "にじ",
+    space: "うちゅうロケット",
+    dino: "きょうりゅう",
+    ocean: "しんかい",
+    forest: "まほうのくま",
   },
   challenge: {
     title: "チャレンジモード 🎯",

@@ -24,6 +24,7 @@ export const de: TranslationSchema = {
     shop: "Laden",
     dobble: "Emoji-Suche",
     shiritori: "Wortschlange",
+    puzzle: "Zauberpuzzle",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -302,6 +303,19 @@ export const de: TranslationSchema = {
     victory: "🎉 Was für eine lange Kette!",
     nRuleLost: "",
     nRuleWarning: "",
+  },
+  puzzleGame: {
+    title: "Zauberpuzzle! 🧩",
+    subtitle: "Tausche die Teile, um das Bild zu reparieren!",
+    help: "Tippe zwei Teile an, um ihre Positionen zu tauschen!",
+    victory: "🎉 Super! Du hast das Puzzle gelöst!",
+    preview: "Bild anzeigen 🖼️",
+    selectImage: "Wähle ein Bild aus:",
+    rainbow: "Regenbogen",
+    space: "Weltraum-Rakete",
+    dino: "Freundlicher Dino",
+    ocean: "Tiefsee",
+    forest: "Zauberbär",
   },
   challenge: {
     title: "Herausforderungsmodus 🎯",

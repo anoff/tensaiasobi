@@ -22,6 +22,7 @@ export const en = {
     shop: "Shop",
     dobble: "Emoji Match",
     shiritori: "Word Chain",
+    puzzle: "Magic Puzzle",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -300,6 +301,19 @@ export const en = {
     victory: "🎉 What a long chain!",
     nRuleLost: "",
     nRuleWarning: "",
+  },
+  puzzleGame: {
+    title: "Magic Puzzle! 🧩",
+    subtitle: "Swap the tiles to fix the picture!",
+    help: "Tap two tiles to swap their positions!",
+    victory: "🎉 Superb! You completed the puzzle!",
+    preview: "Show Picture 🖼️",
+    selectImage: "Choose a Picture:",
+    rainbow: "Rainbow",
+    space: "Space Rocket",
+    dino: "Friendly Dino",
+    ocean: "Deep Sea",
+    forest: "Magic Bear",
   },
   challenge: {
     title: "Challenge Mode 🎯",

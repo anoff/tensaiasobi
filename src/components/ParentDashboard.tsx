@@ -50,6 +50,7 @@ export function ParentDashboard({
       emojiMatch: true,
       anlaut: true,
       shiritori: true,
+      puzzle: true,
       ...challengeAllowedGames
     };
   });
@@ -64,6 +65,7 @@ export function ParentDashboard({
     { id: 'emojiMatch', label: t.menu.dobble, icon: '⚡' },
     { id: 'anlaut', label: t.menu.anlaut, icon: '🔤' },
     { id: 'shiritori', label: t.menu.shiritori, icon: '🔗' },
+    { id: 'puzzle', label: t.menu.puzzle, icon: '🧩' },
   ];
 
   const toggleGame = (gameId: string) => {

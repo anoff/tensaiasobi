@@ -15,6 +15,7 @@ import ShapeTrace from './games/ShapeTrace';
 import AnlautGame from './games/AnlautGame';
 import EmojiMatch from './games/EmojiMatch';
 import Shiritori from './games/Shiritori';
+import PuzzleGame from './games/PuzzleGame';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 import Confetti from 'react-confetti';
 
@@ -26,7 +27,7 @@ import { useStars } from './hooks/useStars';
 import { useVouchers } from './hooks/useVouchers';
 import { useChallenge } from './hooks/useChallenge';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings' | 'shiritori';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings' | 'shiritori' | 'puzzle';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
@@ -178,6 +179,15 @@ function AppContent() {
             playError={playError}
             onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
             challengeMode={challengeActive}
+          />
+        );
+      case 'puzzle':
+        return (
+          <PuzzleGame
+            playPop={playPop}
+            playSuccess={playSuccess}
+            playError={playError}
+            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
           />
         );
       case 'town':
@@ -446,6 +456,19 @@ function AppContent() {
                 >
                   <span className="text-5xl">🔗</span>
                   <span className="text-lg font-black block leading-tight">{t.menu.shiritori}</span>
+                </KidButton>
+              )}
+
+              {(!challengeActive || challengeAllowedGames.puzzle) && (
+                <KidButton
+                  color="orange"
+                  size="lg"
+                  data-testid="launch-puzzle"
+                  onClick={() => handleScreenChange('puzzle')}
+                  className="aspect-square flex-col gap-2 rounded-[2rem]"
+                >
+                  <span className="text-5xl">🧩</span>
+                  <span className="text-lg font-black block leading-tight">{t.menu.puzzle}</span>
                 </KidButton>
               )}
             </div>

@@ -16,6 +16,7 @@ const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
   emojiMatch: false,
   anlaut: true,
   shiritori: true,
+  puzzle: true,
 };
 
 export function useChallenge() {
