@@ -113,32 +113,64 @@ function getJigsawPath(profile: EdgeProfile): string {
   return path;
 }
 
+interface GameInitData {
+  initialBoard: (number | null)[];
+  initialTray: number[];
+  initialLocked: boolean[];
+}
+
 /**
- * Scrambles and shuffles the list of piece IDs.
+ * Generates the initial scrambled state of the game, keeping a portion of the tiles
+ * already placed and locked in their correct slots so that the board starts with anchor tiles.
  */
-function scrambleTray(currentSize: number): number[] {
-  const total = currentSize * currentSize;
-  const pieceIds = Array.from({ length: total }, (_, i) => i);
-  const scrambled = [...pieceIds];
-  let attempts = 0;
+function generateInitialState(size: number): GameInitData {
+  const total = size * size;
+  
+  // Determine number of pre-locked pieces to avoid an completely empty board
+  let preLockedCount = 0;
+  if (size === 2) preLockedCount = 1;     // 1 out of 4 (25%)
+  else if (size === 3) preLockedCount = 2; // 2 out of 9 (~22%)
+  else if (size === 4) preLockedCount = 5; // 5 out of 16 (~31%)
+  else if (size === 5) preLockedCount = 8; // 8 out of 25 (32%)
 
-  while (attempts < 100) {
-    // Fisher-Yates Shuffle
-    for (let i = scrambled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [scrambled[i], scrambled[j]] = [scrambled[j], scrambled[i]];
-    }
-
-    // We want to verify that no pieces start locked/solved in the tray
-    const matchingCount = scrambled.filter((id, index) => id === index).length;
-    if (currentSize === 2) {
-      if (matchingCount === 0) break;
-    } else {
-      if (matchingCount < total * 0.2) break;
-    }
-    attempts++;
+  const allIndices = Array.from({ length: total }, (_, i) => i);
+  const lockedIndices = new Set<number>();
+  
+  // Pick random indices to pre-lock by shuffling indices
+  const shuffledIndices = [...allIndices];
+  for (let i = shuffledIndices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
   }
-  return scrambled;
+  
+  for (let i = 0; i < preLockedCount; i++) {
+    lockedIndices.add(shuffledIndices[i]);
+  }
+
+  // Build the board & locked status
+  const initialBoard: (number | null)[] = Array.from({ length: total }, (_, i) => 
+    lockedIndices.has(i) ? i : null
+  );
+  
+  const initialLocked: boolean[] = Array.from({ length: total }, (_, i) => 
+    lockedIndices.has(i)
+  );
+
+  // Remaining pieces are placed in the tray scrambled
+  const trayPieces = allIndices.filter(i => !lockedIndices.has(i));
+  const initialTray = [...trayPieces];
+  
+  // Shuffle the tray pieces
+  for (let i = initialTray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [initialTray[i], initialTray[j]] = [initialTray[j], initialTray[i]];
+  }
+
+  return {
+    initialBoard,
+    initialTray,
+    initialLocked,
+  };
 }
 
 // -----------------------------------------------------------------------------
@@ -305,33 +337,26 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
 
   // Game board setup
   const initGame = (currentSize: number) => {
-    const total = totalPiecesCount(currentSize);
-    
     // Generate deterministic matching shapes
     const profiles = generateEdgeProfiles(currentSize);
     setEdgeProfiles(profiles);
 
-    // Board starts entirely empty
-    setBoard(Array.from({ length: total }, () => null));
+    // Generate scrambled board with some locked anchor pieces
+    const { initialBoard, initialTray, initialLocked } = generateInitialState(currentSize);
 
-    // Fill tray with scrambled piece IDs
-    const scrambled = scrambleTray(currentSize);
-
-    setTray(scrambled);
-    setLocked(Array.from({ length: total }, () => false));
+    setBoard(initialBoard);
+    setTray(initialTray);
+    setLocked(initialLocked);
     setSelectedTrayIdx(null);
     setIsSolved(false);
     setShowConfetti(false);
     setShowPreview(false);
   };
 
-  const totalPiecesCount = (s: number) => s * s;
-
   // Run on image or size change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     initGame(size);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedImage, size]);
 
   const svgDataUrl = useMemo(() => {
