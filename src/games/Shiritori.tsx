@@ -42,17 +42,25 @@ const setSafeLocalStorage = (key: string, value: number) => {
 };
 
 // Clean Western words for first/last character matching
-const cleanWesternWord = (word: string): string => {
-  return word.toLowerCase().replace(/[^a-zäöüßа-я]/g, '');
+const cleanWesternWord = (word: string, lang?: string): string => {
+  let cleaned = word.toLowerCase();
+  if (lang === 'fr') {
+    cleaned = cleaned
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/œ/g, 'oe')
+      .replace(/æ/g, 'ae');
+  }
+  return cleaned.replace(/[^a-zäöüßа-я]/g, '');
 };
 
 // Get the start character of a word depending on the language
 const getStartChar = (word: string, lang: string): string => {
   if (!word) return '';
-  if (lang === 'ja') {
+  if (lang === 'ja' || lang === 'ko') {
     return word[0];
   }
-  const cleaned = cleanWesternWord(word);
+  const cleaned = cleanWesternWord(word, lang);
   return cleaned.length > 0 ? cleaned[0].toUpperCase() : '';
 };
 
@@ -76,7 +84,10 @@ const getEndChar = (word: string, lang: string): string => {
     };
     return smallToBig[last] || last;
   }
-  const cleaned = cleanWesternWord(word);
+  if (lang === 'ko') {
+    return word[word.length - 1];
+  }
+  const cleaned = cleanWesternWord(word, lang);
   return cleaned.length > 0 ? cleaned[cleaned.length - 1].toUpperCase() : '';
 };
 
@@ -437,12 +448,14 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     const word = itemsDict[emoji] || '';
     if (!word) return '';
 
-    if (language === 'ja') {
-      // For Japanese, highlight first and last hiragana character
-      // We skip trailing long vowels 'ー' for end highlight, but we show the whole word
+    if (language === 'ja' || language === 'ko') {
+      // For Japanese and Korean, highlight first and last character
+      // We skip trailing long vowels 'ー' for end highlight in Japanese, but show the whole word
       let trimmed = word;
-      while (trimmed.endsWith('ー') && trimmed.length > 1) {
-        trimmed = trimmed.slice(0, -1);
+      if (language === 'ja') {
+        while (trimmed.endsWith('ー') && trimmed.length > 1) {
+          trimmed = trimmed.slice(0, -1);
+        }
       }
       const rawEndC = trimmed[trimmed.length - 1];
       const endIdx = word.lastIndexOf(rawEndC);
@@ -467,8 +480,8 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
         </span>
       );
     } else {
-      // English/German highlight first and last letter
-      const cleaned = cleanWesternWord(word);
+      // English/German/French highlight first and last letter
+      const cleaned = cleanWesternWord(word, language);
       if (!cleaned) return <span className="font-black text-3xl">{word}</span>;
 
       const firstLetterIdx = word.toLowerCase().indexOf(cleaned[0]);
