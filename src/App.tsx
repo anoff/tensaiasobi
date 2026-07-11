@@ -283,8 +283,8 @@ function AppContent() {
               {/* Language Switcher Dropdown */}
               <div className="relative" ref={langRef}>
                 {(() => {
-                  const labelMap = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵' } as const;
-                  const options = (['en', 'de', 'ja'] as const).filter((l) => l !== language);
+                  const labelMap = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵', fr: '🇫🇷', ko: '🇰🇷' } as const;
+                  const options = (['en', 'de', 'ja', 'fr', 'ko'] as const).filter((l) => l !== language);
                   return (
                     <>
                       <button

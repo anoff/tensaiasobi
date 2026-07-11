@@ -180,6 +180,12 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
     if (language === 'de') {
       return `Spieler ${playerNum} Punkte: `;
     }
+    if (language === 'fr') {
+      return `Score Joueur ${playerNum} : `;
+    }
+    if (language === 'ko') {
+      return `플레이어 ${playerNum} 점수: `;
+    }
     return `Player ${playerNum} Score: `;
   };
 

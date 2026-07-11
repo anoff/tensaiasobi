@@ -1,13 +1,13 @@
 import { test, expect, Page } from '@playwright/test';
 
 // Helper to switch language using the test IDs
-async function switchLanguage(page: Page, lang: 'en' | 'de' | 'ja') {
+async function switchLanguage(page: Page, lang: 'en' | 'de' | 'ja' | 'fr' | 'ko') {
   // Click the trigger button
   const trigger = page.getByTestId('lang-dropdown-trigger');
   await expect(trigger).toBeVisible();
   
   // Check if the current active language is already the target.
-  const flags = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵' } as const;
+  const flags = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵', fr: '🇫🇷', ko: '🇰🇷' } as const;
   const activeText = await trigger.innerText();
   if (activeText.includes(flags[lang])) {
     return; // Already in target language
@@ -26,7 +26,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
     await page.goto('/');
   });
 
-  const languages = ['en', 'de', 'ja'] as const;
+  const languages = ['en', 'de', 'ja', 'fr', 'ko'] as const;
 
   for (const lang of languages) {
     test(`Verify all games start and first interaction works in ${lang.toUpperCase()}`, async ({ page }) => {

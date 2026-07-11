@@ -1,11 +1,11 @@
 import { test, expect, Page } from '@playwright/test';
 
 // Helper to switch language using the test IDs
-async function switchLanguage(page: Page, lang: 'en' | 'de' | 'ja') {
+async function switchLanguage(page: Page, lang: 'en' | 'de' | 'ja' | 'fr' | 'ko') {
   const trigger = page.getByTestId('lang-dropdown-trigger');
   await expect(trigger).toBeVisible();
   
-  const flags = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵' } as const;
+  const flags = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵', fr: '🇫🇷', ko: '🇰🇷' } as const;
   const activeText = await trigger.innerText();
   if (activeText.includes(flags[lang])) {
     return; // Already in target language
@@ -18,16 +18,24 @@ async function switchLanguage(page: Page, lang: 'en' | 'de' | 'ja') {
 }
 
 // Letter extraction logic (same as the game implementation)
-const cleanWesternWord = (word: string): string => {
-  return word.toLowerCase().replace(/[^a-zäöüßа-я]/g, '');
+const cleanWesternWord = (word: string, lang?: string): string => {
+  let cleaned = word.toLowerCase();
+  if (lang === 'fr') {
+    cleaned = cleaned
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/œ/g, 'oe')
+      .replace(/æ/g, 'ae');
+  }
+  return cleaned.replace(/[^a-zäöüßа-я]/g, '');
 };
 
 const getStartChar = (word: string, lang: string): string => {
   if (!word) return '';
-  if (lang === 'ja') {
+  if (lang === 'ja' || lang === 'ko') {
     return word[0];
   }
-  const cleaned = cleanWesternWord(word);
+  const cleaned = cleanWesternWord(word, lang);
   return cleaned.length > 0 ? cleaned[0].toUpperCase() : '';
 };
 
@@ -47,7 +55,10 @@ const getEndChar = (word: string, lang: string): string => {
     };
     return smallToBig[last] || last;
   }
-  const cleaned = cleanWesternWord(word);
+  if (lang === 'ko') {
+    return word[word.length - 1];
+  }
+  const cleaned = cleanWesternWord(word, lang);
   return cleaned.length > 0 ? cleaned[cleaned.length - 1].toUpperCase() : '';
 };
 
@@ -74,7 +85,7 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
     await page.goto('/');
   });
 
-  const languages = ['en', 'de', 'ja'] as const;
+  const languages = ['en', 'de', 'ja', 'fr', 'ko'] as const;
 
   for (const lang of languages) {
     test(`Verify Shiritori game initializes and play round works in ${lang.toUpperCase()}`, async ({ page }) => {

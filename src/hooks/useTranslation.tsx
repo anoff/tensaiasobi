@@ -16,13 +16,15 @@ function getBrowserLanguage(): Language {
   const prefix = lang.slice(0, 2).toLowerCase();
   if (prefix === 'de') return 'de';
   if (prefix === 'ja') return 'ja';
+  if (prefix === 'fr') return 'fr';
+  if (prefix === 'ko') return 'ko';
   return 'en';
 }
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('app_language');
-    if (saved === 'en' || saved === 'de' || saved === 'ja') {
+    if (saved === 'en' || saved === 'de' || saved === 'ja' || saved === 'fr' || saved === 'ko') {
       return saved as Language;
     }
     return getBrowserLanguage();
