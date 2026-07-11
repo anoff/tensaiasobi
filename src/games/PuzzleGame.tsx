@@ -120,45 +120,17 @@ interface GameInitData {
 }
 
 /**
- * Generates the initial scrambled state of the game, keeping a portion of the tiles
- * already placed and locked in their correct slots so that the board starts with anchor tiles.
+ * Generates the initial scrambled state of the game, starting with an entirely empty board
+ * and all pieces scrambled in the tray.
  */
 function generateInitialState(size: number): GameInitData {
   const total = size * size;
   
-  // Determine number of pre-locked pieces to avoid an completely empty board
-  let preLockedCount = 0;
-  if (size === 2) preLockedCount = 1;     // 1 out of 4 (25%)
-  else if (size === 3) preLockedCount = 2; // 2 out of 9 (~22%)
-  else if (size === 4) preLockedCount = 5; // 5 out of 16 (~31%)
-  else if (size === 5) preLockedCount = 8; // 8 out of 25 (32%)
+  const initialBoard: (number | null)[] = Array.from({ length: total }, () => null);
+  const initialLocked: boolean[] = Array.from({ length: total }, () => false);
 
-  const allIndices = Array.from({ length: total }, (_, i) => i);
-  const lockedIndices = new Set<number>();
-  
-  // Pick random indices to pre-lock by shuffling indices
-  const shuffledIndices = [...allIndices];
-  for (let i = shuffledIndices.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
-  }
-  
-  for (let i = 0; i < preLockedCount; i++) {
-    lockedIndices.add(shuffledIndices[i]);
-  }
-
-  // Build the board & locked status
-  const initialBoard: (number | null)[] = Array.from({ length: total }, (_, i) => 
-    lockedIndices.has(i) ? i : null
-  );
-  
-  const initialLocked: boolean[] = Array.from({ length: total }, (_, i) => 
-    lockedIndices.has(i)
-  );
-
-  // Remaining pieces are placed in the tray scrambled
-  const trayPieces = allIndices.filter(i => !lockedIndices.has(i));
-  const initialTray = [...trayPieces];
+  // All pieces are placed in the tray scrambled
+  const initialTray = Array.from({ length: total }, (_, i) => i);
   
   // Shuffle the tray pieces
   for (let i = initialTray.length - 1; i > 0; i--) {
@@ -185,6 +157,7 @@ interface JigsawPieceProps {
   isLocked: boolean;
   isSelected: boolean;
   isSilhouette?: boolean;
+  isWrong?: boolean;
   onClick?: () => void;
   className?: string;
 }
@@ -197,6 +170,7 @@ export function JigsawPiece({
   isLocked,
   isSelected,
   isSilhouette = false,
+  isWrong = false,
   onClick,
   className = '',
 }: JigsawPieceProps) {
@@ -229,9 +203,11 @@ export function JigsawPiece({
           absolute w-[140%] h-[140%] top-[-20%] left-[-20%] overflow-visible transition-all duration-150
           ${isSilhouette 
             ? 'opacity-25 grayscale-40 z-0 filter drop-shadow-none' 
-            : isSelected 
-              ? 'scale-110 filter drop-shadow-[0_10px_12px_rgba(255,110,180,0.55)] z-30 ring-0' 
-              : 'filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.18)] hover:scale-[1.03] z-10'
+            : isWrong
+              ? 'filter drop-shadow-[0_6px_8px_rgba(239,68,68,0.5)] z-20 hover:scale-[1.03]'
+              : isSelected 
+                ? 'scale-110 filter drop-shadow-[0_10px_12px_rgba(255,110,180,0.55)] z-30 ring-0' 
+                : 'filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.18)] hover:scale-[1.03] z-10'
           }
           ${isLocked ? 'z-0 filter drop-shadow-none' : ''}
         `}
@@ -263,6 +239,23 @@ export function JigsawPiece({
             strokeDasharray="4 4"
             className="pointer-events-none"
           />
+        ) : isWrong ? (
+          <>
+            <path
+              d={pathD}
+              fill="none"
+              stroke="#ef4444"
+              strokeWidth="2.5"
+              className="pointer-events-none"
+            />
+            <path
+              d={pathD}
+              fill="none"
+              stroke="rgba(185, 28, 28, 0.4)"
+              strokeWidth="1"
+              className="pointer-events-none"
+            />
+          </>
         ) : (
           <>
             {/* Highlight top-left/dark bottom-right border */}
@@ -522,7 +515,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
 
       {/* Puzzle Board Area */}
       <div className="flex-1 flex items-center justify-center my-3 w-full min-h-[250px] relative">
-        <div className={`grid gap-2.5 w-full aspect-square justify-center items-center relative rounded-2xl p-2.5 bg-slate-200/50 border-4 border-slate-300/60 ${getGridColsClass()}`}>
+        <div className={`grid gap-0 w-full aspect-square justify-center items-center relative rounded-2xl p-2.5 bg-slate-200/50 border-4 border-slate-300/60 ${getGridColsClass()}`}>
           
           {/* Faint background silhouette of the target picture */}
           <div 
@@ -554,6 +547,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
           {!isSyncing && Array.from({ length: size * size }).map((_, index) => {
             const pieceId = board[index];
             const isPieceLocked = pieceId != null && locked[index];
+            const isPieceWrong = pieceId != null && pieceId !== index;
 
             return (
               <div
@@ -585,16 +579,10 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
                     profile={edgeProfiles[pieceId]}
                     svgDataUrl={svgDataUrl}
                     isLocked={isPieceLocked}
+                    isWrong={isPieceWrong}
                     isSelected={false} // Selection is only in the tray, placed pieces are not highlighted
                     onClick={() => handleSlotClick(index)}
                   />
-                )}
-
-                {/* Lock Star Effect inside correct snapped pieces */}
-                {isPieceLocked && !isSolved && (
-                  <div className="absolute top-1 right-1 w-4 h-4 bg-emerald-500 rounded-full border border-white flex items-center justify-center shadow-md animate-bounce z-20">
-                    <span className="text-[7px] text-white font-extrabold">⭐</span>
-                  </div>
                 )}
               </div>
             );
