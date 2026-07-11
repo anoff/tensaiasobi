@@ -20,25 +20,17 @@ A modern, lightning-fast static web app designed for young children (ages 3-8). 
 
 ## 🕹️ The Games
 
-### 1. Bubble Pop Math
-An auto-generating math quiz disguised as a fun bubble-popping game. 
-- **Skills:** Addition and Subtraction.
-- **Features:** A parent-accessible settings menu to adjust the difficulty (e.g., addition up to 5, addition up to 10). Saves current difficulty and daily "correct answer streaks" via `localStorage`.
-
-### 2. Odd One Out
-A visual categorization puzzle for pre-readers.
-- **Skills:** Categorization, pattern recognition.
-- **Gameplay:** Three emojis belong to the same category, while one does not. Tap the odd one out to win! Tracks completed levels.
-
-### 3. Animal Memory Match
-A classic memory card game using CSS grid and emojis.
-- **Skills:** Working memory, spatial recall.
-- **Gameplay:** Starts at a simple 2x2 grid for toddlers and scales up. Saves the child's fastest time/fewest flips record.
-
-### 4. Magic Doodle Pad
-A simple, frustration-free drawing board.
-- **Skills:** Fine motor skills, creativity.
-- **Gameplay:** Drag a finger to draw with rainbow gradients or stamp emojis. Includes a giant "trash can" button to clear the canvas.
+1. **Math Pop 🎈**: Bubble-popping math quiz with adjustable difficulties (addition/subtraction).
+2. **Odd One 🧐**: A categorization and logic puzzle for pre-readers.
+3. **Animal Match 🐯**: Classic memory card game scaling from 2x2 to larger grids.
+4. **Doodle Pad 🎨**: A canvas for drawing with rainbow gradients and stamping emojis.
+5. **Mazes 🌀**: A procedurally generated maze solver with different sizes.
+6. **Trace ✏️**: Learn shapes and motor control by tracing outlines.
+7. **First Sound 🗣️**: Phonics and starting-letter recognition challenge.
+8. **Emoji Match 🃏**: Speed matching card patterns using colorful emojis.
+9. **Word Chain (Shiritori) 🗣️**: A fun word-building chain game.
+10. **Magic Puzzle 🧩**: Jigsaw puzzle with interlocking pieces, silhouette guides, and dynamic SVG cuts.
+11. **My Town 🏡**: A sandbox builder to place trees, houses, and roads using stars earned from other games.
 
 
 ## 🚀 Local Development
