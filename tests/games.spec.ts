@@ -157,8 +157,11 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             const canvas = page.getByTestId('letter-trace-canvas');
             await expect(canvas).toBeVisible();
 
-            // Verify the numbered-stroke letter palette and level selector are visible
-            await expect(page.getByTestId('letter-trace-level-latin')).toBeVisible();
+            // Verify the letter palette is visible, along with the level selector for
+            // languages that offer more than one script (Japanese: Hiragana/Katakana).
+            if (lang === 'ja') {
+              await expect(page.getByTestId('letter-trace-level-hiragana')).toBeVisible();
+            }
             await expect(page.getByTestId('letter-trace-letter-option').first()).toBeVisible();
 
             // Drag mouse/finger on canvas to attempt tracing the first stroke

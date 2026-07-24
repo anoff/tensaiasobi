@@ -4,7 +4,7 @@ import KidButton from '../components/KidButton';
 import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import DifficultySelector from '../components/DifficultySelector';
 import { GameDifficulty } from '../types/game';
-import { useTranslation } from '../hooks/useTranslation';
+import { useTranslation, Language } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
 
 interface Point {
@@ -37,6 +37,20 @@ function arc(cx: number, cy: number, rx: number, ry: number, startDeg: number, e
     const deg = startDeg + ((endDeg - startDeg) * i) / steps;
     const rad = (deg * Math.PI) / 180;
     pts.push({ x: cx + rx * Math.cos(rad), y: cy + ry * Math.sin(rad) });
+  }
+  return pts;
+}
+
+/** Generates points along a quadratic Bézier curve, used for the smooth hooked/curved strokes found in kana. */
+function curve(p0: Point, control: Point, p1: Point, steps = 10): Point[] {
+  const pts: Point[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const mt = 1 - t;
+    pts.push({
+      x: mt * mt * p0.x + 2 * mt * t * control.x + t * t * p1.x,
+      y: mt * mt * p0.y + 2 * mt * t * control.y + t * t * p1.y,
+    });
   }
   return pts;
 }
@@ -243,120 +257,119 @@ const LATIN_LETTERS: LetterDef[] = makeLetters([
   },
 ]);
 
-// Hiragana — a curated starter set (vowels + the "ka" row), simplified into straight/curved strokes.
+// Hiragana — a curated starter set (vowels + the "ka" row). Stroke order and direction follow the
+// standard textbook order, and curved strokes use arc()/curve() so the tracing corridor actually
+// resembles the rounded shapes of the real kana instead of straight-line approximations.
 const HIRAGANA_LETTERS: LetterDef[] = makeLetters([
   {
     char: 'あ',
     strokes: [
-      stroke({ x: 25, y: 20 }, { x: 75, y: 20 }),
-      stroke({ x: 50, y: 15 }, { x: 45, y: 55 }, { x: 68, y: 80 }),
-      stroke(...arc(45, 68, 18, 14, -20, 220, 10)),
+      stroke({ x: 30, y: 22 }, { x: 58, y: 19 }),
+      stroke({ x: 53, y: 15 }, { x: 37, y: 45 }, { x: 46, y: 62 }, { x: 58, y: 84 }),
+      stroke(...arc(60, 68, 17, 16, 150, 470, 14)),
     ],
   },
   {
     char: 'い',
     strokes: [
-      stroke({ x: 35, y: 20 }, { x: 30, y: 70 }, { x: 45, y: 85 }),
-      stroke({ x: 65, y: 25 }, { x: 60, y: 75 }, { x: 75, y: 85 }),
+      stroke({ x: 35, y: 22 }, { x: 43, y: 48 }),
+      stroke({ x: 62, y: 20 }, { x: 55, y: 62 }, { x: 58, y: 75 }, { x: 72, y: 85 }),
     ],
   },
   {
     char: 'う',
     strokes: [
-      stroke({ x: 25, y: 22 }, { x: 65, y: 18 }),
-      stroke({ x: 20, y: 50 }, ...arc(52, 68, 32, 20, 200, -30, 12)),
+      stroke({ x: 30, y: 20 }, { x: 46, y: 27 }),
+      stroke({ x: 60, y: 22 }, ...arc(45, 60, 26, 22, 200, -40, 14)),
     ],
   },
   {
     char: 'え',
     strokes: [
-      stroke({ x: 20, y: 30 }, { x: 75, y: 28 }),
-      stroke({ x: 30, y: 50 }, { x: 75, y: 46 }),
-      stroke({ x: 45, y: 20 }, { x: 35, y: 65 }, ...arc(55, 80, 20, 14, 140, 20, 8)),
+      stroke({ x: 25, y: 25 }, { x: 72, y: 22 }),
+      stroke({ x: 28, y: 44 }, { x: 55, y: 55 }, ...arc(52, 68, 20, 15, -30, 250, 12)),
     ],
   },
   {
     char: 'お',
     strokes: [
-      stroke({ x: 20, y: 30 }, { x: 75, y: 28 }),
-      stroke({ x: 30, y: 50 }, { x: 75, y: 46 }),
-      stroke({ x: 45, y: 18 }, { x: 38, y: 70 }, ...arc(58, 80, 20, 14, 150, 10, 8)),
-      stroke({ x: 70, y: 35 }, { x: 78, y: 45 }),
+      stroke({ x: 20, y: 25 }, { x: 70, y: 22 }),
+      stroke({ x: 48, y: 22 }, { x: 42, y: 80 }),
+      stroke({ x: 30, y: 45 }, ...arc(40, 65, 20, 16, 200, 20, 10), { x: 62, y: 55 }),
     ],
   },
   {
     char: 'か',
     strokes: [
-      stroke({ x: 30, y: 20 }, { x: 28, y: 80 }),
-      stroke({ x: 25, y: 45 }, { x: 78, y: 40 }),
-      stroke({ x: 60, y: 45 }, { x: 50, y: 80 }),
-      stroke({ x: 68, y: 55 }, { x: 80, y: 68 }),
+      stroke({ x: 28, y: 20 }, { x: 26, y: 45 }),
+      stroke({ x: 45, y: 16 }, { x: 38, y: 80 }),
+      stroke(...curve({ x: 58, y: 42 }, { x: 46, y: 55 }, { x: 30, y: 80 })),
     ],
   },
   {
     char: 'き',
     strokes: [
-      stroke({ x: 25, y: 25 }, { x: 75, y: 22 }),
-      stroke({ x: 25, y: 50 }, { x: 75, y: 47 }),
-      stroke({ x: 50, y: 15 }, { x: 45, y: 85 }),
-      stroke({ x: 35, y: 68 }, { x: 65, y: 75 }),
+      stroke({ x: 25, y: 25 }, { x: 70, y: 22 }),
+      stroke({ x: 22, y: 48 }, { x: 70, y: 45 }),
+      stroke({ x: 48, y: 15 }, { x: 44, y: 80 }),
+      stroke({ x: 38, y: 68 }, ...arc(50, 73, 14, 10, 190, 40, 8)),
     ],
   },
   {
     char: 'く',
     strokes: [
-      stroke({ x: 65, y: 20 }, { x: 30, y: 50 }, { x: 65, y: 85 }),
+      stroke(...curve({ x: 62, y: 18 }, { x: 28, y: 50 }, { x: 64, y: 86 })),
     ],
   },
   {
     char: 'け',
     strokes: [
-      stroke({ x: 25, y: 20 }, { x: 25, y: 80 }),
-      stroke({ x: 45, y: 35 }, { x: 80, y: 30 }),
-      stroke({ x: 45, y: 35 }, { x: 40, y: 80 }),
-      stroke({ x: 60, y: 55 }, { x: 72, y: 68 }),
+      stroke({ x: 25, y: 22 }, { x: 24, y: 55 }),
+      stroke({ x: 45, y: 15 }, { x: 42, y: 80 }),
+      stroke(...curve({ x: 58, y: 42 }, { x: 46, y: 55 }, { x: 30, y: 80 })),
     ],
   },
   {
     char: 'こ',
     strokes: [
-      stroke({ x: 20, y: 35 }, { x: 75, y: 32 }),
-      stroke({ x: 20, y: 68 }, { x: 78, y: 72 }),
+      stroke({ x: 22, y: 35 }, { x: 75, y: 32 }),
+      stroke({ x: 20, y: 66 }, { x: 50, y: 72 }, { x: 78, y: 68 }),
     ],
   },
 ]);
 
-// Katakana — matching set (vowels + the "ka" row).
+// Katakana — matching set (vowels + the "ka" row), following the true stroke order/direction of
+// each character (diagonals first where applicable, then the completing vertical/horizontal).
 const KATAKANA_LETTERS: LetterDef[] = makeLetters([
   {
     char: 'ア',
     strokes: [
-      stroke({ x: 25, y: 25 }, { x: 78, y: 22 }),
-      stroke({ x: 55, y: 22 }, { x: 25, y: 55 }),
-      stroke({ x: 60, y: 40 }, { x: 75, y: 85 }),
+      stroke({ x: 30, y: 22 }, { x: 55, y: 38 }),
+      stroke({ x: 75, y: 20 }, { x: 25, y: 55 }),
+      stroke({ x: 60, y: 35 }, { x: 65, y: 85 }),
     ],
   },
   {
     char: 'イ',
     strokes: [
-      stroke({ x: 35, y: 20 }, { x: 65, y: 45 }),
-      stroke({ x: 65, y: 45 }, { x: 30, y: 85 }),
+      stroke({ x: 35, y: 20 }, { x: 55, y: 40 }),
+      stroke({ x: 62, y: 18 }, { x: 52, y: 55 }, { x: 65, y: 85 }),
     ],
   },
   {
     char: 'ウ',
     strokes: [
-      stroke({ x: 30, y: 20 }, { x: 70, y: 18 }),
-      stroke({ x: 25, y: 45 }, { x: 78, y: 42 }),
-      stroke({ x: 50, y: 45 }, { x: 35, y: 85 }),
+      stroke({ x: 35, y: 18 }, { x: 48, y: 28 }),
+      stroke({ x: 52, y: 25 }, { x: 45, y: 65 }, { x: 62, y: 85 }),
+      stroke({ x: 70, y: 42 }, { x: 30, y: 48 }),
     ],
   },
   {
     char: 'エ',
     strokes: [
-      stroke({ x: 20, y: 22 }, { x: 78, y: 20 }),
-      stroke({ x: 25, y: 50 }, { x: 72, y: 48 }),
-      stroke({ x: 20, y: 80 }, { x: 78, y: 78 }),
+      stroke({ x: 22, y: 22 }, { x: 78, y: 20 }),
+      stroke({ x: 50, y: 22 }, { x: 50, y: 78 }),
+      stroke({ x: 22, y: 80 }, { x: 78, y: 78 }),
     ],
   },
   {
@@ -364,46 +377,46 @@ const KATAKANA_LETTERS: LetterDef[] = makeLetters([
     strokes: [
       stroke({ x: 20, y: 25 }, { x: 78, y: 22 }),
       stroke({ x: 50, y: 22 }, { x: 45, y: 85 }),
-      stroke({ x: 30, y: 55 }, { x: 70, y: 50 }),
+      stroke({ x: 70, y: 45 }, { x: 35, y: 68 }),
     ],
   },
   {
     char: 'カ',
     strokes: [
-      stroke({ x: 25, y: 20 }, { x: 22, y: 80 }),
-      stroke({ x: 22, y: 45 }, { x: 78, y: 40 }),
-      stroke({ x: 60, y: 45 }, { x: 45, y: 85 }),
+      stroke({ x: 28, y: 20 }, { x: 50, y: 40 }),
+      stroke({ x: 75, y: 18 }, { x: 22, y: 58 }),
+      stroke({ x: 62, y: 35 }, { x: 65, y: 85 }),
     ],
   },
   {
     char: 'キ',
     strokes: [
-      stroke({ x: 25, y: 25 }, { x: 75, y: 22 }),
-      stroke({ x: 25, y: 50 }, { x: 75, y: 47 }),
-      stroke({ x: 55, y: 20 }, { x: 45, y: 85 }),
+      stroke({ x: 25, y: 25 }, { x: 72, y: 22 }),
+      stroke({ x: 50, y: 20 }, { x: 45, y: 85 }),
+      stroke({ x: 28, y: 48 }, { x: 68, y: 45 }),
+      stroke({ x: 65, y: 60 }, { x: 30, y: 80 }),
     ],
   },
   {
     char: 'ク',
     strokes: [
-      stroke({ x: 30, y: 20 }, { x: 70, y: 45 }),
-      stroke({ x: 70, y: 45 }, { x: 25, y: 80 }),
+      stroke({ x: 30, y: 20 }, { x: 50, y: 38 }),
+      stroke({ x: 72, y: 20 }, { x: 30, y: 50 }, { x: 65, y: 85 }),
     ],
   },
   {
     char: 'ケ',
     strokes: [
-      stroke({ x: 25, y: 20 }, { x: 25, y: 80 }),
-      stroke({ x: 50, y: 35 }, { x: 78, y: 30 }),
-      stroke({ x: 55, y: 35 }, { x: 45, y: 85 }),
+      stroke({ x: 25, y: 20 }, { x: 45, y: 38 }),
+      stroke({ x: 62, y: 18 }, { x: 58, y: 85 }),
+      stroke({ x: 55, y: 45 }, { x: 28, y: 78 }),
     ],
   },
   {
     char: 'コ',
     strokes: [
-      stroke({ x: 20, y: 25 }, { x: 75, y: 22 }),
-      stroke({ x: 20, y: 25 }, { x: 20, y: 80 }),
-      stroke({ x: 20, y: 80 }, { x: 78, y: 78 }),
+      stroke({ x: 22, y: 22 }, { x: 75, y: 20 }),
+      stroke({ x: 22, y: 22 }, { x: 22, y: 80 }, { x: 78, y: 78 }),
     ],
   },
 ]);
@@ -486,7 +499,15 @@ const LEVEL_DATA: Record<LetterLevel, LetterDef[]> = {
   hangul: HANGUL_LETTERS,
 };
 
-const LEVELS: LetterLevel[] = ['latin', 'hiragana', 'katakana', 'hangul'];
+// Only surface the scripts that are relevant for the app's current language: Latin for
+// English/German/French, Hiragana + Katakana for Japanese, and Hangul for Korean.
+const LEVELS_BY_LANGUAGE: Record<Language, LetterLevel[]> = {
+  en: ['latin'],
+  de: ['latin'],
+  fr: ['latin'],
+  ja: ['hiragana', 'katakana'],
+  ko: ['hangul'],
+};
 
 // Stroke validation thresholds — deliberately stricter than ShapeTrace's since letter formation
 // requires better precision and correct stroke order.
@@ -514,8 +535,9 @@ interface LetterTraceProps {
 }
 
 export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: LetterTraceProps) {
-  const { t } = useTranslation();
-  const [level, setLevel] = useState<LetterLevel>('latin');
+  const { t, language } = useTranslation();
+  const levels = LEVELS_BY_LANGUAGE[language];
+  const [level, setLevel] = useState<LetterLevel>(levels[0]);
   const [letterIndex, setLetterIndex] = useState(0);
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [completedStrokes, setCompletedStrokes] = useState<Point[][]>([]);
@@ -572,6 +594,24 @@ export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: L
     setLetterIndex(0);
     resetProgress();
   };
+
+  // Keep the selected level in sync with the app's language — e.g. switching away from Japanese
+  // should drop out of Hiragana/Katakana into whichever script is valid for the new language.
+  // Adjusting state directly during render (rather than in an effect) is the recommended React
+  // pattern for resetting state when a prop/derived value changes.
+  const [prevLanguage, setPrevLanguage] = useState(language);
+  if (language !== prevLanguage) {
+    setPrevLanguage(language);
+    if (!levels.includes(level)) {
+      setLevel(levels[0]);
+      setLetterIndex(0);
+      setCompletedStrokes([]);
+      setCurrentPoints([]);
+      setIsWon(false);
+      setShowConfetti(false);
+      setShowErrorShake(false);
+    }
+  }
 
   const nextLetter = () => {
     playPop();
@@ -942,9 +982,10 @@ export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: L
         />
       )}
 
-      {/* Level Selector: Latin / Hiragana / Katakana / Hangul */}
+      {/* Level Selector: only the scripts relevant to the current language are shown */}
+      {levels.length > 1 && (
       <div className="w-full flex justify-between bg-slate-200/80 p-1.5 rounded-2xl border-2 border-slate-300 gap-1.5 select-none shrink-0">
-        {LEVELS.map((lvl) => (
+        {levels.map((lvl) => (
           <button
             key={lvl}
             data-testid={`letter-trace-level-${lvl}`}
@@ -961,6 +1002,7 @@ export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: L
           </button>
         ))}
       </div>
+      )}
 
       {/* Letter Palette Selector */}
       <div className="w-full flex justify-between bg-white/80 p-2 rounded-3xl border-2 border-slate-200 shadow-sm shrink-0 gap-1.5 overflow-x-auto select-none mt-2">
