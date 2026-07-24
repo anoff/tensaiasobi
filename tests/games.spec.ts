@@ -37,7 +37,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
       const mathLauncher = page.getByTestId('launch-math');
       await expect(mathLauncher).toBeVisible();
 
-      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'anlaut'] as const;
+      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut'] as const;
 
       for (const gameKey of gameKeys) {
         // 2. Launch Game
@@ -142,6 +142,26 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             await expect(canvas).toBeVisible();
 
             // Drag mouse/finger on canvas
+            const box = await canvas.boundingBox();
+            expect(box).not.toBeNull();
+            if (box) {
+              await page.mouse.move(box.x + 50, box.y + 50);
+              await page.mouse.down();
+              await page.mouse.move(box.x + 100, box.y + 100);
+              await page.mouse.up();
+            }
+            break;
+          }
+
+          case 'letterTrace': {
+            const canvas = page.getByTestId('letter-trace-canvas');
+            await expect(canvas).toBeVisible();
+
+            // Verify the numbered-stroke letter palette and level selector are visible
+            await expect(page.getByTestId('letter-trace-level-latin')).toBeVisible();
+            await expect(page.getByTestId('letter-trace-letter-option').first()).toBeVisible();
+
+            // Drag mouse/finger on canvas to attempt tracing the first stroke
             const box = await canvas.boundingBox();
             expect(box).not.toBeNull();
             if (box) {

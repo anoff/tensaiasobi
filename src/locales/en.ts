@@ -17,6 +17,7 @@ export const en = {
     match: "Match",
     maze: "Mazes",
     trace: "Trace",
+    letterTrace: "Letters",
     anlaut: "First Sound",
     town: "My Town",
     shop: "Shop",
@@ -84,6 +85,18 @@ export const en = {
     help: "Trace the dotted line!",
     victory: "🎉 Brilliant! Beautiful drawing!",
     nextShape: "Next Shape!",
+  },
+  letterTrace: {
+    title: "Letter Drawing! ✏️",
+    help: "Trace each numbered stroke in order!",
+    victory: "🎉 Amazing! You wrote it perfectly!",
+    nextLetter: "Next Letter!",
+    levels: {
+      latin: "Letters",
+      hiragana: "Hiragana",
+      katakana: "Katakana",
+      hangul: "Hangul",
+    },
   },
   anlautGame: {
     title: "First Sound",
