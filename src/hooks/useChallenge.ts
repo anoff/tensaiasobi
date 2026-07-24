@@ -13,6 +13,7 @@ const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
   memory: true,
   maze: false,
   trace: false,
+  letterTrace: false,
   emojiMatch: false,
   anlaut: true,
   shiritori: true,

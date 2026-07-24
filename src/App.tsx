@@ -12,6 +12,7 @@ import DoodlePad from './games/DoodlePad';
 import MemoryMatch from './games/MemoryMatch';
 import MazeGame from './games/MazeGame';
 import ShapeTrace from './games/ShapeTrace';
+import LetterTrace from './games/LetterTrace';
 import AnlautGame from './games/AnlautGame';
 import EmojiMatch from './games/EmojiMatch';
 import Shiritori from './games/Shiritori';
@@ -27,7 +28,7 @@ import { useStars } from './hooks/useStars';
 import { useVouchers } from './hooks/useVouchers';
 import { useChallenge } from './hooks/useChallenge';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings' | 'shiritori' | 'puzzle';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings' | 'shiritori' | 'puzzle';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
@@ -144,6 +145,15 @@ function AppContent() {
       case 'trace':
         return (
           <ShapeTrace
+            playPop={playPop}
+            playSuccess={playSuccess}
+            playError={playError}
+            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+          />
+        );
+      case 'letterTrace':
+        return (
+          <LetterTrace
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
@@ -417,6 +427,19 @@ function AppContent() {
                 >
                   <span className="text-5xl">⭐</span>
                   <span className="text-lg font-black block leading-tight">{t.menu.trace}</span>
+                </KidButton>
+              )}
+
+              {(!challengeActive || challengeAllowedGames.letterTrace) && (
+                <KidButton
+                  color="red"
+                  size="lg"
+                  data-testid="launch-letterTrace"
+                  onClick={() => handleScreenChange('letterTrace')}
+                  className="aspect-square flex-col gap-2 rounded-[2rem]"
+                >
+                  <span className="text-5xl">✏️</span>
+                  <span className="text-lg font-black block leading-tight">{t.menu.letterTrace}</span>
                 </KidButton>
               )}
 

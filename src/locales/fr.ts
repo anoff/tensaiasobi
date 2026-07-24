@@ -19,6 +19,7 @@ export const fr: TranslationSchema = {
     match: "Paires",
     maze: "Labyrinthes",
     trace: "Tracé",
+    letterTrace: "Lettres",
     anlaut: "Premier Son",
     town: "Ma Ville",
     shop: "Boutique",
@@ -86,6 +87,18 @@ export const fr: TranslationSchema = {
     help: "Suis la ligne pointillée !",
     victory: "🎉 Magnifique ! Quel beau dessin !",
     nextShape: "Forme suivante !",
+  },
+  letterTrace: {
+    title: "Écriture des Lettres ! ✏️",
+    help: "Trace chaque trait numéroté dans l'ordre !",
+    victory: "🎉 Formidable ! Parfaitement écrit !",
+    nextLetter: "Lettre suivante !",
+    levels: {
+      latin: "Lettres",
+      hiragana: "Hiragana",
+      katakana: "Katakana",
+      hangul: "Hangul",
+    },
   },
   anlautGame: {
     title: "Premier Son",

@@ -19,6 +19,7 @@ export const ja: TranslationSchema = {
     match: "しんけいすいじゃく",
     maze: "めいろ",
     trace: "かたちなぞり",
+    letterTrace: "もじをかく",
     anlaut: "はじまりのおと",
     town: "まちづくり",
     shop: "おみせ",
@@ -86,6 +87,18 @@ export const ja: TranslationSchema = {
     help: "てんせんのうえをなぞってね！",
     victory: "🎉 すごい！きれいにかけたね！",
     nextShape: "つぎのかたち！",
+  },
+  letterTrace: {
+    title: "もじをかこう！ ✏️",
+    help: "ばんごうのじゅんに、なぞってね！",
+    victory: "🎉 すごい！じょうずにかけたね！",
+    nextLetter: "つぎのもじ！",
+    levels: {
+      latin: "アルファベット",
+      hiragana: "ひらがな",
+      katakana: "カタカナ",
+      hangul: "ハングル",
+    },
   },
   anlautGame: {
     title: "はじまりの おと",

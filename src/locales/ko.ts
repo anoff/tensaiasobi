@@ -19,6 +19,7 @@ export const ko: TranslationSchema = {
     match: "카드 뒤집기",
     maze: "미로 찾기",
     trace: "선 따라 그리기",
+    letterTrace: "글자 쓰기",
     anlaut: "첫 소리 찾기",
     town: "나의 마을",
     shop: "상점",
@@ -86,6 +87,18 @@ export const ko: TranslationSchema = {
     help: "점선을 따라 그려보세요!",
     victory: "🎉 대단해요! 멋진 그림이에요!",
     nextShape: "다음 도형!",
+  },
+  letterTrace: {
+    title: "글자 쓰기! ✏️",
+    help: "번호 순서대로 획을 따라 그려보세요!",
+    victory: "🎉 훌륭해요! 완벽하게 썼어요!",
+    nextLetter: "다음 글자!",
+    levels: {
+      latin: "알파벳",
+      hiragana: "히라가나",
+      katakana: "가타카나",
+      hangul: "한글",
+    },
   },
   anlautGame: {
     title: "첫 소리 글자",

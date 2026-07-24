@@ -19,6 +19,7 @@ export const de: TranslationSchema = {
     match: "Paare finden",
     maze: "Labyrinthe",
     trace: "Nachzeichnen",
+    letterTrace: "Buchstaben",
     anlaut: "Anlaut",
     town: "Meine Stadt",
     shop: "Laden",
@@ -86,6 +87,18 @@ export const de: TranslationSchema = {
     help: "Zeichne die gepunktete Linie nach!",
     victory: "🎉 Genial! Wunderschön gemalt!",
     nextShape: "Nächste Form!",
+  },
+  letterTrace: {
+    title: "Buchstaben schreiben! ✏️",
+    help: "Zeichne jeden nummerierten Strich in der richtigen Reihenfolge!",
+    victory: "🎉 Fantastisch! Perfekt geschrieben!",
+    nextLetter: "Nächster Buchstabe!",
+    levels: {
+      latin: "Buchstaben",
+      hiragana: "Hiragana",
+      katakana: "Katakana",
+      hangul: "Hangul",
+    },
   },
   anlautGame: {
     title: "Anlaute",
