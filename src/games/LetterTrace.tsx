@@ -41,20 +41,6 @@ function arc(cx: number, cy: number, rx: number, ry: number, startDeg: number, e
   return pts;
 }
 
-/** Generates points along a quadratic Bézier curve, used for the smooth hooked/curved strokes found in kana. */
-function curve(p0: Point, control: Point, p1: Point, steps = 10): Point[] {
-  const pts: Point[] = [];
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const mt = 1 - t;
-    pts.push({
-      x: mt * mt * p0.x + 2 * mt * t * control.x + t * t * p1.x,
-      y: mt * mt * p0.y + 2 * mt * t * control.y + t * t * p1.y,
-    });
-  }
-  return pts;
-}
-
 function stroke(...points: Point[]): LetterStroke {
   return { points };
 }
@@ -257,166 +243,164 @@ const LATIN_LETTERS: LetterDef[] = makeLetters([
   },
 ]);
 
-// Hiragana — a curated starter set (vowels + the "ka" row). Stroke order and direction follow the
-// standard textbook order, and curved strokes use arc()/curve() so the tracing corridor actually
-// resembles the rounded shapes of the real kana instead of straight-line approximations.
+// Hiragana — a curated starter set (vowels + the "ka" row). Stroke order, direction and the
+// rounded shapes of each glyph are derived from the KanjiVG stroke-path dataset
+// (https://kanjivg.tagaini.net, CC BY-SA 3.0), downsampled into a simplified tracing corridor
+// sized to sit directly on top of the rendered background character.
 const HIRAGANA_LETTERS: LetterDef[] = makeLetters([
   {
     char: 'あ',
     strokes: [
-      stroke({ x: 30, y: 22 }, { x: 58, y: 19 }),
-      stroke({ x: 53, y: 15 }, { x: 37, y: 45 }, { x: 46, y: 62 }, { x: 58, y: 84 }),
-      stroke(...arc(60, 68, 17, 16, 150, 470, 14)),
+      stroke({ x: 36, y: 38 }, { x: 59, y: 36.3 }),
+      stroke({ x: 46.4, y: 29.4 }, { x: 44.2, y: 57.2 }, { x: 46.2, y: 69.7 }),
+      stroke({ x: 55.3, y: 44.2 }, { x: 52.2, y: 54.8 }, { x: 41.9, y: 67 }, { x: 35.7, y: 68.9 }, { x: 32.4, y: 63.3 }, { x: 34.5, y: 56.9 }, { x: 41.5, y: 51 }, { x: 52.4, y: 47.6 }, { x: 61.4, y: 48.9 }, { x: 66.6, y: 53.2 }, { x: 67.5, y: 62.1 }, { x: 63.8, y: 67.9 }, { x: 55.7, y: 72 }),
     ],
   },
   {
     char: 'い',
     strokes: [
-      stroke({ x: 35, y: 22 }, { x: 43, y: 48 }),
-      stroke({ x: 62, y: 20 }, { x: 55, y: 62 }, { x: 58, y: 75 }, { x: 72, y: 85 }),
+      stroke({ x: 30.7, y: 36.1 }, { x: 32.6, y: 57.3 }, { x: 38.7, y: 65.2 }, { x: 40.2, y: 60.4 }),
+      stroke({ x: 59.3, y: 39.9 }, { x: 66.7, y: 48.6 }, { x: 69.6, y: 58.7 }),
     ],
   },
   {
     char: 'う',
     strokes: [
-      stroke({ x: 30, y: 20 }, { x: 46, y: 27 }),
-      stroke({ x: 60, y: 22 }, ...arc(45, 60, 26, 22, 200, -40, 14)),
+      stroke({ x: 42.1, y: 28.3 }, { x: 52.4, y: 30.2 }, { x: 49.1, y: 33 }),
+      stroke({ x: 37.1, y: 43.2 }, { x: 41.6, y: 44 }, { x: 52.6, y: 40.1 }, { x: 57.2, y: 44.8 }, { x: 55.8, y: 59.8 }, { x: 44.3, y: 73 }),
     ],
   },
   {
     char: 'え',
     strokes: [
-      stroke({ x: 25, y: 25 }, { x: 72, y: 22 }),
-      stroke({ x: 28, y: 44 }, { x: 55, y: 55 }, ...arc(52, 68, 20, 15, -30, 250, 12)),
+      stroke({ x: 41.3, y: 27 }, { x: 52.4, y: 29 }, { x: 48.9, y: 31.7 }),
+      stroke({ x: 36.8, y: 44.7 }, { x: 53.2, y: 39.4 }, { x: 55.9, y: 41.2 }, { x: 32.4, y: 67.9 }, { x: 47.3, y: 56.4 }, { x: 52.3, y: 70 }, { x: 65.5, y: 70 }),
     ],
   },
   {
     char: 'お',
     strokes: [
-      stroke({ x: 20, y: 25 }, { x: 70, y: 22 }),
-      stroke({ x: 48, y: 22 }, { x: 42, y: 80 }),
-      stroke({ x: 30, y: 45 }, ...arc(40, 65, 20, 16, 200, 20, 10), { x: 62, y: 55 }),
+      stroke({ x: 31.5, y: 39.2 }, { x: 35.2, y: 40.3 }, { x: 49.8, y: 36 }),
+      stroke({ x: 41.8, y: 28.6 }, { x: 43.5, y: 33.2 }, { x: 42, y: 69.5 }, { x: 31.2, y: 63.7 }, { x: 32.4, y: 59 }, { x: 40.9, y: 53 }, { x: 50.7, y: 49.6 }, { x: 61, y: 49.7 }, { x: 67.7, y: 53.5 }, { x: 69.1, y: 60.9 }, { x: 64.3, y: 66.9 }, { x: 54.6, y: 70.4 }),
+      stroke({ x: 59.3, y: 31.9 }, { x: 65.3, y: 36.6 }, { x: 64.6, y: 39.3 }),
     ],
   },
   {
     char: 'か',
     strokes: [
-      stroke({ x: 28, y: 20 }, { x: 26, y: 45 }),
-      stroke({ x: 45, y: 16 }, { x: 38, y: 80 }),
-      stroke(...curve({ x: 58, y: 42 }, { x: 46, y: 55 }, { x: 30, y: 80 })),
+      stroke({ x: 32.5, y: 41.1 }, { x: 48.1, y: 39.2 }, { x: 53, y: 41.6 }, { x: 53.3, y: 52 }, { x: 50, y: 63.1 }, { x: 45.9, y: 68.5 }, { x: 42.3, y: 66 }),
+      stroke({ x: 45.7, y: 29.4 }, { x: 43.1, y: 40.7 }, { x: 29.9, y: 66.7 }),
+      stroke({ x: 61.8, y: 37.2 }, { x: 70.1, y: 51 }),
     ],
   },
   {
     char: 'き',
     strokes: [
-      stroke({ x: 25, y: 25 }, { x: 70, y: 22 }),
-      stroke({ x: 22, y: 48 }, { x: 70, y: 45 }),
-      stroke({ x: 48, y: 15 }, { x: 44, y: 80 }),
-      stroke({ x: 38, y: 68 }, ...arc(50, 73, 14, 10, 190, 40, 8)),
+      stroke({ x: 35.7, y: 36.5 }, { x: 56.4, y: 32.4 }),
+      stroke({ x: 38.9, y: 46.7 }, { x: 61.1, y: 42.1 }),
+      stroke({ x: 42.1, y: 27.5 }, { x: 62.1, y: 56.6 }, { x: 55.7, y: 55.1 }),
+      stroke({ x: 37.5, y: 65.9 }, { x: 46.8, y: 70 }, { x: 58.7, y: 68.7 }),
     ],
   },
   {
     char: 'く',
     strokes: [
-      stroke(...curve({ x: 62, y: 18 }, { x: 28, y: 50 }, { x: 64, y: 86 })),
+      stroke({ x: 52.5, y: 28 }, { x: 51.9, y: 32.1 }, { x: 39.9, y: 48.6 }, { x: 53.4, y: 71.7 }),
     ],
   },
   {
     char: 'け',
     strokes: [
-      stroke({ x: 25, y: 22 }, { x: 24, y: 55 }),
-      stroke({ x: 45, y: 15 }, { x: 42, y: 80 }),
-      stroke(...curve({ x: 58, y: 42 }, { x: 46, y: 55 }, { x: 30, y: 80 })),
+      stroke({ x: 32.5, y: 30.6 }, { x: 30.9, y: 58 }, { x: 31.8, y: 64.1 }, { x: 34.7, y: 57 }),
+      stroke({ x: 48.6, y: 41.1 }, { x: 67.7, y: 39.1 }),
+      stroke({ x: 58.6, y: 27.6 }, { x: 59.9, y: 57.4 }, { x: 53.3, y: 70.7 }),
     ],
   },
   {
     char: 'こ',
     strokes: [
-      stroke({ x: 22, y: 35 }, { x: 75, y: 32 }),
-      stroke({ x: 20, y: 66 }, { x: 50, y: 72 }, { x: 78, y: 68 }),
+      stroke({ x: 38.1, y: 34.5 }, { x: 57.6, y: 34.2 }, { x: 50.7, y: 38.9 }),
+      stroke({ x: 35.4, y: 57.5 }, { x: 37.8, y: 62.9 }, { x: 43.4, y: 66.2 }, { x: 62.5, y: 65.2 }),
     ],
   },
 ]);
 
-// Katakana — matching set (vowels + the "ka" row), following the true stroke order/direction of
-// each character (diagonals first where applicable, then the completing vertical/horizontal).
+// Katakana — matching set (vowels + the "ka" row). Stroke geometry is likewise derived from the
+// KanjiVG dataset (https://kanjivg.tagaini.net, CC BY-SA 3.0) and simplified to fit the glyph box.
 const KATAKANA_LETTERS: LetterDef[] = makeLetters([
   {
     char: 'ア',
     strokes: [
-      stroke({ x: 30, y: 22 }, { x: 55, y: 38 }),
-      stroke({ x: 75, y: 20 }, { x: 25, y: 55 }),
-      stroke({ x: 60, y: 35 }, { x: 65, y: 85 }),
+      stroke({ x: 31.8, y: 33.7 }, { x: 66.2, y: 30.3 }, { x: 66.8, y: 32.8 }, { x: 52.5, y: 42.8 }),
+      stroke({ x: 48.8, y: 42.2 }, { x: 45.9, y: 56.2 }, { x: 37.7, y: 71.3 }),
     ],
   },
   {
     char: 'イ',
     strokes: [
-      stroke({ x: 35, y: 20 }, { x: 55, y: 40 }),
-      stroke({ x: 62, y: 18 }, { x: 52, y: 55 }, { x: 65, y: 85 }),
+      stroke({ x: 58.3, y: 28.2 }, { x: 47.2, y: 43.2 }, { x: 31.2, y: 55.9 }),
+      stroke({ x: 50.6, y: 43.8 }, { x: 51.3, y: 73 }),
     ],
   },
   {
     char: 'ウ',
     strokes: [
-      stroke({ x: 35, y: 18 }, { x: 48, y: 28 }),
-      stroke({ x: 52, y: 25 }, { x: 45, y: 65 }, { x: 62, y: 85 }),
-      stroke({ x: 70, y: 42 }, { x: 30, y: 48 }),
+      stroke({ x: 48.8, y: 27 }, { x: 49.6, y: 36.9 }),
+      stroke({ x: 33.5, y: 36.5 }, { x: 34.6, y: 52.3 }),
+      stroke({ x: 35, y: 39.2 }, { x: 65.3, y: 35.8 }, { x: 67.4, y: 37.5 }, { x: 57.6, y: 57.6 }, { x: 43.2, y: 72.4 }),
     ],
   },
   {
     char: 'エ',
     strokes: [
-      stroke({ x: 22, y: 22 }, { x: 78, y: 20 }),
-      stroke({ x: 50, y: 22 }, { x: 50, y: 78 }),
-      stroke({ x: 22, y: 80 }, { x: 78, y: 78 }),
+      stroke({ x: 36.6, y: 39.1 }, { x: 64.1, y: 37.2 }),
+      stroke({ x: 48.9, y: 40.5 }, { x: 49, y: 60 }),
+      stroke({ x: 29.2, y: 61.9 }, { x: 70.5, y: 60.9 }),
     ],
   },
   {
     char: 'オ',
     strokes: [
-      stroke({ x: 20, y: 25 }, { x: 78, y: 22 }),
-      stroke({ x: 50, y: 22 }, { x: 45, y: 85 }),
-      stroke({ x: 70, y: 45 }, { x: 35, y: 68 }),
+      stroke({ x: 29.5, y: 40.3 }, { x: 70.8, y: 38.6 }),
+      stroke({ x: 52.9, y: 28 }, { x: 53.5, y: 69.1 }, { x: 52.3, y: 71.6 }, { x: 48.4, y: 68.3 }),
+      stroke({ x: 52.9, y: 39.5 }, { x: 31, y: 61.8 }),
     ],
   },
   {
     char: 'カ',
     strokes: [
-      stroke({ x: 28, y: 20 }, { x: 50, y: 40 }),
-      stroke({ x: 75, y: 18 }, { x: 22, y: 58 }),
-      stroke({ x: 62, y: 35 }, { x: 65, y: 85 }),
+      stroke({ x: 32.9, y: 41.9 }, { x: 62.6, y: 39.3 }, { x: 66.5, y: 40.8 }, { x: 58.2, y: 66.4 }, { x: 55.2, y: 69.7 }, { x: 50, y: 67.4 }),
+      stroke({ x: 50.4, y: 28.4 }, { x: 45.9, y: 47.9 }, { x: 33.4, y: 66 }),
     ],
   },
   {
     char: 'キ',
     strokes: [
-      stroke({ x: 25, y: 25 }, { x: 72, y: 22 }),
-      stroke({ x: 50, y: 20 }, { x: 45, y: 85 }),
-      stroke({ x: 28, y: 48 }, { x: 68, y: 45 }),
-      stroke({ x: 65, y: 60 }, { x: 30, y: 80 }),
+      stroke({ x: 33.8, y: 41.8 }, { x: 64.6, y: 35.8 }),
+      stroke({ x: 29.5, y: 56.3 }, { x: 69.8, y: 48.2 }),
+      stroke({ x: 46.3, y: 28.2 }, { x: 54.1, y: 72.1 }),
     ],
   },
   {
     char: 'ク',
     strokes: [
-      stroke({ x: 30, y: 20 }, { x: 50, y: 38 }),
-      stroke({ x: 72, y: 20 }, { x: 30, y: 50 }, { x: 65, y: 85 }),
+      stroke({ x: 47, y: 29.9 }, { x: 37.5, y: 46.6 }),
+      stroke({ x: 47.7, y: 35 }, { x: 62.2, y: 32 }, { x: 64, y: 34.3 }, { x: 52.3, y: 53.9 }, { x: 35.8, y: 69.8 }),
     ],
   },
   {
     char: 'ケ',
     strokes: [
-      stroke({ x: 25, y: 20 }, { x: 45, y: 38 }),
-      stroke({ x: 62, y: 18 }, { x: 58, y: 85 }),
-      stroke({ x: 55, y: 45 }, { x: 28, y: 78 }),
+      stroke({ x: 41.8, y: 28.9 }, { x: 38.4, y: 38.8 }, { x: 30.7, y: 50.1 }),
+      stroke({ x: 40, y: 40.2 }, { x: 69.6, y: 36.5 }),
+      stroke({ x: 55.3, y: 40.9 }, { x: 50.8, y: 57.3 }, { x: 41.1, y: 69.8 }),
     ],
   },
   {
     char: 'コ',
     strokes: [
-      stroke({ x: 22, y: 22 }, { x: 75, y: 20 }),
-      stroke({ x: 22, y: 22 }, { x: 22, y: 80 }, { x: 78, y: 78 }),
+      stroke({ x: 35.6, y: 38.7 }, { x: 64.9, y: 36.4 }, { x: 61.3, y: 60.7 }),
+      stroke({ x: 34.1, y: 63 }, { x: 63.7, y: 61.9 }),
     ],
   },
 ]);
