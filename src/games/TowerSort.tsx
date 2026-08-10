@@ -50,7 +50,7 @@ const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
   easy: { types: 3, towers: 5, height: 3, scrambleSteps: 12, starsAward: 5 },
   medium: { types: 4, towers: 6, height: 4, scrambleSteps: 20, starsAward: 10 },
   hard: { types: 5, towers: 7, height: 5, scrambleSteps: 30, starsAward: 18 },
-  expert: { types: 6, towers: 8, height: 6, scrambleSteps: 42, starsAward: 28 },
+  expert: { types: 6, towers: 8, height: 5, scrambleSteps: 36, starsAward: 24 },
 };
 
 interface TowerSortProps {
