@@ -79,12 +79,13 @@ function pickWeightedFiller(): string {
   const buildings = getItemsByCategory('buildings');
   const nature = getItemsByCategory('nature');
   const decorations = getItemsByCategory('decorations');
-  const house = buildings.find((item) => item.id === 'house')!;
+  const house = buildings.find((item) => item.id === 'house');
   const otherBuildings = buildings.filter((item) => item.id !== 'house');
   const nonFlagDecorations = decorations.filter((item) => item.id !== 'flag');
 
+  const houseEmoji = house?.emoji ?? '🏠';
   const pool: string[] = [
-    ...Array(6).fill(house.emoji),
+    ...Array(6).fill(houseEmoji),
     ...otherBuildings.map((item) => item.emoji),
     ...nature.map((item) => item.emoji),
     ...nonFlagDecorations.map((item) => item.emoji),
@@ -302,24 +303,23 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
         if (!prev) return null;
         if (prev.stepIndex >= prev.path.length - 1) {
           // Vehicle arrived: solve event
+          const solvedEventId = prev.targetEventId;
           setEvents((eventList) =>
-            eventList.map((e) => (e.id === prev.targetEventId ? { ...e, solved: true } : e))
+            eventList.map((e) => (e.id === solvedEventId ? { ...e, solved: true } : e))
           );
-          let updatedScore = 0;
           setScore((s) => {
-            updatedScore = s + 1;
+            const updatedScore = s + 1;
+            // Show confetti every 5 solved events
+            if (updatedScore > 0 && updatedScore % 5 === 0) {
+              setShowConfetti(true);
+            }
             return updatedScore;
           });
           onStarEarned?.(1);
           playSuccess();
 
-          // Show confetti every 5 solved events
-          setShowConfetti((current) => {
-            return updatedScore > 0 && updatedScore % 5 === 0 ? true : current;
-          });
-
           setTimeout(() => {
-            setEvents((eventList) => eventList.filter((e) => e.id !== prev.targetEventId));
+            setEvents((eventList) => eventList.filter((e) => e.id !== solvedEventId));
             setShowConfetti(false);
           }, 400);
 
@@ -332,7 +332,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
     return () => {
       if (animationTimerRef.current) clearInterval(animationTimerRef.current);
     };
-  }, [movingVehicle, score, onStarEarned, playSuccess]);
+  }, [movingVehicle, onStarEarned, playSuccess]);
 
   const handleVehicleSelect = (type: ServiceType) => {
     playPop();
