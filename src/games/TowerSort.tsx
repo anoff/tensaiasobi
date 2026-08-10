@@ -47,16 +47,11 @@ interface DifficultyConfig {
 }
 
 const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
-  easy: { types: 3, towers: 4, height: 3, scrambleSteps: 12, starsAward: 5 },
-  medium: { types: 4, towers: 5, height: 4, scrambleSteps: 20, starsAward: 10 },
-  hard: { types: 5, towers: 6, height: 5, scrambleSteps: 30, starsAward: 18 },
-  expert: { types: 6, towers: 7, height: 6, scrambleSteps: 42, starsAward: 28 },
+  easy: { types: 3, towers: 5, height: 3, scrambleSteps: 12, starsAward: 5 },
+  medium: { types: 4, towers: 6, height: 4, scrambleSteps: 20, starsAward: 10 },
+  hard: { types: 5, towers: 7, height: 5, scrambleSteps: 30, starsAward: 18 },
+  expert: { types: 6, towers: 8, height: 6, scrambleSteps: 42, starsAward: 28 },
 };
-
-interface Move {
-  from: number;
-  to: number;
-}
 
 interface TowerSortProps {
   playPop: () => void;
@@ -76,18 +71,6 @@ function canMove(towers: string[][], from: number, to: number, height: number): 
   return dest[dest.length - 1] === source[source.length - 1];
 }
 
-function getPossibleMoves(towers: string[][], height: number, lastMove: Move | null): Move[] {
-  const moves: Move[] = [];
-  for (let from = 0; from < towers.length; from++) {
-    for (let to = 0; to < towers.length; to++) {
-      if (!canMove(towers, from, to, height)) continue;
-      if (lastMove && lastMove.from === to && lastMove.to === from) continue;
-      moves.push({ from, to });
-    }
-  }
-  return moves;
-}
-
 function isSolved(towers: string[][]): boolean {
   return towers.every((tower) => {
     if (tower.length === 0) return true;
@@ -96,11 +79,45 @@ function isSolved(towers: string[][]): boolean {
   });
 }
 
+function solveTowers(towers: string[][], height: number, maxDepth = 80): number | null {
+  if (isSolved(towers)) return 0;
+
+  const queue: [string[][], number][] = [[towers, 0]];
+  const seen = new Set<string>([JSON.stringify(towers)]);
+
+  while (queue.length > 0) {
+    const [state, depth] = queue.shift()!;
+    if (depth >= maxDepth) continue;
+
+    for (let from = 0; from < state.length; from++) {
+      for (let to = 0; to < state.length; to++) {
+        if (!canMove(state, from, to, height)) continue;
+        const next = state.map((tower) => [...tower]);
+        next[to].push(next[from].pop()!);
+        const key = JSON.stringify(next);
+        if (seen.has(key)) continue;
+        if (isSolved(next)) return depth + 1;
+        seen.add(key);
+        queue.push([next, depth + 1]);
+      }
+    }
+  }
+
+  return null;
+}
+
 function generateTowers(difficulty: GameDifficulty, theme: Theme) {
   const config = DIFFICULTY_CONFIG[difficulty];
-  const { types, towers: totalTowers, height, scrambleSteps } = config;
+  const { types, towers: totalTowers, height } = config;
 
-  // Start from a fully sorted state
+  // Build a multiset of pieces: each emoji type appears `height` times.
+  const pieces: string[] = [];
+  for (let typeIdx = 0; typeIdx < types; typeIdx++) {
+    for (let row = 0; row < height; row++) {
+      pieces.push(theme.emojis[typeIdx]);
+    }
+  }
+
   const solved: string[][] = Array.from({ length: totalTowers }, () => []);
   for (let typeIdx = 0; typeIdx < types; typeIdx++) {
     for (let row = 0; row < height; row++) {
@@ -110,31 +127,30 @@ function generateTowers(difficulty: GameDifficulty, theme: Theme) {
 
   let attempts = 0;
   while (attempts < 100) {
-    const current = solved.map((tower) => [...tower]);
-    let lastMove: Move | null = null;
-    let scrambleMoves = 0;
+    // Shuffle pieces and fill the first `types` towers.
+    for (let i = pieces.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+    }
 
-    for (let step = 0; step < scrambleSteps; step++) {
-      const possible = getPossibleMoves(current, height, lastMove);
-      if (possible.length === 0) break;
-      const move = possible[Math.floor(Math.random() * possible.length)];
-      const emoji = current[move.from].pop();
-      if (emoji) {
-        current[move.to].push(emoji);
-        lastMove = move;
-        scrambleMoves++;
+    const current: string[][] = Array.from({ length: totalTowers }, () => []);
+    for (let typeIdx = 0; typeIdx < types; typeIdx++) {
+      for (let row = 0; row < height; row++) {
+        current[typeIdx].push(pieces[typeIdx * height + row]);
       }
     }
 
     if (!isSolved(current)) {
-      return { towers: current, optimalMoves: scrambleMoves };
+      const optimal = solveTowers(current, height);
+      if (optimal !== null) {
+        return { towers: current, optimalMoves: optimal };
+      }
     }
     attempts++;
   }
 
-  // Fallback: return solved state shuffled manually (should be extremely rare)
-  const fallback = solved.map((tower) => [...tower]);
-  return { towers: fallback, optimalMoves: 0 };
+  // Fallback: return the solved state if no valid shuffle was found.
+  return { towers: solved, optimalMoves: 0 };
 }
 
 function loadBestMoves(difficulty: GameDifficulty, themeId: string): number {
