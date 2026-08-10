@@ -51,12 +51,12 @@ function getGridSize(diff: GameDifficulty): number {
     case 'easy':
       return 5;
     case 'medium':
-      return 6;
+      return 7;
     case 'hard':
     case 'expert':
-      return 7;
+      return 9;
     default:
-      return 6;
+      return 7;
   }
 }
 
@@ -74,12 +74,26 @@ function getDifficultySettings(diff: GameDifficulty) {
   }
 }
 
+function pickWeightedFiller(): string {
+  // Bias heavily toward buildings (especially houses) and away from flags.
+  const buildings = getItemsByCategory('buildings');
+  const nature = getItemsByCategory('nature');
+  const decorations = getItemsByCategory('decorations');
+  const house = buildings.find((item) => item.id === 'house')!;
+  const otherBuildings = buildings.filter((item) => item.id !== 'house');
+  const nonFlagDecorations = decorations.filter((item) => item.id !== 'flag');
+
+  const pool: string[] = [
+    ...Array(6).fill(house.emoji),
+    ...otherBuildings.map((item) => item.emoji),
+    ...nature.map((item) => item.emoji),
+    ...nonFlagDecorations.map((item) => item.emoji),
+  ];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function generateCity(size: number): Cell[][] {
   const grid: Cell[][] = [];
-  const natureItems = getItemsByCategory('nature');
-  const buildingItems = getItemsByCategory('buildings');
-  const decorationItems = getItemsByCategory('decorations');
-  const fillers = [...natureItems, ...buildingItems, ...decorationItems];
 
   for (let r = 0; r < size; r++) {
     const row: Cell[] = [];
@@ -88,7 +102,7 @@ function generateCity(size: number): Cell[][] {
         row: r,
         col: c,
         isRoad: false,
-        decoration: fillers[Math.floor(Math.random() * fillers.length)].emoji,
+        decoration: pickWeightedFiller(),
       });
     }
     grid.push(row);
@@ -236,18 +250,17 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
     spawnTimerRef.current = setInterval(() => {
       setEvents((prev) => {
         if (prev.length >= settings.maxEvents) return prev;
-        const roadCells: { row: number; col: number }[] = [];
+        const cells: { row: number; col: number }[] = [];
         for (let r = 0; r < grid.length; r++) {
           for (let c = 0; c < grid[r].length; c++) {
-            if (grid[r][c].isRoad && !grid[r][c].station) {
-              const occupied = prev.some((e) => e.row === r && e.col === c && !e.solved);
-              if (!occupied) roadCells.push({ row: r, col: c });
-            }
+            if (grid[r][c].station) continue;
+            const occupied = prev.some((e) => e.row === r && e.col === c && !e.solved);
+            if (!occupied) cells.push({ row: r, col: c });
           }
         }
-        if (roadCells.length === 0) return prev;
+        if (cells.length === 0) return prev;
         const types: ServiceType[] = ['police', 'fire', 'ambulance'];
-        const cell = roadCells[Math.floor(Math.random() * roadCells.length)];
+        const cell = cells[Math.floor(Math.random() * cells.length)];
         const type = types[Math.floor(Math.random() * types.length)];
         const newEvent: DispatchEvent = {
           id: ++eventIdRef.current,
@@ -442,14 +455,24 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
                   >
                     {isStation ? (
                       <span>{VEHICLE_CONFIG[isStation].stationEmoji}</span>
-                    ) : isMovingHere ? (
-                      <span className="animate-bounce">{VEHICLE_CONFIG[movingVehicle!.type].emoji}</span>
-                    ) : event ? (
-                      <span className={`${event.id === oldestEvent?.id ? 'animate-bounce' : 'animate-pulse'}`}>
-                        {VEHICLE_CONFIG[event.type].eventEmoji}
-                      </span>
                     ) : (
-                      <span className="opacity-60">{cell.decoration}</span>
+                      <>
+                        <span className={`${event ? 'opacity-40' : 'opacity-60'}`}>{cell.decoration}</span>
+                        {isMovingHere && (
+                          <span className="absolute inset-0 flex items-center justify-center animate-bounce">
+                            {VEHICLE_CONFIG[movingVehicle!.type].emoji}
+                          </span>
+                        )}
+                        {event && !isMovingHere && (
+                          <span
+                            className={`absolute -top-1 -right-1 text-lg sm:text-xl drop-shadow-sm ${
+                              event.id === oldestEvent?.id ? 'animate-bounce' : 'animate-pulse'
+                            }`}
+                          >
+                            {VEHICLE_CONFIG[event.type].eventEmoji}
+                          </span>
+                        )}
+                      </>
                     )}
                   </button>
                 );
