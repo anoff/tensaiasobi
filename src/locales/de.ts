@@ -346,8 +346,8 @@ export const de: TranslationSchema = {
     },
   },
   physicsGame: {
-    title: "Wagepuzzle! ⚖️",
-    subtitle: "Lege Gewichte, damit die Wage waagerecht wird!",
+    title: "Waagenpuzzle! ⚖️",
+    subtitle: "Lege Gewichte, damit die Waage waagerecht wird!",
     help: "Tippe ein Gewicht an, dann tippe auf die Seite, um es zu legen!",
     tray: "Gewichte",
     victory: "🎉 Perfekt ausbalanciert!",

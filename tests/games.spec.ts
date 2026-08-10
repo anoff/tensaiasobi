@@ -212,8 +212,8 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             await expect(leftPan).toBeVisible();
             await expect(rightPan).toBeVisible();
 
-            // Tap a weight from the tray (any button in the tray region)
-            const trayButton = page.locator('[data-testid="physics-reset"]').locator('..').locator('button').first();
+            // Tap a weight from the tray
+            const trayButton = page.getByTestId('physics-tray-weight').first();
             await expect(trayButton).toBeVisible();
             await trayButton.click();
             break;

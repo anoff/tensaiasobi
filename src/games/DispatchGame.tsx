@@ -190,7 +190,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
   const [showConfetti, setShowConfetti] = useState(false);
   const [shakeEventId, setShakeEventId] = useState<number | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
-  const [now, setNow] = useState(Date.now);
+  const [now, setNow] = useState(() => Date.now());
 
   const eventIdRef = useRef(0);
   const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -292,14 +292,17 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
           setEvents((eventList) =>
             eventList.map((e) => (e.id === prev.targetEventId ? { ...e, solved: true } : e))
           );
-          setScore((s) => s + 1);
+          let updatedScore = 0;
+          setScore((s) => {
+            updatedScore = s + 1;
+            return updatedScore;
+          });
           onStarEarned?.(1);
           playSuccess();
 
           // Show confetti every 5 solved events
           setShowConfetti((current) => {
-            const newScore = score + 1;
-            return newScore > 0 && newScore % 5 === 0 ? true : current;
+            return updatedScore > 0 && updatedScore % 5 === 0 ? true : current;
           });
 
           setTimeout(() => {

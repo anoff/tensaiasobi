@@ -26,7 +26,7 @@ export const ja: TranslationSchema = {
     dobble: "えもじマッチ",
     shiritori: "しりとり",
     puzzle: "まほうパズル",
-    dispatch: "しょうぼうし",
+    dispatch: "きんきゅう",
     physics: "てんびん",
   },
   parentGate: {
@@ -333,7 +333,7 @@ export const ja: TranslationSchema = {
     forest: "まほうのくま",
   },
   dispatchGame: {
-    title: "しょうぼうしゲーム！🚓🚒🚑",
+    title: "きんきゅうしゅつどう！🚓🚒🚑",
     subtitle: "ただしい くるまを じこに おくろう！",
     help: "くるまを えらんで、マップの おなじ じこを タップ！",
     start: "タップして スタート！",

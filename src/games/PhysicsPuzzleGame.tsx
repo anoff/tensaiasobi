@@ -242,6 +242,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, playError, onStarEarne
             <button
               key={w.id}
               type="button"
+              data-testid="physics-tray-weight"
               onClick={() => handleWeightClick(w)}
               className={`
                 w-12 h-12 text-2xl rounded-xl border-2 flex items-center justify-center
