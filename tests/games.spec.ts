@@ -37,7 +37,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
       const mathLauncher = page.getByTestId('launch-math');
       await expect(mathLauncher).toBeVisible();
 
-      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics'] as const;
+      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort'] as const;
 
       for (const gameKey of gameKeys) {
         // 2. Launch Game
@@ -216,6 +216,19 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             const trayButton = page.getByTestId('physics-tray-weight').first();
             await expect(trayButton).toBeVisible();
             await trayButton.click();
+            break;
+          }
+
+          case 'tower-sort': {
+            // Check that at least two tower buttons are visible
+            const tower = page.getByTestId('tower-sort-tower').first();
+            await expect(tower).toBeVisible();
+
+            // Select the first tower then a second tower to attempt a move
+            await tower.click();
+            const secondTower = page.getByTestId('tower-sort-tower').nth(1);
+            await expect(secondTower).toBeVisible();
+            await secondTower.click();
             break;
           }
         }

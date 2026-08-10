@@ -26,6 +26,7 @@ export const en = {
     puzzle: "Magic Puzzle",
     dispatch: "City Dispatch",
     physics: "Balance",
+    towerSort: "Tower Sort",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -349,6 +350,15 @@ export const en = {
     help: "Tap a weight, then tap the side to place it!",
     tray: "Weights",
     victory: "🎉 Perfectly balanced!",
+  },
+  towerSort: {
+    title: "Tower Sort! 🗼",
+    subtitle: "Move the top emoji to sort the towers!",
+    help: "Tap a tower to lift, then tap another to drop!",
+    victory: "🎉 Sorted!",
+    moves: "moves",
+    perfect: "Perfect solve! 🌟",
+    playAgain: "Play Again",
   },
   challenge: {
     title: "Challenge Mode 🎯",

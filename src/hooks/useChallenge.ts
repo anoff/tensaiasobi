@@ -20,6 +20,7 @@ const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
   puzzle: true,
   dispatch: true,
   physics: true,
+  towerSort: true,
 };
 
 export function useChallenge() {

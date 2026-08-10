@@ -28,6 +28,7 @@ export const fr: TranslationSchema = {
     puzzle: "Puzzle Magique",
     dispatch: "Interventions",
     physics: "Balance",
+    towerSort: "Tri des Tours",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -351,6 +352,15 @@ export const fr: TranslationSchema = {
     help: "Appuie sur un poids, puis sur le côté où le poser !",
     tray: "Poids",
     victory: "🎉 Parfaitement équilibré !",
+  },
+  towerSort: {
+    title: "Tri des Tours ! 🗼",
+    subtitle: "Déplace l'emoji du haut pour trier les tours !",
+    help: "Tape une tour pour soulever, puis une autre pour déposer !",
+    victory: "🎉 Trié !",
+    moves: "coups",
+    perfect: "Solution parfaite ! 🌟",
+    playAgain: "Rejouer",
   },
   challenge: {
     title: "Mode Défi 🎯",

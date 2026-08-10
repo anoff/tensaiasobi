@@ -28,6 +28,7 @@ export const ja: TranslationSchema = {
     puzzle: "まほうパズル",
     dispatch: "きんきゅう",
     physics: "てんびん",
+    towerSort: "タワーソート",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -351,6 +352,15 @@ export const ja: TranslationSchema = {
     help: "おもりを タップして、おきたい ほうを タップ！",
     tray: "おもり",
     victory: "🎉 ぴったり たいしょう！",
+  },
+  towerSort: {
+    title: "タワーソート！ 🗼",
+    subtitle: "うえの えもじを うつして タワーを そろえよう！",
+    help: "タワーを タップして えもじを もちあげ、ほかの タワーに おくよ！",
+    victory: "🎉 そろったよ！",
+    moves: "てすう",
+    perfect: "パーフェクト！ 🌟",
+    playAgain: "もういちどあそぶ",
   },
   challenge: {
     title: "チャレンジモード 🎯",
