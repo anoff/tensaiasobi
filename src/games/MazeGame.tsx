@@ -145,7 +145,6 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
       case 'medium':
         return { cols: 6, rows: 6 };
       case 'hard':
-      case 'expert':
         return { cols: 8, rows: 8 };
       default:
         return { cols: 6, rows: 6 };

@@ -28,6 +28,7 @@ export const de: TranslationSchema = {
     puzzle: "Zauberpuzzle",
     dispatch: "Einsatz",
     physics: "Waage",
+    towerSort: "Turm-Sortierung",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -351,6 +352,15 @@ export const de: TranslationSchema = {
     help: "Tippe ein Gewicht an, dann tippe auf die Seite, um es zu legen!",
     tray: "Gewichte",
     victory: "🎉 Perfekt ausbalanciert!",
+  },
+  towerSort: {
+    title: "Turm-Sortierung! 🗼",
+    subtitle: "Verschiebe das oberste Emoji, um die Türme zu sortieren!",
+    help: "Tippe einen Turm an, hebe das Emoji ab und tippe auf einen anderen Turm!",
+    victory: "🎉 Sortiert!",
+    moves: "Züge",
+    perfect: "Perfekt gelöst! 🌟",
+    playAgain: "Nochmal spielen",
   },
   challenge: {
     title: "Herausforderungsmodus 🎯",

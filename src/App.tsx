@@ -19,6 +19,7 @@ import Shiritori from './games/Shiritori';
 import PuzzleGame from './games/PuzzleGame';
 import DispatchGame from './games/DispatchGame';
 import PhysicsPuzzleGame from './games/PhysicsPuzzleGame';
+import TowerSort from './games/TowerSort';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 import Confetti from 'react-confetti';
 
@@ -30,7 +31,7 @@ import { useStars } from './hooks/useStars';
 import { useVouchers } from './hooks/useVouchers';
 import { useChallenge } from './hooks/useChallenge';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
@@ -97,6 +98,13 @@ function AppContent() {
     // Clear new game progress
     localStorage.removeItem('dispatch_highscore');
     localStorage.removeItem('physics_highscore');
+
+    // Clear Tower Sort best moves
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('tower_sort_best_moves_')) {
+        localStorage.removeItem(key);
+      }
+    });
 
     // Clear gamification progress
     resetStars();
@@ -222,6 +230,16 @@ function AppContent() {
             playSuccess={playSuccess}
             playError={playError}
             onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+          />
+        );
+      case 'towerSort':
+        return (
+          <TowerSort
+            playPop={playPop}
+            playSuccess={playSuccess}
+            playError={playError}
+            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            challengeMode={challengeActive}
           />
         );
       case 'town':
@@ -542,6 +560,19 @@ function AppContent() {
                 >
                   <span className="text-5xl">⚖️</span>
                   <span className="text-lg font-black block leading-tight">{t.menu.physics}</span>
+                </KidButton>
+              )}
+
+              {(!challengeActive || challengeAllowedGames.towerSort) && (
+                <KidButton
+                  color="blue"
+                  size="lg"
+                  data-testid="launch-tower-sort"
+                  onClick={() => handleScreenChange('towerSort')}
+                  className="aspect-square flex-col gap-2 rounded-[2rem]"
+                >
+                  <span className="text-5xl">🗼</span>
+                  <span className="text-lg font-black block leading-tight">{t.menu.towerSort}</span>
                 </KidButton>
               )}
             </div>

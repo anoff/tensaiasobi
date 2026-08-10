@@ -37,7 +37,6 @@ function getDifficultySettings(diff: GameDifficulty) {
     case 'medium':
       return { targetDifference: 2, trayCount: 4, starMultiplier: 2 };
     case 'hard':
-    case 'expert':
       return { targetDifference: 3, trayCount: 5, starMultiplier: 3 };
     default:
       return { targetDifference: 2, trayCount: 4, starMultiplier: 2 };

@@ -28,6 +28,7 @@ export const ko: TranslationSchema = {
     puzzle: "마법 퍼즐",
     dispatch: "출동",
     physics: "저울",
+    towerSort: "타워 정렬",
   },
   parentGate: {
     title: "부모님 전용 🔒",
@@ -351,6 +352,15 @@ export const ko: TranslationSchema = {
     help: "무게추를 터치하고 올릴 쪽을 터치하세요!",
     tray: "무게추",
     victory: "🎉 완벽하게 균형을 잡았어요!",
+  },
+  towerSort: {
+    title: "타워 정렬! 🗼",
+    subtitle: "맨 위 이모지를 옮겨 타워를 정렬하세요!",
+    help: "타워를 터치해 들어 올리고, 다른 타워에 놓으세요!",
+    victory: "🎉 정렬 완료!",
+    moves: "이동",
+    perfect: "완벽한 풀이! 🌟",
+    playAgain: "다시 하기",
   },
   challenge: {
     title: "도전 모드 🎯",
