@@ -62,7 +62,7 @@ const generateQuestion = (currentLevel: GameDifficulty): Question => {
         answer = num1 - num2;
       }
     } else {
-      // Expert: Multiplication & Division
+      // Hard: Multiplication & Division
       if (Math.random() > 0.5) {
         num1 = Math.floor(Math.random() * 8) + 2; // 2-9
         num2 = Math.floor(Math.random() * 6) + 2; // 2-7
@@ -184,7 +184,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
       {/* Level Selection Tabs */}
       <DifficultySelector
         selected={level}
-        options={['easy', 'medium', 'hard', 'expert']}
+        options={['easy', 'medium', 'hard']}
         onChange={handleLevelChange}
       />
 

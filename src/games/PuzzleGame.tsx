@@ -316,8 +316,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
     switch (level) {
       case 'easy': return 2;
       case 'medium': return 3;
-      case 'hard': return 4;
-      case 'expert': return 5;
+      case 'hard': return 5;
       default: return 2;
     }
   }, [level]);
@@ -415,8 +414,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
 
           let starAward = 4;
           if (level === 'medium') starAward = 10;
-          else if (level === 'hard') starAward = 18;
-          else if (level === 'expert') starAward = 28;
+          else if (level === 'hard') starAward = 28;
 
           onStarEarned?.(starAward);
         }
@@ -508,7 +506,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
       {/* Level / Difficulty Selector */}
       <DifficultySelector
         selected={level}
-        options={['easy', 'medium', 'hard', 'expert']}
+        options={['easy', 'medium', 'hard']}
         onChange={handleLevelChange}
         className="mt-1 max-w-[320px]"
       />
