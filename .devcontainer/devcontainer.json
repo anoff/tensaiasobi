@@ -18,5 +18,8 @@
       "label": "Vite Dev Server",
       "onAutoForward": "notify"
     }
+  },
+  "features": {
+    "ghcr.io/postfinance/devcontainer-features/opencode:1": {}
   }
 }
