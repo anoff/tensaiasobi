@@ -71,16 +71,17 @@ function canMove(towers: string[][], from: number, to: number, height: number): 
   return dest[dest.length - 1] === source[source.length - 1];
 }
 
-function isSolved(towers: string[][]): boolean {
+function isSolved(towers: string[][], height: number): boolean {
   return towers.every((tower) => {
     if (tower.length === 0) return true;
+    if (tower.length !== height) return false;
     const first = tower[0];
     return tower.every((emoji) => emoji === first);
   });
 }
 
 function solveTowers(towers: string[][], height: number, maxDepth = 80): number | null {
-  if (isSolved(towers)) return 0;
+  if (isSolved(towers, height)) return 0;
 
   const queue: [string[][], number][] = [[towers, 0]];
   const seen = new Set<string>([JSON.stringify(towers)]);
@@ -96,7 +97,7 @@ function solveTowers(towers: string[][], height: number, maxDepth = 80): number 
         next[to].push(next[from].pop()!);
         const key = JSON.stringify(next);
         if (seen.has(key)) continue;
-        if (isSolved(next)) return depth + 1;
+        if (isSolved(next, height)) return depth + 1;
         seen.add(key);
         queue.push([next, depth + 1]);
       }
@@ -140,7 +141,7 @@ function generateTowers(difficulty: GameDifficulty, theme: Theme) {
       }
     }
 
-    if (!isSolved(current)) {
+    if (!isSolved(current, height)) {
       const optimal = solveTowers(current, height);
       if (optimal !== null) {
         return { towers: current, optimalMoves: optimal };
@@ -236,7 +237,7 @@ export function TowerSort({ playPop, playSuccess, playError, onStarEarned }: Tow
         setMoveCount(newMoveCount);
         setSelectedTower(null);
 
-        if (isSolved(newTowers)) {
+        if (isSolved(newTowers, config.height)) {
           setIsWon(true);
           setShowConfetti(true);
           playSuccess();
