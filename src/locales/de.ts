@@ -26,6 +26,8 @@ export const de: TranslationSchema = {
     dobble: "Emoji-Suche",
     shiritori: "Wortschlange",
     puzzle: "Zauberpuzzle",
+    dispatch: "Einsatz",
+    physics: "Waage",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -329,6 +331,26 @@ export const de: TranslationSchema = {
     dino: "Freundlicher Dino",
     ocean: "Tiefsee",
     forest: "Zauberbär",
+  },
+  dispatchGame: {
+    title: "Stadteinsatz! 🚓🚒🚑",
+    subtitle: "Schicke das richtige Fahrzeug zu jedem Notfall!",
+    help: "Wähle ein Fahrzeug, dann tippe auf den passenden Notfall auf der Karte!",
+    start: "Tippen zum Starten!",
+    difficulty: "Schwierigkeit",
+    score: "Gelöst",
+    vehicles: {
+      police: "Polizei",
+      fire: "Feuerwehr",
+      ambulance: "Rettung",
+    },
+  },
+  physicsGame: {
+    title: "Wagepuzzle! ⚖️",
+    subtitle: "Lege Gewichte, damit die Wage waagerecht wird!",
+    help: "Tippe ein Gewicht an, dann tippe auf die Seite, um es zu legen!",
+    tray: "Gewichte",
+    victory: "🎉 Perfekt ausbalanciert!",
   },
   challenge: {
     title: "Herausforderungsmodus 🎯",

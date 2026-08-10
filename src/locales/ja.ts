@@ -26,6 +26,8 @@ export const ja: TranslationSchema = {
     dobble: "えもじマッチ",
     shiritori: "しりとり",
     puzzle: "まほうパズル",
+    dispatch: "しょうぼうし",
+    physics: "てんびん",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -329,6 +331,26 @@ export const ja: TranslationSchema = {
     dino: "きょうりゅう",
     ocean: "しんかい",
     forest: "まほうのくま",
+  },
+  dispatchGame: {
+    title: "しょうぼうしゲーム！🚓🚒🚑",
+    subtitle: "ただしい くるまを じこに おくろう！",
+    help: "くるまを えらんで、マップの おなじ じこを タップ！",
+    start: "タップして スタート！",
+    difficulty: "むずかしさ",
+    score: "かいけつ",
+    vehicles: {
+      police: "けいさつ",
+      fire: "しょうぼう",
+      ambulance: "きゅうきゅう",
+    },
+  },
+  physicsGame: {
+    title: "てんびんパズル！⚖️",
+    subtitle: "おもりを おいて、てんびんを たてに しよう！",
+    help: "おもりを タップして、おきたい ほうを タップ！",
+    tray: "おもり",
+    victory: "🎉 ぴったり たいしょう！",
   },
   challenge: {
     title: "チャレンジモード 🎯",

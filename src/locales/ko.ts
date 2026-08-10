@@ -26,6 +26,8 @@ export const ko: TranslationSchema = {
     dobble: "이모지 매치",
     shiritori: "끝말잇기",
     puzzle: "마법 퍼즐",
+    dispatch: "출동",
+    physics: "저울",
   },
   parentGate: {
     title: "부모님 전용 🔒",
@@ -329,6 +331,26 @@ export const ko: TranslationSchema = {
     dino: "친근한 공룡",
     ocean: "깊은 바다",
     forest: "마법 곰",
+  },
+  dispatchGame: {
+    title: "출동 게임! 🚓🚒🚑",
+    subtitle: "올바른 차량을 사고 현장으로 보내요!",
+    help: "차량을 고르고 지도의 같은 사고를 터치하세요!",
+    start: "터치해서 시작!",
+    difficulty: "난이도",
+    score: "해결",
+    vehicles: {
+      police: "경찰",
+      fire: "소방",
+      ambulance: "구급",
+    },
+  },
+  physicsGame: {
+    title: "저울 퍼즐! ⚖️",
+    subtitle: "무게추를 올려 시소를 평평하게 만드세요!",
+    help: "무게추를 터치하고 올릴 쪽을 터치하세요!",
+    tray: "무게추",
+    victory: "🎉 완벽하게 균형을 잡았어요!",
   },
   challenge: {
     title: "도전 모드 🎯",

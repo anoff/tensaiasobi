@@ -24,6 +24,8 @@ export const en = {
     dobble: "Emoji Match",
     shiritori: "Word Chain",
     puzzle: "Magic Puzzle",
+    dispatch: "City Dispatch",
+    physics: "Balance",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -327,6 +329,26 @@ export const en = {
     dino: "Friendly Dino",
     ocean: "Deep Sea",
     forest: "Magic Bear",
+  },
+  dispatchGame: {
+    title: "City Dispatch! 🚓🚒🚑",
+    subtitle: "Send the right vehicle to each emergency!",
+    help: "Pick a vehicle, then tap the matching emergency on the map!",
+    start: "Tap to Start!",
+    difficulty: "Difficulty",
+    score: "Solved",
+    vehicles: {
+      police: "Police",
+      fire: "Fire",
+      ambulance: "Ambulance",
+    },
+  },
+  physicsGame: {
+    title: "Balance Puzzle! ⚖️",
+    subtitle: "Place weights to make the seesaw level!",
+    help: "Tap a weight, then tap the side to place it!",
+    tray: "Weights",
+    victory: "🎉 Perfectly balanced!",
   },
   challenge: {
     title: "Challenge Mode 🎯",
