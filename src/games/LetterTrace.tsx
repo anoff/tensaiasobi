@@ -1,17 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Confetti from 'react-confetti';
+import React, { useState, useRef } from 'react';
+import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
 import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import DifficultySelector from '../components/DifficultySelector';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation, Language } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
 import { starMultiplier } from '../utils/difficulty';
-
-interface Point {
-  x: number; // 0 to 100
-  y: number; // 0 to 100
-}
+import { useCanvasLoop } from '../hooks/useCanvasLoop';
+import { spawnParticles, drawParticles, type Particle } from '../utils/particles';
+import {
+  getPixelCoord,
+  getDistanceToPath,
+  getPathSamples,
+  getMarginSize as marginMultiplier,
+  type Point,
+} from '../utils/traceGeometry';
 
 interface LetterStroke {
   points: Point[];
@@ -501,25 +505,7 @@ const COVERAGE_TOLERANCE_MULTIPLIER = 1.3; // How close a drawn point must be to
 const ACCURACY_THRESHOLD = 0.85; // Share of drawn points that must stay within the corridor margin.
 const COMPLETION_THRESHOLD = 0.82; // Share of the target stroke that must be covered by drawn points.
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  color: string;
-  alpha: number;
-  decay: number;
-}
-
-interface LetterTraceProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-}
-
-export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: LetterTraceProps) {
+export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
   const { t, language } = useTranslation();
   const levels = LEVELS_BY_LANGUAGE[language];
   const [level, setLevel] = useState<LetterLevel>(levels[0]);
@@ -535,29 +521,14 @@ export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: L
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isDrawingRef = useRef(false);
   const particlesRef = useRef<Particle[]>([]);
-  const animationFrameRef = useRef<number | null>(null);
 
   const letters = LEVEL_DATA[level];
   const letter = letters[letterIndex];
   const activeStrokeIndex = completedStrokes.length;
 
-  const getPixelCoord = (p: Point, size: number) => ({
-    x: (p.x / 100) * size,
-    y: (p.y / 100) * size,
-  });
-
   // Letter tracing is intentionally stricter than shape tracing: tighter corridors at every difficulty.
-  const getMarginSize = (canvasWidth: number): number => {
-    switch (difficulty) {
-      case 'easy':
-        return canvasWidth * 0.1;
-      case 'medium':
-        return canvasWidth * 0.06;
-      case 'hard':
-        return canvasWidth * 0.035;
-    }
-    return 0;
-  };
+  const getMarginSize = (canvasWidth: number): number =>
+    marginMultiplier(canvasWidth, difficulty, { easy: 0.1, medium: 0.06, hard: 0.035 });
 
   const resetProgress = () => {
     setCompletedStrokes([]);
@@ -580,105 +551,51 @@ export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: L
     resetProgress();
   };
 
-  // Keep the selected level in sync with the app's language — e.g. switching away from Japanese
-  // should drop out of Hiragana/Katakana into whichever script is valid for the new language.
-  // Adjusting state directly during render (rather than in an effect) is the recommended React
-  // pattern for resetting state when a prop/derived value changes.
-  const [prevLanguage, setPrevLanguage] = useState(language);
-  if (language !== prevLanguage) {
-    setPrevLanguage(language);
-    if (!levels.includes(level)) {
-      setLevel(levels[0]);
-      setLetterIndex(0);
-      setCompletedStrokes([]);
-      setCurrentPoints([]);
-      setIsWon(false);
-      setShowConfetti(false);
-      setShowErrorShake(false);
-    }
-  }
-
   const nextLetter = () => {
     playPop();
     const nextIdx = (letterIndex + 1) % letters.length;
     loadLetter(nextIdx);
   };
 
-  const spawnParticles = (x: number, y: number, color: string) => {
-    for (let i = 0; i < 8; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 1.0 + Math.random() * 2.5;
-      particlesRef.current.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        size: 3 + Math.random() * 5,
-        color,
-        alpha: 1,
-        decay: 0.02 + Math.random() * 0.02,
-      });
-    }
-  };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resizeCanvas = () => {
-      const container = containerRef.current;
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height, 420);
-      canvas.width = size;
-      canvas.height = size;
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const drawStrokePath = (points: Point[], size: number) => {
-      ctx.beginPath();
-      points.forEach((p, idx) => {
-        const pt = getPixelCoord(p, size);
-        if (idx === 0) ctx.moveTo(pt.x, pt.y);
-        else ctx.lineTo(pt.x, pt.y);
-      });
-      ctx.stroke();
-    };
-
-    const drawStrokeMarker = (points: Point[], size: number, label: string, opts: { pulse: boolean; alpha: number; fill: string }) => {
-      if (points.length === 0) return;
-      const start = getPixelCoord(points[0], size);
-      const radius = opts.pulse ? 11 + Math.sin(Date.now() / 150) * 3 : 9;
-
-      ctx.save();
-      ctx.globalAlpha = opts.alpha;
-      ctx.fillStyle = opts.fill;
-      if (opts.pulse) {
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = opts.fill;
-      }
-      ctx.beginPath();
-      ctx.arc(start.x, start.y, radius, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 11px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label, start.x, start.y);
-      ctx.restore();
-    };
-
-    const drawLoop = () => {
-      if (!canvas || !ctx) return;
-
-      const size = canvas.width;
+  useCanvasLoop(
+    canvasRef,
+    containerRef,
+    (ctx, size) => {
       const marginSize = getMarginSize(size);
+
+      const drawStrokePath = (points: Point[], strokeSize: number) => {
+        ctx.beginPath();
+        points.forEach((p, idx) => {
+          const pt = getPixelCoord(p, strokeSize);
+          if (idx === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        });
+        ctx.stroke();
+      };
+
+      const drawStrokeMarker = (points: Point[], strokeSize: number, label: string, opts: { pulse: boolean; alpha: number; fill: string }) => {
+        if (points.length === 0) return;
+        const start = getPixelCoord(points[0], strokeSize);
+        const radius = opts.pulse ? 11 + Math.sin(Date.now() / 150) * 3 : 9;
+
+        ctx.save();
+        ctx.globalAlpha = opts.alpha;
+        ctx.fillStyle = opts.fill;
+        if (opts.pulse) {
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = opts.fill;
+        }
+        ctx.beginPath();
+        ctx.arc(start.x, start.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, start.x, start.y);
+        ctx.restore();
+      };
 
       ctx.clearRect(0, 0, size, size);
 
@@ -766,38 +683,11 @@ export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: L
       }
 
       // Draw particles
-      const particles = particlesRef.current;
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.alpha -= p.decay;
-        if (p.alpha <= 0) {
-          particles.splice(i, 1);
-        } else {
-          ctx.save();
-          ctx.globalAlpha = p.alpha;
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-      }
-
-      animationFrameRef.current = requestAnimationFrame(drawLoop);
-    };
-
-    drawLoop();
-
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [letter, activeStrokeIndex, completedStrokes, currentPoints, isWon, difficulty]);
+      drawParticles(ctx, particlesRef.current);
+    },
+    [letter, activeStrokeIndex, completedStrokes, currentPoints, isWon, difficulty],
+    420
+  );
 
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isWon) return;
@@ -820,58 +710,8 @@ export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: L
     setCurrentPoints((prev) => [...prev, coords]);
 
     if (Math.random() < 0.25) {
-      spawnParticles(coords.x, coords.y, letter.color);
+      spawnParticles(particlesRef.current, coords.x, coords.y, letter.color, 8);
     }
-  };
-
-  const getDistanceToSegment = (
-    p: { x: number; y: number },
-    a: { x: number; y: number },
-    b: { x: number; y: number }
-  ) => {
-    const dx = b.x - a.x;
-    const dy = b.y - a.y;
-    if (dx === 0 && dy === 0) {
-      return Math.hypot(p.x - a.x, p.y - a.y);
-    }
-    let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy);
-    t = Math.max(0, Math.min(1, t));
-    const projX = a.x + t * dx;
-    const projY = a.y + t * dy;
-    return Math.hypot(p.x - projX, p.y - projY);
-  };
-
-  const getDistanceToPath = (
-    p: { x: number; y: number },
-    pixelPoints: { x: number; y: number }[]
-  ) => {
-    let minDistance = Infinity;
-    for (let i = 0; i < pixelPoints.length - 1; i++) {
-      const dist = getDistanceToSegment(p, pixelPoints[i], pixelPoints[i + 1]);
-      if (dist < minDistance) {
-        minDistance = dist;
-      }
-    }
-    return minDistance;
-  };
-
-  const getPathSamples = (pixelPoints: { x: number; y: number }[]) => {
-    const samples: { x: number; y: number }[] = [];
-    const stepSize = 10;
-
-    for (let i = 0; i < pixelPoints.length - 1; i++) {
-      const a = pixelPoints[i];
-      const b = pixelPoints[i + 1];
-      const dist = Math.hypot(b.x - a.x, b.y - a.y);
-      const steps = Math.max(1, Math.floor(dist / stepSize));
-      for (let s = 0; s <= steps; s++) {
-        samples.push({
-          x: a.x + (s / steps) * (b.x - a.x),
-          y: a.y + (s / steps) * (b.y - a.y),
-        });
-      }
-    }
-    return samples;
   };
 
   const handlePointerUp = () => {
@@ -959,12 +799,7 @@ export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: L
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-2 w-full select-none max-w-lg mx-auto h-full animate-fade-in">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={150}
-          recycle={false}
-        />
+        <GameConfetti pieces={150} />
       )}
 
       {/* Level Selector: only the scripts relevant to the current language are shown */}

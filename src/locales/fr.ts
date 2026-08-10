@@ -301,6 +301,7 @@ export const fr: TranslationSchema = {
     draw: "Match nul ! 🤝",
     start: "Appuie pour commencer !",
     seconds: "s",
+    playerScore: "Score Joueur {count} : ",
   },
   shiritori: {
     title: "Suite de Mots 🔗",

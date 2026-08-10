@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 import { PUZZLE_IMAGES, PuzzleImage } from '../data/puzzleImages';
@@ -276,14 +276,7 @@ export function JigsawPiece({
 // PuzzleGame Main Component
 // -----------------------------------------------------------------------------
 
-interface PuzzleGameProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-}
-
-export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: PuzzleGameProps) {
+export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
   const [level, setLevel] = useState<GameDifficulty>('easy');
   const [selectedImage, setSelectedImage] = useState<PuzzleImage>(PUZZLE_IMAGES[0]);
 
@@ -448,12 +441,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-4 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={120}
-          recycle={false}
-        />
+        <GameConfetti pieces={120} />
       )}
 
       {/* Title block */}

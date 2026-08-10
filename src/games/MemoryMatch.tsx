@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 import { starMultiplier } from '../utils/difficulty';
@@ -15,16 +15,9 @@ interface Card {
   isMatched: boolean;
 }
 
-interface MemoryMatchProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-}
-
 const ANIMAL_POOL = ['🦁', '🐯', '🐼', '🐨', '🦊', '🐰', '🐸', '🐷', '🐮', '🐔', '🐧', '🦉', '🐻', '🐹', '🐭', '🐱'];
 
-export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: MemoryMatchProps) {
+export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
   const [level, setLevel] = useState<GameDifficulty>('easy');
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
@@ -134,12 +127,7 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: M
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={140}
-          recycle={false}
-        />
+        <GameConfetti pieces={140} />
       )}
 
       {/* Header Info */}

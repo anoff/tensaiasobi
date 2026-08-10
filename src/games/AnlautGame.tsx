@@ -1,18 +1,12 @@
 import { useState, useMemo } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
 import StreakBadge from '../components/StreakBadge';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
-
-interface AnlautGameProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
-}
+import type { GameProps } from '../types/game';
+import AnswerBubble from '../components/AnswerBubble';
 
 // 63 child-friendly emoji keys
 const EMOJI_ITEMS: string[] = [
@@ -73,7 +67,7 @@ const generateOptions = (
   return shuffle([correctChar, ...Array.from(wrongOptionsSet)]);
 };
 
-export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: AnlautGameProps) {
+export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: GameProps) {
   const { language, t } = useTranslation();
 
   const [currentItem, setCurrentItem] = useState<string>(() => {
@@ -180,12 +174,7 @@ export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, chal
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={120}
-          recycle={false}
-        />
+        <GameConfetti pieces={120} />
       )}
 
       {/* Header Panel */}
@@ -259,38 +248,18 @@ export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, chal
             {options.map((opt) => {
               const isThisSelected = selectedOption === opt;
 
-              let bubbleColorClass =
-                'from-sky-300/40 via-sky-400/70 to-sky-600/90 shadow-[0_10px_20px_rgba(14,165,233,0.3),_inset_0_4px_12px_rgba(255,255,255,0.6)] border-sky-400';
-
-              if (isThisSelected) {
-                if ((isCorrect as boolean) === true) {
-                  bubbleColorClass =
-                    'from-emerald-300 via-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.4)] border-emerald-400 scale-95 duration-100';
-                } else if (isCorrect === false) {
-                  bubbleColorClass =
-                    'from-red-300 via-red-400 to-red-600 shadow-[0_4px_10px_rgba(239,68,68,0.4)] border-red-400 animate-shake scale-95 duration-100';
-                }
-              }
-
               return (
-                <button
+                <AnswerBubble
                   key={opt}
-                  data-testid="anlaut-option"
+                  selected={isThisSelected}
+                  correct={isCorrect}
                   disabled={selectedOption !== null}
                   onClick={() => handleOptionSelect(opt)}
-                  className={`
-                    relative w-full aspect-square rounded-full flex items-center justify-center
-                    text-4xl md:text-5xl font-black text-white border-4 transition-all duration-150
-                    bg-gradient-to-br hover:scale-105 active:scale-95 outline-none cursor-pointer
-                    ${bubbleColorClass}
-                  `}
+                  testId="anlaut-option"
+                  className="text-4xl md:text-5xl font-black text-white"
                 >
-                  {/* Bubble reflection effect */}
-                  <div className="absolute top-3 left-4 w-1/4 h-1/8 bg-white/60 rounded-full -rotate-12 pointer-events-none" />
-                  <div className="absolute bottom-2 right-4 w-1/8 h-1/8 bg-white/20 rounded-full pointer-events-none" />
-
                   {opt}
-                </button>
+                </AnswerBubble>
               );
             })}
           </div>

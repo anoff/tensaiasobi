@@ -1,21 +1,17 @@
 import { useState, useEffect } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import StreakBadge from '../components/StreakBadge';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
+import type { GameProps } from '../types/game';
 
 interface EmojiItem {
   emoji: string;
   isOdd: boolean;
 }
 
-interface OddOneOutProps {
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
-}
+type OddOneOutProps = Omit<GameProps, 'playPop'>;
 
 const CATEGORIES: Record<string, string[]> = {
   animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🦆', '🦉'],
@@ -125,12 +121,7 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={120}
-          recycle={false}
-        />
+        <GameConfetti pieces={120} />
       )}
 
       {/* Header Info */}

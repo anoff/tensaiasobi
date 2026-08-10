@@ -40,6 +40,20 @@ function saveTown(grid: (TownCell | null)[][]) {
   }
 }
 
+/** Total 50% refund for every item placed on the grid. */
+function computeTotalRefund(grid: (TownCell | null)[][]): number {
+  let total = 0;
+  grid.forEach((row) => {
+    row.forEach((cell) => {
+      if (cell) {
+        const item = getItemById(cell.itemId);
+        if (item) total += Math.floor(item.cost / 2);
+      }
+    });
+  });
+  return total;
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -179,17 +193,7 @@ export function TownBuilder({
   // ------------------------------------------------------------------
 
   const handleConfirmDeleteAll = useCallback(() => {
-    let totalRefund = 0;
-    grid.forEach((row) => {
-      row.forEach((cell) => {
-        if (cell) {
-          const item = getItemById(cell.itemId);
-          if (item) {
-            totalRefund += Math.floor(item.cost / 2);
-          }
-        }
-      });
-    });
+    const totalRefund = computeTotalRefund(grid);
 
     setGrid(createEmptyGrid());
     if (totalRefund > 0) addStars(totalRefund);
@@ -468,17 +472,7 @@ export function TownBuilder({
       {/* Delete All Confirmation Overlay */}
       {/* ============================================================= */}
       {showDeleteAllPrompt && (() => {
-        let totalRefund = 0;
-        grid.forEach((row) => {
-          row.forEach((cell) => {
-            if (cell) {
-              const item = getItemById(cell.itemId);
-              if (item) {
-                totalRefund += Math.floor(item.cost / 2);
-              }
-            }
-          });
-        });
+        const totalRefund = computeTotalRefund(grid);
 
         return (
           <div

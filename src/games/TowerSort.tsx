@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface Theme {
@@ -52,13 +52,7 @@ const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
   hard: { types: 5, towers: 7, height: 5, scrambleSteps: 30, starsAward: 18 },
 };
 
-interface TowerSortProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
-}
+type TowerSortProps = GameProps;
 
 function canMove(towers: string[][], from: number, to: number, height: number): boolean {
   if (from === to) return false;
@@ -289,12 +283,7 @@ export function TowerSort({ playPop, playSuccess, playError, onStarEarned }: Tow
   return (
     <div className={`flex-1 flex flex-col items-center justify-between p-2 w-full select-none max-w-lg mx-auto h-full ${isDarkTheme ? 'text-white' : 'text-slate-800'}`}>
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={150}
-          recycle={false}
-        />
+        <GameConfetti pieces={150} />
       )}
 
       {/* Header Controls */}

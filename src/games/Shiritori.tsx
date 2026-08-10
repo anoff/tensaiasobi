@@ -1,17 +1,11 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
+import AnswerBubble from '../components/AnswerBubble';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
-
-interface ShiritoriProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
-}
+import type { GameProps } from '../types/game';
 
 // 88 child-friendly emojis from translation dictionary
 const EMOJI_ITEMS: string[] = [
@@ -220,7 +214,7 @@ const getPandaPlayChoice = (
   return '';
 };
 
-export function Shiritori({ playPop, playSuccess, playError, onStarEarned, challengeMode }: ShiritoriProps) {
+export function Shiritori({ playPop, playSuccess, playError, onStarEarned, challengeMode }: GameProps) {
   const { language, t } = useTranslation();
   
   // Memoized items dictionary
@@ -228,19 +222,19 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     return (t.anlautGame.items || {}) as Record<string, string>;
   }, [t.anlautGame.items]);
 
-  // Initial values computed once on mount
-  const startEmoji = useMemo(() => {
-    return getStartWord(language, itemsDict);
-  }, [language, itemsDict]);
-
-  const initialOptions = useMemo(() => {
-    return generateOptionsForWord(startEmoji, [startEmoji], language, itemsDict).options;
-  }, [startEmoji, language, itemsDict]);
+  // Initial values computed once on mount; App remounts on language change via key={language}
+  const [seed] = useState(() => {
+    const startEmoji = getStartWord(language, itemsDict);
+    return {
+      startEmoji,
+      options: generateOptionsForWord(startEmoji, [startEmoji], language, itemsDict).options,
+    };
+  });
 
   // Core Game State
   const [mode, setMode] = useState<'solo' | 'panda'>('solo');
-  const [chain, setChain] = useState<string[]>(() => [startEmoji]);
-  const [options, setOptions] = useState<string[]>(() => initialOptions);
+  const [chain, setChain] = useState<string[]>(() => [seed.startEmoji]);
+  const [options, setOptions] = useState<string[]>(() => seed.options);
   
   // Interaction/Animation Feedback State
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -489,12 +483,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-4 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={150}
-          recycle={false}
-        />
+        <GameConfetti pieces={150} />
       )}
 
       {/* Header Panel */}
@@ -655,44 +644,22 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
               const isThisSelected = selectedOption === opt;
               const isShaking = shakeOption === opt;
 
-              let bubbleColorClass =
-                'from-sky-300/40 via-sky-400/70 to-sky-600/90 shadow-[0_10px_20px_rgba(14,165,233,0.25),_inset_0_4px_12px_rgba(255,255,255,0.6)] border-sky-400';
-
-              if (isThisSelected) {
-                if (isCorrect === true) {
-                  bubbleColorClass =
-                    'from-emerald-300 via-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.4)] border-emerald-400 scale-95 duration-100';
-                } else if (isCorrect === false) {
-                  bubbleColorClass =
-                    'from-red-300 via-red-400 to-red-600 shadow-[0_4px_10px_rgba(239,68,68,0.4)] border-red-400 scale-95 duration-100';
-                }
-              } else if (isShaking) {
-                bubbleColorClass =
-                  'from-red-300 via-red-400 to-red-600 shadow-[0_4px_10px_rgba(239,68,68,0.4)] border-red-400 scale-95 duration-100';
-              }
-
               return (
-                <button
+                <AnswerBubble
                   key={opt}
-                  data-testid="shiritori-option"
-                  data-word={itemsDict[opt] || ''}
-                  data-emoji={opt}
+                  selected={isThisSelected}
+                  correct={isCorrect}
+                  shake={isShaking}
                   disabled={selectedOption !== null || turn !== 'player'}
                   onClick={() => handleOptionSelect(opt)}
-                  className={`
-                    relative w-full aspect-square rounded-full flex items-center justify-center
-                    border-4 transition-all duration-150 bg-gradient-to-br hover:scale-105 active:scale-95 
-                    outline-none cursor-pointer overflow-hidden ${bubbleColorClass} ${
-                      isShaking ? 'animate-shake' : ''
-                    }
-                  `}
+                  testId="shiritori-option"
+                  dataAttrs={{
+                    'data-word': itemsDict[opt] || '',
+                    'data-emoji': opt,
+                  }}
                 >
-                  {/* Bubble reflection effect */}
-                  <div className="absolute top-2.5 left-3 w-1/4 h-1/8 bg-white/60 rounded-full -rotate-12 pointer-events-none" />
-                  <div className="absolute bottom-2 right-3.5 w-1/8 h-1/8 bg-white/20 rounded-full pointer-events-none" />
-
                   <span className="text-5xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)]">{opt}</span>
-                </button>
+                </AnswerBubble>
               );
             })}
           </div>

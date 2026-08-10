@@ -21,7 +21,7 @@ import DispatchGame from './games/DispatchGame';
 import PhysicsPuzzleGame from './games/PhysicsPuzzleGame';
 import TowerSort from './games/TowerSort';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
-import Confetti from 'react-confetti';
+import GameConfetti from './components/GameConfetti';
 
 // Gamification imports
 import { StarCounter } from './components/StarCounter';
@@ -62,6 +62,11 @@ function AppContent() {
     cancelChallenge,
     claimChallengeReward,
   } = useChallenge();
+
+  const handleStarEarned = (amount: number) => {
+    if (challengeActive) addChallengeStars(amount);
+    else addStars(amount);
+  };
 
   useEffect(() => {
     if (!langOpen) return;
@@ -122,7 +127,7 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
             challengeMode={challengeActive}
           />
         );
@@ -131,7 +136,7 @@ function AppContent() {
           <OddOneOut
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
             challengeMode={challengeActive}
           />
         );
@@ -143,7 +148,7 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
           />
         );
       case 'maze':
@@ -152,7 +157,7 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
           />
         );
       case 'trace':
@@ -161,16 +166,17 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
           />
         );
       case 'letterTrace':
         return (
           <LetterTrace
+            key={language}
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
           />
         );
       case 'anlaut':
@@ -179,7 +185,7 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
             challengeMode={challengeActive}
           />
         );
@@ -189,7 +195,7 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
             challengeMode={challengeActive}
           />
         );
@@ -200,7 +206,7 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
             challengeMode={challengeActive}
           />
         );
@@ -210,7 +216,7 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
           />
         );
       case 'dispatch':
@@ -219,7 +225,7 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
           />
         );
       case 'physics':
@@ -227,7 +233,7 @@ function AppContent() {
           <PhysicsPuzzleGame
             playPop={playPop}
             playSuccess={playSuccess}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
+            onStarEarned={handleStarEarned}
           />
         );
       case 'towerSort':
@@ -236,8 +242,7 @@ function AppContent() {
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
-            onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
-            challengeMode={challengeActive}
+            onStarEarned={handleStarEarned}
           />
         );
       case 'town':
@@ -648,7 +653,7 @@ function AppContent() {
       {/* Challenge Unlocked Celebration Overlay */}
       {challengeActive && challengeStarsRemaining === 0 && (
         <div className="fixed inset-0 bg-slate-900/80 z-50 flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-300" data-testid="challenge-completion-modal">
-          <Confetti width={window.innerWidth} height={window.innerHeight} numberOfPieces={200} />
+          <GameConfetti pieces={200} recycle />
           <div className="bg-white rounded-[3rem] border-8 border-purple-400 p-8 max-w-sm w-full text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
             <span className="text-8xl block animate-bounce">🏆🎉</span>
             <h2 className="text-3xl font-black text-purple-800 leading-tight">

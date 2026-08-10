@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 
@@ -13,11 +13,7 @@ interface Weight {
   side: 'left' | 'right' | 'tray';
 }
 
-interface PhysicsPuzzleGameProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  onStarEarned?: (amount: number) => void;
-}
+type PhysicsPuzzleGameProps = Omit<GameProps, 'playError'>;
 
 const WEIGHT_EMOJIS = [
   { emoji: '🍎', mass: 1 },
@@ -149,12 +145,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
   return (
     <div className="flex-1 flex flex-col items-center w-full h-full select-none max-w-lg mx-auto px-2 py-2">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={120}
-          recycle={false}
-        />
+        <GameConfetti pieces={120} />
       )}
 
       <div className="text-center space-y-1 mb-2">
