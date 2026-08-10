@@ -18,6 +18,8 @@ const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
   anlaut: true,
   shiritori: true,
   puzzle: true,
+  dispatch: true,
+  physics: true,
 };
 
 export function useChallenge() {

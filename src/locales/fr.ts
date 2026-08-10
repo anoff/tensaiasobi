@@ -26,6 +26,8 @@ export const fr: TranslationSchema = {
     dobble: "Emoji Match",
     shiritori: "Suite de Mots",
     puzzle: "Puzzle Magique",
+    dispatch: "Interventions",
+    physics: "Balance",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -329,6 +331,26 @@ export const fr: TranslationSchema = {
     dino: "Gentil Dino",
     ocean: "Abysses",
     forest: "Ours Magique",
+  },
+  dispatchGame: {
+    title: "Interventions ! 🚓🚒🚑",
+    subtitle: "Envoie le bon véhicule à chaque urgence !",
+    help: "Choisis un véhicule, puis appuie sur l'urgence correspondante sur la carte !",
+    start: "Appuie pour commencer !",
+    difficulty: "Difficulté",
+    score: "Résolus",
+    vehicles: {
+      police: "Police",
+      fire: "Pompiers",
+      ambulance: "Ambulance",
+    },
+  },
+  physicsGame: {
+    title: "Puzzle Balance ! ⚖️",
+    subtitle: "Place les poids pour équilibrer la balançoire !",
+    help: "Appuie sur un poids, puis sur le côté où le poser !",
+    tray: "Poids",
+    victory: "🎉 Parfaitement équilibré !",
   },
   challenge: {
     title: "Mode Défi 🎯",

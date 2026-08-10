@@ -31,6 +31,8 @@ A modern, lightning-fast static web app designed for young children (ages 3-8). 
 9. **Word Chain (Shiritori) 🗣️**: A fun word-building chain game.
 10. **Magic Puzzle 🧩**: Jigsaw puzzle with interlocking pieces, silhouette guides, and dynamic SVG cuts.
 11. **My Town 🏡**: A sandbox builder to place trees, houses, and roads using stars earned from other games.
+12. **City Dispatch 🚓🚒🚑**: Race to send the right emergency vehicle to fires, injuries, and alerts across a tiny city.
+13. **Balance ⚖️**: A physics puzzle where kids place weights to level a seesaw.
 
 
 ## 🚀 Local Development
