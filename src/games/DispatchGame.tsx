@@ -197,6 +197,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
   }, [gameStarted, grid, settings, playError, spawnEvent]);
 
   const solveEvent = useCallback((eventId: number) => {
+    let showConfettiThisSolve = false;
     setEvents((eventList) =>
       eventList.map((e) => (e.id === eventId ? { ...e, solved: true } : e))
     );
@@ -204,6 +205,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
       const updatedScore = s + 1;
       // Show confetti every 5 solved events
       if (updatedScore > 0 && updatedScore % 5 === 0) {
+        showConfettiThisSolve = true;
         setShowConfetti(true);
       }
       return updatedScore;
@@ -213,7 +215,10 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
 
     setTimeout(() => {
       setEvents((eventList) => eventList.filter((e) => e.id !== eventId));
-      setShowConfetti(false);
+      setSolvingEventId((current) => (current === eventId ? null : current));
+      if (showConfettiThisSolve) {
+        setShowConfetti(false);
+      }
     }, 400);
   }, [onStarEarned, playSuccess]);
 
