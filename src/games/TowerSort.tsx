@@ -50,7 +50,6 @@ const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
   easy: { types: 3, towers: 5, height: 3, scrambleSteps: 12, starsAward: 5 },
   medium: { types: 4, towers: 6, height: 4, scrambleSteps: 20, starsAward: 10 },
   hard: { types: 5, towers: 7, height: 5, scrambleSteps: 30, starsAward: 18 },
-  expert: { types: 6, towers: 8, height: 5, scrambleSteps: 36, starsAward: 24 },
 };
 
 interface TowerSortProps {
@@ -302,7 +301,7 @@ export function TowerSort({ playPop, playSuccess, playError, onStarEarned }: Tow
       <div className="w-full flex items-center justify-between gap-3 bg-white/80 p-2 rounded-3xl border-2 border-slate-200 shadow-sm shrink-0 animate-fade-in">
         <DifficultySelector
           selected={difficulty}
-          options={['easy', 'medium', 'hard', 'expert']}
+          options={['easy', 'medium', 'hard']}
           onChange={changeDifficulty}
           disabled={isWon}
           className="!w-auto flex-1 max-w-[220px]"
