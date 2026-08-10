@@ -448,7 +448,6 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
     switch (size) {
       case 2: return 'grid-cols-2 max-w-[260px]';
       case 3: return 'grid-cols-3 max-w-[290px]';
-      case 4: return 'grid-cols-4 max-w-[320px]';
       case 5: return 'grid-cols-5 max-w-[350px]';
       default: return 'grid-cols-2 max-w-[260px]';
     }
