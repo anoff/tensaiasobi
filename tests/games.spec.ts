@@ -37,7 +37,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
       const mathLauncher = page.getByTestId('launch-math');
       await expect(mathLauncher).toBeVisible();
 
-      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut'] as const;
+      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics'] as const;
 
       for (const gameKey of gameKeys) {
         // 2. Launch Game
@@ -190,6 +190,32 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             if (await option.isVisible()) {
               await expect(option).toBeDisabled();
             }
+            break;
+          }
+
+          case 'dispatch': {
+            const startBtn = page.getByTestId('dispatch-start');
+            await expect(startBtn).toBeVisible();
+            await startBtn.click();
+
+            // Wait for a road cell/event to appear or just tap a vehicle button
+            const vehicleBtn = page.getByTestId('dispatch-vehicle-police');
+            await expect(vehicleBtn).toBeVisible();
+            await vehicleBtn.click();
+            break;
+          }
+
+          case 'physics': {
+            // Wait for the seesaw pans and weight tray to render
+            const leftPan = page.getByTestId('physics-pan-left');
+            const rightPan = page.getByTestId('physics-pan-right');
+            await expect(leftPan).toBeVisible();
+            await expect(rightPan).toBeVisible();
+
+            // Tap a weight from the tray (any button in the tray region)
+            const trayButton = page.locator('[data-testid="physics-reset"]').locator('..').locator('button').first();
+            await expect(trayButton).toBeVisible();
+            await trayButton.click();
             break;
           }
         }

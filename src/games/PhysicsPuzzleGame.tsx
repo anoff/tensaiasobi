@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Confetti from 'react-confetti';
 import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
@@ -17,6 +17,7 @@ interface PhysicsPuzzleGameProps {
   playSuccess: () => void;
   playError: () => void;
   onStarEarned?: (amount: number) => void;
+  challengeMode?: boolean;
 }
 
 const WEIGHT_EMOJIS = [
@@ -43,67 +44,48 @@ function getDifficultySettings(diff: GameDifficulty) {
   }
 }
 
-export function PhysicsPuzzleGame({ playPop, playSuccess, playError, onStarEarned }: PhysicsPuzzleGameProps) {
+function buildWeights(diff: GameDifficulty): Weight[] {
+  const settings = getDifficultySettings(diff);
+  const newWeights: Weight[] = [];
+  const shuffled = [...WEIGHT_EMOJIS].sort(() => Math.random() - 0.5);
+
+  // Place a fixed weight on one side and a slightly different one on the other.
+  const leftBase = shuffled[0];
+  const rightBase = { ...shuffled[1], mass: shuffled[1].mass + settings.targetDifference };
+
+  let nextId = 1;
+  newWeights.push({ id: nextId++, emoji: leftBase.emoji, mass: leftBase.mass, side: 'left' });
+  newWeights.push({ id: nextId++, emoji: rightBase.emoji, mass: rightBase.mass, side: 'right' });
+
+  // Add tray weights that can be used to balance the scale.
+  for (let i = 0; i < settings.trayCount; i++) {
+    const item = shuffled[(i + 2) % shuffled.length];
+    newWeights.push({ id: nextId++, emoji: item.emoji, mass: item.mass, side: 'tray' });
+  }
+
+  return newWeights;
+}
+
+export function PhysicsPuzzleGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: PhysicsPuzzleGameProps) {
+  // challengeMode is accepted for consistency with other games; playError reserved for future penalty feedback.
+  void playError;
+  void challengeMode;
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
-  const [weights, setWeights] = useState<Weight[]>([]);
-  const [leftMass, setLeftMass] = useState(0);
-  const [rightMass, setRightMass] = useState(0);
+  const [weights, setWeights] = useState<Weight[]>(() => buildWeights(difficulty));
   const [showConfetti, setShowConfetti] = useState(false);
   const [solved, setSolved] = useState(false);
   const [selectedWeightId, setSelectedWeightId] = useState<number | null>(null);
-  const [tilt, setTilt] = useState(0);
-  const idRef = useRef(0);
-
   const settings = getDifficultySettings(difficulty);
 
-  const computeMass = useCallback((side: 'left' | 'right') => {
-    return weights
-      .filter((w) => w.side === side)
-      .reduce((sum, w) => sum + w.mass, 0);
-  }, [weights]);
-
-  useEffect(() => {
-    setLeftMass(computeMass('left'));
-    setRightMass(computeMass('right'));
-  }, [weights, computeMass]);
-
-  useEffect(() => {
-    const diff = leftMass - rightMass;
-    const targetTilt = Math.max(-20, Math.min(20, diff * 3));
-    setTilt(targetTilt);
-  }, [leftMass, rightMass]);
-
-  const initGame = useCallback(() => {
-    const newWeights: Weight[] = [];
-    const shuffled = [...WEIGHT_EMOJIS].sort(() => Math.random() - 0.5);
-
-    // Place a fixed weight on one side and a slightly different one on the other.
-    const leftBase = shuffled[0];
-    const rightBase = { ...shuffled[1], mass: shuffled[1].mass + settings.targetDifference };
-
-    newWeights.push({ id: ++idRef.current, emoji: leftBase.emoji, mass: leftBase.mass, side: 'left' });
-    newWeights.push({ id: ++idRef.current, emoji: rightBase.emoji, mass: rightBase.mass, side: 'right' });
-
-    // Add tray weights that can be used to balance the scale.
-    for (let i = 0; i < settings.trayCount; i++) {
-      const item = shuffled[(i + 2) % shuffled.length];
-      newWeights.push({ id: ++idRef.current, emoji: item.emoji, mass: item.mass, side: 'tray' });
-    }
-
-    setWeights(newWeights);
-    setShowConfetti(false);
-    setSolved(false);
-    setSelectedWeightId(null);
-  }, [difficulty, settings.targetDifference, settings.trayCount]);
-
-  useEffect(() => {
-    initGame();
-  }, [initGame]);
+  const leftMass = weights.filter((w) => w.side === 'left').reduce((sum, w) => sum + w.mass, 0);
+  const rightMass = weights.filter((w) => w.side === 'right').reduce((sum, w) => sum + w.mass, 0);
+  const tilt = Math.max(-20, Math.min(20, (leftMass - rightMass) * 3));
 
   useEffect(() => {
     if (solved) return;
     if (leftMass > 0 && rightMass > 0 && leftMass === rightMass) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSolved(true);
       setShowConfetti(true);
       playSuccess();
@@ -111,6 +93,18 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, playError, onStarEarne
       setTimeout(() => setShowConfetti(false), 1500);
     }
   }, [leftMass, rightMass, solved, playSuccess, onStarEarned, settings.starMultiplier]);
+
+  const initGame = useCallback(() => {
+    setWeights(buildWeights(difficulty));
+    setShowConfetti(false);
+    setSolved(false);
+    setSelectedWeightId(null);
+  }, [difficulty]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    initGame();
+  }, [initGame]);
 
   const handleWeightClick = (weight: Weight) => {
     if (solved) return;

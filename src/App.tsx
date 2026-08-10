@@ -213,7 +213,6 @@ function AppContent() {
             playSuccess={playSuccess}
             playError={playError}
             onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
-            challengeMode={challengeActive}
           />
         );
       case 'physics':

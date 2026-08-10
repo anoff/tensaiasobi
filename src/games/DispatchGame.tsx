@@ -190,6 +190,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
   const [showConfetti, setShowConfetti] = useState(false);
   const [shakeEventId, setShakeEventId] = useState<number | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
+  const [now, setNow] = useState(Date.now);
 
   const eventIdRef = useRef(0);
   const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -220,6 +221,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
   }, [gridSize]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     initGame();
   }, [initGame]);
 
@@ -259,15 +261,16 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
       });
     }, settings.spawnInterval);
 
-    // Game loop: check expired events
+    // Game loop: check expired events and drive timer re-renders
     gameLoopRef.current = setInterval(() => {
-      const now = Date.now();
+      const currentNow = Date.now();
+      setNow(currentNow);
       setEvents((prev) => {
-        const expired = prev.filter((e) => !e.solved && now - e.createdAt > e.maxAge);
+        const expired = prev.filter((e) => !e.solved && currentNow - e.createdAt > e.maxAge);
         if (expired.length > 0) {
           playError();
         }
-        const remaining = prev.filter((e) => e.solved || now - e.createdAt <= e.maxAge);
+        const remaining = prev.filter((e) => e.solved || currentNow - e.createdAt <= e.maxAge);
         return remaining;
       });
     }, 200);
@@ -342,20 +345,16 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
     setActiveVehicle(null);
   };
 
-  const oldestEvent = useMemo(() => {
+  const { oldestEvent, timerProgress, isLowTime } = useMemo(() => {
     const active = events.filter((e) => !e.solved);
-    if (active.length === 0) return null;
-    return active.reduce((oldest, e) => (e.createdAt < oldest.createdAt ? e : oldest));
-  }, [events]);
-
-  const timerProgress = useMemo(() => {
-    if (!oldestEvent) return 100;
-    const elapsed = Date.now() - oldestEvent.createdAt;
-    const pct = Math.max(0, Math.min(100, ((oldestEvent.maxAge - elapsed) / oldestEvent.maxAge) * 100));
-    return pct;
-  }, [oldestEvent, events]);
-
-  const isLowTime = timerProgress < 30;
+    if (active.length === 0) {
+      return { oldestEvent: null, timerProgress: 100, isLowTime: false };
+    }
+    const oldest = active.reduce((o, e) => (e.createdAt < o.createdAt ? e : o));
+    const elapsed = now - oldest.createdAt;
+    const pct = Math.max(0, Math.min(100, ((oldest.maxAge - elapsed) / oldest.maxAge) * 100));
+    return { oldestEvent: oldest, timerProgress: pct, isLowTime: pct < 30 };
+  }, [events, now]);
 
   return (
     <div className="flex-1 flex flex-col items-center w-full h-full select-none max-w-lg mx-auto px-2 py-2">
