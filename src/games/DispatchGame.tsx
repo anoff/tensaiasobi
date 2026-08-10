@@ -240,6 +240,33 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
     initGame();
   }, [initGame]);
 
+  const spawnEvent = useCallback(() => {
+    setEvents((prev) => {
+      if (prev.length >= settings.maxEvents) return prev;
+      const cells: { row: number; col: number }[] = [];
+      for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+          if (grid[r][c].station) continue;
+          const occupied = prev.some((e) => e.row === r && e.col === c && !e.solved);
+          if (!occupied) cells.push({ row: r, col: c });
+        }
+      }
+      if (cells.length === 0) return prev;
+      const types: ServiceType[] = ['police', 'fire', 'ambulance'];
+      const cell = cells[Math.floor(Math.random() * cells.length)];
+      const type = types[Math.floor(Math.random() * types.length)];
+      const newEvent: DispatchEvent = {
+        id: ++eventIdRef.current,
+        row: cell.row,
+        col: cell.col,
+        type,
+        createdAt: Date.now(),
+        maxAge: settings.eventMaxAge,
+      };
+      return [...prev, newEvent];
+    });
+  }, [grid, settings.maxEvents, settings.eventMaxAge]);
+
   useEffect(() => {
     if (!gameStarted) {
       if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
@@ -247,33 +274,9 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
       return;
     }
 
-    // Spawn events
-    spawnTimerRef.current = setInterval(() => {
-      setEvents((prev) => {
-        if (prev.length >= settings.maxEvents) return prev;
-        const cells: { row: number; col: number }[] = [];
-        for (let r = 0; r < grid.length; r++) {
-          for (let c = 0; c < grid[r].length; c++) {
-            if (grid[r][c].station) continue;
-            const occupied = prev.some((e) => e.row === r && e.col === c && !e.solved);
-            if (!occupied) cells.push({ row: r, col: c });
-          }
-        }
-        if (cells.length === 0) return prev;
-        const types: ServiceType[] = ['police', 'fire', 'ambulance'];
-        const cell = cells[Math.floor(Math.random() * cells.length)];
-        const type = types[Math.floor(Math.random() * types.length)];
-        const newEvent: DispatchEvent = {
-          id: ++eventIdRef.current,
-          row: cell.row,
-          col: cell.col,
-          type,
-          createdAt: Date.now(),
-          maxAge: settings.eventMaxAge,
-        };
-        return [...prev, newEvent];
-      });
-    }, settings.spawnInterval);
+    // Spawn one event right away, then continue on the interval.
+    spawnEvent();
+    spawnTimerRef.current = setInterval(spawnEvent, settings.spawnInterval);
 
     // Game loop: check expired events and drive timer re-renders
     gameLoopRef.current = setInterval(() => {
