@@ -296,7 +296,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
       if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
       if (gameLoopRef.current) clearInterval(gameLoopRef.current);
     };
-  }, [gameStarted, grid, settings, playError]);
+  }, [gameStarted, grid, settings, playError, spawnEvent]);
 
   useEffect(() => {
     if (!movingVehicle) return;
