@@ -54,14 +54,14 @@ function getGridSize(diff: GameDifficulty): number {
 function getDifficultySettings(diff: GameDifficulty) {
   switch (diff) {
     case 'easy':
-      return { spawnInterval: 3500, maxEvents: 1, eventMaxAge: 24000 };
+      return { spawnInterval: 6000, maxEvents: 1, eventMaxAge: 24000 };
     case 'medium':
-      return { spawnInterval: 2500, maxEvents: 2, eventMaxAge: 13000 };
+      return { spawnInterval: 4500, maxEvents: 2, eventMaxAge: 13000 };
     case 'hard':
     case 'expert':
-      return { spawnInterval: 1800, maxEvents: 4, eventMaxAge: 10000 };
+      return { spawnInterval: 3500, maxEvents: 4, eventMaxAge: 10000 };
     default:
-      return { spawnInterval: 2500, maxEvents: 1, eventMaxAge: 13000 };
+      return { spawnInterval: 4500, maxEvents: 1, eventMaxAge: 13000 };
   }
 }
 
