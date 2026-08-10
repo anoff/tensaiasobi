@@ -15,9 +15,7 @@ interface Weight {
 interface PhysicsPuzzleGameProps {
   playPop: () => void;
   playSuccess: () => void;
-  playError: () => void;
   onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
 }
 
 const WEIGHT_EMOJIS = [
@@ -65,10 +63,7 @@ function buildWeights(diff: GameDifficulty): Weight[] {
   return newWeights;
 }
 
-export function PhysicsPuzzleGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: PhysicsPuzzleGameProps) {
-  // challengeMode is accepted for consistency with other games; playError reserved for future penalty feedback.
-  void playError;
-  void challengeMode;
+export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: PhysicsPuzzleGameProps) {
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
   const [weights, setWeights] = useState<Weight[]>(() => buildWeights(difficulty));

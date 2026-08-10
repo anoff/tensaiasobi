@@ -20,13 +20,10 @@ export function DifficultySelector<T extends string>({
   const getStars = (opt: string) => {
     switch (opt) {
       case 'easy':
-      case 'baby':
         return '⭐';
       case 'medium':
-      case 'toddler':
         return '⭐⭐';
       case 'hard':
-      case 'kid':
         return '⭐⭐⭐';
       case 'expert':
         return '⭐⭐⭐⭐';
@@ -35,12 +32,7 @@ export function DifficultySelector<T extends string>({
     }
   };
 
-  const getTestId = (opt: string) => {
-    if (opt === 'baby') return 'difficulty-easy';
-    if (opt === 'toddler') return 'difficulty-medium';
-    if (opt === 'kid') return 'difficulty-hard';
-    return `difficulty-${opt}`;
-  };
+  const getTestId = (opt: string) => `difficulty-${opt}`;
 
   return (
     <div className={`w-full flex justify-between bg-slate-200/80 p-1.5 rounded-2xl border-2 border-slate-300 gap-1.5 select-none ${className}`}>

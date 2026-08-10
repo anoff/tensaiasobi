@@ -116,7 +116,6 @@ function getJigsawPath(profile: EdgeProfile): string {
 interface GameInitData {
   initialBoard: (number | null)[];
   initialTray: number[];
-  initialLocked: boolean[];
 }
 
 /**
@@ -127,7 +126,6 @@ function generateInitialState(size: number): GameInitData {
   const total = size * size;
   
   const initialBoard: (number | null)[] = Array.from({ length: total }, () => null);
-  const initialLocked: boolean[] = Array.from({ length: total }, () => false);
 
   // All pieces are placed in the tray scrambled
   const initialTray = Array.from({ length: total }, (_, i) => i);
@@ -141,7 +139,6 @@ function generateInitialState(size: number): GameInitData {
   return {
     initialBoard,
     initialTray,
-    initialLocked,
   };
 }
 
@@ -333,12 +330,12 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
     const profiles = generateEdgeProfiles(currentSize);
     setEdgeProfiles(profiles);
 
-    // Generate scrambled board with some locked anchor pieces
-    const { initialBoard, initialTray, initialLocked } = generateInitialState(currentSize);
+    // Generate scrambled board with all pieces in the tray
+    const { initialBoard, initialTray } = generateInitialState(currentSize);
 
     setBoard(initialBoard);
     setTray(initialTray);
-    setLocked(initialLocked);
+    setLocked(new Array(currentSize * currentSize).fill(false));
     setSelectedTrayIdx(null);
     setIsSolved(false);
     setShowConfetti(false);

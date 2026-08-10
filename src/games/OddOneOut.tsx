@@ -8,7 +8,6 @@ interface EmojiItem {
 }
 
 interface OddOneOutProps {
-  playPop: () => void;
   playSuccess: () => void;
   playError: () => void;
   onStarEarned?: (amount: number) => void;

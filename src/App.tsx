@@ -129,7 +129,6 @@ function AppContent() {
       case 'odd':
         return (
           <OddOneOut
-            playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
             onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
@@ -228,7 +227,6 @@ function AppContent() {
           <PhysicsPuzzleGame
             playPop={playPop}
             playSuccess={playSuccess}
-            playError={playError}
             onStarEarned={(amt) => challengeActive ? addChallengeStars(amt) : addStars(amt)}
           />
         );

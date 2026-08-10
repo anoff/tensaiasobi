@@ -9,8 +9,6 @@ import { getItemsByCategory } from '../data/townItems';
 type ServiceType = 'police' | 'fire' | 'ambulance';
 
 interface Cell {
-  row: number;
-  col: number;
   decoration?: string;
 }
 
@@ -89,8 +87,6 @@ function generateCity(size: number): Cell[][] {
     const row: Cell[] = [];
     for (let c = 0; c < size; c++) {
       row.push({
-        row: r,
-        col: c,
         decoration: pickWeightedFiller(),
       });
     }
