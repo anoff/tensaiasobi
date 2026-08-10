@@ -11,8 +11,6 @@ type ServiceType = 'police' | 'fire' | 'ambulance';
 interface Cell {
   row: number;
   col: number;
-  isRoad: boolean;
-  station?: ServiceType;
   decoration?: string;
 }
 
@@ -24,13 +22,6 @@ interface DispatchEvent {
   createdAt: number;
   maxAge: number;
   solved?: boolean;
-}
-
-interface MovingVehicle {
-  type: ServiceType;
-  path: { row: number; col: number }[];
-  stepIndex: number;
-  targetEventId: number;
 }
 
 interface DispatchGameProps {
@@ -65,10 +56,10 @@ function getDifficultySettings(diff: GameDifficulty) {
     case 'easy':
       return { spawnInterval: 3500, maxEvents: 1, eventMaxAge: 24000 };
     case 'medium':
-      return { spawnInterval: 2500, maxEvents: 1, eventMaxAge: 13000 };
+      return { spawnInterval: 2500, maxEvents: 2, eventMaxAge: 13000 };
     case 'hard':
     case 'expert':
-      return { spawnInterval: 1800, maxEvents: 2, eventMaxAge: 10000 };
+      return { spawnInterval: 1800, maxEvents: 4, eventMaxAge: 10000 };
     default:
       return { spawnInterval: 2500, maxEvents: 1, eventMaxAge: 13000 };
   }
@@ -102,96 +93,13 @@ function generateCity(size: number): Cell[][] {
       row.push({
         row: r,
         col: c,
-        isRoad: false,
         decoration: pickWeightedFiller(),
       });
     }
     grid.push(row);
   }
 
-  // Place stations in 3 corners and make adjacent cells roads
-  const stations: { row: number; col: number; type: ServiceType }[] = [
-    { row: 0, col: 0, type: 'police' },
-    { row: 0, col: size - 1, type: 'fire' },
-    { row: size - 1, col: 0, type: 'ambulance' },
-  ];
-
-  for (const s of stations) {
-    grid[s.row][s.col].station = s.type;
-    grid[s.row][s.col].isRoad = true;
-    grid[s.row][s.col].decoration = undefined;
-  }
-
-  // Create a road network connecting the three stations.
-  // Strategy: roads along the first row and first column guarantee connection.
-  for (let c = 0; c < size; c++) {
-    grid[0][c].isRoad = true;
-    grid[0][c].decoration = undefined;
-  }
-  for (let r = 0; r < size; r++) {
-    grid[r][0].isRoad = true;
-    grid[r][0].decoration = undefined;
-  }
-
-  // Add a few random interior road branches for variety.
-  const branches = Math.max(1, Math.floor(size / 2));
-  for (let i = 0; i < branches; i++) {
-    const startRow = Math.floor(Math.random() * (size - 2)) + 1;
-    const startCol = Math.floor(Math.random() * (size - 2)) + 1;
-    const horizontal = Math.random() < 0.5;
-    if (horizontal) {
-      for (let c = startCol; c < size; c++) {
-        grid[startRow][c].isRoad = true;
-        grid[startRow][c].decoration = undefined;
-      }
-    } else {
-      for (let r = startRow; r < size; r++) {
-        grid[r][startCol].isRoad = true;
-        grid[r][startCol].decoration = undefined;
-      }
-    }
-  }
-
   return grid;
-}
-
-function findPath(
-  grid: Cell[][],
-  start: { row: number; col: number },
-  end: { row: number; col: number }
-): { row: number; col: number }[] {
-  const size = grid.length;
-  const queue: { row: number; col: number; path: { row: number; col: number }[] }[] = [
-    { ...start, path: [start] },
-  ];
-  const visited = new Set<string>([`${start.row}-${start.col}`]);
-
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    if (current.row === end.row && current.col === end.col) {
-      return current.path;
-    }
-
-    const dirs = [
-      { row: -1, col: 0 },
-      { row: 1, col: 0 },
-      { row: 0, col: -1 },
-      { row: 0, col: 1 },
-    ];
-
-    for (const d of dirs) {
-      const nr = current.row + d.row;
-      const nc = current.col + d.col;
-      if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
-      if (!grid[nr][nc].isRoad) continue;
-      const key = `${nr}-${nc}`;
-      if (visited.has(key)) continue;
-      visited.add(key);
-      queue.push({ row: nr, col: nc, path: [...current.path, { row: nr, col: nc }] });
-    }
-  }
-
-  return [start, end];
 }
 
 export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: DispatchGameProps) {
@@ -200,7 +108,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
   const [grid, setGrid] = useState<Cell[][]>([]);
   const [events, setEvents] = useState<DispatchEvent[]>([]);
   const [activeVehicle, setActiveVehicle] = useState<ServiceType | null>(null);
-  const [movingVehicle, setMovingVehicle] = useState<MovingVehicle | null>(null);
+  const [solvingEventId, setSolvingEventId] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [shakeEventId, setShakeEventId] = useState<number | null>(null);
@@ -209,26 +117,17 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
 
   const eventIdRef = useRef(0);
   const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const animationTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const gameLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const gridSize = getGridSize(difficulty);
   const settings = getDifficultySettings(difficulty);
-
-  const stationPositions = useMemo(() => {
-    return {
-      police: { row: 0, col: 0 },
-      fire: { row: 0, col: gridSize - 1 },
-      ambulance: { row: gridSize - 1, col: 0 },
-    };
-  }, [gridSize]);
 
   const initGame = useCallback(() => {
     const newGrid = generateCity(gridSize);
     setGrid(newGrid);
     setEvents([]);
     setActiveVehicle(null);
-    setMovingVehicle(null);
+    setSolvingEventId(null);
     setScore(0);
     setShowConfetti(false);
     setShakeEventId(null);
@@ -246,7 +145,6 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
       const cells: { row: number; col: number }[] = [];
       for (let r = 0; r < grid.length; r++) {
         for (let c = 0; c < grid[r].length; c++) {
-          if (grid[r][c].station) continue;
           const occupied = prev.some((e) => e.row === r && e.col === c && !e.solved);
           if (!occupied) cells.push({ row: r, col: c });
         }
@@ -298,44 +196,26 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
     };
   }, [gameStarted, grid, settings, playError, spawnEvent]);
 
-  useEffect(() => {
-    if (!movingVehicle) return;
+  const solveEvent = useCallback((eventId: number) => {
+    setEvents((eventList) =>
+      eventList.map((e) => (e.id === eventId ? { ...e, solved: true } : e))
+    );
+    setScore((s) => {
+      const updatedScore = s + 1;
+      // Show confetti every 5 solved events
+      if (updatedScore > 0 && updatedScore % 5 === 0) {
+        setShowConfetti(true);
+      }
+      return updatedScore;
+    });
+    onStarEarned?.(1);
+    playSuccess();
 
-    animationTimerRef.current = setInterval(() => {
-      setMovingVehicle((prev) => {
-        if (!prev) return null;
-        if (prev.stepIndex >= prev.path.length - 1) {
-          // Vehicle arrived: solve event
-          const solvedEventId = prev.targetEventId;
-          setEvents((eventList) =>
-            eventList.map((e) => (e.id === solvedEventId ? { ...e, solved: true } : e))
-          );
-          setScore((s) => {
-            const updatedScore = s + 1;
-            // Show confetti every 5 solved events
-            if (updatedScore > 0 && updatedScore % 5 === 0) {
-              setShowConfetti(true);
-            }
-            return updatedScore;
-          });
-          onStarEarned?.(1);
-          playSuccess();
-
-          setTimeout(() => {
-            setEvents((eventList) => eventList.filter((e) => e.id !== solvedEventId));
-            setShowConfetti(false);
-          }, 400);
-
-          return null;
-        }
-        return { ...prev, stepIndex: prev.stepIndex + 1 };
-      });
-    }, 180);
-
-    return () => {
-      if (animationTimerRef.current) clearInterval(animationTimerRef.current);
-    };
-  }, [movingVehicle, onStarEarned, playSuccess]);
+    setTimeout(() => {
+      setEvents((eventList) => eventList.filter((e) => e.id !== eventId));
+      setShowConfetti(false);
+    }, 400);
+  }, [onStarEarned, playSuccess]);
 
   const handleVehicleSelect = (type: ServiceType) => {
     playPop();
@@ -343,7 +223,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
   };
 
   const handleEventClick = (event: DispatchEvent) => {
-    if (movingVehicle || event.solved) return;
+    if (solvingEventId === event.id || event.solved) return;
 
     if (!activeVehicle) {
       playPop();
@@ -357,11 +237,10 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
       return;
     }
 
-    // Correct dispatch: start animation
-    const start = stationPositions[activeVehicle];
-    const path = findPath(grid, start, { row: event.row, col: event.col });
-    setMovingVehicle({ type: activeVehicle, path, stepIndex: 0, targetEventId: event.id });
+    // Correct dispatch: vehicle appears directly on the event
+    setSolvingEventId(event.id);
     setActiveVehicle(null);
+    solveEvent(event.id);
   };
 
   const { oldestEvent, timerProgress, isLowTime } = useMemo(() => {
@@ -438,10 +317,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
             {grid.map((row, ri) =>
               row.map((cell, ci) => {
                 const event = events.find((e) => e.row === ri && e.col === ci && !e.solved);
-                const isMovingHere = movingVehicle?.path[movingVehicle.stepIndex]?.row === ri &&
-                  movingVehicle?.path[movingVehicle.stepIndex]?.col === ci;
-                const isStation = cell.station;
-                const isRoad = cell.isRoad && !isStation;
+                const isSolving = solvingEventId === event?.id;
 
                 return (
                   <button
@@ -451,31 +327,25 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
                     className={`
                       relative aspect-square flex items-center justify-center rounded-xl text-xl sm:text-2xl
                       transition-all duration-75 outline-none
-                      ${isRoad ? 'bg-amber-100/80 border-2 border-amber-200/60' : 'bg-emerald-50 border-2 border-emerald-100'}
+                      bg-emerald-50 border-2 border-emerald-100
                       ${event ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
                       ${event && shakeEventId === event.id ? 'animate-shake' : ''}
                     `}
                   >
-                    {isStation ? (
-                      <span>{VEHICLE_CONFIG[isStation].stationEmoji}</span>
-                    ) : (
-                      <>
-                        <span className={`${event ? 'opacity-40' : 'opacity-60'}`}>{cell.decoration}</span>
-                        {isMovingHere && (
-                          <span className="absolute inset-0 flex items-center justify-center animate-bounce">
-                            {VEHICLE_CONFIG[movingVehicle!.type].emoji}
-                          </span>
-                        )}
-                        {event && !isMovingHere && (
-                          <span
-                            className={`absolute -top-1 -right-1 text-lg sm:text-xl drop-shadow-sm ${
-                              event.id === oldestEvent?.id ? 'animate-bounce' : 'animate-pulse'
-                            }`}
-                          >
-                            {VEHICLE_CONFIG[event.type].eventEmoji}
-                          </span>
-                        )}
-                      </>
+                    <span className={`${event ? 'opacity-40' : 'opacity-60'}`}>{cell.decoration}</span>
+                    {isSolving && event && (
+                      <span className="absolute inset-0 flex items-center justify-center animate-bounce">
+                        {VEHICLE_CONFIG[event.type].emoji}
+                      </span>
+                    )}
+                    {event && !isSolving && (
+                      <span
+                        className={`absolute -top-1 -right-1 text-lg sm:text-xl drop-shadow-sm ${
+                          event.id === oldestEvent?.id ? 'animate-bounce' : 'animate-pulse'
+                        }`}
+                      >
+                        {VEHICLE_CONFIG[event.type].eventEmoji}
+                      </span>
                     )}
                   </button>
                 );
