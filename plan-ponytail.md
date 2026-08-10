@@ -16,7 +16,6 @@ Audit of over-engineering across the repo (11739 lines of src + config, docs, de
 - `yagni` EmojiMatch hand-rolls 5-language score labels in getPlayerScoreLabel while `useTranslation` exists. [src/games/EmojiMatch.tsx:176]
 - `yagni` Fly-up animation machinery (StarEarnAnimation, animIdRef, pendingAnimations, clearAnimation) duplicated in useStars/useChallenge. One shared hook. [src/hooks/useStars.ts:22]
 - `shrink` `challengeActive ? addChallengeStars(amt) : addStars(amt)` ternary inlined 12x in App.tsx. Hoist one handler. [src/App.tsx:117]
-- `shrink` `getGridSize(diff)` switch duplicated MazeGame/DispatchGame. One util. [src/games/MazeGame.tsx:141]
 - `shrink` TownBuilder computes total refund with same double grid-loop twice. One `computeTotalRefund()`. [src/games/TownBuilder.tsx:181]
 - `yagni` LetterTrace re-implements `key={language}` remount via prevLanguage state; App already keys Shiritori. [src/games/LetterTrace.tsx:586]
 - `delete` OddOneOutProps declares `playPop`, never destructured/used. [src/games/OddOneOut.tsx:11]
@@ -48,10 +47,9 @@ Split into 6 dependency-ordered phases; each is independently shippable and ends
 ### Phase 2 — Leaf utilities (~130 lines)
 - `shrink` one `shuffle()` util, adopt in 8 games [MathGame.tsx:90]
 - `shrink` consolidate `getSafeLocalStorage` -> `useLocalStorage` [AnlautGame.tsx:24]
-- `shrink` `difficultyMultiplier()` helper, adopt in 5 games [MazeGame.tsx:555]
-- `shrink` dedupe `getGridSize(diff)` MazeGame/DispatchGame [MazeGame.tsx:141]
+- `shrink` `starMultiplier()` helper, adopt in 5 games [MazeGame.tsx:555]
 - `shrink` `useStreak()` hook + badge, adopt in 4 games [MathGame.tsx:107]
-> Independent helpers; each adoptable game-by-game, so risk stays low.
+> Independent helpers; each adoptable game-by-game, so risk stays low. (Note: the `getGridSize` dedupe finding was dropped — MazeGame returns `{cols,rows}` 4/6/8, DispatchGame returns a bare number 5/7/9; different shape and constants, not deduplicable without changing behavior.)
 
 ### Phase 3 — Shared game types & components (~210 lines)
 - `shrink` shared `GameProps` type, adopt in all 13 games [MathGame.tsx:15]

@@ -3,6 +3,7 @@ import Confetti from 'react-confetti';
 import DifficultySelector from '../components/DifficultySelector';
 import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
+import { shuffle } from '../utils/shuffle';
 import { PUZZLE_IMAGES, PuzzleImage } from '../data/puzzleImages';
 
 // -----------------------------------------------------------------------------
@@ -128,13 +129,7 @@ function generateInitialState(size: number): GameInitData {
   const initialBoard: (number | null)[] = Array.from({ length: total }, () => null);
 
   // All pieces are placed in the tray scrambled
-  const initialTray = Array.from({ length: total }, (_, i) => i);
-  
-  // Shuffle the tray pieces
-  for (let i = initialTray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [initialTray[i], initialTray[j]] = [initialTray[j], initialTray[i]];
-  }
+  const initialTray = shuffle(Array.from({ length: total }, (_, i) => i));
 
   return {
     initialBoard,

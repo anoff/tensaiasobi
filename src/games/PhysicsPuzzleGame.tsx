@@ -4,6 +4,7 @@ import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
 import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
+import { shuffle } from '../utils/shuffle';
 
 interface Weight {
   id: number;
@@ -44,7 +45,7 @@ function getDifficultySettings(diff: GameDifficulty) {
 function buildWeights(diff: GameDifficulty): Weight[] {
   const settings = getDifficultySettings(diff);
   const newWeights: Weight[] = [];
-  const shuffled = [...WEIGHT_EMOJIS].sort(() => Math.random() - 0.5);
+  const shuffled = shuffle(WEIGHT_EMOJIS);
 
   // Place a fixed weight on one side and a slightly different one on the other.
   const leftBase = shuffled[0];

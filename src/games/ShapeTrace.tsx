@@ -6,6 +6,7 @@ import DifficultySelector from '../components/DifficultySelector';
 import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
+import { starMultiplier } from '../utils/difficulty';
 
 interface Point {
   x: number; // 0 to 100
@@ -1037,7 +1038,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
       setIsWon(true);
       setShowConfetti(true);
       playSuccess();
-      const multiplier = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
+      const multiplier = starMultiplier(difficulty);
       onStarEarned?.(3 * multiplier);
     } else {
       playError();

@@ -5,6 +5,7 @@ import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import DifficultySelector from '../components/DifficultySelector';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
+import { starMultiplier } from '../utils/difficulty';
 
 import { GameDifficulty } from '../types/game';
 
@@ -551,7 +552,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
           setIsWon(true);
           setShowConfetti(true);
           playSuccess();
-          const multiplier = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
+          const multiplier = starMultiplier(difficulty);
           onStarEarned?.(3 * multiplier);
           setIsAnimating(false);
         } else {

@@ -3,6 +3,7 @@ import Confetti from 'react-confetti';
 import DifficultySelector from '../components/DifficultySelector';
 import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
+import { shuffle } from '../utils/shuffle';
 
 // Finite Field arithmetic helper for order q
 // Specifically, order 4 (easy, 5 emojis), 5 (medium, 6 emojis), 7 (hard, 8 emojis)
@@ -129,13 +130,13 @@ function getCardLayout(emojis: string[], q: number): CardEmoji[] {
   }
 
   // Shuffle order to avoid DOM z-index bias
-  return layout.sort(() => Math.random() - 0.5);
+  return shuffle(layout);
 }
 
 function buildShuffledDeck(q: number): DobbleCard[] {
   const indicesDeck = generateDobbleDeck(q);
   const numUniqueEmojis = q * q + q + 1;
-  const chosenEmojis = [...EMOJI_POOL].sort(() => Math.random() - 0.5).slice(0, numUniqueEmojis);
+  const chosenEmojis = shuffle(EMOJI_POOL).slice(0, numUniqueEmojis);
 
   const cards: DobbleCard[] = indicesDeck.map((indices, cardId) => {
     const cardEmojis = indices.map((idx) => chosenEmojis[idx]);
@@ -145,7 +146,7 @@ function buildShuffledDeck(q: number): DobbleCard[] {
     };
   });
 
-  return cards.sort(() => Math.random() - 0.5);
+  return shuffle(cards);
 }
 
 // Find the single matching emoji between two cards

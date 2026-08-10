@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import Confetti from 'react-confetti';
 import DifficultySelector from '../components/DifficultySelector';
+import StreakBadge from '../components/StreakBadge';
 import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
+import { useStreak } from '../hooks/useStreak';
+import { shuffle } from '../utils/shuffle';
+import { starMultiplier } from '../utils/difficulty';
 
 
 
@@ -87,7 +91,7 @@ const generateQuestion = (currentLevel: GameDifficulty): Question => {
       }
     }
 
-    const options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
+    const options = shuffle(Array.from(optionsSet));
 
     return {
       text: `${num1} ${operator} ${num2}`,
@@ -104,14 +108,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
   const [showConfetti, setShowConfetti] = useState(false);
   const { t } = useTranslation();
 
-  const [streak, setStreak] = useState(() => {
-    const saved = localStorage.getItem('math_streak');
-    return saved ? parseInt(saved, 10) : 0;
-  });
-  const [highScore, setHighScore] = useState(() => {
-    const saved = localStorage.getItem('math_highscore');
-    return saved ? parseInt(saved, 10) : 0;
-  });
+  const { streak, highScore, registerCorrect, resetStreak } = useStreak('math');
 
   const loadNewQuestion = (currentLevel: GameDifficulty) => {
     setQuestion(generateQuestion(currentLevel));
@@ -128,17 +125,10 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
       setShowConfetti(true);
       playSuccess();
       
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-      localStorage.setItem('math_streak', newStreak.toString());
-
-      if (newStreak > highScore) {
-        setHighScore(newStreak);
-        localStorage.setItem('math_highscore', newStreak.toString());
-      }
+      registerCorrect();
 
       // Award stars: base 2 × level multiplier
-      const multiplier = level === 'easy' ? 1 : level === 'medium' ? 3 : 5;
+      const multiplier = starMultiplier(level);
       onStarEarned?.(2 * multiplier);
 
       setTimeout(() => {
@@ -148,8 +138,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
     } else {
       setIsCorrect(false);
       playError();
-      setStreak(0);
-      localStorage.setItem('math_streak', '0');
+      resetStreak();
 
       if (challengeMode) {
         setTimeout(() => {
@@ -198,14 +187,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
         </div>
         
         {/* Streak Counter */}
-        <div className="flex gap-4 items-center justify-center pt-2">
-          <span className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1.5 rounded-full border-2 border-amber-300 text-sm shadow-sm flex items-center gap-1.5 animate-pulse">
-            ✨ {streak}
-          </span>
-          <span className="bg-indigo-100 text-indigo-600 font-extrabold px-4 py-1.5 rounded-full border-2 border-indigo-300 text-sm shadow-sm">
-            🏆 {highScore}
-          </span>
-        </div>
+        <StreakBadge streak={streak} highScore={highScore} />
       </div>
 
       {/* Answer Bubbles */}

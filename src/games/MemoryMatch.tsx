@@ -3,6 +3,8 @@ import Confetti from 'react-confetti';
 import DifficultySelector from '../components/DifficultySelector';
 import { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
+import { shuffle } from '../utils/shuffle';
+import { starMultiplier } from '../utils/difficulty';
 
 
 
@@ -36,13 +38,10 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: M
     if (currentLevel === 'hard') numPairs = 8; // (4x4)
 
     // Select random unique animal emojis from the pool
-    const selectedAnimals = [...ANIMAL_POOL]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, numPairs);
+    const selectedAnimals = shuffle(ANIMAL_POOL).slice(0, numPairs);
 
     // Create pairs and shuffle them
-    const cardsPool = [...selectedAnimals, ...selectedAnimals]
-      .sort(() => Math.random() - 0.5)
+    const cardsPool = shuffle([...selectedAnimals, ...selectedAnimals])
       .map((emoji, index) => ({
         id: index,
         emoji,
@@ -100,7 +99,7 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: M
           if (newMatches === totalPairs) {
             setShowConfetti(true);
             // Award 4 stars × level multiplier
-            const multiplier = level === 'easy' ? 1 : level === 'medium' ? 3 : 5;
+            const multiplier = starMultiplier(level);
             onStarEarned?.(4 * multiplier);
             setTimeout(() => {
               initGame(level);

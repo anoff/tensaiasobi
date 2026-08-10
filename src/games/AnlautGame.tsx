@@ -1,7 +1,10 @@
 import { useState, useMemo } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
+import StreakBadge from '../components/StreakBadge';
 import { useTranslation } from '../hooks/useTranslation';
+import { useStreak } from '../hooks/useStreak';
+import { shuffle } from '../utils/shuffle';
 
 interface AnlautGameProps {
   playPop: () => void;
@@ -20,24 +23,6 @@ const EMOJI_ITEMS: string[] = [
   '🐙', '🐨', '🐻', '🐷', '🐔', '🐬', '🐳', '🐝', '🦋', '🐞', '🤖', '👻', '🎁', '🍄', '❄️', '🎸',
   '🍕', '🍩', '🍪', '🍬', '🍊', '🥕', '⛵', '🧥', '🥜', '📓', '🎺', '🐪', '🔍', '🧱', '🧸', '✏️', '🧣', '👓', '🥛', '🦖', '🦄', '🦈', '🐍', '🍟', '🍔', '🌽', '🍯', '🛸', '🚜', '🎒', '🧩'
 ];
-
-const getSafeLocalStorage = (key: string, defaultValue: number): number => {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? parseInt(saved, 10) : defaultValue;
-  } catch (e) {
-    console.error('Error reading localStorage key', key, e);
-    return defaultValue;
-  }
-};
-
-const setSafeLocalStorage = (key: string, value: number) => {
-  try {
-    localStorage.setItem(key, value.toString());
-  } catch (e) {
-    console.error('Error writing localStorage key', key, e);
-  }
-};
 
 const generateOptions = (
   item: string,
@@ -85,7 +70,7 @@ const generateOptions = (
     }
   }
 
-  return [correctChar, ...Array.from(wrongOptionsSet)].sort(() => Math.random() - 0.5);
+  return shuffle([correctChar, ...Array.from(wrongOptionsSet)]);
 };
 
 export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: AnlautGameProps) {
@@ -101,8 +86,7 @@ export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, chal
   const [hintUsed, setHintUsed] = useState<boolean>(false);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
 
-  const [streak, setStreak] = useState(() => getSafeLocalStorage('anlaut_streak', 0));
-  const [highScore, setHighScore] = useState(() => getSafeLocalStorage('anlaut_highscore', 0));
+  const { streak, highScore, registerCorrect, resetStreak } = useStreak('anlaut');
 
   // Compute options dynamically using useMemo to avoid setState in useEffect
   const options = useMemo(() => {
@@ -127,19 +111,11 @@ export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, chal
       playSuccess();
       onStarEarned?.(2);
 
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-      setSafeLocalStorage('anlaut_streak', newStreak);
-
-      if (newStreak > highScore) {
-        setHighScore(newStreak);
-        setSafeLocalStorage('anlaut_highscore', newStreak);
-      }
+      registerCorrect();
     } else {
       setIsCorrect(false);
       playError();
-      setStreak(0);
-      setSafeLocalStorage('anlaut_streak', 0);
+      resetStreak();
 
       if (challengeMode) {
         setTimeout(() => {
@@ -222,14 +198,7 @@ export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, chal
         </p>
 
         {/* Counters */}
-        <div className="flex gap-4 items-center justify-center pt-1">
-          <span className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1.5 rounded-full border-2 border-amber-300 text-sm shadow-sm flex items-center gap-1.5 animate-pulse">
-            ✨ {streak}
-          </span>
-          <span className="bg-indigo-100 text-indigo-600 font-extrabold px-4 py-1.5 rounded-full border-2 border-indigo-300 text-sm shadow-sm">
-            🏆 {highScore}
-          </span>
-        </div>
+        <StreakBadge streak={streak} highScore={highScore} />
       </div>
 
       {/* Emoji and Word display area */}

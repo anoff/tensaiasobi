@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Confetti from 'react-confetti';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
+import { useStreak } from '../hooks/useStreak';
+import { shuffle } from '../utils/shuffle';
 
 interface ShiritoriProps {
   playPop: () => void;
@@ -20,26 +22,6 @@ const EMOJI_ITEMS: string[] = [
   '🐙', '🐨', '🐻', '🐷', '🐔', '🐬', '🐳', '🐝', '🦋', '🐞', '🤖', '👻', '🎁', '🍄', '❄️', '🎸',
   '🍕', '🍩', '🍪', '🍬', '🍊', '🥕', '⛵', '🥜', '📓', '🎺', '🐪', '🔍', '🧱', '🧸', '✏️', '🧣', '👓', '🥛', '🦖', '🦄', '🦈', '🐍', '🍟', '🍔', '🌽', '🍯', '🛸', '🚜', '🎒', '🧩'
 ];
-
-// Helper to read localStorage safely
-const getSafeLocalStorage = (key: string, defaultValue: number): number => {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? parseInt(saved, 10) : defaultValue;
-  } catch (e) {
-    console.error('Error reading localStorage key', key, e);
-    return defaultValue;
-  }
-};
-
-// Helper to write localStorage safely
-const setSafeLocalStorage = (key: string, value: number) => {
-  try {
-    localStorage.setItem(key, value.toString());
-  } catch (e) {
-    console.error('Error writing localStorage key', key, e);
-  }
-};
 
 // Clean Western words for first/last character matching
 const cleanWesternWord = (word: string, lang?: string): string => {
@@ -191,8 +173,7 @@ const generateOptionsForWord = (
   });
 
   // 3. Select 8 distinct distractors
-  const shuffledDistractors = [...distractorCandidates].sort(() => Math.random() - 0.5);
-  const selectedDistractors = shuffledDistractors.slice(0, 8);
+  const selectedDistractors = shuffle(distractorCandidates).slice(0, 8);
 
   // Japanese specific: If in Japanese mode, sometimes include a 'ん' ending word as a distractor/trap if possible
   if (lang === 'ja' && Math.random() < 0.25) {
@@ -200,13 +181,13 @@ const generateOptionsForWord = (
     if (nEndingCandidates.length > 0) {
       const trapEmoji = nEndingCandidates[Math.floor(Math.random() * nEndingCandidates.length)];
       // Replace one distractor with the trap
-      const optsList = [correctEmoji, trapEmoji, ...selectedDistractors.slice(0, 7)].sort(() => Math.random() - 0.5);
+      const optsList = shuffle([correctEmoji, trapEmoji, ...selectedDistractors.slice(0, 7)]);
       return { options: optsList };
     }
   }
 
   if (correctEmoji) {
-    const optsList = [correctEmoji, ...selectedDistractors].sort(() => Math.random() - 0.5);
+    const optsList = shuffle([correctEmoji, ...selectedDistractors]);
     return { options: optsList };
   } else {
     return { options: [], isGameOver: true };
@@ -277,8 +258,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
   // High Scores
-  const [streak, setStreak] = useState<number>(0);
-  const [highScore, setHighScore] = useState<number>(() => getSafeLocalStorage('shiritori_highscore', 0));
+  const { streak, highScore, registerCorrect, resetStreak } = useStreak('shiritori');
 
   const chainEndRef = useRef<HTMLDivElement>(null);
 
@@ -286,7 +266,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
   const initGame = useCallback((selectedMode: 'solo' | 'panda') => {
     const startEmoji = getStartWord(language, itemsDict);
     setChain([startEmoji]);
-    setStreak(0);
+    resetStreak();
     setMode(selectedMode);
     setTurn('player');
     setIsNRuleLost(false);
@@ -310,7 +290,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     } else {
       setOptions(result.options);
     }
-  }, [language, itemsDict, t.shiritori.yourTurn]);
+  }, [language, itemsDict, t.shiritori.yourTurn, resetStreak]);
 
   // Auto-scroll the chain view as new cards are added
   useEffect(() => {
@@ -375,14 +355,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
       const newChain = [...chain, emoji];
       setChain(newChain);
 
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-
-      // Check for High Score
-      if (newStreak > highScore) {
-        setHighScore(newStreak);
-        setSafeLocalStorage('shiritori_highscore', newStreak);
-      }
+      const newStreak = registerCorrect();
 
       // Check Japanese 'ん' Game Over Rule
       const endingChar = getEndChar(selectedWord, language);
@@ -428,7 +401,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     } else {
       // INCORRECT MATCH
       playError();
-      setStreak(0);
+      resetStreak();
       setShakeOption(emoji);
 
       if (challengeMode) {
