@@ -47,7 +47,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: process.env.VITE_BASE_PATH || '/',
+  base: process.env.VITE_BASE_PATH || './',
   server: {
     host: true,
   },

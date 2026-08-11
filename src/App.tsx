@@ -286,7 +286,7 @@ function AppContent() {
   };
 
   return (
-    <div className="w-screen h-[100dvh] flex flex-col bg-sky-50 text-slate-800 relative">
+    <div className="w-screen h-[100dvh] flex flex-col bg-sky-50 text-slate-800 relative pt-safe pb-safe">
       {/* Top Navigation Bar */}
       <header className="flex justify-between items-center p-4 z-10">
         <div>
