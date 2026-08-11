@@ -29,6 +29,7 @@ export const fr: TranslationSchema = {
     dispatch: "Interventions",
     physics: "Balance",
     towerSort: "Tri des Tours",
+    shadowFlashlight: "Ombre",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -362,6 +363,12 @@ export const fr: TranslationSchema = {
     moves: "coups",
     perfect: "Solution parfaite ! 🌟",
     playAgain: "Rejouer",
+  },
+  shadowFlashlight: {
+    title: "Lampe Ombre! 🔦",
+    subtitle: "Déplace la lumière pour trouver la forme cachée !",
+    help: "Déplace la lampe, puis appuie sur l'emoji correspondant !",
+    victory: "🎉 Trouvé !",
   },
   challenge: {
     title: "Mode Défi 🎯",

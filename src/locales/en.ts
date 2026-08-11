@@ -27,6 +27,7 @@ export const en = {
     dispatch: "City Dispatch",
     physics: "Balance",
     towerSort: "Tower Sort",
+    shadowFlashlight: "Shadow",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -360,6 +361,12 @@ export const en = {
     moves: "moves",
     perfect: "Perfect solve! 🌟",
     playAgain: "Play Again",
+  },
+  shadowFlashlight: {
+    title: "Shadow Flashlight! 🔦",
+    subtitle: "Move the light to find the hidden shape!",
+    help: "Drag the flashlight, then tap the matching emoji!",
+    victory: "🎉 You found it!",
   },
   challenge: {
     title: "Challenge Mode 🎯",

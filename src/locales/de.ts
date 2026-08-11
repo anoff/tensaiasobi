@@ -29,6 +29,7 @@ export const de: TranslationSchema = {
     dispatch: "Einsatz",
     physics: "Waage",
     towerSort: "Turm-Sortierung",
+    shadowFlashlight: "Schatten",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -362,6 +363,12 @@ export const de: TranslationSchema = {
     moves: "Züge",
     perfect: "Perfekt gelöst! 🌟",
     playAgain: "Nochmal spielen",
+  },
+  shadowFlashlight: {
+    title: "Schatten-Taschenlampe! 🔦",
+    subtitle: "Bewege das Licht, um die versteckte Form zu finden!",
+    help: "Ziehe die Taschenlampe und tippe dann das passende Emoji an!",
+    victory: "🎉 Gefunden!",
   },
   challenge: {
     title: "Herausforderungsmodus 🎯",

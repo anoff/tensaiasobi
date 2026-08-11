@@ -37,7 +37,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
       const mathLauncher = page.getByTestId('launch-math');
       await expect(mathLauncher).toBeVisible();
 
-      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort'] as const;
+      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort', 'shadow'] as const;
 
       for (const gameKey of gameKeys) {
         // 2. Launch Game
@@ -229,6 +229,27 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             const secondTower = page.getByTestId('tower-sort-tower').nth(1);
             await expect(secondTower).toBeVisible();
             await secondTower.click();
+            break;
+          }
+
+          case 'shadow': {
+            const stage = page.getByTestId('shadow-stage');
+            await expect(stage).toBeVisible();
+
+            // Move the flashlight by dragging within the stage
+            const box = await stage.boundingBox();
+            expect(box).not.toBeNull();
+            if (box) {
+              await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.3);
+              await page.mouse.down();
+              await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.6);
+              await page.mouse.up();
+            }
+
+            // Tap one of the answer choices
+            const choice = page.getByTestId('shadow-choice').first();
+            await expect(choice).toBeVisible();
+            await choice.click();
             break;
           }
         }
