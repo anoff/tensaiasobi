@@ -29,6 +29,7 @@ export const ja: TranslationSchema = {
     dispatch: "きんきゅう",
     physics: "てんびん",
     towerSort: "タワーソート",
+    numberTrain: "かずのれっしゃ",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -362,6 +363,13 @@ export const ja: TranslationSchema = {
     moves: "てすう",
     perfect: "パーフェクト！ 🌟",
     playAgain: "もういちどあそぶ",
+  },
+  numberTrain: {
+    title: "かずのれっしゃ！ 🚂",
+    subtitle: "おきゃくさんを かぞえて、ただしい えきに れっしゃを はこぼう！",
+    help: "あう すうじの えきに れっしゃを ドラッグしてね！",
+    oneMore: "＋１",
+    oneLess: "－１",
   },
   challenge: {
     title: "チャレンジモード 🎯",

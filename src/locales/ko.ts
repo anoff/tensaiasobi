@@ -29,6 +29,7 @@ export const ko: TranslationSchema = {
     dispatch: "출동",
     physics: "저울",
     towerSort: "타워 정렬",
+    numberTrain: "숫자 기차",
   },
   parentGate: {
     title: "부모님 전용 🔒",
@@ -362,6 +363,13 @@ export const ko: TranslationSchema = {
     moves: "이동",
     perfect: "완벽한 풀이! 🌟",
     playAgain: "다시 하기",
+  },
+  numberTrain: {
+    title: "숫자 기차! 🚂",
+    subtitle: "승객을 세고 기차를 맞는 역으로 끌어다 놓으세요!",
+    help: "숫자 역에 기차를 끌어다 놓으세요!",
+    oneMore: "+1",
+    oneLess: "-1",
   },
   challenge: {
     title: "도전 모드 🎯",

@@ -29,6 +29,7 @@ export const de: TranslationSchema = {
     dispatch: "Einsatz",
     physics: "Waage",
     towerSort: "Turm-Sortierung",
+    numberTrain: "Zahlenzug",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -362,6 +363,13 @@ export const de: TranslationSchema = {
     moves: "Züge",
     perfect: "Perfekt gelöst! 🌟",
     playAgain: "Nochmal spielen",
+  },
+  numberTrain: {
+    title: "Zahlenzug! 🚂",
+    subtitle: "Zähle die Passagiere und ziehe den Zug zum richtigen Bahnhof!",
+    help: "Ziehe den Zug zur passenden Zahlen-Station!",
+    oneMore: "+1",
+    oneLess: "-1",
   },
   challenge: {
     title: "Herausforderungsmodus 🎯",

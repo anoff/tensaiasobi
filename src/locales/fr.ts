@@ -29,6 +29,7 @@ export const fr: TranslationSchema = {
     dispatch: "Interventions",
     physics: "Balance",
     towerSort: "Tri des Tours",
+    numberTrain: "Train des Chiffres",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -362,6 +363,13 @@ export const fr: TranslationSchema = {
     moves: "coups",
     perfect: "Solution parfaite ! 🌟",
     playAgain: "Rejouer",
+  },
+  numberTrain: {
+    title: "Train des Chiffres ! 🚂",
+    subtitle: "Compte les passagers et amène le train à la bonne gare !",
+    help: "Fais glisser le train vers la gare du bon chiffre !",
+    oneMore: "+1",
+    oneLess: "-1",
   },
   challenge: {
     title: "Mode Défi 🎯",
