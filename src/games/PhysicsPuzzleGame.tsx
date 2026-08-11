@@ -214,6 +214,9 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
         <div className="flex flex-wrap justify-center gap-2 min-h-[48px]">
           {trayWeights.map((w) => (
             <div key={w.id} className="flex flex-col items-center gap-1">
+              {selectedWeightId === w.id && (
+                <span className="text-xs font-black text-slate-600 leading-none">{w.mass}</span>
+              )}
               <button
                 type="button"
                 data-testid="physics-tray-weight"
