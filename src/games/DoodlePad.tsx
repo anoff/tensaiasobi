@@ -126,6 +126,14 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
 
     const lastPoint = lastPointRef.current ?? coords;
 
+    ctx.lineWidth = brushSize;
+    if (isEraser) {
+      ctx.globalCompositeOperation = 'destination-out';
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = color;
+    }
+
     // Only draw the new segment from the last point, instead of restroking
     // the entire accumulated path each move — restroking the whole path on
     // every pointer move caused the line to look jittery/weird when the
