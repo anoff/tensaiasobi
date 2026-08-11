@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import { useTranslation } from '../hooks/useTranslation';
@@ -27,6 +28,9 @@ const CONFIG: Record<GameDifficulty, DifficultyConfig> = {
 };
 
 const PASSENGER_EMOJIS = ['🐻', '🐰', '🐱', '🐶', '🦊', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🦆', '🦉', '🐴', '🦄'];
+
+const STATION_SIZE = 96;
+const STATION_MARGIN = 12;
 
 function generateRound(difficulty: GameDifficulty, overrideCount?: number): RoundConfig {
   const config = CONFIG[difficulty];
@@ -69,17 +73,54 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
   const [trainX, setTrainX] = useState(0);
   const [trainY, setTrainY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [locked, setLocked] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [closedStation, setClosedStation] = useState<number | null>(null);
+  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
 
   const stageRef = useRef<HTMLDivElement>(null);
   const trainRef = useRef<HTMLDivElement>(null);
 
+  // Refs mirror latest values so the global pointer-move/up listeners always
+  // see up-to-date state without needing to be re-attached every render,
+  // which previously made dragging feel laggy and prone to "losing" the cursor.
+  const draggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const lockedRef = useRef(locked);
+  const roundRef = useRef(round);
+  const difficultyRef = useRef(difficulty);
+
+  useEffect(() => {
+    lockedRef.current = locked;
+  }, [locked]);
+  useEffect(() => {
+    roundRef.current = round;
+  }, [round]);
+  useEffect(() => {
+    difficultyRef.current = difficulty;
+  }, [difficulty]);
+
+  useLayoutEffect(() => {
+    const stageEl = stageRef.current;
+    if (!stageEl) return;
+    const updateSize = () => {
+      const rect = stageEl.getBoundingClientRect();
+      setStageSize({ width: rect.width, height: rect.height });
+    };
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(stageEl);
+    return () => observer.disconnect();
+  }, []);
+
   const resetTrainPosition = useCallback(() => {
-    setTrainX(0);
-    setTrainY(0);
+    // Force a synchronous commit so the train's DOM position reflects the
+    // reset immediately (important for pointerup-driven snap-back, where a
+    // fast release could otherwise be measured before React re-renders).
+    flushSync(() => {
+      setTrainX(0);
+      setTrainY(0);
+    });
   }, []);
 
   const startNewRound = useCallback((diff: GameDifficulty) => {
@@ -105,23 +146,36 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
     return { x: clientX - rect.left, y: clientY - rect.top };
   };
 
-  const startDrag = (clientX: number, clientY: number) => {
-    if (locked) return;
+  const trainXRef = useRef(trainX);
+  const trainYRef = useRef(trainY);
+  useEffect(() => {
+    trainXRef.current = trainX;
+  }, [trainX]);
+  useEffect(() => {
+    trainYRef.current = trainY;
+  }, [trainY]);
+
+  const startDrag = useCallback((clientX: number, clientY: number) => {
+    if (lockedRef.current) return;
+    draggingRef.current = true;
     setIsDragging(true);
     const pos = getPointerPosition(clientX, clientY);
-    setDragStart({ x: pos.x - trainX, y: pos.y - trainY });
-  };
+    dragStartRef.current = { x: pos.x - trainXRef.current, y: pos.y - trainYRef.current };
+  }, []);
 
-  const moveDrag = (clientX: number, clientY: number) => {
-    if (!isDragging || !stageRef.current) return;
+  const moveDrag = useCallback((clientX: number, clientY: number) => {
+    if (!draggingRef.current || !stageRef.current) return;
     const pos = getPointerPosition(clientX, clientY);
-    setTrainX(pos.x - dragStart.x);
-    setTrainY(pos.y - dragStart.y);
-  };
+    setTrainX(pos.x - dragStartRef.current.x);
+    setTrainY(pos.y - dragStartRef.current.y);
+  }, []);
 
-  const endDrag = () => {
-    if (!isDragging) return;
+  const endDrag = useCallback(() => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
     setIsDragging(false);
+    const round = roundRef.current;
+    const difficulty = difficultyRef.current;
 
     if (!stageRef.current || !trainRef.current) {
       resetTrainPosition();
@@ -184,10 +238,51 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
     } else {
       resetTrainPosition();
     }
-  };
+  }, [playSuccess, playError, onStarEarned, startNewRound, resetTrainPosition]);
+
+  // Also listen on the window as a fallback for browsers/environments where
+  // pointer capture isn't available, so a fast drag never "outruns" the
+  // element and gets abandoned mid-gesture.
+  useEffect(() => {
+    const handlePointerMove = (e: PointerEvent) => moveDrag(e.clientX, e.clientY);
+    const handlePointerUp = () => endDrag();
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+    };
+  }, [moveDrag, endDrag]);
 
   const passengerEmoji = PASSENGER_EMOJIS[round.passengerCount % PASSENGER_EMOJIS.length];
   const passengers = Array.from({ length: round.passengerCount }, (_, i) => i);
+
+  // Orient every station in a circle around the centered train so no number
+  // ever gets pushed to a second row / off-screen row where it can't be reached.
+  const stationPositions = useMemo(() => {
+    const { width, height } = stageSize;
+    const count = round.targets.length;
+    if (!width || !height || count === 0) {
+      return round.targets.map(() => ({ left: 0, top: 0 }));
+    }
+    const cx = width / 2;
+    const cy = height / 2;
+    const radius = Math.max(
+      Math.min(width, height) / 2 - STATION_SIZE / 2 - STATION_MARGIN,
+      STATION_SIZE / 2 + STATION_MARGIN
+    );
+    return round.targets.map((_, i) => {
+      const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+      return {
+        left: cx + radius * Math.cos(angle) - STATION_SIZE / 2,
+        top: cy + radius * Math.sin(angle) - STATION_SIZE / 2,
+      };
+    });
+  }, [round.targets, stageSize]);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-4 w-full select-none max-w-lg mx-auto">
@@ -207,10 +302,10 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
 
       <div
         ref={stageRef}
-        className="relative flex-1 w-full min-h-[320px] my-4 rounded-3xl border-4 border-slate-200 bg-gradient-to-b from-sky-100 to-emerald-50 overflow-hidden"
+        className="relative flex-1 w-full min-h-[420px] my-4 rounded-3xl border-4 border-slate-200 bg-gradient-to-b from-sky-100 to-emerald-50 overflow-hidden"
       >
         {round.delta !== 0 && (
-          <div className="absolute top-4 left-0 right-0 text-center">
+          <div className="absolute top-4 left-0 right-0 text-center z-10">
             <span
               className={`inline-block text-3xl font-black px-4 py-2 rounded-full border-4 ${
                 round.delta > 0
@@ -223,34 +318,48 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
           </div>
         )}
 
+        {round.targets.map((target, i) => {
+          const isClosed = closedStation === target;
+          const pos = stationPositions[i] ?? { left: 0, top: 0 };
+          return (
+            <div
+              key={target}
+              data-testid="number-train-station"
+              data-value={target}
+              style={{ left: `${pos.left}px`, top: `${pos.top}px` }}
+              className={`absolute w-24 h-24 min-w-[96px] min-h-[96px] flex items-center justify-center rounded-2xl border-4 text-4xl font-black transition-all duration-300 ${
+                isClosed
+                  ? 'bg-slate-400 border-slate-500 text-white scale-95'
+                  : 'bg-white border-slate-300 text-slate-700 shadow-[0_6px_0_0_#94a3b8]'
+              }`}
+            >
+              {target}
+            </div>
+          );
+        })}
+
         <div
           ref={trainRef}
           data-testid="number-train"
-          onMouseDown={(e) => {
+          onPointerDown={(e) => {
             e.preventDefault();
+            (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
             startDrag(e.clientX, e.clientY);
           }}
-          onTouchStart={(e) => {
-            const touch = e.touches[0];
-            startDrag(touch.clientX, touch.clientY);
-          }}
-          onMouseMove={(e) => moveDrag(e.clientX, e.clientY)}
-          onTouchMove={(e) => {
-            const touch = e.touches[0];
-            moveDrag(touch.clientX, touch.clientY);
-          }}
-          onMouseUp={endDrag}
-          onMouseLeave={endDrag}
-          onTouchEnd={endDrag}
+          onPointerMove={(e) => moveDrag(e.clientX, e.clientY)}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
           style={{
             transform: `translate(${trainX}px, ${trainY}px)`,
             left: '50%',
-            top: '30%',
+            top: '50%',
             marginLeft: '-80px',
+            marginTop: '-56px',
+            touchAction: 'none',
           }}
-          className={`absolute w-40 h-28 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing transition-transform duration-75 ${
-            locked ? 'pointer-events-none' : ''
-          }`}
+          className={`absolute z-20 w-40 h-28 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing ${
+            isDragging ? '' : 'transition-transform duration-75'
+          } ${locked ? 'pointer-events-none' : ''}`}
         >
           <div className="text-6xl">🚂</div>
           <div className="absolute -bottom-2 flex flex-wrap justify-center gap-0.5 max-w-[140px]">
@@ -260,26 +369,6 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
               </span>
             ))}
           </div>
-        </div>
-
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center items-end gap-3 px-4 flex-wrap">
-          {round.targets.map((target) => {
-            const isClosed = closedStation === target;
-            return (
-              <div
-                key={target}
-                data-testid="number-train-station"
-                data-value={target}
-                className={`w-24 h-24 min-w-[96px] min-h-[96px] flex items-center justify-center rounded-2xl border-4 text-4xl font-black transition-all duration-300 ${
-                  isClosed
-                    ? 'bg-slate-400 border-slate-500 text-white scale-95'
-                    : 'bg-white border-slate-300 text-slate-700 shadow-[0_6px_0_0_#94a3b8]'
-                }`}
-              >
-                {target}
-              </div>
-            );
-          })}
         </div>
       </div>
 

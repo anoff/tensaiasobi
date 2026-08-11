@@ -61,10 +61,14 @@ test.describe('Number Train E2E Tests', () => {
     });
 
     // Train should return to a visible position inside the stage
+    await expect.poll(async () => {
+      const box = await train.boundingBox();
+      return box ? box.x : null;
+    }).toBeGreaterThanOrEqual(0);
+
     const newBox = await train.boundingBox();
     expect(newBox).not.toBeNull();
-    if (newBox && trainBox) {
-      expect(newBox.x).toBeGreaterThanOrEqual(0);
+    if (newBox) {
       expect(newBox.y).toBeGreaterThanOrEqual(0);
     }
   });
