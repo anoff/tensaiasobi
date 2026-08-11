@@ -35,7 +35,7 @@ const PALETTE = [
   '#7C4DFF', '#FF4081', '#00E5FF', '#CE93D8', '#FFF176',
 ];
 
-/** Generates a series of points along an elliptical arc, used to approximate curved letter strokes. */
+
 function arc(cx: number, cy: number, rx: number, ry: number, startDeg: number, endDeg: number, steps = 12): Point[] {
   const pts: Point[] = [];
   for (let i = 0; i <= steps; i++) {
@@ -682,7 +682,7 @@ export function LetterTrace({ playPop, playSuccess, playError, onStarEarned }: G
         ctx.restore();
       }
 
-      // Draw particles
+
       drawParticles(ctx, particlesRef.current);
     },
     [letter, activeStrokeIndex, completedStrokes, currentPoints, isWon, difficulty],

@@ -6,9 +6,9 @@ import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 import { PUZZLE_IMAGES, PuzzleImage } from '../data/puzzleImages';
 
-// -----------------------------------------------------------------------------
+
 // Types & Helper Functions
-// -----------------------------------------------------------------------------
+
 
 interface EdgeProfile {
   top: 'none' | 'tab' | 'blank';
@@ -17,9 +17,7 @@ interface EdgeProfile {
   left: 'none' | 'tab' | 'blank';
 }
 
-/**
- * Deterministically generates matching jigsaw edge profiles for a grid of a given size.
- */
+
 function generateEdgeProfiles(size: number): EdgeProfile[] {
   const profiles: EdgeProfile[] = Array.from({ length: size * size }, () => ({
     top: 'none',
@@ -32,7 +30,7 @@ function generateEdgeProfiles(size: number): EdgeProfile[] {
     for (let c = 0; c < size; c++) {
       const idx = r * size + c;
 
-      // Top edge
+
       if (r === 0) {
         profiles[idx].top = 'none';
       } else {
@@ -40,7 +38,7 @@ function generateEdgeProfiles(size: number): EdgeProfile[] {
         profiles[idx].top = profiles[topIdx].bottom === 'tab' ? 'blank' : 'tab';
       }
 
-      // Left edge
+
       if (c === 0) {
         profiles[idx].left = 'none';
       } else {
@@ -48,14 +46,14 @@ function generateEdgeProfiles(size: number): EdgeProfile[] {
         profiles[idx].left = profiles[leftIdx].right === 'tab' ? 'blank' : 'tab';
       }
 
-      // Right edge
+
       if (c === size - 1) {
         profiles[idx].right = 'none';
       } else {
         profiles[idx].right = Math.random() < 0.5 ? 'tab' : 'blank';
       }
 
-      // Bottom edge
+
       if (r === size - 1) {
         profiles[idx].bottom = 'none';
       } else {
@@ -67,10 +65,7 @@ function generateEdgeProfiles(size: number): EdgeProfile[] {
   return profiles;
 }
 
-/**
- * Returns the SVG path string for a jigsaw piece given its edge profiles.
- * The core tile coordinates are from (0,0) to (100,100).
- */
+
 function getJigsawPath(profile: EdgeProfile): string {
   let path = 'M 0,0';
 
@@ -119,16 +114,13 @@ interface GameInitData {
   initialTray: number[];
 }
 
-/**
- * Generates the initial scrambled state of the game, starting with an entirely empty board
- * and all pieces scrambled in the tray.
- */
+
 function generateInitialState(size: number): GameInitData {
   const total = size * size;
   
   const initialBoard: (number | null)[] = Array.from({ length: total }, () => null);
 
-  // All pieces are placed in the tray scrambled
+
   const initialTray = shuffle(Array.from({ length: total }, (_, i) => i));
 
   return {
@@ -137,9 +129,6 @@ function generateInitialState(size: number): GameInitData {
   };
 }
 
-// -----------------------------------------------------------------------------
-// JigsawPiece Component
-// -----------------------------------------------------------------------------
 
 interface JigsawPieceProps {
   pieceId: number;
@@ -272,9 +261,6 @@ export function JigsawPiece({
   );
 }
 
-// -----------------------------------------------------------------------------
-// PuzzleGame Main Component
-// -----------------------------------------------------------------------------
 
 export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
   const [level, setLevel] = useState<GameDifficulty>('easy');
@@ -282,11 +268,11 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Ga
 
   // Board contains pieceId or null (empty cell)
   const [board, setBoard] = useState<(number | null)[]>([]);
-  // Tray contains scrambled pieceIds
+
   const [tray, setTray] = useState<number[]>([]);
-  // Locked status for correct placements
+
   const [locked, setLocked] = useState<boolean[]>([]);
-  // Edge shapes config
+
   const [edgeProfiles, setEdgeProfiles] = useState<EdgeProfile[]>([]);
 
   const [selectedTrayIdx, setSelectedTrayIdx] = useState<number | null>(null);
@@ -296,7 +282,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Ga
   
   const { t } = useTranslation();
 
-  // Grid size conversion
+
   const size = useMemo(() => {
     switch (level) {
       case 'easy': return 2;
@@ -312,13 +298,13 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Ga
     return board.length !== total || edgeProfiles.length !== total || locked.length !== total;
   }, [board.length, edgeProfiles.length, locked.length, size]);
 
-  // Game board setup
+
   const initGame = (currentSize: number) => {
-    // Generate deterministic matching shapes
+
     const profiles = generateEdgeProfiles(currentSize);
     setEdgeProfiles(profiles);
 
-    // Generate scrambled board with all pieces in the tray
+
     const { initialBoard, initialTray } = generateInitialState(currentSize);
 
     setBoard(initialBoard);
@@ -330,17 +316,15 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Ga
     setShowPreview(false);
   };
 
-  // Run on image or size change
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     initGame(size);
   }, [selectedImage, size]);
 
-  const svgDataUrl = useMemo(() => {
-    return `data:image/svg+xml;utf8,${encodeURIComponent(selectedImage.svgContent)}`;
-  }, [selectedImage]);
+  const svgDataUrl = useMemo(() => selectedImage.src, [selectedImage]);
 
-  // Click on a tray piece
+
   const handleTrayPieceClick = (idx: number) => {
     if (isSolved || showPreview) {
       playError();
@@ -350,14 +334,14 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Ga
     setSelectedTrayIdx(selectedTrayIdx === idx ? null : idx);
   };
 
-  // Click on a board grid slot
+
   const handleSlotClick = (slotIdx: number) => {
     if (isSolved || showPreview) {
       playError();
       return;
     }
 
-    // Locked pieces cannot be touched
+
     if (locked[slotIdx]) return;
 
     const currentOccupant = board[slotIdx];
@@ -375,7 +359,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Ga
         // Swap: Put the previous occupant back in the tray at the same index
         newTray[selectedTrayIdx] = currentOccupant;
       } else {
-        // Remove from tray
+
         newTray.splice(selectedTrayIdx, 1);
       }
 
@@ -383,7 +367,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Ga
       setTray(newTray);
       setSelectedTrayIdx(null);
 
-      // Check if snapped in the correct position
+
       if (pieceId === slotIdx) {
         // Snap!
         playSuccess();
@@ -391,7 +375,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Ga
         newLocked[slotIdx] = true;
         setLocked(newLocked);
 
-        // Check if fully solved
+
         const allLocked = newLocked.every((val) => val === true);
         if (allLocked) {
           setIsSolved(true);
@@ -418,7 +402,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Ga
     }
   };
 
-  // Selector functions
+
   const handleSelectImage = (img: PuzzleImage) => {
     playPop();
     setSelectedImage(img);

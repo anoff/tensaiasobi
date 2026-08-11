@@ -10,13 +10,11 @@ import { starMultiplier } from '../utils/difficulty';
 import AnswerBubble from '../components/AnswerBubble';
 
 
-
 interface Question {
   text: string;
   answer: number;
   options: number[];
 }
-
 
 
 const generateQuestion = (currentLevel: GameDifficulty): Question => {

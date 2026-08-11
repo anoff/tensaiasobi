@@ -14,7 +14,7 @@ import MazeGame from './games/MazeGame';
 import ShapeTrace from './games/ShapeTrace';
 import LetterTrace from './games/LetterTrace';
 import AnlautGame from './games/AnlautGame';
-import EmojiMatch from './games/EmojiMatch';
+import { EmojiMatch } from './games/EmojiMatch';
 import Shiritori from './games/Shiritori';
 import PuzzleGame from './games/PuzzleGame';
 import DispatchGame from './games/DispatchGame';
@@ -33,6 +33,31 @@ import { useVouchers } from './hooks/useVouchers';
 import { useChallenge } from './hooks/useChallenge';
 
 type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort';
+
+interface LauncherDef {
+  id: Screen;
+  color: 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'red';
+  testid: string;
+  emoji: string;
+  label: 'math' | 'odd' | 'doodle' | 'match' | 'maze' | 'trace' | 'letterTrace' | 'dobble' | 'anlaut' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort';
+}
+
+const GAME_LAUNCHERS: LauncherDef[] = [
+  { id: 'math', color: 'blue', testid: 'launch-math', emoji: '🎈', label: 'math' },
+  { id: 'odd', color: 'yellow', testid: 'launch-odd', emoji: '🧐', label: 'odd' },
+  { id: 'doodle', color: 'pink', testid: 'launch-doodle', emoji: '🎨', label: 'doodle' },
+  { id: 'memory', color: 'orange', testid: 'launch-memory', emoji: '🐯', label: 'match' },
+  { id: 'maze', color: 'green', testid: 'launch-maze', emoji: '🗺️', label: 'maze' },
+  { id: 'trace', color: 'purple', testid: 'launch-trace', emoji: '⭐', label: 'trace' },
+  { id: 'letterTrace', color: 'red', testid: 'launch-letterTrace', emoji: '✏️', label: 'letterTrace' },
+  { id: 'emojiMatch', color: 'pink', testid: 'launch-emojimatch', emoji: '⚡', label: 'dobble' },
+  { id: 'anlaut', color: 'red', testid: 'launch-anlaut', emoji: '🔤', label: 'anlaut' },
+  { id: 'shiritori', color: 'purple', testid: 'launch-shiritori', emoji: '🔗', label: 'shiritori' },
+  { id: 'puzzle', color: 'orange', testid: 'launch-puzzle', emoji: '🧩', label: 'puzzle' },
+  { id: 'dispatch', color: 'red', testid: 'launch-dispatch', emoji: '🚒', label: 'dispatch' },
+  { id: 'physics', color: 'purple', testid: 'launch-physics', emoji: '⚖️', label: 'physics' },
+  { id: 'towerSort', color: 'blue', testid: 'launch-tower-sort', emoji: '🗼', label: 'towerSort' },
+];
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
@@ -394,187 +419,24 @@ function AppContent() {
 
             {/* Launchers Grid */}
             <div className="grid grid-cols-3 gap-4 my-8">
-              {(!challengeActive || challengeAllowedGames.math) && (
-                <KidButton
-                  color="blue"
-                  size="lg"
-                  data-testid="launch-math"
-                  onClick={() => handleScreenChange('math')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🎈</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.math}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.odd) && (
-                <KidButton
-                  color="yellow"
-                  size="lg"
-                  data-testid="launch-odd"
-                  onClick={() => handleScreenChange('odd')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🧐</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.odd}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.doodle) && (
-                <KidButton
-                  color="pink"
-                  size="lg"
-                  data-testid="launch-doodle"
-                  onClick={() => handleScreenChange('doodle')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🎨</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.doodle}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.memory) && (
-                <KidButton
-                  color="orange"
-                  size="lg"
-                  data-testid="launch-memory"
-                  onClick={() => handleScreenChange('memory')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🐯</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.match}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.maze) && (
-                <KidButton
-                  color="green"
-                  size="lg"
-                  data-testid="launch-maze"
-                  onClick={() => handleScreenChange('maze')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🗺️</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.maze}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.trace) && (
-                <KidButton
-                  color="purple"
-                  size="lg"
-                  data-testid="launch-trace"
-                  onClick={() => handleScreenChange('trace')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">⭐</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.trace}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.letterTrace) && (
-                <KidButton
-                  color="red"
-                  size="lg"
-                  data-testid="launch-letterTrace"
-                  onClick={() => handleScreenChange('letterTrace')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">✏️</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.letterTrace}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.emojiMatch) && (
-                <KidButton
-                  color="pink"
-                  size="lg"
-                  data-testid="launch-emojimatch"
-                  onClick={() => handleScreenChange('emojiMatch')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">⚡</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.dobble}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.anlaut) && (
-                <KidButton
-                  color="red"
-                  size="lg"
-                  data-testid="launch-anlaut"
-                  onClick={() => handleScreenChange('anlaut')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🔤</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.anlaut}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.shiritori) && (
-                <KidButton
-                  color="purple"
-                  size="lg"
-                  data-testid="launch-shiritori"
-                  onClick={() => handleScreenChange('shiritori')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🔗</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.shiritori}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.puzzle) && (
-                <KidButton
-                  color="orange"
-                  size="lg"
-                  data-testid="launch-puzzle"
-                  onClick={() => handleScreenChange('puzzle')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🧩</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.puzzle}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.dispatch) && (
-                <KidButton
-                  color="red"
-                  size="lg"
-                  data-testid="launch-dispatch"
-                  onClick={() => handleScreenChange('dispatch')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🚒</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.dispatch}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.physics) && (
-                <KidButton
-                  color="purple"
-                  size="lg"
-                  data-testid="launch-physics"
-                  onClick={() => handleScreenChange('physics')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">⚖️</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.physics}</span>
-                </KidButton>
-              )}
-
-              {(!challengeActive || challengeAllowedGames.towerSort) && (
-                <KidButton
-                  color="blue"
-                  size="lg"
-                  data-testid="launch-tower-sort"
-                  onClick={() => handleScreenChange('towerSort')}
-                  className="aspect-square flex-col gap-2 rounded-[2rem]"
-                >
-                  <span className="text-5xl">🗼</span>
-                  <span className="text-lg font-black block leading-tight">{t.menu.towerSort}</span>
-                </KidButton>
-              )}
+              {GAME_LAUNCHERS.map((launcher) => {
+                const key = launcher.id;
+                const allowed = !challengeActive || challengeAllowedGames[key];
+                if (!allowed) return null;
+                return (
+                  <KidButton
+                    key={key}
+                    color={launcher.color}
+                    size="lg"
+                    data-testid={launcher.testid}
+                    onClick={() => handleScreenChange(key)}
+                    className="aspect-square flex-col gap-2 rounded-[2rem]"
+                  >
+                    <span className="text-5xl">{launcher.emoji}</span>
+                    <span className="text-lg font-black block leading-tight">{t.menu[launcher.label]}</span>
+                  </KidButton>
+                );
+              })}
             </div>
 
             {/* Gamification section separated by a gap and border */}

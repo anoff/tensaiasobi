@@ -7,7 +7,6 @@ import { shuffle } from '../utils/shuffle';
 import { starMultiplier } from '../utils/difficulty';
 
 
-
 interface Card {
   id: number;
   emoji: string;
@@ -30,10 +29,10 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
     if (currentLevel === 'medium') numPairs = 6; // (3x4)
     if (currentLevel === 'hard') numPairs = 8; // (4x4)
 
-    // Select random unique animal emojis from the pool
+
     const selectedAnimals = shuffle(ANIMAL_POOL).slice(0, numPairs);
 
-    // Create pairs and shuffle them
+
     const cardsPool = shuffle([...selectedAnimals, ...selectedAnimals])
       .map((emoji, index) => ({
         id: index,
@@ -62,7 +61,7 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
 
     playPop();
 
-    // Flip card
+
     const updatedCards = cards.map((c) => (c.id === cardId ? { ...c, isFlipped: true } : c));
     setCards(updatedCards);
 
@@ -75,7 +74,7 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
       const card2 = cards.find((c) => c.id === secondId);
 
       if (card1 && card2 && card1.emoji === card2.emoji) {
-        // MATCH FOUND
+
         setTimeout(() => {
           playSuccess();
           const matchedCards = updatedCards.map((c) =>
@@ -87,7 +86,7 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
           const newMatches = matches + 1;
           setMatches(newMatches);
 
-          // Check if all matched
+
           const totalPairs = level === 'easy' ? 2 : level === 'medium' ? 6 : 8;
           if (newMatches === totalPairs) {
             setShowConfetti(true);
@@ -100,7 +99,7 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
           }
         }, 300);
       } else {
-        // NO MATCH
+
         setTimeout(() => {
           playError();
           const resetCards = updatedCards.map((c) =>

@@ -866,7 +866,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Ga
     const marginSize = getMarginSize(size);
     const pixelPoints = shape.points.map((p) => getPixelCoord(p, size));
 
-    // Accuracy Check
+
     let pointsInside = 0;
     drawingPoints.forEach((pt) => {
       const dist = getDistanceToPath(pt, pixelPoints);
@@ -878,7 +878,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Ga
     const accuracyRate = pointsInside / drawingPoints.length;
     const isAccurate = accuracyRate >= 0.82;
 
-    // Completeness Check
+
     const targetSamples = getPathSamples(pixelPoints);
     let coveredSamples = 0;
 

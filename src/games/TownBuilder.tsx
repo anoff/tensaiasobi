@@ -4,9 +4,6 @@ import { TownCell, createEmptyGrid, TOWN_GRID_SIZE } from '../types/gamification
 import type { ShopCategory } from '../types/gamification';
 import { SHOP_CATEGORIES, getItemsByCategory, getItemById } from '../data/townItems';
 
-// ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
 
 interface TownBuilderProps {
   stars: number;
@@ -16,9 +13,9 @@ interface TownBuilderProps {
   playSuccess: () => void;
 }
 
-// ---------------------------------------------------------------------------
+
 // localStorage helpers
-// ---------------------------------------------------------------------------
+
 
 const STORAGE_KEY = 'gamification_town';
 
@@ -40,7 +37,7 @@ function saveTown(grid: (TownCell | null)[][]) {
   }
 }
 
-/** Total 50% refund for every item placed on the grid. */
+
 function computeTotalRefund(grid: (TownCell | null)[][]): number {
   let total = 0;
   grid.forEach((row) => {
@@ -54,9 +51,6 @@ function computeTotalRefund(grid: (TownCell | null)[][]): number {
   return total;
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 
 export function TownBuilder({
   stars,
@@ -67,7 +61,7 @@ export function TownBuilder({
 }: TownBuilderProps) {
   const { t } = useTranslation();
 
-  // ---- state ----
+
   const [grid, setGrid] = useState<(TownCell | null)[][]>(loadTown);
   const [catalogCell, setCatalogCell] = useState<{ row: number; col: number } | null>(null);
   const [activeCategory, setActiveCategory] = useState<ShopCategory>('buildings');
@@ -95,15 +89,12 @@ export function TownBuilder({
     saveTown(grid);
   }, [grid]);
 
-  // ------------------------------------------------------------------
-  // Grid interactions
-  // ------------------------------------------------------------------
 
   const handleCellClick = (row: number, col: number) => {
     if (longPressTriggered.current) return; // ignore click after long-press
     const cell = grid[row][col];
     if (!cell) {
-      // Open catalog for this empty cell
+
       setActiveCategory('buildings');
       setCatalogCell({ row, col });
       playPop();
@@ -135,9 +126,9 @@ export function TownBuilder({
     }
   };
 
-  // ------------------------------------------------------------------
+
   // Catalog – buy an item
-  // ------------------------------------------------------------------
+
 
   const handleBuyItem = useCallback(
     (itemId: string) => {
@@ -165,9 +156,9 @@ export function TownBuilder({
     [catalogCell, spendStars, playSuccess],
   );
 
-  // ------------------------------------------------------------------
+
   // Remove an item (with 50% refund)
-  // ------------------------------------------------------------------
+
 
   const handleConfirmRemove = useCallback(() => {
     if (!removeCell) return;
@@ -188,9 +179,9 @@ export function TownBuilder({
     playPop();
   }, [removeCell, grid, addStars, playPop]);
 
-  // ------------------------------------------------------------------
+
   // Remove all items (with 50% refund for each item)
-  // ------------------------------------------------------------------
+
 
   const handleConfirmDeleteAll = useCallback(() => {
     const totalRefund = computeTotalRefund(grid);
@@ -234,9 +225,6 @@ export function TownBuilder({
     setHoldProgress(0);
   };
 
-  // ------------------------------------------------------------------
-  // Render
-  // ------------------------------------------------------------------
 
   const catalogItems = getItemsByCategory(activeCategory);
 

@@ -28,7 +28,7 @@ const generateOptions = (
 
   const correctChar = lang === 'ja' ? word[0] : word[0].toUpperCase();
 
-  // Collect all starting characters of all items in this language dictionary
+
   const allWords = Object.values(itemsDict) as string[];
   const allStartingChars = Array.from(
     new Set(
@@ -82,7 +82,7 @@ export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, chal
 
   const { streak, highScore, registerCorrect, resetStreak } = useStreak('anlaut');
 
-  // Compute options dynamically using useMemo to avoid setState in useEffect
+
   const options = useMemo(() => {
     return generateOptions(currentItem, language, t.anlautGame.items as Record<string, string>);
   }, [currentItem, language, t.anlautGame.items]);
@@ -156,7 +156,7 @@ export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, chal
     setHintUsed(false);
   };
 
-  // Help format the word before correct answer
+
   const getPlaceholderWord = () => {
     if (isCorrect) {
       return displayWord;
@@ -164,7 +164,7 @@ export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, chal
     if (hintUsed) {
       return '..' + displayWord.slice(1);
     }
-    // Dotted representation
+
     return displayWord
       .split('')
       .map((char) => (char === ' ' ? ' ' : '_'))

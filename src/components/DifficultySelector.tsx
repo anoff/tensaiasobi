@@ -1,39 +1,26 @@
-interface DifficultySelectorProps<T extends string> {
-  selected: T;
-  options: T[];
-  onChange: (value: T) => void;
+import type { GameDifficulty } from '../types/game';
+
+interface DifficultySelectorProps {
+  selected: GameDifficulty;
+  options: GameDifficulty[];
+  onChange: (value: GameDifficulty) => void;
   disabled?: boolean;
   className?: string;
 }
 
-/**
- * A unified difficulty selector component for all games.
- * Displays difficulties on a 1-2-3 (or 4) star scale with consistent kid-friendly styling and 3D press effects.
- */
-export function DifficultySelector<T extends string>({
+const STARS: Record<GameDifficulty, string> = {
+  easy: '⭐',
+  medium: '⭐⭐',
+  hard: '⭐⭐⭐',
+};
+
+export function DifficultySelector({
   selected,
   options,
   onChange,
   disabled = false,
   className = '',
-}: DifficultySelectorProps<T>) {
-  const getStars = (opt: string) => {
-    switch (opt) {
-      case 'easy':
-        return '⭐';
-      case 'medium':
-        return '⭐⭐';
-      case 'hard':
-        return '⭐⭐⭐';
-      case 'expert':
-        return '⭐⭐⭐⭐';
-      default:
-        return '⭐';
-    }
-  };
-
-  const getTestId = (opt: string) => `difficulty-${opt}`;
-
+}: DifficultySelectorProps) {
   return (
     <div className={`w-full flex justify-between bg-slate-200/80 p-1.5 rounded-2xl border-2 border-slate-300 gap-1.5 select-none ${className}`}>
       {options.map((opt) => {
@@ -41,7 +28,7 @@ export function DifficultySelector<T extends string>({
         return (
           <button
             key={opt}
-            data-testid={getTestId(opt)}
+            data-testid={`difficulty-${opt}`}
             disabled={disabled}
             onClick={() => {
               if (!isActive) onChange(opt);
@@ -55,7 +42,7 @@ export function DifficultySelector<T extends string>({
             `}
           >
             <span className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]">
-              {getStars(opt)}
+              {STARS[opt]}
             </span>
           </button>
         );

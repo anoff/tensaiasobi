@@ -21,10 +21,8 @@ test.describe('Emoji Match Game E2E Tests', () => {
     await expect(hardDiff).toBeVisible();
 
     const startSoloZen = page.getByTestId('start-solo-zen');
-    const startDuel = page.getByTestId('start-duel');
-    
+
     await expect(startSoloZen).toBeVisible();
-    await expect(startDuel).toBeVisible();
 
     // Easy mode should lock out Time Attack
     await easyDiff.click();

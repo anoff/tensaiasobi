@@ -107,7 +107,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
     }
 
     if (selectedWeightId !== null) {
-      // Move selected tray weight to this side
+
       setWeights((prev) =>
         prev.map((w) => (w.id === selectedWeightId ? { ...w, side: weight.side } : w))
       );
@@ -116,7 +116,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
       return;
     }
 
-    // Clicking a placed weight returns it to the tray
+
     setWeights((prev) => prev.map((w) => (w.id === weight.id ? { ...w, side: 'tray' } : w)));
     playPop();
   };

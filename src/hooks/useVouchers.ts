@@ -3,7 +3,7 @@ import type { Voucher } from '../types/gamification';
 
 const STORAGE_KEY = 'gamification_vouchers';
 
-/** Preset voucher definitions */
+
 const DEFAULT_VOUCHERS: Voucher[] = [
   { id: 'gummy_bear',   emoji: '🍬', nameKey: 'gummyBear',  cost: 50,  enabled: true },
   { id: 'ice_cream',    emoji: '🍦', nameKey: 'iceCream',   cost: 100, enabled: true },
@@ -18,7 +18,7 @@ function loadVouchers(): Voucher[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const saved = JSON.parse(raw) as Voucher[];
-      // Merge saved state with defaults to pick up any new preset vouchers
+
       return DEFAULT_VOUCHERS.map((def) => {
         const found = saved.find((v) => v.id === def.id);
         return found ? { ...def, cost: found.cost, enabled: found.enabled, redeemedAt: found.redeemedAt } : def;

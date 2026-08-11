@@ -1,6 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import { useFlyUpAnimations } from './useFlyUpAnimations';
+
+interface StarEarnAnimation {
+  id: number;
+  amount: number;
+}
 
 const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
   math: true,
@@ -25,7 +29,22 @@ export function useChallenge() {
   const [challengeStarsEarned, setChallengeStarsEarned] = useLocalStorage<number>('challenge_stars_earned', 0);
   const [challengeAllowedGames, setChallengeAllowedGames] = useLocalStorage<Record<string, boolean>>('challenge_allowed_games', DEFAULT_ALLOWED_GAMES);
 
-  const { pendingAnimations, queueAnimation, clearAnimation, clearAllAnimations } = useFlyUpAnimations();
+  const [pendingAnimations, setPendingAnimations] = useState<StarEarnAnimation[]>([]);
+  const animIdRef = useRef(0);
+
+  const queueAnimation = useCallback((amount: number) => {
+    if (amount <= 0) return;
+    const id = ++animIdRef.current;
+    setPendingAnimations((prev) => [...prev, { id, amount }]);
+  }, []);
+
+  const clearAnimation = useCallback((id: number) => {
+    setPendingAnimations((prev) => prev.filter((a) => a.id !== id));
+  }, []);
+
+  const clearAllAnimations = useCallback(() => {
+    setPendingAnimations([]);
+  }, []);
 
   const challengeStarsRemaining = Math.max(0, challengeStarsTarget - challengeStarsEarned);
 
@@ -39,10 +58,7 @@ export function useChallenge() {
 
   const addChallengeStars = useCallback((amount: number) => {
     if (amount <= 0) return;
-    setChallengeStarsEarned((prev) => {
-      const next = prev + amount;
-      return next;
-    });
+    setChallengeStarsEarned((prev) => prev + amount);
     queueAnimation(amount);
   }, [setChallengeStarsEarned, queueAnimation]);
 
