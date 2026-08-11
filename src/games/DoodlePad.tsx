@@ -29,6 +29,7 @@ const PRESETS_COLORS = [
 export function DoodlePad({ playPop }: DoodlePadProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const [color, setColor] = useState(PRESETS_COLORS[0]);
   const [brushSize, setBrushSize] = useState(10);
   const [isEraser, setIsEraser] = useState(false);
@@ -94,10 +95,6 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    ctx.beginPath();
-    ctx.moveTo(coords.x, coords.y);
-
-
     ctx.lineWidth = brushSize;
     if (isEraser) {
       ctx.globalCompositeOperation = 'destination-out';
@@ -106,10 +103,13 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
       ctx.strokeStyle = color;
     }
 
-
+    // Draw a dot so a simple tap/click still leaves a mark
+    ctx.beginPath();
+    ctx.moveTo(coords.x, coords.y);
     ctx.lineTo(coords.x, coords.y);
     ctx.stroke();
 
+    lastPointRef.current = coords;
     setIsDrawing(true);
   };
 
@@ -124,8 +124,18 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
+    const lastPoint = lastPointRef.current ?? coords;
+
+    // Only draw the new segment from the last point, instead of restroking
+    // the entire accumulated path each move — restroking the whole path on
+    // every pointer move caused the line to look jittery/weird when the
+    // cursor moved quickly (repeated overlapping renders of prior segments).
+    ctx.beginPath();
+    ctx.moveTo(lastPoint.x, lastPoint.y);
     ctx.lineTo(coords.x, coords.y);
     ctx.stroke();
+
+    lastPointRef.current = coords;
   };
 
   const stopDrawing = () => {
@@ -135,6 +145,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     if (ctx) {
       ctx.closePath();
     }
+    lastPointRef.current = null;
     setIsDrawing(false);
   };
 
