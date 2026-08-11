@@ -208,8 +208,9 @@ test.describe('tensaiasobi Gamification Checks', () => {
     const catalogTitle = page.locator('h3', { hasText: 'Choose an item' });
     await expect(catalogTitle).not.toBeVisible();
 
-    // The poke swell animation class should be applied to the tapped cell
+    // The poke swell animation class should be applied to the emoji inside
+    // the tapped cell (not the cell itself, which must stay in place)
     // (assert promptly since the class is removed after ~1s).
-    await expect(placedHouse).toHaveClass(/town-poke-swell/, { timeout: 500 });
+    await expect(placedHouse.locator('span')).toHaveClass(/town-poke-swell/, { timeout: 500 });
   });
 });

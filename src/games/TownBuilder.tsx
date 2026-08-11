@@ -367,9 +367,8 @@ export function TownBuilder({
                   type="button"
                   className={
                     cell
-                      ? `aspect-square flex items-center justify-center rounded-xl text-2xl sm:text-3xl
-                         bg-amber-100/80 dark:bg-amber-800/30 transition-transform active:scale-95
-                         ${isJustPlaced ? 'town-place' : isPoked ? pokeClass : animClass}`
+                      ? `group aspect-square flex items-center justify-center rounded-xl text-2xl sm:text-3xl
+                         bg-amber-100/80 dark:bg-amber-800/30`
                       : `aspect-square flex items-center justify-center rounded-xl
                          bg-green-100 dark:bg-green-900/30
                          border-2 border-dashed border-green-300 dark:border-green-700
@@ -383,7 +382,15 @@ export function TownBuilder({
                   onContextMenu={(e) => e.preventDefault()}
                   aria-label={cell ? cell.emoji : t.town.empty}
                 >
-                  {cell ? cell.emoji : '+'}
+                  {cell ? (
+                    <span
+                      className={`inline-block transition-transform group-active:scale-95 ${isJustPlaced ? 'town-place' : isPoked ? pokeClass : animClass}`}
+                    >
+                      {cell.emoji}
+                    </span>
+                  ) : (
+                    '+'
+                  )}
                 </button>
               );
             })
