@@ -29,6 +29,7 @@ export const ja: TranslationSchema = {
     dispatch: "きんきゅう",
     physics: "てんびん",
     towerSort: "タワーソート",
+    shadowFlashlight: "かげ",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -362,6 +363,12 @@ export const ja: TranslationSchema = {
     moves: "てすう",
     perfect: "パーフェクト！ 🌟",
     playAgain: "もういちどあそぶ",
+  },
+  shadowFlashlight: {
+    title: "かげのフラッシュライト！🔦",
+    subtitle: "あかりをうごかして かくれた かたちを みつけよう！",
+    help: "ライトをうごかして、あてはまる えもじを タップしてね！",
+    victory: "🎉 みつけたね！",
   },
   challenge: {
     title: "チャレンジモード 🎯",
