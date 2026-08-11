@@ -76,3 +76,4 @@ Split into 6 dependency-ordered phases; each is independently shippable and ends
 ### Phase 6 — Animation state consolidation (~40 lines)
 - `yagni` merge fly-up machinery (StarEarnAnimation, animIdRef, pendingAnimations) into one shared hook for useStars + useChallenge [useStars.ts:22]
 > Touches only the two hooks + their consumers (StarCounter, App). Saved for last since it's isolated from game files.
+> DONE. `hooks/useFlyUpAnimations.ts` owns `pendingAnimations`/`animIdRef`/`queueAnimation`/`clearAnimation`/`clearAllAnimations`; both hooks adopted it (challenge gains the `amount <= 0` guard). Also extracted `components/FlyUpStar.tsx` (onDone + children, `onAnimationEnd`) — StarCounter's ref+listener copy and App's challenge-badge inline block both render through it; StarCounter's `useRef` cleanup also went with it. App's destructure untouched (useChallenge still returns `pendingChallengeAnimations`/`clearChallengeAnimation`).

@@ -1,4 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
+import { useFlyUpAnimations, type StarEarnAnimation } from './useFlyUpAnimations';
 
 const STORAGE_KEY = 'gamification_stars';
 
@@ -19,11 +20,6 @@ function saveStars(value: number): void {
   }
 }
 
-export interface StarEarnAnimation {
-  id: number;
-  amount: number;
-}
-
 export interface UseStarsReturn {
   stars: number;
   addStars: (amount: number) => void;
@@ -37,8 +33,7 @@ export interface UseStarsReturn {
 
 export function useStars(): UseStarsReturn {
   const [stars, setStars] = useState<number>(loadStars);
-  const [pendingAnimations, setPendingAnimations] = useState<StarEarnAnimation[]>([]);
-  const animIdRef = useRef(0);
+  const { pendingAnimations, queueAnimation, clearAnimation, clearAllAnimations } = useFlyUpAnimations();
 
   const addStars = useCallback((amount: number) => {
     if (amount <= 0) return;
@@ -47,10 +42,8 @@ export function useStars(): UseStarsReturn {
       saveStars(next);
       return next;
     });
-    // Queue a fly-up animation
-    const id = ++animIdRef.current;
-    setPendingAnimations((prev) => [...prev, { id, amount }]);
-  }, []);
+    queueAnimation(amount);
+  }, [queueAnimation]);
 
   const spendStars = useCallback((amount: number): boolean => {
     let success = false;
@@ -69,12 +62,8 @@ export function useStars(): UseStarsReturn {
   const resetStars = useCallback(() => {
     setStars(0);
     saveStars(0);
-    setPendingAnimations([]);
-  }, []);
-
-  const clearAnimation = useCallback((id: number) => {
-    setPendingAnimations((prev) => prev.filter((a) => a.id !== id));
-  }, []);
+    clearAllAnimations();
+  }, [clearAllAnimations]);
 
   return { stars, addStars, spendStars, resetStars, pendingAnimations, clearAnimation };
 }

@@ -25,6 +25,7 @@ import GameConfetti from './components/GameConfetti';
 
 // Gamification imports
 import { StarCounter } from './components/StarCounter';
+import { FlyUpStar } from './components/FlyUpStar';
 import { StarShop } from './components/StarShop';
 import { TownBuilder } from './games/TownBuilder';
 import { useStars } from './hooks/useStars';
@@ -314,15 +315,11 @@ function AppContent() {
 
               {/* Countdown fly-down/up animations */}
               {pendingChallengeAnimations.map((anim) => (
-                <div
-                  key={anim.id}
-                  onAnimationEnd={() => clearChallengeAnimation(anim.id)}
-                  className="absolute left-1/2 -translate-x-1/2 pointer-events-none star-fly-up"
-                >
+                <FlyUpStar key={anim.id} onDone={() => clearChallengeAnimation(anim.id)}>
                   <span className="text-sm font-black text-pink-600 whitespace-nowrap drop-shadow-sm">
                     -{anim.amount} ⭐
                   </span>
-                </div>
+                </FlyUpStar>
               ))}
             </div>
           )}
