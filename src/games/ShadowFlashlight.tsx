@@ -47,9 +47,9 @@ const SHADOW_ITEMS: ShadowItem[] = [
 ];
 
 const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
-  easy: { choices: 2, radius: 96, baseStars: 2 },
-  medium: { choices: 3, radius: 72, baseStars: 2 },
-  hard: { choices: 3, radius: 56, baseStars: 2 },
+  easy: { choices: 2, radius: 64, baseStars: 2 },
+  medium: { choices: 3, radius: 48, baseStars: 2 },
+  hard: { choices: 3, radius: 36, baseStars: 2 },
 };
 
 type ShadowFlashlightProps = GameProps;
@@ -74,7 +74,6 @@ export function ShadowFlashlight({
   const [target, setTarget] = useState<ShadowItem | null>(null);
   const [choices, setChoices] = useState<ShadowItem[]>([]);
   const [position, setPosition] = useState({ x: 50, y: 50 });
-  const [isDragging, setIsDragging] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
   const [shakeChoice, setShakeChoice] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -112,14 +111,10 @@ export function ShadowFlashlight({
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (isRevealed) return;
-    setIsDragging(true);
-    (e.target as Element).setPointerCapture?.(e.pointerId);
     handlePointerMove(e);
   };
 
-  const handlePointerUp = () => {
-    setIsDragging(false);
-  };
+  const handlePointerUp = () => {};
 
   const handleChoice = (item: ShadowItem) => {
     if (isRevealed || !target) return;
@@ -188,7 +183,7 @@ export function ShadowFlashlight({
           ref={stageRef}
           data-testid="shadow-stage"
           onPointerDown={handlePointerDown}
-          onPointerMove={isDragging ? handlePointerMove : undefined}
+          onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
           className="relative w-full h-full max-h-[420px] rounded-[2.5rem] border-8 border-slate-800 bg-slate-950 overflow-hidden shadow-inner cursor-none touch-none"
@@ -212,8 +207,7 @@ export function ShadowFlashlight({
               <span
                 className="text-[10rem] leading-none"
                 style={{
-                  color: 'black',
-                  filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.8))',
+                  filter: 'brightness(0)',
                 }}
               >
                 {target.emoji}
