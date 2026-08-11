@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { Coupon } from '../types/gamification';
 
 const STORAGE_KEY = 'gamification_coupons';
@@ -50,50 +50,50 @@ export interface UseCouponsReturn {
 
 export function useCoupons(): UseCouponsReturn {
   const [coupons, setCoupons] = useState<Coupon[]>(loadCoupons);
+  // Mirrors the latest coupons list synchronously (updated immediately, not only after a
+  // re-render) so award/redeem can validate against fresh data even if called back-to-back
+  // within the same tick, and can return an accurate success/failure result right away.
+  const couponsRef = useRef<Coupon[]>(coupons);
+
+  const commit = useCallback((next: Coupon[]) => {
+    couponsRef.current = next;
+    setCoupons(next);
+    saveCoupons(next);
+  }, []);
 
   const toggleCoupon = useCallback((id: string) => {
-    setCoupons((prev) => {
-      const next = prev.map((c) => (c.id === id ? { ...c, enabled: !c.enabled } : c));
-      saveCoupons(next);
-      return next;
-    });
-  }, []);
+    const next = couponsRef.current.map((c) => (c.id === id ? { ...c, enabled: !c.enabled } : c));
+    commit(next);
+  }, [commit]);
 
   const awardCoupon = useCallback((id: string): boolean => {
     if (!id) return false;
-    const coupon = coupons.find((c) => c.id === id);
-    if (!coupon || !coupon.enabled) return false;
+    const target = couponsRef.current.find((c) => c.id === id);
+    if (!target || !target.enabled) return false;
 
-    setCoupons((prev) => {
-      const next = prev.map((c) =>
-        c.id === id ? { ...c, earnedCount: c.earnedCount + 1, lastEarnedAt: Date.now() } : c
-      );
-      saveCoupons(next);
-      return next;
-    });
+    const next = couponsRef.current.map((c) =>
+      c.id === id ? { ...c, earnedCount: c.earnedCount + 1, lastEarnedAt: Date.now() } : c
+    );
+    commit(next);
     return true;
-  }, [coupons]);
+  }, [commit]);
 
   const redeemCoupon = useCallback((id: string): boolean => {
     if (!id) return false;
-    const coupon = coupons.find((c) => c.id === id);
-    if (!coupon || coupon.earnedCount <= 0) return false;
+    const target = couponsRef.current.find((c) => c.id === id);
+    if (!target || target.earnedCount <= 0) return false;
 
-    setCoupons((prev) => {
-      const next = prev.map((c) =>
-        c.id === id ? { ...c, earnedCount: c.earnedCount - 1 } : c
-      );
-      saveCoupons(next);
-      return next;
-    });
+    const next = couponsRef.current.map((c) =>
+      c.id === id ? { ...c, earnedCount: c.earnedCount - 1 } : c
+    );
+    commit(next);
     return true;
-  }, [coupons]);
+  }, [commit]);
 
   const resetCoupons = useCallback(() => {
     const fresh = DEFAULT_COUPONS.map((c) => ({ ...c }));
-    setCoupons(fresh);
-    saveCoupons(fresh);
-  }, []);
+    commit(fresh);
+  }, [commit]);
 
   return { coupons, toggleCoupon, awardCoupon, redeemCoupon, resetCoupons };
 }
