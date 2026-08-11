@@ -1,11 +1,6 @@
 import { useEffect, type DependencyList, type RefObject } from 'react';
 
-/**
- * Runs a requestAnimationFrame draw loop, resizing the canvas to fit its
- * container (square, capped at maxSize) on mount and on window resize.
- * The loop tears down and re-creates whenever `deps` change, mirroring the
- * per-game effects it replaces.
- */
+
 export function useCanvasLoop(
   canvasRef: RefObject<HTMLCanvasElement | null>,
   containerRef: RefObject<HTMLDivElement | null>,

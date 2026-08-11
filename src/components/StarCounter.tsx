@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react';
-import type { StarEarnAnimation } from '../hooks/useFlyUpAnimations';
 import { FlyUpStar } from './FlyUpStar';
 
 interface StarCounterProps {
   stars: number;
-  pendingAnimations: StarEarnAnimation[];
+  pendingAnimations: { id: number; amount: number }[];
   clearAnimation: (id: number) => void;
 }
 
@@ -12,11 +11,11 @@ export function StarCounter({ stars, pendingAnimations, clearAnimation }: StarCo
   const counterRef = useRef<HTMLDivElement>(null);
   const prevStars = useRef(stars);
 
-  // Pulse the counter when stars change
+
   useEffect(() => {
     if (stars !== prevStars.current && counterRef.current) {
       counterRef.current.classList.remove('star-counter-pulse');
-      // Force reflow
+
       void counterRef.current.offsetWidth;
       counterRef.current.classList.add('star-counter-pulse');
     }

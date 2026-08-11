@@ -35,7 +35,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
   const [isDrawing, setIsDrawing] = useState(false);
   const { t } = useTranslation();
 
-  // Initialize and resize canvas
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -43,7 +43,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Smooth lines configuration
+
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
@@ -51,7 +51,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
       const container = containerRef.current;
       if (!container) return;
 
-      // Save drawing content
+
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = canvas.width;
       tempCanvas.height = canvas.height;
@@ -60,7 +60,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
         tempCtx.drawImage(canvas, 0, 0);
       }
 
-      // Resize canvas to fill container
+
       const rect = container.getBoundingClientRect();
       canvas.width = rect.width;
       canvas.height = rect.height;
@@ -69,11 +69,11 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      // Draw background
+
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Restore drawing content
+
       ctx.drawImage(tempCanvas, 0, 0);
     };
 
@@ -97,7 +97,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
     ctx.beginPath();
     ctx.moveTo(coords.x, coords.y);
 
-    // Set drawing settings
+
     ctx.lineWidth = brushSize;
     if (isEraser) {
       ctx.globalCompositeOperation = 'destination-out';
@@ -106,7 +106,7 @@ export function DoodlePad({ playPop }: DoodlePadProps) {
       ctx.strokeStyle = color;
     }
 
-    // Draw single dot on touch start
+
     ctx.lineTo(coords.x, coords.y);
     ctx.stroke();
 

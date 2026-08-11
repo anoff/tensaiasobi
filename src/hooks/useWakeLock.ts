@@ -12,7 +12,7 @@ export function useWakeLock() {
   const wakeLockRef = useRef<LocalWakeLockSentinel | null>(null);
 
   useEffect(() => {
-    // Check if Screen Wake Lock API is supported
+
     if (typeof navigator === 'undefined' || !('wakeLock' in navigator)) {
       console.warn('Screen Wake Lock API is not supported in this browser.');
       return;
@@ -49,7 +49,7 @@ export function useWakeLock() {
       }
     };
 
-    // Request wake lock initially
+
     requestWakeLock();
 
     document.addEventListener('visibilitychange', handleVisibilityChange);

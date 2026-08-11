@@ -33,11 +33,11 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
 
   const generatePuzzle = () => {
     const keys = Object.keys(CATEGORIES);
-    // Pick main category
+
     const mainCatIndex = Math.floor(Math.random() * keys.length);
     const mainCatKey = keys[mainCatIndex];
     
-    // Pick odd category
+
     let oddCatKey = mainCatKey;
     while (oddCatKey === mainCatKey) {
       const oddCatIndex = Math.floor(Math.random() * keys.length);
@@ -56,7 +56,7 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
       { emoji: chosenOdd, isOdd: true },
     ];
 
-    // Shuffle
+
     setItems(shuffle(puzzleItems));
     setSelectedEmoji(null);
     setIsCorrect(null);

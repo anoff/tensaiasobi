@@ -110,7 +110,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
   const [isWon, setIsWon] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Animation states
+
   const [isAnimating, setIsAnimating] = useState(false);
   const [animatingIndex, setAnimatingIndex] = useState(0);
 
@@ -136,7 +136,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
 
   const { cols, rows } = getGridSize(difficulty);
 
-  // Generate Maze using DFS Spanning Tree
+
   const generateMaze = () => {
     const tempGrid: Cell[][] = [];
     for (let r = 0; r < rows; r++) {
@@ -227,7 +227,6 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
           ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
         }
       }
-
 
 
       // 3. Draw Crayon Path Line
@@ -331,7 +330,6 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
   );
 
 
-
   const getCellFromCoords = (x: number, y: number): { col: number; row: number } | null => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
@@ -344,7 +342,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
     return null;
   };
 
-  // Drawing event handlers
+
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isWon || isAnimating) return;
 
@@ -354,7 +352,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
     const touchedCell = getCellFromCoords(coords.x, coords.y);
     if (!touchedCell) return;
 
-    // Check if the touched cell is already in the mappedPath
+
     const touchedIdx = mappedPath.findIndex((cell) => cell.col === touchedCell.col && cell.row === touchedCell.row);
 
     if (touchedIdx !== -1) {
@@ -367,7 +365,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
       setMappedPath(newPath);
       setAnimatingIndex(touchedIdx);
 
-      // Reset collected stars for cells that are no longer in the path
+
       const resetGrid = grid.map((row) =>
         row.map((cell) => {
           const inPath = newPath.some((p) => p.col === cell.col && p.row === cell.row);
@@ -392,20 +390,20 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
     const touchedCell = getCellFromCoords(coords.x, coords.y);
     if (!touchedCell) return;
 
-    // Check mapping logic
+
     const lastCell = mappedPath[mappedPath.length - 1];
     if (touchedCell.col === lastCell.col && touchedCell.row === lastCell.row) {
       return;
     }
 
-    // Check adjacency
+
     const colDiff = touchedCell.col - lastCell.col;
     const rowDiff = touchedCell.row - lastCell.row;
     const isAdjacent = Math.abs(colDiff) + Math.abs(rowDiff) === 1;
 
     if (!isAdjacent) return;
 
-    // Check wall collision between lastCell and touchedCell
+
     let wallBlocked = false;
     const lastCellGridInfo = grid[lastCell.row][lastCell.col];
 
@@ -418,7 +416,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
       return; // Do not map past wall, but let the drawing overlay draw the line to show they went off-track
     }
 
-    // Check backtracking
+
     if (mappedPath.length > 1) {
       const secondToLast = mappedPath[mappedPath.length - 2];
       if (touchedCell.col === secondToLast.col && touchedCell.row === secondToLast.row) {
@@ -450,21 +448,21 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
     activePointerCoordsRef.current = null;
   };
 
-  // Play Path Execution Animation
+
   const handlePlayPath = () => {
     if (isAnimating || isWon || mappedPath.length <= 1) return;
 
     setIsAnimating(true);
     setAnimatingIndex(0);
 
-    // Play loop
+
     let idx = 0;
     const interval = setInterval(() => {
       idx += 1;
       if (idx >= mappedPath.length) {
         clearInterval(interval);
 
-        // Check if destination reached
+
         const finalCell = mappedPath[mappedPath.length - 1];
         const reachedGoal = finalCell.col === cols - 1 && finalCell.row === rows - 1;
 
@@ -476,14 +474,14 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
           onStarEarned?.(3 * multiplier);
           setIsAnimating(false);
         } else {
-          // Play slide back animation
+
           handleReturnToStart();
         }
       } else {
         playPop();
         setAnimatingIndex(idx);
 
-        // Check star collection
+
         const cell = mappedPath[idx];
         const cellData = grid[cell.row][cell.col];
         if (cellData.hasStar && !cellData.starCollected) {
@@ -516,7 +514,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
     }, 100); // Walk backwards faster!
   };
 
-  // Control button actions
+
   const handleClear = () => {
     playPop();
     activePointerCoordsRef.current = null;
@@ -526,7 +524,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Game
     setIsWon(false);
     setShowConfetti(false);
 
-    // Reset star status
+
     const resetGrid = grid.map(row => row.map(cell => ({ ...cell, starCollected: false })));
     setGrid(resetGrid);
   };

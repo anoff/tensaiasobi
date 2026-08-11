@@ -5,70 +5,16 @@ import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 
-// Finite Field arithmetic helper for order q
-// Specifically, order 4 (easy, 5 emojis), 5 (medium, 6 emojis), 7 (hard, 8 emojis)
+// Precomputed Dobble card index decks (one shared symbol per pair of cards)
+const DECK_EASY: number[][] = [[16,17,18,19,20],[0,1,2,3,20],[4,5,6,7,20],[8,9,10,11,20],[12,13,14,15,20],[0,4,8,12,16],[1,5,9,13,16],[2,6,10,14,16],[3,7,11,15,16],[0,5,10,15,17],[1,4,11,14,17],[2,7,8,13,17],[3,6,9,12,17],[0,6,11,13,18],[1,7,10,12,18],[2,4,9,15,18],[3,5,8,14,18],[0,7,9,14,19],[1,6,8,15,19],[2,5,11,12,19],[3,4,10,13,19]];
+const DECK_MEDIUM: number[][] = [[25,26,27,28,29,30],[0,1,2,3,4,30],[5,6,7,8,9,30],[10,11,12,13,14,30],[15,16,17,18,19,30],[20,21,22,23,24,30],[0,5,10,15,20,25],[1,6,11,16,21,25],[2,7,12,17,22,25],[3,8,13,18,23,25],[4,9,14,19,24,25],[0,6,12,18,24,26],[1,7,13,19,20,26],[2,8,14,15,21,26],[3,9,10,16,22,26],[4,5,11,17,23,26],[0,7,14,16,23,27],[1,8,10,17,24,27],[2,9,11,18,20,27],[3,5,12,19,21,27],[4,6,13,15,22,27],[0,8,11,19,22,28],[1,9,12,15,23,28],[2,5,13,16,24,28],[3,6,14,17,20,28],[4,7,10,18,21,28],[0,9,13,17,21,29],[1,5,14,18,22,29],[2,6,10,19,23,29],[3,7,11,15,24,29],[4,8,12,16,20,29]];
+const DECK_HARD: number[][] = [[49,50,51,52,53,54,55,56],[0,1,2,3,4,5,6,56],[7,8,9,10,11,12,13,56],[14,15,16,17,18,19,20,56],[21,22,23,24,25,26,27,56],[28,29,30,31,32,33,34,56],[35,36,37,38,39,40,41,56],[42,43,44,45,46,47,48,56],[0,7,14,21,28,35,42,49],[1,8,15,22,29,36,43,49],[2,9,16,23,30,37,44,49],[3,10,17,24,31,38,45,49],[4,11,18,25,32,39,46,49],[5,12,19,26,33,40,47,49],[6,13,20,27,34,41,48,49],[0,8,16,24,32,40,48,50],[1,9,17,25,33,41,42,50],[2,10,18,26,34,35,43,50],[3,11,19,27,28,36,44,50],[4,12,20,21,29,37,45,50],[5,13,14,22,30,38,46,50],[6,7,15,23,31,39,47,50],[0,9,18,27,29,38,47,51],[1,10,19,21,30,39,48,51],[2,11,20,22,31,40,42,51],[3,12,14,23,32,41,43,51],[4,13,15,24,33,35,44,51],[5,7,16,25,34,36,45,51],[6,8,17,26,28,37,46,51],[0,10,20,23,33,36,46,52],[1,11,14,24,34,37,47,52],[2,12,15,25,28,38,48,52],[3,13,16,26,29,39,42,52],[4,7,17,27,30,40,43,52],[5,8,18,21,31,41,44,52],[6,9,19,22,32,35,45,52],[0,11,15,26,30,41,45,53],[1,12,16,27,31,35,46,53],[2,13,17,21,32,36,47,53],[3,7,18,22,33,37,48,53],[4,8,19,23,34,38,42,53],[5,9,20,24,28,39,43,53],[6,10,14,25,29,40,44,53],[0,12,17,22,34,39,44,54],[1,13,18,23,28,40,45,54],[2,7,19,24,29,41,46,54],[3,8,20,25,30,35,47,54],[4,9,14,26,31,36,48,54],[5,10,15,27,32,37,42,54],[6,11,16,21,33,38,43,54],[0,13,19,25,31,37,43,55],[1,7,20,26,32,38,44,55],[2,8,14,27,33,39,45,55],[3,9,15,21,34,40,46,55],[4,10,16,22,28,41,47,55],[5,11,17,23,29,35,48,55],[6,12,18,24,30,36,42,55]];
+
 function generateDobbleDeck(q: number): number[][] {
-  const deck: number[][] = [];
-
-  const add = (x: number, y: number): number => {
-    if (q === 4) {
-      return x ^ y; // Galois Field F4 addition is bitwise XOR
-    }
-    return (x + y) % q;
-  };
-
-  const mult = (x: number, y: number): number => {
-    if (q === 4) {
-      if (x === 0 || y === 0) return 0;
-      if (x === 1) return y;
-      if (y === 1) return x;
-      if (x === 2) {
-        if (y === 2) return 3;
-        if (y === 3) return 1;
-      }
-      if (x === 3) {
-        if (y === 2) return 1;
-        if (y === 3) return 2;
-      }
-      return 0;
-    }
-    return (x * y) % q;
-  };
-
-  // 1. Line at infinity
-  const infinityLine: number[] = [];
-  for (let i = 0; i < q; i++) {
-    infinityLine.push(q * q + i);
-  }
-  infinityLine.push(q * q + q);
-  deck.push(infinityLine);
-
-  // 2. Lines of form x = c
-  for (let c = 0; c < q; c++) {
-    const line: number[] = [];
-    for (let y = 0; y < q; y++) {
-      line.push(c * q + y);
-    }
-    line.push(q * q + q);
-    deck.push(line);
-  }
-
-  // 3. Lines of form y = mx + c
-  for (let m = 0; m < q; m++) {
-    for (let c = 0; c < q; c++) {
-      const line: number[] = [];
-      for (let x = 0; x < q; x++) {
-        const y = add(mult(m, x), c);
-        line.push(x * q + y);
-      }
-      line.push(q * q + m);
-      deck.push(line);
-    }
-  }
-
-  return deck;
+  if (q === 4) return DECK_EASY;
+  if (q === 5) return DECK_MEDIUM;
+  return DECK_HARD;
 }
-
 // Child-friendly emojis for play
 const EMOJI_POOL = [
   '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🦆', '🦉', '🐙',
@@ -95,7 +41,7 @@ function getCardLayout(emojis: string[], q: number): CardEmoji[] {
   const layout: CardEmoji[] = [];
   const numEmojis = q + 1;
 
-  // Center emoji
+
   layout.push({
     emoji: emojis[0],
     x: (Math.random() - 0.5) * 6, // slight center jitter (+/- 3%)
@@ -104,13 +50,13 @@ function getCardLayout(emojis: string[], q: number): CardEmoji[] {
     scale: q === 4 ? 1.05 + Math.random() * 0.2 : 0.85 + Math.random() * 0.35 // larger for easy
   });
 
-  // Outer ring emojis
+
   const numOuter = numEmojis - 1;
   const radius = q === 4 ? 26 : q === 5 ? 31 : 33; // base radius in % to prevent overflow
 
   for (let i = 0; i < numOuter; i++) {
     const baseAngle = (2 * Math.PI * i) / numOuter;
-    // Add organic jitter
+
     const angleJitter = (Math.random() - 0.5) * 0.22; // ~ +/- 6 degrees
     const angle = baseAngle + angleJitter;
 
@@ -149,7 +95,7 @@ function buildShuffledDeck(q: number): DobbleCard[] {
   return shuffle(cards);
 }
 
-// Find the single matching emoji between two cards
+
 function findMatch(cardA: DobbleCard, cardB: DobbleCard): string {
   const setA = new Set(cardA.emojis.map(e => e.emoji));
   for (const item of cardB.emojis) {
@@ -160,22 +106,19 @@ function findMatch(cardA: DobbleCard, cardB: DobbleCard): string {
   return '';
 }
 
-
-type Mode = 'solo_time' | 'solo_zen' | 'duel';
+type Mode = 'solo_time' | 'solo_zen';
 
 type EmojiMatchProps = GameProps;
 
 export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, challengeMode }: EmojiMatchProps) {
   const { t } = useTranslation();
 
-  const getPlayerScoreLabel = (playerNum: number) => t.emojiMatch.playerScore.replace('{count}', String(playerNum));
 
-  // Setup states
   const [gameStarted, setGameStarted] = useState(false);
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
   const [mode, setMode] = useState<Mode>('solo_zen');
 
-  // Solo State
+
   const [deck, setDeck] = useState<DobbleCard[]>([]);
   const [deckIndex, setDeckIndex] = useState(0);
   const [cardA, setCardA] = useState<DobbleCard | null>(null);
@@ -192,18 +135,6 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
   // Rotational key to trigger slide/fade animations on card swap
   const [cardAKey, setCardAKey] = useState(0);
   const [cardBKey, setCardBKey] = useState(0);
-
-  // 2-Player Duel State
-  const [duelCard1, setDuelCard1] = useState<DobbleCard | null>(null);
-  const [duelCard2, setDuelCard2] = useState<DobbleCard | null>(null);
-  const [duelScore1, setDuelScore1] = useState(0);
-  const [duelScore2, setDuelScore2] = useState(0);
-  const [winner, setWinner] = useState<1 | 2 | null>(null);
-  const [duelMatchedEmoji, setDuelMatchedEmoji] = useState<string | null>(null);
-
-  // Anti-spam freeze timers
-  const [p1Frozen, setP1Frozen] = useState(false);
-  const [p2Frozen, setP2Frozen] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -238,7 +169,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
 
   const [highScore, setHighScore] = useState(0);
 
-  // Initialize Game Session
+
   const initGame = (diff: GameDifficulty, gMode: Mode) => {
     const q = getQ(diff);
     const newDeck = buildShuffledDeck(q);
@@ -250,36 +181,22 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
     setIsGameOver(false);
     setShowConfetti(false);
     setMatchedEmoji(null);
-    setDuelMatchedEmoji(null);
-    setWinner(null);
-    setDuelScore1(0);
-    setDuelScore2(0);
-    setP1Frozen(false);
-    setP2Frozen(false);
 
-    // Set high score
+
     setHighScore(loadHighScore(diff, gMode));
 
-    if (gMode === 'duel') {
-      setDuelCard1(newDeck[0]);
-      setDuelCard2(newDeck[1]);
-      setDeckIndex(2);
-    } else {
-      setCardA(newDeck[0]);
-      setCardB(newDeck[1]);
-      setDeckIndex(2);
-      
-      // Timer setup
-      if (gMode === 'solo_time') {
-        const startSecs = diff === 'medium' ? 45 : 50;
-        setTimeLeft(startSecs);
-      }
+    setCardA(newDeck[0]);
+    setCardB(newDeck[1]);
+    setDeckIndex(2);
+    if (gMode === 'solo_time') {
+      const startSecs = diff === 'medium' ? 45 : 50;
+      setTimeLeft(startSecs);
     }
 
     setGameStarted(true);
   };
 
-  // Timer effect for Time Attack
+
   useEffect(() => {
     if (gameStarted && mode === 'solo_time' && !isGameOver) {
       timerRef.current = setInterval(() => {
@@ -289,7 +206,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
             playError();
             if (timerRef.current) clearInterval(timerRef.current);
             
-            // Check high score
+
             const currentHigh = loadHighScore(difficulty, mode);
             if (score > currentHigh) {
               saveHighScore(difficulty, mode, score);
@@ -309,10 +226,10 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
     };
   }, [gameStarted, mode, isGameOver, score, difficulty, playError, playSuccess]);
 
-  // Draw card helper with deck recycling
+
   const drawCard = (currentDeck: DobbleCard[], index: number) => {
     if (index >= currentDeck.length) {
-      // Regenerate deck if empty
+
       const q = getQ(difficulty);
       const recycled = buildShuffledDeck(q);
       setDeck(recycled);
@@ -323,7 +240,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
     return currentDeck[index];
   };
 
-  // Solo Tap Handler
+
   const handleSoloTap = (emoji: string, cardSource: 'A' | 'B') => {
     if (isGameOver || !cardA || !cardB || matchedEmoji) return;
 
@@ -334,11 +251,11 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
       setMatchedEmoji(emoji);
       playSuccess();
 
-      // Award stars immediately
+
       const starsEarned = getStars(difficulty);
       onStarEarned?.(starsEarned);
 
-      // Score and Combo calculations
+
       const newScore = score + 1;
       setScore(newScore);
 
@@ -349,13 +266,13 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
         setTimeout(() => setCombo(0), 1000);
       }
 
-      // Time attack bonus
+
       if (mode === 'solo_time') {
         const bonus = difficulty === 'medium' ? 2 : 3;
         setTimeLeft((t) => Math.min(t + bonus, 99));
       }
 
-      // Update High Score in Zen Mode instantly
+
       if (mode === 'solo_zen') {
         const currentHigh = loadHighScore(difficulty, mode);
         if (newScore > currentHigh) {
@@ -364,7 +281,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
         }
       }
 
-      // Slide card animation transitions
+
       setTimeout(() => {
         setMatchedEmoji(null);
         
@@ -382,7 +299,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
       setStreak(0);
       setShakeCard(cardSource);
       
-      // Time Attack penalty
+
       if (mode === 'solo_time') {
         const penalty = difficulty === 'medium' ? 3 : 4;
         setTimeLeft((t) => Math.max(t - penalty, 0));
@@ -401,72 +318,6 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
         }, 1500);
       } else {
         setTimeout(() => setShakeCard(null), 500);
-      }
-    }
-  };
-
-  // 2-Player Duel Tap Handler
-  const handleDuelTap = (emoji: string, player: 1 | 2) => {
-    if (winner || !duelCard1 || !duelCard2 || duelMatchedEmoji) return;
-
-    // Check if player is frozen (wrong tap penalty)
-    if (player === 1 && p1Frozen) return;
-    if (player === 2 && p2Frozen) return;
-
-    const correctMatch = findMatch(duelCard1, duelCard2);
-
-    if (emoji === correctMatch) {
-      setDuelMatchedEmoji(emoji);
-      playSuccess();
-
-      // Award stars to active matched play
-      const starsEarned = getStars(difficulty);
-      onStarEarned?.(starsEarned);
-
-      let targetScore: number;
-      if (player === 1) {
-        const newScore = duelScore1 + 1;
-        setDuelScore1(newScore);
-        targetScore = newScore;
-      } else {
-        const newScore = duelScore2 + 1;
-        setDuelScore2(newScore);
-        targetScore = newScore;
-      }
-
-      // Check win condition (First to 10)
-      if (targetScore >= 10) {
-        setTimeout(() => {
-          setWinner(player);
-          setShowConfetti(true);
-          playSuccess();
-        }, 500);
-        return;
-      }
-
-      // Replace card for the opponent so the layout remains fresh
-      setTimeout(() => {
-        setDuelMatchedEmoji(null);
-        const nextCard = drawCard(deck, deckIndex);
-        if (player === 1) {
-          // P1 matched. Keep P1 card, swap P2 card
-          setDuelCard2(nextCard);
-          setCardAKey(prev => prev + 1);
-        } else {
-          // P2 matched. Keep P2 card, swap P1 card
-          setDuelCard1(nextCard);
-          setCardBKey(prev => prev + 1);
-        }
-      }, 500);
-    } else {
-      // Wrong tap penalty: Freeze clicking for 1.5 seconds
-      playError();
-      if (player === 1) {
-        setP1Frozen(true);
-        setTimeout(() => setP1Frozen(false), 1500);
-      } else {
-        setP2Frozen(true);
-        setTimeout(() => setP2Frozen(false), 1500);
       }
     }
   };
@@ -527,18 +378,10 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
               </div>
             )}
 
-            {/* 2-Player Duel */}
-            <button
-              data-testid="start-duel"
-              onClick={() => { playPop(); setMode('duel'); initGame(difficulty, 'duel'); }}
-              className="w-full py-4 bg-white hover:bg-slate-50 border-4 border-candy-pink/80 rounded-[2rem] shadow-[0_8px_0_0_#d81b60] font-black text-pink-600 text-lg flex items-center justify-center gap-3 transition-all active:translate-y-[6px] active:shadow-[0_2px_0_0_#d81b60] outline-none cursor-pointer"
-            >
-              <span>⚔️</span> {t.emojiMatch.duelMode}
-            </button>
           </div>
         </div>
-      ) : mode !== 'duel' ? (
-        // ================= SOLO PLAY GAME BOARD =================
+      ) : (
+
         <div className="flex-1 flex flex-col justify-between w-full p-4 relative">
           
           {/* Header Stats */}
@@ -697,167 +540,6 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
           <div className="text-center text-slate-400 font-extrabold text-xs">
             {matchedEmoji ? '✨ 🎉 Matching! 🎉 ✨' : 'Tap the matching emoji!'}
           </div>
-        </div>
-      ) : (
-        // ================= 2-PLAYER DUEL GAME BOARD =================
-        <div className="flex-1 flex flex-col justify-between w-full h-full relative overflow-hidden">
-          
-          {/* PLAYER 2 ZONE (Top, Rotated 180 Degrees) */}
-          <div className="flex-1 flex flex-col justify-center items-center p-4 border-b-2 border-slate-300 relative bg-amber-50/20 rotate-180">
-            {/* Duel card P2 */}
-            <div
-              key={`duelCard2-${cardAKey}`}
-              className={`
-                w-60 h-60 sm:w-72 sm:h-72 rounded-full bg-white border-4 border-pink-400 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-300
-                ${p2Frozen ? 'opacity-50 animate-shake' : 'animate-card-in'}
-              `}
-            >
-              {duelCard2?.emojis.map((item, idx) => {
-                const isMatched = duelMatchedEmoji === item.emoji;
-                return (
-                  <button
-                    key={idx}
-                    disabled={p2Frozen}
-                    onClick={() => handleDuelTap(item.emoji, 2)}
-                    style={{
-                      position: 'absolute',
-                      left: `calc(50% + ${item.x}%)`,
-                      top: `calc(50% + ${item.y}%)`,
-                      transform: `translate(-50%, -50%) rotate(${item.rotation}deg) scale(${item.scale})`,
-                    }}
-                    className={`
-                      select-none outline-none text-center leading-none
-                      ${difficulty === 'easy' ? 'text-5xl sm:text-6xl' : difficulty === 'medium' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'}
-                      ${isMatched ? 'animate-emoji-pop scale-150 z-30' : ''}
-                    `}
-                  >
-                    <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)] block">
-                      {item.emoji}
-                    </span>
-                  </button>
-                );
-              })}
-
-              {p2Frozen && (
-                <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center font-black text-red-600 text-3xl">
-                  ⏳
-                </div>
-              )}
-            </div>
-
-            {/* P2 Stats Header */}
-            <div className="absolute top-2 left-4 right-4 flex justify-between items-center pointer-events-none">
-              <span className="bg-pink-100 border-2 border-pink-300 text-pink-600 font-extrabold px-4 py-1 rounded-full text-xs">
-                {getPlayerScoreLabel(2)}{duelScore2} / 10
-              </span>
-            </div>
-          </div>
-
-          {/* MIDDLE DIVIDER & SYSTEM UI */}
-          <div className="h-10 bg-slate-200 border-y-2 border-slate-300 flex justify-between items-center px-4 relative z-25">
-            <button
-              onClick={() => { playPop(); setGameStarted(false); }}
-              className="px-3 py-0.5 bg-slate-300 hover:bg-slate-400 text-slate-700 font-extrabold text-[10px] rounded-full cursor-pointer outline-none transition-colors"
-            >
-              ⬅️ Quit
-            </button>
-            
-            <div className="flex gap-2">
-              <span className="bg-blue-500 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full">
-                P1: {duelScore1}
-              </span>
-              <span className="bg-pink-500 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full">
-                P2: {duelScore2}
-              </span>
-            </div>
-
-            <button
-              onClick={() => { playPop(); initGame(difficulty, 'duel'); }}
-              className="px-3 py-0.5 bg-candy-yellow border border-yellow-500 text-yellow-800 font-extrabold text-[10px] rounded-full cursor-pointer outline-none"
-            >
-              🔄 Reset
-            </button>
-          </div>
-
-          {/* PLAYER 1 ZONE (Bottom, Facing Normal) */}
-          <div className="flex-1 flex flex-col justify-center items-center p-4 relative bg-blue-50/20">
-            {/* Duel card P1 */}
-            <div
-              key={`duelCard1-${cardBKey}`}
-              className={`
-                w-60 h-60 sm:w-72 sm:h-72 rounded-full bg-white border-4 border-blue-400 shadow-md relative overflow-hidden flex items-center justify-center transition-all duration-300
-                ${p1Frozen ? 'opacity-50 animate-shake' : 'animate-card-in'}
-              `}
-            >
-              {duelCard1?.emojis.map((item, idx) => {
-                const isMatched = duelMatchedEmoji === item.emoji;
-                return (
-                  <button
-                    key={idx}
-                    disabled={p1Frozen}
-                    onClick={() => handleDuelTap(item.emoji, 1)}
-                    style={{
-                      position: 'absolute',
-                      left: `calc(50% + ${item.x}%)`,
-                      top: `calc(50% + ${item.y}%)`,
-                      transform: `translate(-50%, -50%) rotate(${item.rotation}deg) scale(${item.scale})`,
-                    }}
-                    className={`
-                      select-none outline-none text-center leading-none
-                      ${difficulty === 'easy' ? 'text-5xl sm:text-6xl' : difficulty === 'medium' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'}
-                      ${isMatched ? 'animate-emoji-pop scale-150 z-30' : ''}
-                    `}
-                  >
-                    <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)] block">
-                      {item.emoji}
-                    </span>
-                  </button>
-                );
-              })}
-
-              {p1Frozen && (
-                <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center font-black text-red-600 text-3xl">
-                  ⏳
-                </div>
-              )}
-            </div>
-
-            {/* P1 Stats Header */}
-            <div className="absolute top-2 left-4 right-4 flex justify-between items-center pointer-events-none">
-              <span className="bg-blue-100 border-2 border-blue-300 text-blue-600 font-extrabold px-4 py-1 rounded-full text-xs">
-                {getPlayerScoreLabel(1)}{duelScore1} / 10
-              </span>
-            </div>
-          </div>
-
-          {/* DUEL GAME OVER SCREEN OVERLAY */}
-          {winner && (
-            <div className="absolute inset-0 bg-sky-50/95 backdrop-blur-md flex flex-col justify-center items-center p-6 z-40 space-y-6">
-              <div className="text-center space-y-2">
-                <h3 className="text-4xl font-black text-slate-800">
-                  {winner === 1 ? t.emojiMatch.p1Wins : t.emojiMatch.p2Wins}
-                </h3>
-                <p className="text-slate-500 font-extrabold text-lg">
-                  Final Score: {duelScore1} - {duelScore2}
-                </p>
-              </div>
-
-              <button
-                onClick={() => { playPop(); initGame(difficulty, 'duel'); }}
-                className="px-8 py-3 bg-candy-purple hover:bg-purple-400 text-white font-black text-lg rounded-2xl shadow-[0_6px_0_0_#9c27b0] border-2 border-purple-500 active:translate-y-[4px] active:shadow-[0_2px_0_0_#9c27b0] cursor-pointer outline-none"
-              >
-                🔄 {t.emojiMatch.playAgain}
-              </button>
-
-              <button
-                onClick={() => { playPop(); setGameStarted(false); }}
-                className="px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-600 font-black text-sm rounded-xl cursor-pointer outline-none transition-colors"
-              >
-                Exit to Modes
-              </button>
-            </div>
-          )}
-
         </div>
       )}
     </div>

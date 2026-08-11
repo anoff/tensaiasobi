@@ -30,7 +30,7 @@ const cleanWesternWord = (word: string, lang?: string): string => {
   return cleaned.replace(/[^a-zäöüßа-я]/g, '');
 };
 
-// Get the start character of a word depending on the language
+
 const getStartChar = (word: string, lang: string): string => {
   if (!word) return '';
   if (lang === 'ja' || lang === 'ko') {
@@ -40,7 +40,7 @@ const getStartChar = (word: string, lang: string): string => {
   return cleaned.length > 0 ? cleaned[0].toUpperCase() : '';
 };
 
-// Get the end character of a word depending on the language
+
 const getEndChar = (word: string, lang: string): string => {
   if (!word) return '';
   if (lang === 'ja') {
@@ -51,7 +51,7 @@ const getEndChar = (word: string, lang: string): string => {
     }
     const last = trimmed[trimmed.length - 1];
     
-    // Normalize small characters to their standard counterpart
+
     const smallToBig: Record<string, string> = {
       'ぁ': 'あ', 'ぃ': 'い', 'ぅ': 'う', 'ぇ': 'え', 'ぉ': 'お',
       'っ': 'つ',
@@ -76,7 +76,7 @@ const KANA_BASE_MAP: Record<string, string> = {
   'ぱ': 'は', 'ぴ': 'ひ', 'ぷ': 'ふ', 'ぺ': 'へ', 'ぽ': 'ほ',
 };
 
-// Checks compatibility between ending char of previous word and starting char of next word
+
 const areCharsCompatible = (endChar: string, startChar: string, lang: string): boolean => {
   if (!endChar || !startChar) return false;
   if (lang === 'ja') {
@@ -110,7 +110,7 @@ const isSafeWord = (emoji: string, lang: string, itemsDict: Record<string, strin
   });
 };
 
-// Get a random starting word that is safe
+
 const getStartWord = (lang: string, itemsDict: Record<string, string>): string => {
   const safeItems = EMOJI_ITEMS.filter(emoji => isSafeWord(emoji, lang, itemsDict));
   if (safeItems.length > 0) {
@@ -174,7 +174,7 @@ const generateOptionsForWord = (
     const nEndingCandidates = matchingCandidates.filter(emoji => getEndChar(itemsDict[emoji] || '', 'ja') === 'ん');
     if (nEndingCandidates.length > 0) {
       const trapEmoji = nEndingCandidates[Math.floor(Math.random() * nEndingCandidates.length)];
-      // Replace one distractor with the trap
+
       const optsList = shuffle([correctEmoji, trapEmoji, ...selectedDistractors.slice(0, 7)]);
       return { options: optsList };
     }
@@ -217,7 +217,7 @@ const getPandaPlayChoice = (
 export function Shiritori({ playPop, playSuccess, playError, onStarEarned, challengeMode }: GameProps) {
   const { language, t } = useTranslation();
   
-  // Memoized items dictionary
+
   const itemsDict = useMemo(() => {
     return (t.anlautGame.items || {}) as Record<string, string>;
   }, [t.anlautGame.items]);
@@ -231,7 +231,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     };
   });
 
-  // Core Game State
+
   const [mode, setMode] = useState<'solo' | 'panda'>('solo');
   const [chain, setChain] = useState<string[]>(() => [seed.startEmoji]);
   const [options, setOptions] = useState<string[]>(() => seed.options);
@@ -247,16 +247,16 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
   const [pandaSpeech, setPandaSpeech] = useState<string>('');
   const [pandaState, setPandaState] = useState<'idle' | 'thinking' | 'talking'>('idle');
 
-  // Game End States
+
   const [isNRuleLost, setIsNRuleLost] = useState<boolean>(false);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
-  // High Scores
+
   const { streak, highScore, registerCorrect, resetStreak } = useStreak('shiritori');
 
   const chainEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize or restart the game
+
   const initGame = useCallback((selectedMode: 'solo' | 'panda') => {
     const startEmoji = getStartWord(language, itemsDict);
     setChain([startEmoji]);
@@ -293,7 +293,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     }
   }, [chain]);
 
-  // Panda plays its turn
+
   const handlePandaPlay = useCallback((currentChain: string[]) => {
     const pandaChoice = getPandaPlayChoice(currentChain, language, itemsDict);
 
@@ -332,7 +332,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     }
   }, [language, itemsDict, t.shiritori.pandaPlayed, playPop]);
 
-  // Handle Player Selection
+
   const handleOptionSelect = (emoji: string) => {
     if (selectedOption !== null || turn !== 'player') return;
 
@@ -360,11 +360,11 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
         return;
       }
 
-      // Successful connection
+
       playSuccess();
       onStarEarned?.(2);
 
-      // Confetti on milestone achievements
+
       if (newStreak % 5 === 0) {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 3000);
@@ -375,12 +375,12 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
         setPandaState('thinking');
         setPandaSpeech(t.shiritori.pandaTurn);
         
-        // Trigger Panda play after delay
+
         setTimeout(() => {
           handlePandaPlay(newChain);
         }, 1500);
       } else {
-        // Solo Mode continues immediately
+
         setTimeout(() => {
           setSelectedOption(null);
           setIsCorrect(null);
@@ -393,7 +393,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
         }, 1000);
       }
     } else {
-      // INCORRECT MATCH
+
       playError();
       resetStreak();
       setShakeOption(emoji);
@@ -410,7 +410,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     }
   };
 
-  // Highlight word letters for educational visualization
+
   const renderHighlightedWord = (emoji: string) => {
     const word = itemsDict[emoji] || '';
     if (!word) return '';

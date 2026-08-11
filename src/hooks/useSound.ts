@@ -1,5 +1,3 @@
-import { useCallback } from 'react';
-
 let audioCtx: AudioContext | null = null;
 
 function getAudioContext(): AudioContext {
@@ -13,7 +11,7 @@ function getAudioContext(): AudioContext {
 }
 
 export function useSound(soundEnabled: boolean, vibrationEnabled: boolean) {
-  const playPop = useCallback(() => {
+  const playPop = () => {
     if (vibrationEnabled && navigator.vibrate) {
       navigator.vibrate(25);
     }
@@ -39,9 +37,9 @@ export function useSound(soundEnabled: boolean, vibrationEnabled: boolean) {
     } catch (e) {
       console.error('Failed to play pop sound:', e);
     }
-  }, [soundEnabled, vibrationEnabled]);
+  };
 
-  const playSuccess = useCallback(() => {
+  const playSuccess = () => {
     if (vibrationEnabled && navigator.vibrate) {
       navigator.vibrate([40, 30, 80]);
     }
@@ -74,9 +72,9 @@ export function useSound(soundEnabled: boolean, vibrationEnabled: boolean) {
     } catch (e) {
       console.error('Failed to play success sound:', e);
     }
-  }, [soundEnabled, vibrationEnabled]);
+  };
 
-  const playError = useCallback(() => {
+  const playError = () => {
     if (vibrationEnabled && navigator.vibrate) {
       navigator.vibrate([100, 50, 100]);
     }
@@ -102,7 +100,7 @@ export function useSound(soundEnabled: boolean, vibrationEnabled: boolean) {
     } catch (e) {
       console.error('Failed to play error sound:', e);
     }
-  }, [soundEnabled, vibrationEnabled]);
+  };
 
   return { playPop, playSuccess, playError };
 }
