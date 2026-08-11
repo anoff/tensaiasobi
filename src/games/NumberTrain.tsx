@@ -212,25 +212,27 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
       return;
     }
 
-    // Check collision with station targets.
+    // Check collision with station targets. Any part of the train (not just its
+    // center) overlapping a station counts as a hit, so dragging the front or
+    // back wagon onto a station works just as well as the middle. This can hit
+    // multiple stations at once; if any of them is the correct answer, treat it
+    // as a win.
     const stationElements = Array.from(stageRef.current.querySelectorAll('[data-testid="number-train-station"]'));
-    const trainCenter = { x: trainCenterX - stageRect.left, y: trainCenterY - stageRect.top };
 
-    let hitStation: number | null = null;
+    const hitStations: number[] = [];
     for (const el of stationElements) {
       const rect = el.getBoundingClientRect();
-      const stationCenter = {
-        x: rect.left + rect.width / 2 - stageRect.left,
-        y: rect.top + rect.height / 2 - stageRect.top,
-      };
-      const dx = trainCenter.x - stationCenter.x;
-      const dy = trainCenter.y - stationCenter.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance < Math.min(rect.width, rect.height) * 0.6) {
-        hitStation = parseInt(el.getAttribute('data-value') || '0', 10);
-        break;
+      const overlaps =
+        trainRect.left < rect.right &&
+        trainRect.right > rect.left &&
+        trainRect.top < rect.bottom &&
+        trainRect.bottom > rect.top;
+      if (overlaps) {
+        hitStations.push(parseInt(el.getAttribute('data-value') || '0', 10));
       }
     }
+
+    const hitStation = hitStations.includes(round.answer) ? round.answer : hitStations[0] ?? null;
 
     if (hitStation === round.answer) {
       setLocked(true);
