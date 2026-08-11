@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import GameConfetti from '../components/GameConfetti';
-import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
 import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
@@ -41,11 +40,15 @@ function getDifficultySettings(diff: GameDifficulty) {
 function buildWeights(diff: GameDifficulty): Weight[] {
   const settings = getDifficultySettings(diff);
   const newWeights: Weight[] = [];
-  const shuffled = shuffle(WEIGHT_EMOJIS);
-
-  // Place a fixed weight on one side and a slightly different one on the other.
-  const leftBase = shuffled[0];
-  const rightBase = { ...shuffled[1], mass: shuffled[1].mass + settings.targetDifference };
+  const weightedPairs = WEIGHT_EMOJIS.flatMap((first, firstIndex) =>
+    WEIGHT_EMOJIS
+      .slice(firstIndex + 1)
+      .filter((second) => Math.abs(first.mass - second.mass) === settings.targetDifference)
+      .map((second) => [first, second] as const)
+  );
+  const [baseA, baseB] = shuffle(weightedPairs)[0] ?? [WEIGHT_EMOJIS[0], WEIGHT_EMOJIS[2]];
+  const [leftBase, rightBase] = Math.random() < 0.5 ? [baseA, baseB] : [baseB, baseA];
+  const trayPool = shuffle(WEIGHT_EMOJIS);
 
   let nextId = 1;
   newWeights.push({ id: nextId++, emoji: leftBase.emoji, mass: leftBase.mass, side: 'left' });
@@ -53,7 +56,7 @@ function buildWeights(diff: GameDifficulty): Weight[] {
 
   // Add tray weights that can be used to balance the scale.
   for (let i = 0; i < settings.trayCount; i++) {
-    const item = shuffled[(i + 2) % shuffled.length];
+    const item = trayPool[i % trayPool.length];
     newWeights.push({ id: nextId++, emoji: item.emoji, mass: item.mass, side: 'tray' });
   }
 
@@ -62,7 +65,7 @@ function buildWeights(diff: GameDifficulty): Weight[] {
 
 export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: PhysicsPuzzleGameProps) {
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
+  const difficulty: GameDifficulty = 'hard';
   const [weights, setWeights] = useState<Weight[]>(() => buildWeights(difficulty));
   const [showConfetti, setShowConfetti] = useState(false);
   const [solved, setSolved] = useState(false);
@@ -71,7 +74,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
 
   const leftMass = weights.filter((w) => w.side === 'left').reduce((sum, w) => sum + w.mass, 0);
   const rightMass = weights.filter((w) => w.side === 'right').reduce((sum, w) => sum + w.mass, 0);
-  const tilt = Math.max(-20, Math.min(20, (leftMass - rightMass) * 3));
+  const tilt = Math.max(-20, Math.min(20, (rightMass - leftMass) * 3));
 
   useEffect(() => {
     if (solved) return;
@@ -130,17 +133,9 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
     setSelectedWeightId(null);
   };
 
-  const handleDifficultyChange = (diff: GameDifficulty) => {
-    playPop();
-    setDifficulty(diff);
-  };
-
   const trayWeights = weights.filter((w) => w.side === 'tray');
   const leftWeights = weights.filter((w) => w.side === 'left');
   const rightWeights = weights.filter((w) => w.side === 'right');
-
-  const leftLabel = `${leftMass}`;
-  const rightLabel = `${rightMass}`;
 
   return (
     <div className="flex-1 flex flex-col items-center w-full h-full select-none max-w-lg mx-auto px-2 py-2">
@@ -155,24 +150,8 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
         <p className="text-slate-500 font-extrabold text-xs">{t.physicsGame.subtitle}</p>
       </div>
 
-      <DifficultySelector
-        selected={difficulty}
-        options={['easy', 'medium', 'hard']}
-        onChange={handleDifficultyChange}
-        className="mb-3"
-      />
-
       {/* Seesaw */}
       <div className="relative w-full flex-1 flex flex-col items-center justify-center min-h-[240px]">
-        {/* Left pan label */}
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 text-2xl font-black text-slate-400">
-          {leftLabel}
-        </div>
-        {/* Right pan label */}
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-2xl font-black text-slate-400">
-          {rightLabel}
-        </div>
-
         {/* Pivot triangle */}
         <div className="absolute bottom-8 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[36px] border-b-amber-700" />
 
@@ -216,6 +195,15 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
             <p className="text-lg font-black text-emerald-600">{t.physicsGame.victory}</p>
           </div>
         )}
+
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex items-center justify-between px-2">
+          <div className="px-3 py-1 rounded-full bg-white border-2 border-slate-200 shadow-sm text-sm font-black text-slate-700">
+            <span data-testid="physics-left-mass">⬅️ {leftMass}</span>
+          </div>
+          <div className="px-3 py-1 rounded-full bg-white border-2 border-slate-200 shadow-sm text-sm font-black text-slate-700">
+            <span data-testid="physics-right-mass">➡️ {rightMass}</span>
+          </div>
+        </div>
       </div>
 
       {/* Weight tray */}
@@ -225,22 +213,26 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
         </p>
         <div className="flex flex-wrap justify-center gap-2 min-h-[48px]">
           {trayWeights.map((w) => (
-            <button
-              key={w.id}
-              type="button"
-              data-testid="physics-tray-weight"
-              onClick={() => handleWeightClick(w)}
-              className={`
-                w-12 h-12 text-2xl rounded-xl border-2 flex items-center justify-center
-                transition-all duration-75
-                ${selectedWeightId === w.id
-                  ? 'bg-yellow-100 border-yellow-400 scale-110 shadow-md'
-                  : 'bg-white border-slate-200 hover:bg-slate-50 active:scale-95'
-                }
-              `}
-            >
-              {w.emoji}
-            </button>
+            <div key={w.id} className="flex flex-col items-center gap-1">
+              {selectedWeightId === w.id && (
+                <span className="text-xs font-black text-slate-600 leading-none">{w.mass}</span>
+              )}
+              <button
+                type="button"
+                data-testid="physics-tray-weight"
+                onClick={() => handleWeightClick(w)}
+                className={`
+                  w-12 h-12 text-2xl rounded-xl border-2 flex items-center justify-center
+                  transition-all duration-75
+                  ${selectedWeightId === w.id
+                    ? 'bg-yellow-100 border-yellow-400 scale-110 shadow-md'
+                    : 'bg-white border-slate-200 hover:bg-slate-50 active:scale-95'
+                  }
+                `}
+              >
+                {w.emoji}
+              </button>
+            </div>
           ))}
         </div>
       </div>
