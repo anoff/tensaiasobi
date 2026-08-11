@@ -25,17 +25,17 @@ export interface ShopItem {
   animation?: string;
 }
 
-/** A redeemable real-world voucher */
-export interface Voucher {
+/** A real-world coupon that can be awarded by a parent, e.g. via a Challenge */
+export interface Coupon {
   id: string;
   emoji: string;
   nameKey: string;
-  /** Cost set by parent (defaults provided) */
-  cost: number;
-  /** Whether this voucher is available to the child */
+  /** Whether this coupon is available to be selected/awarded */
   enabled: boolean;
-  /** Timestamp of last redemption, or undefined if never redeemed */
-  redeemedAt?: number;
+  /** How many times this coupon has been earned so far */
+  earnedCount: number;
+  /** Timestamp of the most recent time this coupon was earned, if any */
+  lastEarnedAt?: number;
 }
 
 /** Default size of the town grid */

@@ -44,7 +44,7 @@ test.describe('tensaiasobi Gamification Checks', () => {
     await page.reload();
   });
 
-  test('Verify Town Builder and Star Shop are accessible and have the core components', async ({ page }) => {
+  test('Verify Town Builder and Coupon Shop are accessible and have the core components', async ({ page }) => {
     // 1. Check Town Builder Launcher
     const townLauncher = page.getByTestId('launch-town');
     await expect(townLauncher).toBeVisible();
@@ -59,21 +59,21 @@ test.describe('tensaiasobi Gamification Checks', () => {
     // Return to menu
     await page.getByTestId('home-button').click();
 
-    // 2. Check Star Shop Launcher
-    const shopLauncher = page.getByTestId('launch-shop');
-    await expect(shopLauncher).toBeVisible();
-    await shopLauncher.click();
+    // 2. Check Coupon Shop Launcher
+    const couponsLauncher = page.getByTestId('launch-coupons');
+    await expect(couponsLauncher).toBeVisible();
+    await couponsLauncher.click();
 
-    // Verify Star Shop title and tabs
-    const shopTitle = page.locator('h2', { hasText: 'Star Shop' });
-    await expect(shopTitle).toBeVisible();
-    const itemsTab = page.locator('button', { hasText: 'Items' });
-    const vouchersTab = page.locator('button', { hasText: 'Vouchers' });
-    await expect(itemsTab).toBeVisible();
-    await expect(vouchersTab).toBeVisible();
+    // Verify Coupon Shop title and catalog
+    const couponsTitle = page.locator('h2', { hasText: 'Coupon Collection' });
+    await expect(couponsTitle).toBeVisible();
+    const catalogHeading = page.locator('h3', { hasText: 'All Coupons' });
+    await expect(catalogHeading).toBeVisible();
+    const gummyBearCoupon = page.locator('p', { hasText: 'Gummy Bear' });
+    await expect(gummyBearCoupon).toBeVisible();
   });
 
-  test('Verify Parent Settings Dashboard displays Reward Vouchers section', async ({ page }) => {
+  test('Verify Parent Settings Dashboard displays Reward Coupons section', async ({ page }) => {
     // Open Settings (triggers Parent Gate)
     const parentsButton = page.locator('button', { hasText: 'Parents' });
     await expect(parentsButton).toBeVisible();
@@ -86,13 +86,47 @@ test.describe('tensaiasobi Gamification Checks', () => {
     const settingsTitle = page.locator('h2', { hasText: 'Settings' });
     await expect(settingsTitle).toBeVisible();
 
-    // Verify Vouchers Configuration Section is visible
-    const vouchersSection = page.locator('span', { hasText: 'Reward Vouchers' });
-    await expect(vouchersSection).toBeVisible();
+    // Verify Coupons Configuration Section is visible
+    const couponsSection = page.locator('span', { hasText: 'Reward Coupons' });
+    await expect(couponsSection).toBeVisible();
 
-    // Verify default vouchers (e.g. Gummy Bear, Ice Cream, etc.) are listed
-    const gummyBearVoucher = page.locator('span', { hasText: 'Gummy Bear' });
-    await expect(gummyBearVoucher).toBeVisible();
+    // Verify default coupons (e.g. Gummy Bear, Ice Cream, etc.) are listed
+    const gummyBearCoupon = page.locator('span', { hasText: 'Gummy Bear' });
+    await expect(gummyBearCoupon).toBeVisible();
+  });
+
+  test('Verify awarding a coupon directly from the Coupon Shop requires parent confirmation', async ({ page }) => {
+    // 1. Open Coupon Shop
+    const couponsLauncher = page.getByTestId('launch-coupons');
+    await expect(couponsLauncher).toBeVisible();
+    await couponsLauncher.click();
+
+    // No coupons earned yet
+    const noneMessage = page.locator('p', { hasText: 'No coupons earned yet' });
+    await expect(noneMessage).toBeVisible();
+
+    // 2. Tap "Award" on the Gummy Bear coupon
+    const awardButton = page.getByTestId('award-coupon-gummy_bear');
+    await expect(awardButton).toBeVisible();
+    await awardButton.click();
+
+    // 3. A Parent Gate confirmation must appear before the coupon is granted
+    const gateTitle = page.locator('h2', { hasText: 'Parents Only' });
+    await expect(gateTitle).toBeVisible();
+
+    // Cancelling should NOT grant the coupon
+    await page.locator('form button', { hasText: 'Cancel' }).click();
+    await expect(noneMessage).toBeVisible();
+
+    // 4. Try again and solve the gate this time
+    await awardButton.click();
+    await expect(gateTitle).toBeVisible();
+    await solveParentGate(page);
+
+    // 5. Coupon should now be shown as earned
+    const earnedCoupon = page.getByTestId('earned-coupon-gummy_bear');
+    await expect(earnedCoupon).toBeVisible();
+    await expect(noneMessage).toBeHidden();
   });
 
   test('Verify Town Builder Delete All with reimbursement', async ({ page }) => {

@@ -64,7 +64,7 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
 
     // Let's configure the challenge: target 5 stars, only Math allowed
     // Select 5 Stars from the target dropdown
-    const targetSelect = page.locator('select');
+    const targetSelect = page.locator('select').first();
     await expect(targetSelect).toBeVisible();
     await targetSelect.selectOption('5'); // 5 Stars
 
@@ -115,7 +115,7 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
       'launch-anlaut',
       'launch-shiritori',
       'launch-town',
-      'launch-shop'
+      'launch-coupons'
     ];
 
     for (const launcherId of hiddenLaunchers) {
@@ -130,8 +130,12 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     await parentsButton.click();
     await solveParentGate(page);
 
-    const targetSelect = page.locator('select');
+    const targetSelect = page.locator('select').first();
     await targetSelect.selectOption('5'); // 5 Stars target
+
+    // Select the "Ice Cream" coupon as the challenge reward
+    const couponSelect = page.locator('select').nth(1);
+    await couponSelect.selectOption('ice_cream');
 
     const gamesToDisable = [
       '🧐 Odd One', '🎨 Doodle', '🐯 Match', '🗺️ Mazes', '⭐ Trace', '⚡ Emoji Match', '🔤 First Sound', '🔗 Word Chain'
@@ -215,6 +219,11 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     const completionModal = page.getByTestId('challenge-completion-modal');
     await expect(completionModal).toBeVisible();
 
+    // Verify the selected coupon reward is shown on the completion modal
+    const couponReward = page.getByTestId('challenge-coupon-reward');
+    await expect(couponReward).toBeVisible();
+    await expect(couponReward).toContainText('Ice Cream');
+
     const claimButton = page.getByTestId('claim-challenge-reward-button');
     await expect(claimButton).toBeVisible();
     await claimButton.click();
@@ -227,5 +236,11 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     // Verify other games are visible again (e.g. Odd One)
     const oddLauncher = page.getByTestId('launch-odd');
     await expect(oddLauncher).toBeVisible();
+
+    // Verify the coupon was awarded and persisted in the Coupon Shop
+    const couponsLauncher = page.getByTestId('launch-coupons');
+    await couponsLauncher.click();
+    const earnedCoupon = page.getByTestId('earned-coupon-ice_cream');
+    await expect(earnedCoupon).toBeVisible();
   });
 });
