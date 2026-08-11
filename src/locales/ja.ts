@@ -352,7 +352,6 @@ export const ja: TranslationSchema = {
     subtitle: "おもりを おいて、てんびんを たてに しよう！",
     help: "おもりを タップして、おきたい ほうを タップ！",
     tray: "おもり",
-    legend: "おもりの おもさ",
     victory: "🎉 ぴったり たいしょう！",
   },
   towerSort: {

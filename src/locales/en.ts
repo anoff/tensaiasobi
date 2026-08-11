@@ -350,7 +350,6 @@ export const en = {
     subtitle: "Place weights to make the seesaw level!",
     help: "Tap a weight, then tap the side to place it!",
     tray: "Weights",
-    legend: "Weight Legend",
     victory: "🎉 Perfectly balanced!",
   },
   towerSort: {
