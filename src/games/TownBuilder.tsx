@@ -86,8 +86,8 @@ export function TownBuilder({
   useCanvasLoop(
     confettiCanvasRef,
     gridContainerRef,
-    (ctx, size) => {
-      ctx.clearRect(0, 0, size, size);
+    (ctx) => {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       drawParticles(ctx, particlesRef.current);
     },
     [],
@@ -132,9 +132,13 @@ export function TownBuilder({
       }
 
       const key = `${row}-${col}`;
-      setPokedCell(key);
       if (pokeTimeout.current) clearTimeout(pokeTimeout.current);
-      pokeTimeout.current = setTimeout(() => setPokedCell(null), 400);
+      // Reset first so the animation reliably restarts even on rapid repeated
+      // taps of the same cell (re-adding an already-present class name would
+      // not retrigger the CSS animation).
+      setPokedCell(null);
+      requestAnimationFrame(() => setPokedCell(key));
+      pokeTimeout.current = setTimeout(() => setPokedCell(null), 350);
     },
     [grid, playPop, playSuccess],
   );
