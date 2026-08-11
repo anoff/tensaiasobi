@@ -61,7 +61,7 @@ export function useCoupons(): UseCouponsReturn {
   const awardCoupon = useCallback((id: string): boolean => {
     if (!id) return false;
     const coupon = coupons.find((c) => c.id === id);
-    if (!coupon) return false;
+    if (!coupon || !coupon.enabled) return false;
 
     setCoupons((prev) => {
       const next = prev.map((c) =>
