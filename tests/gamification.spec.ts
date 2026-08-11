@@ -194,9 +194,15 @@ test.describe('tensaiasobi Gamification Checks', () => {
 
     // 5. Tap the placed House again – it should NOT reopen the catalog modal,
     //    and it should instead play a swell "poke" animation.
+    // Buildings have an infinite CSS "town-pulse" animation applied, so the
+    // element's bounding box never settles; force the click to bypass
+    // Playwright's actionability/stability check. Also wait out the one-shot
+    // "town-place" placement animation window (500ms) so it doesn't take
+    // rendering priority over the poke animation class.
     const placedHouse = page.locator('button[aria-label="🏠"]');
     await expect(placedHouse).toBeVisible();
-    await placedHouse.click();
+    await page.waitForTimeout(600);
+    await placedHouse.click({ force: true });
 
     // Catalog title should not appear since the tap was consumed as item feedback
     const catalogTitle = page.locator('h3', { hasText: 'Choose an item' });
