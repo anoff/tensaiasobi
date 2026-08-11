@@ -372,7 +372,7 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
               }`}
             >
               <div
-                className={`flex items-center justify-center gap-0.5 text-[10px] font-black py-0.5 ${
+                className={`flex items-center justify-center gap-0.5 py-0.5 ${
                   isCorrect
                     ? 'bg-emerald-600 text-white'
                     : isClosed
@@ -380,7 +380,7 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
                     : 'bg-slate-200 text-slate-500'
                 }`}
               >
-                <span aria-hidden="true">🚉</span>
+                <span aria-hidden="true" className="text-2xl leading-none">🚉</span>
               </div>
               <div className="flex-1 flex items-center justify-center text-4xl font-black">
                 {target}
@@ -412,15 +412,17 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
         >
           <div className="text-4xl leading-none">🚂</div>
           {wagons.map((seats, wagonIndex) => (
-            <div
-              key={wagonIndex}
-              className="w-12 h-9 rounded-md border-2 border-candy-orange/60 bg-candy-orange/20 grid grid-cols-2 grid-rows-2 place-items-center gap-0"
-            >
-              {seats.map((seatIndex) => (
-                <span key={seatIndex} className="text-[10px] leading-none">
-                  {passengerEmoji}
-                </span>
-              ))}
+            <div key={wagonIndex} className="relative w-12 h-9">
+              <span className="absolute inset-0 flex items-center justify-center text-4xl leading-none" aria-hidden="true">
+                🚃
+              </span>
+              <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 place-items-center gap-0 pt-1">
+                {seats.map((seatIndex) => (
+                  <span key={seatIndex} className="text-[10px] leading-none">
+                    {passengerEmoji}
+                  </span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
