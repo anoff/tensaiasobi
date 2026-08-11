@@ -190,7 +190,7 @@ export function ShadowFlashlight({
         >
           {/* Hidden object layer */}
           <div
-            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${isRevealed ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute inset-0 flex items-center justify-center ${isRevealed ? 'opacity-100 transition-opacity duration-300' : 'opacity-0 duration-0'}`}
             aria-hidden={!isRevealed}
           >
             <span className="text-[10rem] leading-none drop-shadow-[0_4px_8px_rgba(255,255,255,0.3)] animate-emoji-pop">
