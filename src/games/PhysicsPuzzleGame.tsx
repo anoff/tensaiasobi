@@ -136,7 +136,6 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
   const trayWeights = weights.filter((w) => w.side === 'tray');
   const leftWeights = weights.filter((w) => w.side === 'left');
   const rightWeights = weights.filter((w) => w.side === 'right');
-  const showTrayMassLabels = difficulty !== 'hard';
 
   return (
     <div className="flex-1 flex flex-col items-center w-full h-full select-none max-w-lg mx-auto px-2 py-2">
@@ -215,9 +214,6 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
         <div className="flex flex-wrap justify-center gap-2 min-h-[48px]">
           {trayWeights.map((w) => (
             <div key={w.id} className="flex flex-col items-center gap-1">
-              {showTrayMassLabels && (
-                <span className="text-xs font-black text-slate-600 leading-none">{w.mass}</span>
-              )}
               <button
                 type="button"
                 data-testid="physics-tray-weight"
