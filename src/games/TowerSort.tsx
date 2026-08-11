@@ -62,11 +62,15 @@ function canMove(towers: string[][], from: number, to: number): boolean {
 }
 
 function isSolved(towers: string[][]): boolean {
-  return towers.every((tower) => {
-    if (tower.length === 0) return true;
+  const seenTypes = new Set<string>();
+  for (const tower of towers) {
+    if (tower.length === 0) continue;
     const first = tower[0];
-    return tower.every((emoji) => emoji === first);
-  });
+    if (seenTypes.has(first)) return false;
+    seenTypes.add(first);
+    if (!tower.every((emoji) => emoji === first)) return false;
+  }
+  return true;
 }
 
 
