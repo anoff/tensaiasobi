@@ -41,11 +41,15 @@ function getDifficultySettings(diff: GameDifficulty) {
 function buildWeights(diff: GameDifficulty): Weight[] {
   const settings = getDifficultySettings(diff);
   const newWeights: Weight[] = [];
-  const shuffled = shuffle(WEIGHT_EMOJIS);
-
-  // Place a fixed weight on one side and a slightly different one on the other.
-  const leftBase = shuffled[0];
-  const rightBase = { ...shuffled[1], mass: shuffled[1].mass + settings.targetDifference };
+  const weightedPairs = WEIGHT_EMOJIS.flatMap((first, firstIndex) =>
+    WEIGHT_EMOJIS
+      .slice(firstIndex + 1)
+      .filter((second) => Math.abs(first.mass - second.mass) === settings.targetDifference)
+      .map((second) => [first, second] as const)
+  );
+  const [baseA, baseB] = shuffle(weightedPairs)[0] ?? [WEIGHT_EMOJIS[0], WEIGHT_EMOJIS[2]];
+  const [leftBase, rightBase] = Math.random() < 0.5 ? [baseA, baseB] : [baseB, baseA];
+  const trayPool = shuffle(WEIGHT_EMOJIS);
 
   let nextId = 1;
   newWeights.push({ id: nextId++, emoji: leftBase.emoji, mass: leftBase.mass, side: 'left' });
@@ -53,7 +57,7 @@ function buildWeights(diff: GameDifficulty): Weight[] {
 
   // Add tray weights that can be used to balance the scale.
   for (let i = 0; i < settings.trayCount; i++) {
-    const item = shuffled[(i + 2) % shuffled.length];
+    const item = trayPool[i % trayPool.length];
     newWeights.push({ id: nextId++, emoji: item.emoji, mass: item.mass, side: 'tray' });
   }
 
@@ -139,8 +143,6 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
   const leftWeights = weights.filter((w) => w.side === 'left');
   const rightWeights = weights.filter((w) => w.side === 'right');
 
-  const leftLabel = `${leftMass}`;
-  const rightLabel = `${rightMass}`;
   const showWeightLegend = difficulty === 'easy' || difficulty === 'medium';
 
   return (
@@ -165,15 +167,6 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
 
       {/* Seesaw */}
       <div className="relative w-full flex-1 flex flex-col items-center justify-center min-h-[240px]">
-        {/* Left pan label */}
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 text-2xl font-black text-slate-400">
-          {leftLabel}
-        </div>
-        {/* Right pan label */}
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-2xl font-black text-slate-400">
-          {rightLabel}
-        </div>
-
         {/* Pivot triangle */}
         <div className="absolute bottom-8 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[36px] border-b-amber-700" />
 
@@ -244,6 +237,11 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="w-full flex items-center justify-center gap-6 text-base font-black text-slate-600 mb-3">
+        <span data-testid="physics-left-mass">⬅️ {leftMass}</span>
+        <span data-testid="physics-right-mass">➡️ {rightMass}</span>
       </div>
 
       {showWeightLegend && (
