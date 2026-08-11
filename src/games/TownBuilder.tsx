@@ -8,6 +8,22 @@ import { spawnParticles, drawParticles, type Particle } from '../utils/particles
 
 const CONFETTI_COLORS = ['#FFD54F', '#FF8A65', '#4FC3F7', '#AED581', '#BA68C8'];
 
+/** Maps a shop category to its "Petting Zoo" tap-feedback CSS animation class. */
+function getPokeClassForCategory(category: ShopCategory | undefined): string {
+  switch (category) {
+    case 'vehicles':
+      return 'town-poke-slide';
+    case 'animals':
+      return 'town-poke-jump';
+    case 'nature':
+      return 'town-poke-sway-small';
+    case 'decorations':
+      return 'town-poke-rotate';
+    default:
+      return 'town-poke-swell';
+  }
+}
+
 
 interface TownBuilderProps {
   stars: number;
@@ -15,6 +31,10 @@ interface TownBuilderProps {
   addStars: (amount: number) => void; // for 50% refunds
   playPop: () => void;
   playSuccess: () => void;
+  playAnimalSound: () => void;
+  playCarHonk: () => void;
+  playDoorChime: () => void;
+  playWindBreeze: () => void;
 }
 
 
@@ -62,6 +82,10 @@ export function TownBuilder({
   addStars,
   playPop,
   playSuccess,
+  playAnimalSound,
+  playCarHonk,
+  playDoorChime,
+  playWindBreeze,
 }: TownBuilderProps) {
   const { t } = useTranslation();
 
@@ -123,12 +147,22 @@ export function TownBuilder({
       if (!cell) return;
       const item = getItemById(cell.itemId);
 
-      // Animals get a livelier chime; everything else gets the standard pop
-      // (both already combine a synth tone with a native vibration pulse).
-      if (item?.category === 'animals') {
-        playSuccess();
-      } else {
-        playPop();
+      // Each category gets a distinct sound effect to match its tap animation.
+      switch (item?.category) {
+        case 'animals':
+          playAnimalSound();
+          break;
+        case 'vehicles':
+          playCarHonk();
+          break;
+        case 'buildings':
+          playDoorChime();
+          break;
+        case 'nature':
+          playWindBreeze();
+          break;
+        default:
+          playPop();
       }
 
       const key = `${row}-${col}`;
@@ -137,10 +171,14 @@ export function TownBuilder({
       // taps of the same cell (re-adding an already-present class name would
       // not retrigger the CSS animation).
       setPokedCell(null);
-      requestAnimationFrame(() => setPokedCell(key));
-      pokeTimeout.current = setTimeout(() => setPokedCell(null), 350);
+      requestAnimationFrame(() => {
+        setPokedCell(key);
+        // All category-specific poke animations run for about 1s. Start the
+        // cleanup timer only after the class has actually been applied.
+        pokeTimeout.current = setTimeout(() => setPokedCell(null), 1000);
+      });
     },
-    [grid, playPop, playSuccess],
+    [grid, playPop, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze],
   );
 
   const handleCellClick = (row: number, col: number) => {
@@ -321,7 +359,7 @@ export function TownBuilder({
               const isPoked = pokedCell === key;
               const item = cell ? getItemById(cell.itemId) : null;
               const animClass = item?.animation ?? '';
-              const pokeClass = item?.category === 'vehicles' ? 'town-poke-slide' : 'town-poke-swell';
+              const pokeClass = getPokeClassForCategory(item?.category);
 
               return (
                 <button

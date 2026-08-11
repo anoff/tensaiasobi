@@ -209,6 +209,7 @@ test.describe('tensaiasobi Gamification Checks', () => {
     await expect(catalogTitle).not.toBeVisible();
 
     // The poke swell animation class should be applied to the tapped cell
-    await expect(placedHouse).toHaveClass(/town-poke-swell/);
+    // (assert promptly since the class is removed after ~1s).
+    await expect(placedHouse).toHaveClass(/town-poke-swell/, { timeout: 500 });
   });
 });
