@@ -33,8 +33,8 @@ const STATION_SIZE = 96;
 const STATION_MARGIN = 12;
 const WAGON_CAPACITY = 4;
 const TRAIN_TOP_OFFSET = 56;
-const ENGINE_HEIGHT = 40;
-const WAGON_HEIGHT = 36;
+const ENGINE_HEIGHT = 72;
+const WAGON_HEIGHT = 72;
 const WAGON_GAP = 2;
 // Reserve vertical space for a "typical" train (engine + a couple of wagons)
 // so the station circle below usually clears it. For very tall trains (lots
@@ -410,15 +410,15 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
             isDragging ? '' : 'transition-transform duration-75'
           } ${locked ? 'pointer-events-none' : ''}`}
         >
-          <div className="text-4xl leading-none">🚂</div>
+          <div className="text-[72px] leading-none">🚂</div>
           {wagons.map((seats, wagonIndex) => (
-            <div key={wagonIndex} className="relative w-12 h-9">
-              <span className="absolute inset-0 flex items-center justify-center text-4xl leading-none" aria-hidden="true">
+            <div key={wagonIndex} className="relative w-24 h-[72px]">
+              <span className="absolute inset-0 flex items-center justify-center text-[72px] leading-none" aria-hidden="true">
                 🚃
               </span>
-              <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 place-items-center gap-0 pt-1">
+              <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 place-items-center gap-0">
                 {seats.map((seatIndex) => (
-                  <span key={seatIndex} className="text-[10px] leading-none">
+                  <span key={seatIndex} className="text-2xl leading-none">
                     {passengerEmoji}
                   </span>
                 ))}
