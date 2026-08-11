@@ -76,6 +76,7 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
   const [locked, setLocked] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [closedStation, setClosedStation] = useState<number | null>(null);
+  const [correctStation, setCorrectStation] = useState<number | null>(null);
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
 
   const stageRef = useRef<HTMLDivElement>(null);
@@ -128,6 +129,7 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
     resetTrainPosition();
     setLocked(false);
     setClosedStation(null);
+    setCorrectStation(null);
     setShowConfetti(false);
   }, [resetTrainPosition]);
 
@@ -224,6 +226,7 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
       setLocked(true);
       playSuccess();
       setShowConfetti(true);
+      setCorrectStation(hitStation);
       onStarEarned?.(CONFIG[difficulty].stars);
       setTimeout(() => {
         startNewRound(difficulty);
@@ -320,6 +323,7 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
 
         {round.targets.map((target, i) => {
           const isClosed = closedStation === target;
+          const isCorrect = correctStation === target;
           const pos = stationPositions[i] ?? { left: 0, top: 0 };
           return (
             <div
@@ -328,7 +332,9 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
               data-value={target}
               style={{ left: `${pos.left}px`, top: `${pos.top}px` }}
               className={`absolute w-24 h-24 min-w-[96px] min-h-[96px] flex items-center justify-center rounded-2xl border-4 text-4xl font-black transition-all duration-300 ${
-                isClosed
+                isCorrect
+                  ? 'bg-emerald-400 border-emerald-500 text-white scale-95'
+                  : isClosed
                   ? 'bg-slate-400 border-slate-500 text-white scale-95'
                   : 'bg-white border-slate-300 text-slate-700 shadow-[0_6px_0_0_#94a3b8]'
               }`}
