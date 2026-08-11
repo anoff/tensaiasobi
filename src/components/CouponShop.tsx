@@ -3,12 +3,12 @@ import type { Coupon } from '../types/gamification';
 
 interface CouponShopProps {
   coupons: Coupon[];
-  /** Requests to award a coupon; the caller is responsible for confirming before granting it */
-  onAwardCoupon: (id: string) => void;
+  /** Requests to redeem an already-earned coupon; the caller is responsible for confirming before it is used up */
+  onRedeemCoupon: (id: string) => void;
   playPop: () => void;
 }
 
-export function CouponShop({ coupons, onAwardCoupon, playPop }: CouponShopProps) {
+export function CouponShop({ coupons, onRedeemCoupon, playPop }: CouponShopProps) {
   const { t } = useTranslation();
 
   const earnedCoupons = coupons.filter((c) => c.earnedCount > 0);
@@ -16,9 +16,9 @@ export function CouponShop({ coupons, onAwardCoupon, playPop }: CouponShopProps)
   const couponName = (coupon: Coupon) =>
     (t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey;
 
-  const handleAwardClick = (coupon: Coupon) => {
+  const handleRedeemClick = (coupon: Coupon) => {
     playPop();
-    onAwardCoupon(coupon.id);
+    onRedeemCoupon(coupon.id);
   };
 
   return (
@@ -78,14 +78,18 @@ export function CouponShop({ coupons, onAwardCoupon, playPop }: CouponShopProps)
                 )}
               </div>
               <div className="shrink-0">
-                {coupon.enabled ? (
+                {isEarned ? (
                   <button
-                    data-testid={`award-coupon-${coupon.id}`}
-                    onClick={() => handleAwardClick(coupon)}
+                    data-testid={`redeem-coupon-${coupon.id}`}
+                    onClick={() => handleRedeemClick(coupon)}
                     className="bg-gradient-to-b from-violet-400 to-violet-500 text-white text-xs font-bold rounded-full px-4 py-1.5 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150"
                   >
-                    {t.coupons.award}
+                    {t.coupons.redeem}
                   </button>
+                ) : coupon.enabled ? (
+                  <span className="text-xs font-bold text-gray-400 bg-gray-100 rounded-full px-3 py-1.5">
+                    {t.coupons.notEarnedYet}
+                  </span>
                 ) : (
                   <span className="text-xs font-bold text-gray-400 bg-gray-200 rounded-full px-3 py-1.5">
                     {t.coupons.disabled}

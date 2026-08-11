@@ -5,12 +5,12 @@ const STORAGE_KEY = 'gamification_coupons';
 
 
 const DEFAULT_COUPONS: Coupon[] = [
-  { id: 'gummy_bear',   emoji: '🍬', nameKey: 'gummyBear',  enabled: true, earnedCount: 0 },
-  { id: 'ice_cream',    emoji: '🍦', nameKey: 'iceCream',   enabled: true, earnedCount: 0 },
-  { id: 'movie_night',  emoji: '🎬', nameKey: 'movieNight', enabled: true, earnedCount: 0 },
-  { id: 'new_toy',      emoji: '🧸', nameKey: 'newToy',     enabled: true, earnedCount: 0 },
-  { id: 'gaming',       emoji: '🎮', nameKey: 'gaming',     enabled: true, earnedCount: 0 },
-  { id: 'zoo',          emoji: '🦁', nameKey: 'zoo',        enabled: true, earnedCount: 0 },
+  { id: 'gummy_bear',   emoji: '🍬', nameKey: 'gummyBear',  enabled: true, rewardSize: 'small',  earnedCount: 0 },
+  { id: 'ice_cream',    emoji: '🍦', nameKey: 'iceCream',   enabled: true, rewardSize: 'small',  earnedCount: 0 },
+  { id: 'movie_night',  emoji: '🎬', nameKey: 'movieNight', enabled: true, rewardSize: 'medium', earnedCount: 0 },
+  { id: 'new_toy',      emoji: '🧸', nameKey: 'newToy',     enabled: true, rewardSize: 'medium', earnedCount: 0 },
+  { id: 'gaming',       emoji: '🎮', nameKey: 'gaming',     enabled: true, rewardSize: 'large',  earnedCount: 0 },
+  { id: 'zoo',          emoji: '🦁', nameKey: 'zoo',        enabled: true, rewardSize: 'large',  earnedCount: 0 },
 ];
 
 function loadCoupons(): Coupon[] {
@@ -44,6 +44,7 @@ export interface UseCouponsReturn {
   coupons: Coupon[];
   toggleCoupon: (id: string) => void;
   awardCoupon: (id: string) => boolean;
+  redeemCoupon: (id: string) => boolean;
   resetCoupons: () => void;
 }
 
@@ -73,11 +74,26 @@ export function useCoupons(): UseCouponsReturn {
     return true;
   }, [coupons]);
 
+  const redeemCoupon = useCallback((id: string): boolean => {
+    if (!id) return false;
+    const coupon = coupons.find((c) => c.id === id);
+    if (!coupon || coupon.earnedCount <= 0) return false;
+
+    setCoupons((prev) => {
+      const next = prev.map((c) =>
+        c.id === id ? { ...c, earnedCount: c.earnedCount - 1 } : c
+      );
+      saveCoupons(next);
+      return next;
+    });
+    return true;
+  }, [coupons]);
+
   const resetCoupons = useCallback(() => {
     const fresh = DEFAULT_COUPONS.map((c) => ({ ...c }));
     setCoupons(fresh);
     saveCoupons(fresh);
   }, []);
 
-  return { coupons, toggleCoupon, awardCoupon, resetCoupons };
+  return { coupons, toggleCoupon, awardCoupon, redeemCoupon, resetCoupons };
 }

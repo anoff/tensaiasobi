@@ -95,38 +95,72 @@ test.describe('tensaiasobi Gamification Checks', () => {
     await expect(gummyBearCoupon).toBeVisible();
   });
 
-  test('Verify awarding a coupon directly from the Coupon Shop requires parent confirmation', async ({ page }) => {
+  test('Verify redeeming an earned coupon from the Coupon Shop requires double parent confirmation', async ({ page }) => {
+    // 0. Seed an earned Gummy Bear coupon so there is something to redeem
+    await page.addInitScript(() => {
+      localStorage.setItem('gamification_coupons', JSON.stringify([
+        { id: 'gummy_bear', enabled: true, earnedCount: 1 },
+      ]));
+    });
+    await page.goto('/');
+
     // 1. Open Coupon Shop
     const couponsLauncher = page.getByTestId('launch-coupons');
     await expect(couponsLauncher).toBeVisible();
     await couponsLauncher.click();
 
-    // No coupons earned yet
-    const noneMessage = page.locator('p', { hasText: 'No coupons earned yet' });
-    await expect(noneMessage).toBeVisible();
+    // Gummy Bear is shown as earned
+    const earnedCoupon = page.getByTestId('earned-coupon-gummy_bear');
+    await expect(earnedCoupon).toBeVisible();
 
-    // 2. Tap "Award" on the Gummy Bear coupon
-    const awardButton = page.getByTestId('award-coupon-gummy_bear');
-    await expect(awardButton).toBeVisible();
-    await awardButton.click();
+    // No "Award" button exists anywhere - coupons can only be redeemed once earned
+    await expect(page.locator('button', { hasText: 'Award' })).toHaveCount(0);
 
-    // 3. A Parent Gate confirmation must appear before the coupon is granted
+    // 2. Tap "Redeem" on the Gummy Bear coupon
+    const redeemButton = page.getByTestId('redeem-coupon-gummy_bear');
+    await expect(redeemButton).toBeVisible();
+    await redeemButton.click();
+
+    // 3. First confirmation: Parent Gate math challenge must appear
     const gateTitle = page.locator('h2', { hasText: 'Parents Only' });
     await expect(gateTitle).toBeVisible();
 
-    // Cancelling should NOT grant the coupon
+    // Cancelling should NOT redeem the coupon
     await page.locator('form button', { hasText: 'Cancel' }).click();
-    await expect(noneMessage).toBeVisible();
+    await expect(earnedCoupon).toBeVisible();
 
     // 4. Try again and solve the gate this time
-    await awardButton.click();
+    await redeemButton.click();
     await expect(gateTitle).toBeVisible();
     await solveParentGate(page);
 
-    // 5. Coupon should now be shown as earned
-    const earnedCoupon = page.getByTestId('earned-coupon-gummy_bear');
+    // 5. Second confirmation: a custom redeem dialog must appear before anything happens
+    const redeemDialog = page.getByTestId('redeem-confirm-dialog');
+    await expect(redeemDialog).toBeVisible();
+    await expect(redeemDialog).toContainText('Gummy Bear');
+
+    // Cancelling the second confirmation should NOT redeem the coupon either
+    await page.getByTestId('redeem-confirm-cancel').click();
+    await expect(redeemDialog).toBeHidden();
     await expect(earnedCoupon).toBeVisible();
-    await expect(noneMessage).toBeHidden();
+
+    // 6. Redeem again and confirm both steps
+    await redeemButton.click();
+    await solveParentGate(page);
+    await expect(redeemDialog).toBeVisible();
+    await page.getByTestId('redeem-confirm-submit').click();
+
+    // 7. A celebration message is shown
+    const celebration = page.getByTestId('coupon-celebration');
+    await expect(celebration).toBeVisible();
+    await expect(celebration).toContainText('Gummy Bear');
+    await page.getByTestId('coupon-celebration-close').click();
+    await expect(celebration).toBeHidden();
+
+    // 8. The coupon has been used up
+    const noneMessage = page.locator('p', { hasText: 'No coupons earned yet' });
+    await expect(noneMessage).toBeVisible();
+    await expect(earnedCoupon).toBeHidden();
   });
 
   test('Verify Town Builder Delete All with reimbursement', async ({ page }) => {

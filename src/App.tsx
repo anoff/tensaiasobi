@@ -74,8 +74,10 @@ function AppContent() {
 
   // Gamification state
   const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
-  const { coupons, toggleCoupon, awardCoupon, resetCoupons } = useCoupons();
-  const [pendingCouponAwardId, setPendingCouponAwardId] = useState<string | null>(null);
+  const { coupons, toggleCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
+  const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
+  const [pendingCouponRedeemConfirmId, setPendingCouponRedeemConfirmId] = useState<string | null>(null);
+  const [celebratingCouponId, setCelebratingCouponId] = useState<string | null>(null);
 
   // Challenge mode state
   const {
@@ -298,7 +300,7 @@ function AppContent() {
         return (
           <CouponShop
             coupons={coupons}
-            onAwardCoupon={(id) => setPendingCouponAwardId(id)}
+            onRedeemCoupon={(id) => setPendingCouponRedeemGateId(id)}
             playPop={playPop}
           />
         );
@@ -505,21 +507,98 @@ function AppContent() {
         />
       )}
 
-      {/* Parent Gate for Direct Coupon Award */}
-      {pendingCouponAwardId && (
+      {/* Parent Gate for Coupon Redemption (first confirmation) */}
+      {pendingCouponRedeemGateId && (
         <ParentGate
           onSuccess={() => {
-            const success = awardCoupon(pendingCouponAwardId);
-            if (success) {
-              playSuccess();
-            } else {
-              playError();
-            }
-            setPendingCouponAwardId(null);
+            const id = pendingCouponRedeemGateId;
+            setPendingCouponRedeemGateId(null);
+            setPendingCouponRedeemConfirmId(id);
           }}
-          onClose={() => setPendingCouponAwardId(null)}
+          onClose={() => setPendingCouponRedeemGateId(null)}
         />
       )}
+
+      {/* Double-confirmation dialog for Coupon Redemption (second confirmation) */}
+      {pendingCouponRedeemConfirmId && (() => {
+        const coupon = coupons.find((c) => c.id === pendingCouponRedeemConfirmId);
+        if (!coupon) return null;
+        const name = (t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div
+              className="bg-white rounded-3xl border-4 border-violet-300 p-6 max-w-sm w-full text-center shadow-2xl animate-in fade-in zoom-in-95 duration-150"
+              data-testid="redeem-confirm-dialog"
+            >
+              <span className="text-5xl block mb-2">{coupon.emoji}</span>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.coupons.redeemConfirmTitle}</h2>
+              <p className="text-slate-600 mb-6 text-sm">
+                {t.coupons.redeemConfirmBody.replace('{name}', name)}
+              </p>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  data-testid="redeem-confirm-cancel"
+                  onClick={() => setPendingCouponRedeemConfirmId(null)}
+                  className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-2xl transition-colors cursor-pointer text-sm"
+                >
+                  {t.parentGate.cancel}
+                </button>
+                <button
+                  type="button"
+                  data-testid="redeem-confirm-submit"
+                  onClick={() => {
+                    const success = redeemCoupon(coupon.id);
+                    setPendingCouponRedeemConfirmId(null);
+                    if (success) {
+                      playSuccess();
+                      setCelebratingCouponId(coupon.id);
+                    } else {
+                      playError();
+                    }
+                  }}
+                  className="flex-1 bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 rounded-2xl transition-colors cursor-pointer text-sm"
+                >
+                  {t.coupons.redeemConfirmButton}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Celebration overlay shown after a coupon has been redeemed */}
+      {celebratingCouponId && (() => {
+        const coupon = coupons.find((c) => c.id === celebratingCouponId);
+        if (!coupon) return null;
+        const name = (t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey;
+        return (
+          <div
+            className="fixed inset-0 bg-slate-900/80 z-50 flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-300"
+            data-testid="coupon-celebration"
+          >
+            <GameConfetti pieces={200} recycle={false} />
+            <div className="bg-white rounded-[3rem] border-8 border-violet-400 p-8 max-w-sm w-full text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
+              <span className="text-8xl block animate-bounce">{coupon.emoji}🎉</span>
+              <h2 className="text-3xl font-black text-violet-800 leading-tight">
+                {t.coupons.celebrationTitle}
+              </h2>
+              <p className="text-slate-500 font-extrabold text-sm">
+                {t.coupons.celebrationBody.replace('{name}', name)}
+              </p>
+              <KidButton
+                color="green"
+                size="lg"
+                data-testid="coupon-celebration-close"
+                onClick={() => setCelebratingCouponId(null)}
+                className="w-full rounded-2xl tracking-wider uppercase"
+              >
+                {t.coupons.celebrationClose}
+              </KidButton>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Challenge Unlocked Celebration Overlay */}
       {challengeActive && challengeStarsRemaining === 0 && (

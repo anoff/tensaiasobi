@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import KidButton from './KidButton';
 import { useTranslation } from '../hooks/useTranslation';
-import type { Coupon } from '../types/gamification';
+import { REWARD_SIZE_STAR_TARGETS, type Coupon } from '../types/gamification';
 
 interface ParentDashboardProps {
   soundEnabled: boolean;
@@ -38,10 +38,21 @@ export function ParentDashboard({
 }: ParentDashboardProps) {
   const { t } = useTranslation();
 
-  const [selectedTarget, setSelectedTarget] = useState<number>(challengeStarsTarget || 10);
-  const [selectedCoupon, setSelectedCoupon] = useState<string>(
-    challengeCouponId || coupons.find((c) => c.enabled)?.id || ''
+  const initialCoupon = coupons.find((c) => c.id === challengeCouponId) || coupons.find((c) => c.enabled);
+  const [selectedTarget, setSelectedTarget] = useState<number>(
+    challengeStarsTarget || (initialCoupon ? REWARD_SIZE_STAR_TARGETS[initialCoupon.rewardSize] : 10)
   );
+  const [selectedCoupon, setSelectedCoupon] = useState<string>(
+    challengeCouponId || initialCoupon?.id || ''
+  );
+
+  const handleCouponChange = (id: string) => {
+    setSelectedCoupon(id);
+    const coupon = coupons.find((c) => c.id === id);
+    if (coupon) {
+      setSelectedTarget(REWARD_SIZE_STAR_TARGETS[coupon.rewardSize]);
+    }
+  };
   const [allowedGames, setAllowedGames] = useState<Record<string, boolean>>(() => {
     return {
       math: true,
@@ -237,7 +248,7 @@ export function ParentDashboard({
                   <span className="font-bold text-slate-700">{t.challenge.couponReward}:</span>
                   <select
                     value={selectedCoupon}
-                    onChange={(e) => setSelectedCoupon(e.target.value)}
+                    onChange={(e) => handleCouponChange(e.target.value)}
                     disabled={enabledCoupons.length === 0}
                     className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer"
                   >
