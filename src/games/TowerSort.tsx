@@ -54,51 +54,25 @@ const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
 
 type TowerSortProps = GameProps;
 
-function canMove(towers: string[][], from: number, to: number, height: number): boolean {
+function canMove(towers: string[][], from: number, to: number): boolean {
   if (from === to) return false;
   const source = towers[from];
-  const dest = towers[to];
   if (source.length === 0) return false;
-  if (dest.length >= height) return false;
-  if (dest.length === 0) return true;
-  return dest[dest.length - 1] === source[source.length - 1];
+  return true;
 }
 
-function isSolved(towers: string[][], height: number): boolean {
-  return towers.every((tower) => {
-    if (tower.length === 0) return true;
-    if (tower.length !== height) return false;
+function isSolved(towers: string[][]): boolean {
+  const seenTypes = new Set<string>();
+  for (const tower of towers) {
+    if (tower.length === 0) continue;
     const first = tower[0];
-    return tower.every((emoji) => emoji === first);
-  });
-}
-
-function solveTowers(towers: string[][], height: number, maxDepth = 80): number | null {
-  if (isSolved(towers, height)) return 0;
-
-  const queue: [string[][], number][] = [[towers, 0]];
-  const seen = new Set<string>([JSON.stringify(towers)]);
-
-  while (queue.length > 0) {
-    const [state, depth] = queue.shift()!;
-    if (depth >= maxDepth) continue;
-
-    for (let from = 0; from < state.length; from++) {
-      for (let to = 0; to < state.length; to++) {
-        if (!canMove(state, from, to, height)) continue;
-        const next = state.map((tower) => [...tower]);
-        next[to].push(next[from].pop()!);
-        const key = JSON.stringify(next);
-        if (seen.has(key)) continue;
-        if (isSolved(next, height)) return depth + 1;
-        seen.add(key);
-        queue.push([next, depth + 1]);
-      }
-    }
+    if (seenTypes.has(first)) return false;
+    seenTypes.add(first);
+    if (!tower.every((emoji) => emoji === first)) return false;
   }
-
-  return null;
+  return true;
 }
+
 
 function generateTowers(difficulty: GameDifficulty, theme: Theme) {
   const config = DIFFICULTY_CONFIG[difficulty];
@@ -119,32 +93,24 @@ function generateTowers(difficulty: GameDifficulty, theme: Theme) {
     }
   }
 
-  let attempts = 0;
-  while (attempts < 100) {
-    // Shuffle pieces and fill the first `types` towers.
-    for (let i = pieces.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
-    }
-
-    const current: string[][] = Array.from({ length: totalTowers }, () => []);
-    for (let typeIdx = 0; typeIdx < types; typeIdx++) {
-      for (let row = 0; row < height; row++) {
-        current[typeIdx].push(pieces[typeIdx * height + row]);
-      }
-    }
-
-    if (!isSolved(current, height)) {
-      const optimal = solveTowers(current, height);
-      if (optimal !== null) {
-        return { towers: current, optimalMoves: optimal };
-      }
-    }
-    attempts++;
+  // Shuffle pieces and fill the first `types` towers.
+  for (let i = pieces.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
   }
 
-  // Fallback: return the solved state if no valid shuffle was found.
-  return { towers: solved, optimalMoves: 0 };
+  const current: string[][] = Array.from({ length: totalTowers }, () => []);
+  for (let typeIdx = 0; typeIdx < types; typeIdx++) {
+    for (let row = 0; row < height; row++) {
+      current[typeIdx].push(pieces[typeIdx * height + row]);
+    }
+  }
+
+  if (isSolved(current)) {
+    return { towers: solved, optimalMoves: 0 };
+  }
+
+  return { towers: current, optimalMoves: 0 };
 }
 
 function loadBestMoves(difficulty: GameDifficulty, themeId: string): number {
@@ -219,7 +185,7 @@ export function TowerSort({ playPop, playSuccess, playError, onStarEarned }: Tow
       return;
     }
 
-    if (canMove(towers, selectedTower, index, config.height)) {
+    if (canMove(towers, selectedTower, index)) {
       playPop();
       const newTowers = towers.map((tower) => [...tower]);
       const emoji = newTowers[selectedTower].pop();
@@ -230,7 +196,7 @@ export function TowerSort({ playPop, playSuccess, playError, onStarEarned }: Tow
         setMoveCount(newMoveCount);
         setSelectedTower(null);
 
-        if (isSolved(newTowers, config.height)) {
+        if (isSolved(newTowers)) {
           setIsWon(true);
           setShowConfetti(true);
           playSuccess();
