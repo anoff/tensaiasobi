@@ -3,6 +3,10 @@ import { useTranslation } from '../hooks/useTranslation';
 import { TownCell, createEmptyGrid, TOWN_GRID_SIZE } from '../types/gamification';
 import type { ShopCategory } from '../types/gamification';
 import { SHOP_CATEGORIES, getItemsByCategory, getItemById } from '../data/townItems';
+import { useCanvasLoop } from '../hooks/useCanvasLoop';
+import { spawnParticles, drawParticles, type Particle } from '../utils/particles';
+
+const CONFETTI_COLORS = ['#FFD54F', '#FF8A65', '#4FC3F7', '#AED581', '#BA68C8'];
 
 
 interface TownBuilderProps {
@@ -67,15 +71,36 @@ export function TownBuilder({
   const [activeCategory, setActiveCategory] = useState<ShopCategory>('buildings');
   const [removeCell, setRemoveCell] = useState<{ row: number; col: number } | null>(null);
   const [justPlaced, setJustPlaced] = useState<string | null>(null); // "row-col"
+  const [pokedCell, setPokedCell] = useState<string | null>(null); // "row-col" – "Petting Zoo" tap feedback
+  const pokeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [showDeleteAllPrompt, setShowDeleteAllPrompt] = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
   const holdInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Placement confetti particle overlay
+  const gridContainerRef = useRef<HTMLDivElement | null>(null);
+  const confettiCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const particlesRef = useRef<Particle[]>([]);
+
+  useCanvasLoop(
+    confettiCanvasRef,
+    gridContainerRef,
+    (ctx, size) => {
+      ctx.clearRect(0, 0, size, size);
+      drawParticles(ctx, particlesRef.current);
+    },
+    [],
+    600,
+  );
+
   useEffect(() => {
     return () => {
       if (holdInterval.current) {
         clearInterval(holdInterval.current);
+      }
+      if (pokeTimeout.current) {
+        clearTimeout(pokeTimeout.current);
       }
     };
   }, []);
@@ -90,10 +115,36 @@ export function TownBuilder({
   }, [grid]);
 
 
+  // "Petting Zoo" – tapping an already-placed item plays sound/haptic feedback
+  // and swells it (or slides it for vehicles) instead of opening the catalog.
+  const triggerItemFeedback = useCallback(
+    (row: number, col: number) => {
+      const cell = grid[row][col];
+      if (!cell) return;
+      const item = getItemById(cell.itemId);
+
+      // Animals get a livelier chime; everything else gets the standard pop
+      // (both already combine a synth tone with a native vibration pulse).
+      if (item?.category === 'animals') {
+        playSuccess();
+      } else {
+        playPop();
+      }
+
+      const key = `${row}-${col}`;
+      setPokedCell(key);
+      if (pokeTimeout.current) clearTimeout(pokeTimeout.current);
+      pokeTimeout.current = setTimeout(() => setPokedCell(null), 400);
+    },
+    [grid, playPop, playSuccess],
+  );
+
   const handleCellClick = (row: number, col: number) => {
     if (longPressTriggered.current) return; // ignore click after long-press
     const cell = grid[row][col];
-    if (!cell) {
+    if (cell) {
+      triggerItemFeedback(row, col);
+    } else {
 
       setActiveCategory('buildings');
       setCatalogCell({ row, col });
@@ -150,6 +201,17 @@ export function TownBuilder({
 
       setJustPlaced(key);
       setTimeout(() => setJustPlaced(null), 500);
+
+      // Placement Confetti – burst particles from the freshly placed cell.
+      const canvas = confettiCanvasRef.current;
+      if (canvas) {
+        const cellSize = canvas.width / TOWN_GRID_SIZE;
+        const x = (catalogCell.col + 0.5) * cellSize;
+        const y = (catalogCell.row + 0.5) * cellSize;
+        const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+        spawnParticles(particlesRef.current, x, y, color, 20);
+      }
+
       setCatalogCell(null);
       playSuccess();
     },
@@ -241,46 +303,57 @@ export function TownBuilder({
       </p>
 
       {/* Grid */}
-      <div
-        className="grid gap-1.5 w-full rounded-2xl p-3 bg-amber-50/60 dark:bg-amber-900/20 shadow-inner"
-        style={{
-          gridTemplateColumns: `repeat(${TOWN_GRID_SIZE}, 1fr)`,
-        }}
-      >
-        {grid.map((row, ri) =>
-          row.map((cell, ci) => {
-            const key = `${ri}-${ci}`;
-            const isJustPlaced = justPlaced === key;
-            const item = cell ? getItemById(cell.itemId) : null;
-            const animClass = item?.animation ?? '';
+      <div ref={gridContainerRef} className="relative w-full">
+        <div
+          className="grid gap-1.5 w-full rounded-2xl p-3 bg-amber-50/60 dark:bg-amber-900/20 shadow-inner"
+          style={{
+            gridTemplateColumns: `repeat(${TOWN_GRID_SIZE}, 1fr)`,
+          }}
+        >
+          {grid.map((row, ri) =>
+            row.map((cell, ci) => {
+              const key = `${ri}-${ci}`;
+              const isJustPlaced = justPlaced === key;
+              const isPoked = pokedCell === key;
+              const item = cell ? getItemById(cell.itemId) : null;
+              const animClass = item?.animation ?? '';
+              const pokeClass = item?.category === 'vehicles' ? 'town-poke-slide' : 'town-poke-swell';
 
-            return (
-              <button
-                key={key}
-                type="button"
-                className={
-                  cell
-                    ? `aspect-square flex items-center justify-center rounded-xl text-2xl sm:text-3xl
-                       bg-amber-100/80 dark:bg-amber-800/30 transition-transform active:scale-95
-                       ${isJustPlaced ? 'town-place' : animClass}`
-                    : `aspect-square flex items-center justify-center rounded-xl
-                       bg-green-100 dark:bg-green-900/30
-                       border-2 border-dashed border-green-300 dark:border-green-700
-                       text-green-400 dark:text-green-600 text-xl
-                       hover:bg-green-200/60 dark:hover:bg-green-800/30 transition-colors`
-                }
-                onClick={() => handleCellClick(ri, ci)}
-                onPointerDown={() => handlePointerDown(ri, ci)}
-                onPointerUp={handlePointerUp}
-                onPointerLeave={handlePointerLeave}
-                onContextMenu={(e) => e.preventDefault()}
-                aria-label={cell ? cell.emoji : t.town.empty}
-              >
-                {cell ? cell.emoji : '+'}
-              </button>
-            );
-          })
-        )}
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={
+                    cell
+                      ? `aspect-square flex items-center justify-center rounded-xl text-2xl sm:text-3xl
+                         bg-amber-100/80 dark:bg-amber-800/30 transition-transform active:scale-95
+                         ${isJustPlaced ? 'town-place' : isPoked ? pokeClass : animClass}`
+                      : `aspect-square flex items-center justify-center rounded-xl
+                         bg-green-100 dark:bg-green-900/30
+                         border-2 border-dashed border-green-300 dark:border-green-700
+                         text-green-400 dark:text-green-600 text-xl
+                         hover:bg-green-200/60 dark:hover:bg-green-800/30 transition-colors`
+                  }
+                  onClick={() => handleCellClick(ri, ci)}
+                  onPointerDown={() => handlePointerDown(ri, ci)}
+                  onPointerUp={handlePointerUp}
+                  onPointerLeave={handlePointerLeave}
+                  onContextMenu={(e) => e.preventDefault()}
+                  aria-label={cell ? cell.emoji : t.town.empty}
+                >
+                  {cell ? cell.emoji : '+'}
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        {/* Placement Confetti overlay – purely decorative, sits above the grid */}
+        <canvas
+          ref={confettiCanvasRef}
+          data-testid="town-confetti-canvas"
+          className="absolute inset-0 w-full h-full pointer-events-none"
+        />
       </div>
 
       {/* Delete All Control */}

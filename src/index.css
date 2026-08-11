@@ -93,6 +93,27 @@
     animation: town-place 0.4s ease-out;
   }
 
+  /* Played once when a placed item is tapped ("Petting Zoo" interaction) */
+  @keyframes town-poke-swell {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+  .town-poke-swell {
+    animation: town-poke-swell 0.35s ease-out;
+  }
+
+  /* Vehicles slide laterally with a fast spring-back when tapped */
+  @keyframes town-poke-slide {
+    0% { transform: translateX(0); }
+    30% { transform: translateX(10px) scale(1.1); }
+    60% { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
+  }
+  .town-poke-slide {
+    animation: town-poke-slide 0.35s ease-out;
+  }
+
   /* ── Emoji Match Animations ── */
   @keyframes card-in {
     0% { transform: scale(0.7); opacity: 0; }
