@@ -31,6 +31,16 @@ const PASSENGER_EMOJIS = ['🐻', '🐰', '🐱', '🐶', '🦊', '🐼', '🐨'
 
 const STATION_SIZE = 96;
 const STATION_MARGIN = 12;
+const WAGON_CAPACITY = 4;
+const TRAIN_TOP_OFFSET = 56;
+const ENGINE_HEIGHT = 40;
+const WAGON_HEIGHT = 36;
+const WAGON_GAP = 2;
+// Reserve vertical space for a "typical" train (engine + a couple of wagons)
+// so the station circle below usually clears it. For very tall trains (lots
+// of wagons) on short stages we fall back to a centered circle instead of
+// letting stations overflow the stage bounds.
+const TRAIN_RESERVED_TOP = TRAIN_TOP_OFFSET + ENGINE_HEIGHT + 2 * (WAGON_HEIGHT + WAGON_GAP) + 16;
 
 function generateRound(difficulty: GameDifficulty, overrideCount?: number): RoundConfig {
   const config = CONFIG[difficulty];
@@ -262,10 +272,22 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
   }, [moveDrag, endDrag]);
 
   const passengerEmoji = PASSENGER_EMOJIS[round.passengerCount % PASSENGER_EMOJIS.length];
-  const passengers = Array.from({ length: round.passengerCount }, (_, i) => i);
 
-  // Orient every station in a circle around the centered train so no number
-  // ever gets pushed to a second row / off-screen row where it can't be reached.
+  // Split passengers into wagons of a fixed capacity so the train visually
+  // grows a car for every few passengers instead of piling everyone into one box.
+  const wagons = useMemo(() => {
+    const wagonCount = Math.max(1, Math.ceil(round.passengerCount / WAGON_CAPACITY));
+    return Array.from({ length: wagonCount }, (_, wagonIndex) => {
+      const remaining = round.passengerCount - wagonIndex * WAGON_CAPACITY;
+      const seatCount = Math.max(0, Math.min(WAGON_CAPACITY, remaining));
+      return Array.from({ length: seatCount }, (_, seatIndex) => seatIndex);
+    });
+  }, [round.passengerCount]);
+
+  // Orient every station in a circle below the reserved train area, so the
+  // train (now taller due to stacked wagons, and starting near the top of the
+  // stage) usually doesn't overlap a station. If the stage is too short to
+  // fit both, fall back to a centered circle so stations never overflow it.
   const stationPositions = useMemo(() => {
     const { width, height } = stageSize;
     const count = round.targets.length;
@@ -273,13 +295,23 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
       return round.targets.map(() => ({ left: 0, top: 0 }));
     }
     const cx = width / 2;
-    const cy = height / 2;
-    const radius = Math.max(
-      Math.min(width, height) / 2 - STATION_SIZE / 2 - STATION_MARGIN,
-      STATION_SIZE / 2 + STATION_MARGIN
-    );
+    const minRadius = STATION_SIZE / 2 + STATION_MARGIN;
+    const horizontalRadius = width / 2 - STATION_SIZE / 2 - STATION_MARGIN;
+    const verticalRadiusBelowTrain = (height - STATION_MARGIN - TRAIN_RESERVED_TOP - STATION_SIZE) / 2;
+
+    let cy: number;
+    let radius: number;
+    if (verticalRadiusBelowTrain >= minRadius) {
+      radius = Math.min(horizontalRadius, verticalRadiusBelowTrain);
+      cy = TRAIN_RESERVED_TOP + STATION_SIZE / 2 + radius;
+    } else {
+      radius = Math.max(Math.min(horizontalRadius, height / 2 - STATION_SIZE / 2 - STATION_MARGIN), minRadius);
+      cy = height / 2;
+    }
+
     return round.targets.map((_, i) => {
-      const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+      // Half-slot rotation keeps a gap at the very top instead of a station.
+      const angle = ((i + 0.5) / count) * Math.PI * 2 - Math.PI / 2;
       return {
         left: cx + radius * Math.cos(angle) - STATION_SIZE / 2,
         top: cy + radius * Math.sin(angle) - STATION_SIZE / 2,
@@ -331,7 +363,7 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
               data-testid="number-train-station"
               data-value={target}
               style={{ left: `${pos.left}px`, top: `${pos.top}px` }}
-              className={`absolute w-24 h-24 min-w-[96px] min-h-[96px] flex items-center justify-center rounded-2xl border-4 text-4xl font-black transition-all duration-300 ${
+              className={`absolute w-24 h-24 min-w-[96px] min-h-[96px] flex flex-col items-stretch overflow-hidden rounded-2xl border-4 transition-all duration-300 ${
                 isCorrect
                   ? 'bg-emerald-400 border-emerald-500 text-white scale-95'
                   : isClosed
@@ -339,7 +371,20 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
                   : 'bg-white border-slate-300 text-slate-700 shadow-[0_6px_0_0_#94a3b8]'
               }`}
             >
-              {target}
+              <div
+                className={`flex items-center justify-center gap-0.5 text-[10px] font-black py-0.5 ${
+                  isCorrect
+                    ? 'bg-emerald-600 text-white'
+                    : isClosed
+                    ? 'bg-slate-600 text-white'
+                    : 'bg-slate-200 text-slate-500'
+                }`}
+              >
+                <span aria-hidden="true">🚉</span>
+              </div>
+              <div className="flex-1 flex items-center justify-center text-4xl font-black">
+                {target}
+              </div>
             </div>
           );
         })}
@@ -356,25 +401,28 @@ export default function NumberTrain({ playSuccess, playError, onStarEarned }: Ga
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           style={{
-            transform: `translate(${trainX}px, ${trainY}px)`,
             left: '50%',
-            top: '50%',
-            marginLeft: '-80px',
-            marginTop: '-56px',
+            top: `${TRAIN_TOP_OFFSET}px`,
+            transform: `translate(-50%, 0) translate(${trainX}px, ${trainY}px)`,
             touchAction: 'none',
           }}
-          className={`absolute z-20 w-40 h-28 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing ${
+          className={`absolute z-20 flex flex-col items-center gap-0.5 cursor-grab active:cursor-grabbing ${
             isDragging ? '' : 'transition-transform duration-75'
           } ${locked ? 'pointer-events-none' : ''}`}
         >
-          <div className="text-6xl">🚂</div>
-          <div className="absolute -bottom-2 flex flex-wrap justify-center gap-0.5 max-w-[140px]">
-            {passengers.map((i) => (
-              <span key={i} className="text-lg">
-                {passengerEmoji}
-              </span>
-            ))}
-          </div>
+          <div className="text-4xl leading-none">🚂</div>
+          {wagons.map((seats, wagonIndex) => (
+            <div
+              key={wagonIndex}
+              className="w-12 h-9 rounded-md border-2 border-candy-orange/60 bg-candy-orange/20 grid grid-cols-2 grid-rows-2 place-items-center gap-0"
+            >
+              {seats.map((seatIndex) => (
+                <span key={seatIndex} className="text-[10px] leading-none">
+                  {passengerEmoji}
+                </span>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 
