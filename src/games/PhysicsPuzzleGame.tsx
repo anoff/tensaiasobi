@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import GameConfetti from '../components/GameConfetti';
-import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
 import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
@@ -66,7 +65,7 @@ function buildWeights(diff: GameDifficulty): Weight[] {
 
 export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: PhysicsPuzzleGameProps) {
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
+  const difficulty: GameDifficulty = 'hard';
   const [weights, setWeights] = useState<Weight[]>(() => buildWeights(difficulty));
   const [showConfetti, setShowConfetti] = useState(false);
   const [solved, setSolved] = useState(false);
@@ -134,14 +133,10 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
     setSelectedWeightId(null);
   };
 
-  const handleDifficultyChange = (diff: GameDifficulty) => {
-    playPop();
-    setDifficulty(diff);
-  };
-
   const trayWeights = weights.filter((w) => w.side === 'tray');
   const leftWeights = weights.filter((w) => w.side === 'left');
   const rightWeights = weights.filter((w) => w.side === 'right');
+  const showTrayMassLabels = difficulty !== 'hard';
 
   return (
     <div className="flex-1 flex flex-col items-center w-full h-full select-none max-w-lg mx-auto px-2 py-2">
@@ -155,13 +150,6 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
         </h2>
         <p className="text-slate-500 font-extrabold text-xs">{t.physicsGame.subtitle}</p>
       </div>
-
-      <DifficultySelector
-        selected={difficulty}
-        options={['easy', 'medium', 'hard']}
-        onChange={handleDifficultyChange}
-        className="mb-3"
-      />
 
       {/* Seesaw */}
       <div className="relative w-full flex-1 flex flex-col items-center justify-center min-h-[240px]">
@@ -208,6 +196,15 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
             <p className="text-lg font-black text-emerald-600">{t.physicsGame.victory}</p>
           </div>
         )}
+
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex items-center justify-between px-2">
+          <div className="px-3 py-1 rounded-full bg-white border-2 border-slate-200 shadow-sm text-sm font-black text-slate-700">
+            <span data-testid="physics-left-mass">⬅️ {leftMass}</span>
+          </div>
+          <div className="px-3 py-1 rounded-full bg-white border-2 border-slate-200 shadow-sm text-sm font-black text-slate-700">
+            <span data-testid="physics-right-mass">➡️ {rightMass}</span>
+          </div>
+        </div>
       </div>
 
       {/* Weight tray */}
@@ -218,7 +215,9 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
         <div className="flex flex-wrap justify-center gap-2 min-h-[48px]">
           {trayWeights.map((w) => (
             <div key={w.id} className="flex flex-col items-center gap-1">
-              <span className="text-xs font-black text-slate-600 leading-none">{w.mass}</span>
+              {showTrayMassLabels && (
+                <span className="text-xs font-black text-slate-600 leading-none">{w.mass}</span>
+              )}
               <button
                 type="button"
                 data-testid="physics-tray-weight"
@@ -237,11 +236,6 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="w-full flex items-center justify-center gap-6 text-base font-black text-slate-600 mb-3">
-        <span data-testid="physics-left-mass">⬅️ {leftMass}</span>
-        <span data-testid="physics-right-mass">➡️ {rightMass}</span>
       </div>
 
       <div className="flex gap-3 w-full">
