@@ -1,109 +1,359 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
   <defs>
-    <linearGradient id="forestSky" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#99f6e4" />
-      <stop offset="60%" stop-color="#ccfbf1" />
-      <stop offset="100%" stop-color="#f0fdfa" />
+    <!-- Sky Gradient -->
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="60%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#f0f9ff"/>
     </linearGradient>
-    <linearGradient id="bearGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#b45309" />
-      <stop offset="100%" stop-color="#78350f" />
+
+    <!-- Mountain Gradient -->
+    <linearGradient id="mountainGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c7d2fe"/>
     </linearGradient>
+
+    <!-- Stream Gradient -->
+    <linearGradient id="streamGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+
+    <!-- Fox Fur Gradient -->
+    <linearGradient id="foxGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <!-- Bear Fur Gradient -->
+    <linearGradient id="bearGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+
+    <!-- Tree Bark Gradient -->
+    <linearGradient id="barkGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#92400e"/>
+      <stop offset="50%" stop-color="#78350f"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+
+    <!-- Honey Pot Gradient -->
+    <linearGradient id="honeyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+
+    <!-- Shared Templates -->
+    <!-- Flower Template -->
+    <g id="forestFlower">
+      <circle cx="-3" cy="0" r="2.5" fill="#f472b6"/>
+      <circle cx="3" cy="0" r="2.5" fill="#f472b6"/>
+      <circle cx="0" cy="-3" r="2.5" fill="#f472b6"/>
+      <circle cx="0" cy="3" r="2.5" fill="#f472b6"/>
+      <circle cx="0" cy="0" r="2" fill="#fef08a"/>
+    </g>
+
+    <!-- Mushroom Template -->
+    <g id="mushroom">
+      <path d="M -3 10 L 3 10 L 2 2 L -2 2 Z" fill="#fef08a"/>
+      <path d="M -8 3 Q 0 -6 8 3 Z" fill="#ef4444"/>
+      <circle cx="-3" cy="0" r="1" fill="#ffffff"/>
+      <circle cx="3" cy="-1" r="1.2" fill="#ffffff"/>
+      <circle cx="0" cy="1" r="0.8" fill="#ffffff"/>
+    </g>
+
+    <!-- Pine Tree Template -->
+    <g id="pineTree">
+      <rect x="-3" y="20" width="6" height="15" fill="#451a03"/>
+      <polygon points="0,-20 -15,0 -7,0 -18,15 -9,15 -22,30 22,30 9,15 18,15 7,0 15,0" fill="#065f46"/>
+    </g>
   </defs>
-  <rect width="400" height="400" fill="url(#forestSky)" />
-  <g fill="#fde047">
-    <circle cx="40" cy="50" r="4" opacity="0.7" />
-    <circle cx="160" cy="30" r="3" opacity="0.6" />
-    <circle cx="340" cy="40" r="5" opacity="0.8" />
-    <circle cx="280" cy="80" r="3" opacity="0.5" />
-    <polygon points="120,60 123,65 120,70 117,65" opacity="0.8" />
-    <polygon points="230,45 234,51 230,57 226,51" opacity="0.75" />
-    <polygon points="360,110 363,115 360,120 357,115" opacity="0.9" />
-    <polygon points="50,150 53,155 50,160 47,155" opacity="0.65" />
+
+  <!-- ==================== BACKGROUND & SKY ==================== -->
+  <rect width="400" height="400" rx="16" fill="url(#skyGrad)"/>
+
+  <!-- Sun with Cute Face -->
+  <g transform="translate(340, 45)">
+    <circle r="20" fill="#facc15"/>
+    <path d="M 0 -26 L 0 -22 M 0 22 L 0 26 M -26 0 L -22 0 M 22 0 L 26 0 M -18 -18 L -15 -15 M 15 15 L 18 18 M -18 18 L -15 15 M 15 -15 L 18 -20" stroke="#facc15" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="-5" cy="-3" r="2" fill="#1e293b"/>
+    <circle cx="5" cy="-3" r="2" fill="#1e293b"/>
+    <path d="M -4 4 Q 0 8 4 4" fill="none" stroke="#1e293b" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="-8" cy="2" r="2" fill="#fb7185" opacity="0.6"/>
+    <circle cx="8" cy="2" r="2" fill="#fb7185" opacity="0.6"/>
   </g>
-  <g fill="#064e3b" opacity="0.4">
-    <polygon points="40,280 -10,200 90,200" />
-    <polygon points="320,280 270,180 370,180" />
+
+  <!-- Sky Clouds -->
+  <path d="M 240 45 Q 250 35 265 35 Q 275 25 290 35 Q 305 30 315 40 Q 325 45 320 55 L 235 55 Z" fill="#ffffff" opacity="0.9"/>
+
+  <!-- Rainbow in Sky Right -->
+  <g fill="none" stroke-width="3.5" opacity="0.75">
+    <path d="M 260 110 Q 320 40 380 100" stroke="#ef4444"/>
+    <path d="M 260 114 Q 320 44 380 104" stroke="#f97316"/>
+    <path d="M 260 118 Q 320 48 380 108" stroke="#facc15"/>
+    <path d="M 260 122 Q 320 52 380 112" stroke="#22c55e"/>
+    <path d="M 260 126 Q 320 56 380 116" stroke="#3b82f6"/>
   </g>
-  <g fill="#0f766e" opacity="0.6">
-    <polygon points="280,300 240,210 320,210" />
-    <polygon points="90,300 40,190 140,190" />
-  </g>
-  <g>
-    <rect x="72" y="300" width="16" height="50" fill="#78350f" stroke="#451a03" stroke-width="1.5" />
-    <polygon points="80,300 15,220 145,220" fill="#047857" stroke="#064e3b" stroke-width="2" />
-    <polygon points="80,240 25,165 135,165" fill="#065f46" stroke="#064e3b" stroke-width="2" />
-    <polygon points="80,180 35,115 125,115" fill="#064e3b" stroke="#022c22" stroke-width="2" />
-    <circle cx="50" cy="200" r="4.5" fill="#ef4444" /><circle cx="100" cy="185" r="4.5" fill="#ef4444" />
-    <circle cx="65" cy="145" r="4.5" fill="#ef4444" /><circle cx="95" cy="140" r="4.5" fill="#ef4444" />
-  </g>
-  <g transform="translate(110, 160) scale(0.55)">
-    <ellipse cx="0" cy="0" rx="14" ry="18" fill="#a16207" stroke="#451a03" stroke-width="2" />
-    <ellipse cx="0" cy="0" rx="10" ry="14" fill="#fef08a" />
-    <polygon points="-8,-12 -12,-20 -2,-16" fill="#a16207" stroke="#451a03" stroke-width="1.5" />
-    <polygon points="8,-12 12,-20 2,-16" fill="#a16207" stroke="#451a03" stroke-width="1.5" />
-    <path d="M -8,-3 Q -5,-7 -2,-3" fill="none" stroke="#451a03" stroke-width="2.5" stroke-linecap="round" />
-    <path d="M 8,-3 Q 5,-7 2,-3" fill="none" stroke="#451a03" stroke-width="2.5" stroke-linecap="round" />
-    <polygon points="0,-2 -3,2 3,2" fill="#f97316" />
-  </g>
-  <path d="M -20,330 Q 80,310 200,325 T 420,315 L 420,400 L -20,400 Z" fill="#15803d" stroke="#14532d" stroke-width="2" />
-  <path d="M 120,345 Q 260,330 420,350 L 420,400 L 120,400 Z" fill="#166534" opacity="0.6" />
-  <g transform="translate(290, 130) scale(0.5)">
-    <ellipse cx="0" cy="0" rx="2" ry="10" fill="#1e293b" />
-    <circle cx="-8" cy="-6" r="6.5" fill="#a855f7" />
-    <circle cx="8" cy="-6" r="6.5" fill="#a855f7" />
-    <circle cx="-6" cy="4" r="5" fill="#e9d5ff" />
-    <circle cx="6" cy="4" r="5" fill="#e9d5ff" />
-  </g>
-  <g transform="translate(190, 90) scale(0.45) rotate(15)">
-    <ellipse cx="0" cy="0" rx="2" ry="10" fill="#1e293b" />
-    <circle cx="-8" cy="-6" r="6.5" fill="#f43f5e" />
-    <circle cx="8" cy="-6" r="6.5" fill="#f43f5e" />
-    <circle cx="-6" cy="4" r="5" fill="#fda4af" />
-  </g>
-  <g>
-    <circle cx="180" cy="210" r="13" fill="#78350f" stroke="#451a03" stroke-width="2" />
-    <circle cx="180" cy="210" r="7" fill="#fda4af" />
-    <circle cx="240" cy="210" r="13" fill="#78350f" stroke="#451a03" stroke-width="2" />
-    <circle cx="240" cy="210" r="7" fill="#fda4af" />
-    <circle cx="210" cy="230" r="30" fill="url(#bearGrad)" stroke="#451a03" stroke-width="2.5" />
-    <circle cx="210" cy="242" r="11" fill="#fed7aa" />
-    <polygon points="206,238 214,238 210,243" fill="#000" />
-    <path d="M 207,247 Q 210,249 213,247" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" />
-    <circle cx="198" cy="226" r="4.5" fill="#000" /><circle cx="198" cy="226" r="1.5" fill="#fff" />
-    <circle cx="222" cy="226" r="4.5" fill="#000" /><circle cx="222" cy="226" r="1.5" fill="#fff" />
-    <circle cx="190" cy="236" r="3" fill="#fda4af" opacity="0.6" />
-    <circle cx="230" cy="236" r="3" fill="#fda4af" opacity="0.6" />
-    <ellipse cx="210" cy="302" rx="36" ry="42" fill="url(#bearGrad)" stroke="#451a03" stroke-width="2.5" />
-    <ellipse cx="210" cy="302" rx="20" ry="26" fill="#fed7aa" />
-    <circle cx="168" cy="324" r="12" fill="#78350f" stroke="#451a03" stroke-width="2" />
-    <circle cx="252" cy="324" r="12" fill="#78350f" stroke="#451a03" stroke-width="2" />
-  </g>
-  <g transform="translate(285, 305) scale(0.65)">
-    <path d="M -15,10 C -20,10 -25,18 -25,30 C -25,45 -15,50 15,50 C 45,50 55,45 55,30 C 55,18 50,10 45,10 Z" fill="#fb923c" stroke="#c2410c" stroke-width="3" />
-    <ellipse cx="15" cy="10" rx="30" ry="8" fill="#f97316" stroke="#c2410c" stroke-width="3" />
-    <ellipse cx="15" cy="10" rx="25" ry="5" fill="#fde047" />
-    <path d="M 0,12 C 0,22 6,24 10,24 C 14,24 15,12 15,12 Z" fill="#fde047" />
-    <rect x="-5" y="22" width="40" height="16" rx="3" fill="#fffef0" stroke="#78350f" stroke-width="1.5" />
-    <path d="M 2,28 L 5,34 L 8,28 M 12,28 L 12,34 M 16,34 C 18,34 18,28 16,28 M 22,28 L 22,34" fill="none" stroke="#78350f" stroke-width="1.2" />
-    <g transform="translate(-15, -15) scale(0.6)">
-      <ellipse cx="0" cy="0" rx="8" ry="6" fill="#fde047" stroke="#000" stroke-width="1.5" />
-      <line x1="-3" y1="-5" x2="-3" y2="5" stroke="#000" stroke-width="1.5" />
-      <line x1="2" y1="-5" x2="2" y2="5" stroke="#000" stroke-width="1.5" />
-      <ellipse cx="-1" cy="-8" rx="3" ry="5" fill="#e0f2fe" opacity="0.8" />
+
+  <!-- Distant Blue Mountains -->
+  <path d="M 0 160 L 50 110 L 110 150 L 170 100 L 230 150 L 310 95 L 370 140 L 400 110 L 400 200 L 0 200 Z" fill="url(#mountainGrad)"/>
+
+  <!-- Rolling Forest Hills -->
+  <path d="M 0 190 Q 130 140 250 180 T 400 160 L 400 400 L 0 400 Z" fill="#4ade80"/>
+  <path d="M 0 220 Q 150 170 300 210 T 400 210 L 400 400 L 0 400 Z" fill="#22c55e"/>
+
+  <!-- Background Pine Trees -->
+  <use href="#pineTree" x="30" y="150" transform="scale(0.8)"/>
+  <use href="#pineTree" x="300" y="140" transform="scale(0.9)"/>
+  <use href="#pineTree" x="345" y="130" transform="scale(0.7)"/>
+
+  <!-- Birds Flying -->
+  <path d="M 235 70 Q 240 63 245 70 Q 250 63 255 70" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 215 82 Q 219 77 223 82 Q 227 77 231 82" fill="none" stroke="#0284c7" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- ==================== LARGE ANCIENT OAK TREE (LEFT) ==================== -->
+  <g id="oakTree">
+    <!-- Main Trunk with Hollow Hole -->
+    <path d="M -20 120 Q 50 140 80 230 Q 100 290 80 340 L 0 340 Z" fill="url(#barkGrad)"/>
+    <path d="M 80 230 Q 130 190 230 100 L 210 80 Q 120 150 60 170 Z" fill="url(#barkGrad)"/>
+    <path d="M 70 180 Q 20 130 10 90 L -10 90 Q 0 140 50 200 Z" fill="url(#barkGrad)"/>
+
+    <!-- Tree Hollow Hole with Sleeping Mouse -->
+    <ellipse cx="115" cy="180" rx="10" ry="14" fill="#291004"/>
+    <circle cx="115" cy="185" r="5" fill="#d97706"/> <!-- Mouse -->
+    <circle cx="113" cy="183" r="1.5" fill="#451a03"/> <!-- Ear -->
+
+    <!-- Oak Leaf Canopy Clusters -->
+    <circle cx="30" cy="60" r="45" fill="#15803d"/>
+    <circle cx="80" cy="40" r="50" fill="#166534"/>
+    <circle cx="140" cy="50" r="40" fill="#15803d"/>
+    <circle cx="190" cy="70" r="35" fill="#166534"/>
+    <circle cx="230" cy="90" r="25" fill="#15803d"/>
+    <circle cx="-10" cy="90" r="35" fill="#166534"/>
+
+    <!-- Acorns Hanging -->
+    <g transform="translate(60, 90)">
+      <rect x="-2" y="-5" width="4" height="5" fill="#451a03"/>
+      <path d="M -5 0 Q 0 -3 5 0 L 5 3 L -5 3 Z" fill="#78350f"/>
+      <ellipse cx="0" cy="6" rx="4" ry="5" fill="#d97706"/>
     </g>
-    <g transform="translate(45, -5) scale(0.5) rotate(-30)">
-      <ellipse cx="0" cy="0" rx="8" ry="6" fill="#fde047" stroke="#000" stroke-width="1.5" />
-      <ellipse cx="-1" cy="-8" rx="3" ry="5" fill="#e0f2fe" opacity="0.8" />
+    <g transform="translate(170, 105)">
+      <rect x="-2" y="-5" width="4" height="5" fill="#451a03"/>
+      <path d="M -5 0 Q 0 -3 5 0 L 5 3 L -5 3 Z" fill="#78350f"/>
+      <ellipse cx="0" cy="6" rx="4" ry="5" fill="#d97706"/>
+    </g>
+
+    <!-- Squirrel Sitting on Branch -->
+    <g id="squirrel" transform="translate(130, 80)">
+      <!-- Tail -->
+      <path d="M -5 10 Q -30 -15 -10 -25 Q 5 -30 -2 -10 Z" fill="#d97706" stroke="#b45309" stroke-width="1"/>
+      <!-- Body -->
+      <ellipse cx="5" cy="5" rx="8" ry="11" fill="#f97316"/>
+      <!-- Head -->
+      <circle cx="9" cy="-8" r="7" fill="#f97316"/>
+      <circle cx="11" cy="-10" r="1" fill="#1e293b"/> <!-- Eye -->
+      <polygon points="7,-14 9,-18 11,-14" fill="#f97316"/> <!-- Ear -->
+      <!-- Holding Acorn -->
+      <circle cx="15" cy="-2" r="3" fill="#78350f"/>
+    </g>
+
+    <!-- Owl Sitting on Left Lower Branch -->
+    <g id="owl" transform="translate(45, 160)">
+      <!-- Body -->
+      <ellipse cx="0" cy="0" rx="14" ry="18" fill="#a16207"/>
+      <ellipse cx="0" cy="3" rx="9" ry="12" fill="#fef08a"/> <!-- Chest -->
+      <path d="M -6 0 L -3 4 L 0 0 L 3 4 L 6 0" stroke="#ca8a04" stroke-width="1.5" fill="none"/> <!-- Feathers -->
+      <!-- Head & Big Eyes -->
+      <circle cx="-5" cy="-8" r="6" fill="#ffffff" stroke="#78350f" stroke-width="1"/>
+      <circle cx="5" cy="-8" r="6" fill="#ffffff" stroke="#78350f" stroke-width="1"/>
+      <circle cx="-4" cy="-8" r="3" fill="#1e293b"/>
+      <circle cx="4" cy="-8" r="3" fill="#1e293b"/>
+      <polygon points="-2,-4 2,-4 0,0" fill="#f97316"/> <!-- Beak -->
+      <!-- Ear Tufts -->
+      <polygon points="-10,-14 -6,-20 -2,-14" fill="#a16207"/>
+      <polygon points="2,-14 6,-20 10,-14" fill="#a16207"/>
     </g>
   </g>
-  <g transform="translate(30, 335) scale(0.7)">
-    <path d="M 28,40 Q 28,15 35,15 Q 42,15 42,40 Z" fill="#fafaf9" stroke="#d6d3d1" stroke-width="1.5" />
-    <path d="M 12,18 Q 35,-20 58,18 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="2.5" />
-    <circle cx="35" cy="-2" r="5" fill="#ffffff" />
-    <circle cx="24" cy="6" r="4.5" fill="#ffffff" />
-    <circle cx="48" cy="8" r="4" fill="#ffffff" />
-    <path d="M 68,40 Q 68,25 72,25 Q 76,25 76,40 Z" fill="#fafaf9" />
-    <path d="M 60,25 Q 72,5 84,25 Z" fill="#ef4444" />
+
+  <!-- ==================== STREAM & POND (BOTTOM RIGHT) ==================== -->
+  <g id="forestStream">
+    <path d="M 180 400 C 230 350 280 320 400 300 L 400 400 Z" fill="url(#streamGrad)"/>
+    <!-- Water Ripples -->
+    <path d="M 230 370 Q 260 360 290 375" fill="none" stroke="#bae6fd" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+    <path d="M 310 330 Q 340 320 370 335" fill="none" stroke="#bae6fd" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+    <!-- River Pebbles -->
+    <ellipse cx="210" cy="385" rx="6" ry="3" fill="#94a3b8"/>
+    <ellipse cx="280" cy="345" rx="8" ry="4" fill="#64748b"/>
+    <ellipse cx="300" cy="352" rx="5" ry="3" fill="#94a3b8"/>
+    <!-- Swimming Fish -->
+    <g transform="translate(330, 360)">
+      <ellipse cx="0" cy="0" rx="7" ry="4" fill="#fb923c"/>
+      <polygon points="6,0 12,-4 12,4" fill="#f97316"/>
+      <circle cx="-4" cy="-1" r="1" fill="#1e293b"/>
+    </g>
   </g>
+
+  <!-- ==================== FOREST FLOOR DETAILS & BADGER BURROW ==================== -->
+  <!-- Badger Hole (Bottom Left) -->
+  <g transform="translate(30, 320)">
+    <path d="M -15 30 Q 20 0 60 25 L 50 60 L -20 60 Z" fill="#78350f"/>
+    <ellipse cx="20" cy="32" rx="22" ry="14" fill="#1e293b"/> <!-- Cave Entrance -->
+
+    <!-- Friendly Badger Peeking Out -->
+    <g transform="translate(20, 25)">
+      <!-- Head -->
+      <ellipse cx="0" cy="0" rx="12" ry="10" fill="#ffffff"/>
+      <!-- Black Stripes -->
+      <path d="M -8 -8 Q -4 0 -2 8 L -6 8 Q -8 0 -11 -6 Z" fill="#1e293b"/>
+      <path d="M 8 -8 Q 4 0 2 8 L 6 8 Q 8 0 11 -6 Z" fill="#1e293b"/>
+      <!-- Eyes & Nose -->
+      <circle cx="-5" cy="0" r="1.5" fill="#ffffff"/>
+      <circle cx="-5" cy="0" r="0.8" fill="#000000"/>
+      <circle cx="5" cy="0" r="1.5" fill="#ffffff"/>
+      <circle cx="5" cy="0" r="0.8" fill="#000000"/>
+      <ellipse cx="0" cy="4" rx="2.5" ry="1.8" fill="#000000"/>
+    </g>
+  </g>
+
+  <!-- Cute Hedgehogs (Center Bottom) -->
+  <g id="hedgehogs" transform="translate(190, 315)">
+    <!-- Mama Hedgehog -->
+    <g transform="translate(20, 0)">
+      <!-- Spiky Back -->
+      <path d="M -15 10 Q -20 -12 5 -15 Q 25 -10 20 10 Z" fill="#78350f"/>
+      <path d="M -12 5 L -18 -2 M -6 0 L -10 -8 M 0 2 L 0 -10 M 8 0 L 10 -8 M 14 5 L 18 -2" stroke="#fde047" stroke-width="2" stroke-linecap="round"/>
+      <!-- Face -->
+      <path d="M 12 0 Q 25 5 22 12 L 5 12 Z" fill="#fed7aa"/>
+      <circle cx="18" cy="4" r="1.2" fill="#1e293b"/>
+      <circle cx="23" cy="7" r="1.5" fill="#000000"/> <!-- Snout -->
+    </g>
+
+    <!-- Baby Hedgehog -->
+    <g transform="translate(-15, 10) scale(0.75)">
+      <path d="M -15 10 Q -20 -12 5 -15 Q 25 -10 20 10 Z" fill="#78350f"/>
+      <path d="M -12 5 L -18 -2 M -6 0 L -10 -8 M 0 2 L 0 -10 M 8 0 L 10 -8" stroke="#fde047" stroke-width="2" stroke-linecap="round"/>
+      <path d="M 12 0 Q 25 5 22 12 L 5 12 Z" fill="#fed7aa"/>
+      <circle cx="18" cy="4" r="1.2" fill="#1e293b"/>
+      <circle cx="23" cy="7" r="1.5" fill="#000000"/>
+    </g>
+  </g>
+
+  <!-- ==================== HERO ANIMALS (CENTER & RIGHT) ==================== -->
+
+  <!-- HERO ANIMAL 1: CUTE RED FOX (CENTER FOREGROUND) -->
+  <g id="heroFox" transform="translate(140, 160)">
+    <!-- Bushy Tail with White Tip -->
+    <path d="M -10 80 Q -60 70 -50 30 Q -30 0 10 50 Z" fill="url(#foxGrad)"/>
+    <path d="M -45 35 Q -55 32 -42 20 Q -30 10 -32 30 Z" fill="#ffffff"/>
+
+    <!-- Body -->
+    <ellipse cx="25" cy="70" rx="22" ry="28" fill="url(#foxGrad)"/>
+    <path d="M 12 50 Q 25 45 38 50 L 35 90 Q 25 95 15 90 Z" fill="#ffffff"/> <!-- White Chest -->
+
+    <!-- Paws -->
+    <rect x="12" y="90" width="8" height="15" rx="4" fill="#1e293b"/>
+    <rect x="30" y="90" width="8" height="15" rx="4" fill="#1e293b"/>
+
+    <!-- Head -->
+    <path d="M 25 15 L -10 25 Q 25 60 60 25 Z" fill="url(#foxGrad)"/>
+    <!-- White Cheeks & Muzzle -->
+    <path d="M 25 35 L -2 27 Q 25 55 52 27 Z" fill="#ffffff"/>
+
+    <!-- Big Cute Ears -->
+    <polygon points="0,20 -12,-10 12,8" fill="url(#foxGrad)"/>
+    <polygon points="-2,15 -8,-3 6,8" fill="#1e293b"/> <!-- Left Ear Inner -->
+
+    <polygon points="50,20 62,-10 38,8" fill="url(#foxGrad)"/>
+    <polygon points="52,15 58,-3 44,8" fill="#1e293b"/> <!-- Right Ear Inner -->
+
+    <!-- Eyes, Nose & Smile -->
+    <ellipse cx="12" cy="30" rx="3.5" ry="4.5" fill="#1e293b"/>
+    <ellipse cx="38" cy="30" rx="3.5" ry="4.5" fill="#1e293b"/>
+    <circle cx="13" cy="28" r="1.2" fill="#ffffff"/> <!-- Eye Sparkle -->
+    <circle cx="39" cy="28" r="1.2" fill="#ffffff"/>
+
+    <ellipse cx="25" cy="42" rx="3.5" ry="2.5" fill="#1e293b"/> <!-- Cute Nose -->
+    <path d="M 21 46 Q 25 50 29 46" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- HERO ANIMAL 2: FRIENDLY BEAR WITH HONEY POT (RIGHT) -->
+  <g id="heroBear" transform="translate(280, 170)">
+    <!-- Body -->
+    <ellipse cx="35" cy="75" rx="30" ry="38" fill="url(#bearGrad)"/>
+    <ellipse cx="35" cy="75" rx="20" ry="26" fill="#d97706" opacity="0.4"/> <!-- Tummy -->
+
+    <!-- Legs -->
+    <rect x="15" y="102" width="14" height="16" rx="6" fill="#78350f"/>
+    <rect x="41" y="102" width="14" height="16" rx="6" fill="#78350f"/>
+
+    <!-- Head -->
+    <circle cx="35" cy="25" r="24" fill="url(#bearGrad)"/>
+
+    <!-- Round Ears -->
+    <circle cx="16" cy="8" r="8" fill="url(#bearGrad)"/>
+    <circle cx="16" cy="8" r="4" fill="#fde047" opacity="0.6"/>
+    <circle cx="54" cy="8" r="8" fill="url(#bearGrad)"/>
+    <circle cx="54" cy="8" r="4" fill="#fde047" opacity="0.6"/>
+
+    <!-- Snout & Face -->
+    <ellipse cx="35" cy="30" rx="10" ry="8" fill="#fde047"/>
+    <ellipse cx="35" cy="26" rx="4" ry="3" fill="#1e293b"/> <!-- Nose -->
+    <path d="M 31 31 Q 35 35 39 31" fill="none" stroke="#1e293b" stroke-width="1.8" stroke-linecap="round"/>
+
+    <!-- Eyes -->
+    <circle cx="25" cy="20" r="3" fill="#1e293b"/>
+    <circle cx="45" cy="20" r="3" fill="#1e293b"/>
+    <circle cx="26" cy="19" r="1" fill="#ffffff"/>
+    <circle cx="46" cy="19" r="1" fill="#ffffff"/>
+
+    <!-- Rosy Cheeks -->
+    <circle cx="18" cy="28" r="3" fill="#fb7185" opacity="0.5"/>
+    <circle cx="52" cy="28" r="3" fill="#fb7185" opacity="0.5"/>
+
+    <!-- Arms Holding Honey Pot -->
+    <path d="M 10 60 Q 25 70 30 80" stroke="#78350f" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M 60 60 Q 45 70 40 80" stroke="#78350f" stroke-width="8" stroke-linecap="round" fill="none"/>
+
+    <!-- Honey Jar -->
+    <g transform="translate(20, 65)">
+      <rect x="0" y="0" width="30" height="28" rx="5" fill="url(#honeyGrad)" stroke="#b45309" stroke-width="1.5"/>
+      <rect x="-3" y="-3" width="36" height="6" rx="2" fill="#fef08a" stroke="#b45309" stroke-width="1"/>
+      <text x="15" y="18" font-family="Arial, sans-serif" font-size="7" font-weight="bold" fill="#78350f" text-anchor="middle">HONEY</text>
+    </g>
+  </g>
+
+  <!-- ==================== FLOWERS, MUSHROOMS & BUTTERFLIES ==================== -->
+  <!-- Mushrooms Scattered -->
+  <use href="#mushroom" x="80" y="270" transform="scale(1.3)"/>
+  <use href="#mushroom" x="110" y="280"/>
+  <use href="#mushroom" x="270" y="290" transform="scale(1.2)"/>
+
+  <!-- Flowers Scattered -->
+  <use href="#forestFlower" x="130" y="260" transform="scale(1.2)"/>
+  <use href="#forestFlower" x="155" y="275"/>
+  <use href="#forestFlower" x="230" y="270" transform="scale(1.4)"/>
+  <use href="#forestFlower" x="255" y="285"/>
+  <use href="#forestFlower" x="370" y="280" transform="scale(1.3)"/>
+  <use href="#forestFlower" x="20" y="240" transform="scale(1.2)"/>
+
+  <!-- Fluttering Butterfly -->
+  <g id="butterfly" transform="translate(250, 210)">
+    <path d="M 0 0 Q -10 -12 0 -18 Q 5 -8 0 0 Z" fill="#f472b6"/>
+    <path d="M 0 0 Q 10 -12 0 -18 Q -5 -8 0 0 Z" fill="#f472b6"/>
+    <path d="M 0 0 Q -8 8 0 12 Q 3 4 0 0 Z" fill="#38bdf8"/>
+    <path d="M 0 0 Q 8 8 0 12 Q -3 4 0 0 Z" fill="#38bdf8"/>
+    <line x1="0" y1="-5" x2="0" y2="8" stroke="#1e293b" stroke-width="1.5"/>
+  </g>
+
+  <!-- Ladybug on Leaf -->
+  <g transform="translate(140, 370)">
+    <ellipse cx="0" cy="0" rx="5" ry="4" fill="#ef4444"/>
+    <circle cx="-3" cy="0" r="1.5" fill="#1e293b"/> <!-- Head -->
+    <circle cx="0" cy="-1.5" r="0.8" fill="#1e293b"/> <!-- Spots -->
+    <circle cx="2" cy="1" r="0.8" fill="#1e293b"/>
+    <circle cx="-1" cy="2" r="0.8" fill="#1e293b"/>
+  </g>
+
 </svg>
