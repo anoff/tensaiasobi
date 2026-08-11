@@ -47,9 +47,9 @@ const SHADOW_ITEMS: ShadowItem[] = [
 ];
 
 const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
-  easy: { choices: 2, radius: 64, baseStars: 2 },
-  medium: { choices: 3, radius: 48, baseStars: 2 },
-  hard: { choices: 3, radius: 36, baseStars: 2 },
+  easy: { choices: 3, radius: 64, baseStars: 2 },
+  medium: { choices: 5, radius: 48, baseStars: 2 },
+  hard: { choices: 6, radius: 36, baseStars: 2 },
 };
 
 type ShadowFlashlightProps = GameProps;
@@ -198,27 +198,41 @@ export function ShadowFlashlight({
             </span>
           </div>
 
-          {/* Revealed silhouette inside flashlight beam */}
+          {/* Revealed silhouette inside flashlight beam: white light showing only the emoji's black outline */}
           {!isRevealed && (
             <div
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              className="absolute inset-0 flex items-center justify-center pointer-events-none bg-white"
               style={maskStyle}
             >
-              <span
-                className="text-[10rem] leading-none"
-                style={{
-                  filter: 'brightness(0)',
-                }}
-              >
-                {target.emoji}
-              </span>
+              <div className="relative flex items-center justify-center">
+                {/* Outline layer: black silhouette slightly enlarged forms the outline ring */}
+                <span
+                  className="absolute inset-0 flex items-center justify-center text-[10rem] leading-none"
+                  style={{
+                    filter: 'brightness(0)',
+                    transform: 'scale(1.06)',
+                  }}
+                  aria-hidden="true"
+                >
+                  {target.emoji}
+                </span>
+                {/* Fill layer: white silhouette at normal scale erases the interior, leaving only the outline visible */}
+                <span
+                  className="relative text-[10rem] leading-none"
+                  style={{
+                    filter: 'brightness(0) invert(1)',
+                  }}
+                >
+                  {target.emoji}
+                </span>
+              </div>
             </div>
           )}
 
           {/* Flashlight rim */}
           {!isRevealed && (
             <div
-              className="absolute rounded-full border-4 border-yellow-200/50 shadow-[0_0_24px_8px_rgba(253,224,71,0.35)] pointer-events-none"
+              className="absolute rounded-full border-4 border-white/70 shadow-[0_0_24px_8px_rgba(255,255,255,0.45)] pointer-events-none"
               style={flashlightStyle}
             />
           )}
