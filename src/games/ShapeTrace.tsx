@@ -1,16 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Confetti from 'react-confetti';
+import React, { useState, useRef } from 'react';
+import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
 import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import DifficultySelector from '../components/DifficultySelector';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
-
-interface Point {
-  x: number; // 0 to 100
-  y: number; // 0 to 100
-}
+import { starMultiplier } from '../utils/difficulty';
+import { useCanvasLoop } from '../hooks/useCanvasLoop';
+import { spawnParticles, drawParticles, type Particle } from '../utils/particles';
+import {
+  getPixelCoord,
+  getDistanceToPath,
+  getPathSamples,
+  getMarginSize as marginMultiplier,
+  type Point,
+} from '../utils/traceGeometry';
 
 interface Shape {
   id: string;
@@ -686,25 +691,7 @@ const SHAPES: Shape[] = [
 ];
 
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  color: string;
-  alpha: number;
-  decay: number;
-}
-
-interface ShapeTraceProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-}
-
-export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: ShapeTraceProps) {
+export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
   const { t } = useTranslation();
   const [shapeIndex, setShapeIndex] = useState(0);
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
@@ -717,26 +704,11 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isDrawingRef = useRef(false);
   const particlesRef = useRef<Particle[]>([]);
-  const animationFrameRef = useRef<number | null>(null);
 
   const shape = SHAPES[shapeIndex];
 
-  const getPixelCoord = (p: Point, size: number) => ({
-    x: (p.x / 100) * size,
-    y: (p.y / 100) * size,
-  });
-
-  const getMarginSize = (canvasWidth: number): number => {
-    switch (difficulty) {
-      case 'easy':
-        return canvasWidth * 0.13;
-      case 'medium':
-        return canvasWidth * 0.08;
-      case 'hard':
-        return canvasWidth * 0.045;
-    }
-    return 0
-  };
+  const getMarginSize = (canvasWidth: number): number =>
+    marginMultiplier(canvasWidth, difficulty, { easy: 0.13, medium: 0.08, hard: 0.045 });
 
   const loadShape = (index: number) => {
     setShapeIndex(index);
@@ -753,46 +725,10 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
     loadShape(nextIdx);
   };
 
-  const spawnParticles = (x: number, y: number, color: string) => {
-    for (let i = 0; i < 8; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 1.0 + Math.random() * 2.5;
-      particlesRef.current.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        size: 3 + Math.random() * 5,
-        color,
-        alpha: 1,
-        decay: 0.02 + Math.random() * 0.02,
-      });
-    }
-  };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resizeCanvas = () => {
-      const container = containerRef.current;
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height, 420);
-      canvas.width = size;
-      canvas.height = size;
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const drawLoop = () => {
-      if (!canvas || !ctx) return;
-
-      const size = canvas.width;
+  useCanvasLoop(
+    canvasRef,
+    containerRef,
+    (ctx, size) => {
       const marginSize = getMarginSize(size);
 
       ctx.clearRect(0, 0, size, size);
@@ -883,38 +819,11 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
       }
 
       // 6. Draw particles
-      const particles = particlesRef.current;
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.alpha -= p.decay;
-        if (p.alpha <= 0) {
-          particles.splice(i, 1);
-        } else {
-          ctx.save();
-          ctx.globalAlpha = p.alpha;
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-      }
-
-      animationFrameRef.current = requestAnimationFrame(drawLoop);
-    };
-
-    drawLoop();
-
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shapeIndex, drawingPoints, isWon, difficulty]);
+      drawParticles(ctx, particlesRef.current);
+    },
+    [shapeIndex, drawingPoints, isWon, difficulty],
+    420
+  );
 
   const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isWon) return;
@@ -937,62 +846,12 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
     setDrawingPoints((prev) => [...prev, coords]);
 
     if (Math.random() < 0.25) {
-      spawnParticles(coords.x, coords.y, shape.color);
+      spawnParticles(particlesRef.current, coords.x, coords.y, shape.color, 8);
     }
   };
 
   const handlePointerUp = () => {
     isDrawingRef.current = false;
-  };
-
-  const getDistanceToSegment = (
-    p: { x: number; y: number },
-    a: { x: number; y: number },
-    b: { x: number; y: number }
-  ) => {
-    const dx = b.x - a.x;
-    const dy = b.y - a.y;
-    if (dx === 0 && dy === 0) {
-      return Math.hypot(p.x - a.x, p.y - a.y);
-    }
-    let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy);
-    t = Math.max(0, Math.min(1, t));
-    const projX = a.x + t * dx;
-    const projY = a.y + t * dy;
-    return Math.hypot(p.x - projX, p.y - projY);
-  };
-
-  const getDistanceToShapeOutline = (
-    p: { x: number; y: number },
-    pixelPoints: { x: number; y: number }[]
-  ) => {
-    let minDistance = Infinity;
-    for (let i = 0; i < pixelPoints.length - 1; i++) {
-      const dist = getDistanceToSegment(p, pixelPoints[i], pixelPoints[i + 1]);
-      if (dist < minDistance) {
-        minDistance = dist;
-      }
-    }
-    return minDistance;
-  };
-
-  const getOutlineSamples = (pixelPoints: { x: number; y: number }[]) => {
-    const samples: { x: number; y: number }[] = [];
-    const stepSize = 10;
-
-    for (let i = 0; i < pixelPoints.length - 1; i++) {
-      const a = pixelPoints[i];
-      const b = pixelPoints[i + 1];
-      const dist = Math.hypot(b.x - a.x, b.y - a.y);
-      const steps = Math.max(1, Math.floor(dist / stepSize));
-      for (let s = 0; s <= steps; s++) {
-        samples.push({
-          x: a.x + (s / steps) * (b.x - a.x),
-          y: a.y + (s / steps) * (b.y - a.y),
-        });
-      }
-    }
-    return samples;
   };
 
   const handleCheckTrace = () => {
@@ -1010,7 +869,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
     // Accuracy Check
     let pointsInside = 0;
     drawingPoints.forEach((pt) => {
-      const dist = getDistanceToShapeOutline(pt, pixelPoints);
+      const dist = getDistanceToPath(pt, pixelPoints);
       if (dist <= marginSize) {
         pointsInside += 1;
       }
@@ -1020,7 +879,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
     const isAccurate = accuracyRate >= 0.82;
 
     // Completeness Check
-    const targetSamples = getOutlineSamples(pixelPoints);
+    const targetSamples = getPathSamples(pixelPoints);
     let coveredSamples = 0;
 
     targetSamples.forEach((sample) => {
@@ -1037,7 +896,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
       setIsWon(true);
       setShowConfetti(true);
       playSuccess();
-      const multiplier = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
+      const multiplier = starMultiplier(difficulty);
       onStarEarned?.(3 * multiplier);
     } else {
       playError();
@@ -1062,12 +921,7 @@ export function ShapeTrace({ playPop, playSuccess, playError, onStarEarned }: Sh
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-2 w-full select-none max-w-lg mx-auto h-full animate-fade-in">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={150}
-          recycle={false}
-        />
+        <GameConfetti pieces={150} />
       )}
 
       {/* Header Shape Palette Selector */}

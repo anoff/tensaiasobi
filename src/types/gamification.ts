@@ -38,12 +38,6 @@ export interface Voucher {
   redeemedAt?: number;
 }
 
-/** Star-earn event emitted by games */
-export interface StarEarnEvent {
-  amount: number;
-  source: string;
-}
-
 /** Default size of the town grid */
 export const TOWN_GRID_SIZE = 6;
 

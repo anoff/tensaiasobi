@@ -301,6 +301,7 @@ export const ko: TranslationSchema = {
     draw: "무승부! 🤝",
     start: "터치해서 시작!",
     seconds: "초",
+    playerScore: "플레이어 {count} 점수: ",
   },
   shiritori: {
     title: "끝말잇기 🔗",

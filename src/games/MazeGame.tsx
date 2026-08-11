@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
 import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import DifficultySelector from '../components/DifficultySelector';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
-
-import { GameDifficulty } from '../types/game';
+import { starMultiplier } from '../utils/difficulty';
+import { useCanvasLoop } from '../hooks/useCanvasLoop';
+import { spawnParticles, drawParticles, type Particle } from '../utils/particles';
+import type { GameDifficulty, GameProps } from '../types/game';
 
 interface Cell {
   col: number;
@@ -98,25 +100,7 @@ const THEMES: Theme[] = [
   },
 ];
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  color: string;
-  alpha: number;
-  decay: number;
-}
-
-interface MazeGameProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-}
-
-export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: MazeGameProps) {
+export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
   const [themeIndex, setThemeIndex] = useState(0);
@@ -134,7 +118,6 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isDrawingRef = useRef(false);
   const particlesRef = useRef<Particle[]>([]);
-  const animationFrameRef = useRef<number | null>(null);
 
   const theme = THEMES[themeIndex];
 
@@ -226,47 +209,12 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [difficulty, themeIndex]);
 
-  const spawnParticles = (x: number, y: number, color: string) => {
-    for (let i = 0; i < 15; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 1.5 + Math.random() * 3;
-      particlesRef.current.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        size: 4 + Math.random() * 6,
-        color,
-        alpha: 1,
-        decay: 0.02 + Math.random() * 0.02,
-      });
-    }
-  };
+  useCanvasLoop(
+    canvasRef,
+    containerRef,
+    (ctx, size) => {
+      if (grid.length === 0) return;
 
-  // Canvas render loop
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || grid.length === 0) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resizeCanvas = () => {
-      const container = containerRef.current;
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height, 450);
-      canvas.width = size;
-      canvas.height = size;
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const drawLoop = () => {
-      if (!canvas || !ctx) return;
-
-      const size = canvas.width;
       const cellSize = size / cols;
       const wallWidth = Math.max(4, cellSize * 0.08);
 
@@ -376,38 +324,11 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
       ctx.fillText(theme.startEmoji, playerX, playerY);
 
       // 8. Update and Draw Particles
-      const particles = particlesRef.current;
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.alpha -= p.decay;
-        if (p.alpha <= 0) {
-          particles.splice(i, 1);
-        } else {
-          ctx.save();
-          ctx.globalAlpha = p.alpha;
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-      }
-
-      animationFrameRef.current = requestAnimationFrame(drawLoop);
-    };
-
-    drawLoop();
-
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [grid, mappedPath, isAnimating, animatingIndex, themeIndex]);
+      drawParticles(ctx, particlesRef.current);
+    },
+    [grid, mappedPath, isAnimating, animatingIndex, themeIndex],
+    450
+  );
 
 
 
@@ -551,7 +472,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
           setIsWon(true);
           setShowConfetti(true);
           playSuccess();
-          const multiplier = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
+          const multiplier = starMultiplier(difficulty);
           onStarEarned?.(3 * multiplier);
           setIsAnimating(false);
         } else {
@@ -572,7 +493,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
             const cellSize = canvas.width / cols;
             const starX = cell.col * cellSize + cellSize / 2;
             const starY = cell.row * cellSize + cellSize / 2;
-            spawnParticles(starX, starY, '#FFD54F');
+            spawnParticles(particlesRef.current, starX, starY, '#FFD54F', 15);
           }
         }
       }
@@ -625,12 +546,7 @@ export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: Maze
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-2 w-full select-none max-w-lg mx-auto h-full">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={150}
-          recycle={false}
-        />
+        <GameConfetti pieces={150} />
       )}
 
       {/* Header Controls */}

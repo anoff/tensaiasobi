@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
+import StreakBadge from '../components/StreakBadge';
 import { useTranslation } from '../hooks/useTranslation';
+import { useStreak } from '../hooks/useStreak';
+import { shuffle } from '../utils/shuffle';
+import type { GameProps } from '../types/game';
 
 interface EmojiItem {
   emoji: string;
   isOdd: boolean;
 }
 
-interface OddOneOutProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
-}
+type OddOneOutProps = Omit<GameProps, 'playPop'>;
 
 const CATEGORIES: Record<string, string[]> = {
   animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🦆', '🦉'],
@@ -31,14 +29,7 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
   const [showConfetti, setShowConfetti] = useState(false);
   const { t } = useTranslation();
 
-  const [streak, setStreak] = useState(() => {
-    const saved = localStorage.getItem('odd_streak');
-    return saved ? parseInt(saved, 10) : 0;
-  });
-  const [highScore, setHighScore] = useState(() => {
-    const saved = localStorage.getItem('odd_highscore');
-    return saved ? parseInt(saved, 10) : 0;
-  });
+  const { streak, highScore, registerCorrect, resetStreak } = useStreak('odd');
 
   const generatePuzzle = () => {
     const keys = Object.keys(CATEGORIES);
@@ -53,17 +44,11 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
       oddCatKey = keys[oddCatIndex];
     }
 
-    const mainEmojis = [...CATEGORIES[mainCatKey]];
-    const oddEmojis = [...CATEGORIES[oddCatKey]];
-
     // Select 3 unique emojis from main category
-    const chosenMain: string[] = [];
-    for (let i = 0; i < 3; i++) {
-      const idx = Math.floor(Math.random() * mainEmojis.length);
-      chosenMain.push(mainEmojis.splice(idx, 1)[0]);
-    }
+    const chosenMain = shuffle(CATEGORIES[mainCatKey]).slice(0, 3);
 
     // Select 1 emoji from odd category
+    const oddEmojis = CATEGORIES[oddCatKey];
     const chosenOdd = oddEmojis[Math.floor(Math.random() * oddEmojis.length)];
 
     const puzzleItems: EmojiItem[] = [
@@ -72,7 +57,7 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
     ];
 
     // Shuffle
-    setItems(puzzleItems.sort(() => Math.random() - 0.5));
+    setItems(shuffle(puzzleItems));
     setSelectedEmoji(null);
     setIsCorrect(null);
   };
@@ -92,14 +77,7 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
       setShowConfetti(true);
       playSuccess();
 
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-      localStorage.setItem('odd_streak', newStreak.toString());
-
-      if (newStreak > highScore) {
-        setHighScore(newStreak);
-        localStorage.setItem('odd_highscore', newStreak.toString());
-      }
+      registerCorrect();
 
       // Award 2 stars per correct pick
       onStarEarned?.(2);
@@ -111,8 +89,7 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
     } else {
       setIsCorrect(false);
       playError();
-      setStreak(0);
-      localStorage.setItem('odd_streak', '0');
+      resetStreak();
 
       if (challengeMode) {
         setTimeout(() => {
@@ -144,12 +121,7 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={120}
-          recycle={false}
-        />
+        <GameConfetti pieces={120} />
       )}
 
       {/* Header Info */}
@@ -158,14 +130,7 @@ export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode 
         <p className="text-slate-500 font-extrabold text-sm">{t.oddOneOut.subtitle}</p>
         
         {/* Streak Counters */}
-        <div className="flex gap-4 items-center justify-center pt-1">
-          <span className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1 rounded-full border-2 border-amber-300 text-xs shadow-sm">
-            ✨ {streak}
-          </span>
-          <span className="bg-indigo-100 text-indigo-600 font-extrabold px-4 py-1 rounded-full border-2 border-indigo-300 text-xs shadow-sm">
-            🏆 {highScore}
-          </span>
-        </div>
+        <StreakBadge streak={streak} highScore={highScore} size="sm" />
       </div>
 
       {/* 2x2 Grid */}

@@ -1,8 +1,13 @@
 import { useState } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
-import { GameDifficulty } from '../types/game';
+import StreakBadge from '../components/StreakBadge';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
+import { useStreak } from '../hooks/useStreak';
+import { shuffle } from '../utils/shuffle';
+import { starMultiplier } from '../utils/difficulty';
+import AnswerBubble from '../components/AnswerBubble';
 
 
 
@@ -12,13 +17,7 @@ interface Question {
   options: number[];
 }
 
-interface MathGameProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
-}
+
 
 const generateQuestion = (currentLevel: GameDifficulty): Question => {
   let num1: number;
@@ -87,7 +86,7 @@ const generateQuestion = (currentLevel: GameDifficulty): Question => {
       }
     }
 
-    const options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
+    const options = shuffle(Array.from(optionsSet));
 
     return {
       text: `${num1} ${operator} ${num2}`,
@@ -96,7 +95,7 @@ const generateQuestion = (currentLevel: GameDifficulty): Question => {
     };
   };
 
-export function MathGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: MathGameProps) {
+export function MathGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: GameProps) {
   const [level, setLevel] = useState<GameDifficulty>('easy');
   const [question, setQuestion] = useState<Question>(() => generateQuestion('easy'));
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -104,14 +103,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
   const [showConfetti, setShowConfetti] = useState(false);
   const { t } = useTranslation();
 
-  const [streak, setStreak] = useState(() => {
-    const saved = localStorage.getItem('math_streak');
-    return saved ? parseInt(saved, 10) : 0;
-  });
-  const [highScore, setHighScore] = useState(() => {
-    const saved = localStorage.getItem('math_highscore');
-    return saved ? parseInt(saved, 10) : 0;
-  });
+  const { streak, highScore, registerCorrect, resetStreak } = useStreak('math');
 
   const loadNewQuestion = (currentLevel: GameDifficulty) => {
     setQuestion(generateQuestion(currentLevel));
@@ -128,17 +120,10 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
       setShowConfetti(true);
       playSuccess();
       
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-      localStorage.setItem('math_streak', newStreak.toString());
-
-      if (newStreak > highScore) {
-        setHighScore(newStreak);
-        localStorage.setItem('math_highscore', newStreak.toString());
-      }
+      registerCorrect();
 
       // Award stars: base 2 × level multiplier
-      const multiplier = level === 'easy' ? 1 : level === 'medium' ? 3 : 5;
+      const multiplier = starMultiplier(level);
       onStarEarned?.(2 * multiplier);
 
       setTimeout(() => {
@@ -148,8 +133,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
     } else {
       setIsCorrect(false);
       playError();
-      setStreak(0);
-      localStorage.setItem('math_streak', '0');
+      resetStreak();
 
       if (challengeMode) {
         setTimeout(() => {
@@ -173,12 +157,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={150}
-          recycle={false}
-        />
+        <GameConfetti pieces={150} />
       )}
 
       {/* Level Selection Tabs */}
@@ -198,14 +177,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
         </div>
         
         {/* Streak Counter */}
-        <div className="flex gap-4 items-center justify-center pt-2">
-          <span className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1.5 rounded-full border-2 border-amber-300 text-sm shadow-sm flex items-center gap-1.5 animate-pulse">
-            ✨ {streak}
-          </span>
-          <span className="bg-indigo-100 text-indigo-600 font-extrabold px-4 py-1.5 rounded-full border-2 border-indigo-300 text-sm shadow-sm">
-            🏆 {highScore}
-          </span>
-        </div>
+        <StreakBadge streak={streak} highScore={highScore} />
       </div>
 
       {/* Answer Bubbles */}
@@ -214,38 +186,18 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
           {question?.options.map((opt) => {
             const isThisSelected = selectedAnswer === opt;
 
-            let bubbleColorClass =
-              'from-sky-300/40 via-sky-400/70 to-sky-600/90 shadow-[0_10px_20px_rgba(14,165,233,0.3),_inset_0_4px_12px_rgba(255,255,255,0.6)] border-sky-400';
-            
-            if (isThisSelected) {
-              if (isCorrect === true) {
-                bubbleColorClass =
-                  'from-emerald-300 via-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.4)] border-emerald-400 scale-95 duration-100';
-              } else if (isCorrect === false) {
-                bubbleColorClass =
-                  'from-red-300 via-red-400 to-red-600 shadow-[0_4px_10px_rgba(239,68,68,0.4)] border-red-400 animate-shake scale-95 duration-100';
-              }
-            }
-
             return (
-              <button
+              <AnswerBubble
                 key={opt}
-                data-testid="math-answer-option"
+                selected={isThisSelected}
+                correct={isCorrect}
                 disabled={selectedAnswer !== null}
                 onClick={() => handleAnswerSelect(opt)}
-                className={`
-                  relative w-full aspect-square rounded-full flex items-center justify-center
-                  text-4xl md:text-5xl font-black text-white border-4 transition-all duration-150
-                  bg-gradient-to-br hover:scale-105 active:scale-95 outline-none cursor-pointer
-                  ${bubbleColorClass}
-                `}
+                testId="math-answer-option"
+                className="text-4xl md:text-5xl font-black text-white"
               >
-                {/* Bubble reflection effect */}
-                <div className="absolute top-3 left-4 w-1/4 h-1/8 bg-white/60 rounded-full -rotate-12 pointer-events-none" />
-                <div className="absolute bottom-2 right-4 w-1/8 h-1/8 bg-white/20 rounded-full pointer-events-none" />
-                
                 {opt}
-              </button>
+              </AnswerBubble>
             );
           })}
         </div>

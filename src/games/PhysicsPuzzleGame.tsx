@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
+import { shuffle } from '../utils/shuffle';
 
 interface Weight {
   id: number;
@@ -12,13 +13,7 @@ interface Weight {
   side: 'left' | 'right' | 'tray';
 }
 
-interface PhysicsPuzzleGameProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
-}
+type PhysicsPuzzleGameProps = Omit<GameProps, 'playError'>;
 
 const WEIGHT_EMOJIS = [
   { emoji: '🍎', mass: 1 },
@@ -46,7 +41,7 @@ function getDifficultySettings(diff: GameDifficulty) {
 function buildWeights(diff: GameDifficulty): Weight[] {
   const settings = getDifficultySettings(diff);
   const newWeights: Weight[] = [];
-  const shuffled = [...WEIGHT_EMOJIS].sort(() => Math.random() - 0.5);
+  const shuffled = shuffle(WEIGHT_EMOJIS);
 
   // Place a fixed weight on one side and a slightly different one on the other.
   const leftBase = shuffled[0];
@@ -65,10 +60,7 @@ function buildWeights(diff: GameDifficulty): Weight[] {
   return newWeights;
 }
 
-export function PhysicsPuzzleGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: PhysicsPuzzleGameProps) {
-  // challengeMode is accepted for consistency with other games; playError reserved for future penalty feedback.
-  void playError;
-  void challengeMode;
+export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: PhysicsPuzzleGameProps) {
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
   const [weights, setWeights] = useState<Weight[]>(() => buildWeights(difficulty));
@@ -153,12 +145,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, playError, onStarEarne
   return (
     <div className="flex-1 flex flex-col items-center w-full h-full select-none max-w-lg mx-auto px-2 py-2">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={120}
-          recycle={false}
-        />
+        <GameConfetti pieces={120} />
       )}
 
       <div className="text-center space-y-1 mb-2">

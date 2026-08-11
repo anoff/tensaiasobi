@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
+import { shuffle } from '../utils/shuffle';
 import { PUZZLE_IMAGES, PuzzleImage } from '../data/puzzleImages';
 
 // -----------------------------------------------------------------------------
@@ -116,7 +117,6 @@ function getJigsawPath(profile: EdgeProfile): string {
 interface GameInitData {
   initialBoard: (number | null)[];
   initialTray: number[];
-  initialLocked: boolean[];
 }
 
 /**
@@ -127,21 +127,13 @@ function generateInitialState(size: number): GameInitData {
   const total = size * size;
   
   const initialBoard: (number | null)[] = Array.from({ length: total }, () => null);
-  const initialLocked: boolean[] = Array.from({ length: total }, () => false);
 
   // All pieces are placed in the tray scrambled
-  const initialTray = Array.from({ length: total }, (_, i) => i);
-  
-  // Shuffle the tray pieces
-  for (let i = initialTray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [initialTray[i], initialTray[j]] = [initialTray[j], initialTray[i]];
-  }
+  const initialTray = shuffle(Array.from({ length: total }, (_, i) => i));
 
   return {
     initialBoard,
     initialTray,
-    initialLocked,
   };
 }
 
@@ -284,14 +276,7 @@ export function JigsawPiece({
 // PuzzleGame Main Component
 // -----------------------------------------------------------------------------
 
-interface PuzzleGameProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-}
-
-export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: PuzzleGameProps) {
+export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
   const [level, setLevel] = useState<GameDifficulty>('easy');
   const [selectedImage, setSelectedImage] = useState<PuzzleImage>(PUZZLE_IMAGES[0]);
 
@@ -333,12 +318,12 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
     const profiles = generateEdgeProfiles(currentSize);
     setEdgeProfiles(profiles);
 
-    // Generate scrambled board with some locked anchor pieces
-    const { initialBoard, initialTray, initialLocked } = generateInitialState(currentSize);
+    // Generate scrambled board with all pieces in the tray
+    const { initialBoard, initialTray } = generateInitialState(currentSize);
 
     setBoard(initialBoard);
     setTray(initialTray);
-    setLocked(initialLocked);
+    setLocked(new Array(currentSize * currentSize).fill(false));
     setSelectedTrayIdx(null);
     setIsSolved(false);
     setShowConfetti(false);
@@ -456,12 +441,7 @@ export function PuzzleGame({ playPop, playSuccess, playError, onStarEarned }: Pu
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-4 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={120}
-          recycle={false}
-        />
+        <GameConfetti pieces={120} />
       )}
 
       {/* Title block */}

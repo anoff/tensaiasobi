@@ -301,6 +301,7 @@ export const de: TranslationSchema = {
     draw: "Unentschieden! 🤝",
     start: "Tippen zum Starten!",
     seconds: "s",
+    playerScore: "Spieler {count} Punkte: ",
   },
   shiritori: {
     title: "Wortschlange 🔗",

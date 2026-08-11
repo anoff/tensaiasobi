@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import type { StarEarnAnimation } from '../hooks/useStars';
+import type { StarEarnAnimation } from '../hooks/useFlyUpAnimations';
+import { FlyUpStar } from './FlyUpStar';
 
 interface StarCounterProps {
   stars: number;
@@ -31,34 +32,12 @@ export function StarCounter({ stars, pendingAnimations, clearAnimation }: StarCo
 
       {/* Fly-up animations */}
       {pendingAnimations.map((anim) => (
-        <FlyUpStar key={anim.id} amount={anim.amount} onDone={() => clearAnimation(anim.id)} />
+        <FlyUpStar key={anim.id} onDone={() => clearAnimation(anim.id)}>
+          <span className="text-sm font-black text-amber-600 whitespace-nowrap drop-shadow-sm">
+            +{anim.amount} ⭐
+          </span>
+        </FlyUpStar>
       ))}
-    </div>
-  );
-}
-
-function FlyUpStar({ amount, onDone }: { amount: number; onDone: () => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const handleEnd = () => {
-      onDone();
-    };
-    el.addEventListener('animationend', handleEnd);
-    return () => el.removeEventListener('animationend', handleEnd);
-  }, [onDone]);
-
-  return (
-    <div
-      ref={ref}
-      className="absolute left-1/2 -translate-x-1/2 pointer-events-none star-fly-up"
-    >
-      <span className="text-sm font-black text-amber-600 whitespace-nowrap drop-shadow-sm">
-        +{amount} ⭐
-      </span>
     </div>
   );
 }

@@ -1,15 +1,11 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
+import AnswerBubble from '../components/AnswerBubble';
 import { useTranslation } from '../hooks/useTranslation';
-
-interface ShiritoriProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
-}
+import { useStreak } from '../hooks/useStreak';
+import { shuffle } from '../utils/shuffle';
+import type { GameProps } from '../types/game';
 
 // 88 child-friendly emojis from translation dictionary
 const EMOJI_ITEMS: string[] = [
@@ -20,26 +16,6 @@ const EMOJI_ITEMS: string[] = [
   '🐙', '🐨', '🐻', '🐷', '🐔', '🐬', '🐳', '🐝', '🦋', '🐞', '🤖', '👻', '🎁', '🍄', '❄️', '🎸',
   '🍕', '🍩', '🍪', '🍬', '🍊', '🥕', '⛵', '🥜', '📓', '🎺', '🐪', '🔍', '🧱', '🧸', '✏️', '🧣', '👓', '🥛', '🦖', '🦄', '🦈', '🐍', '🍟', '🍔', '🌽', '🍯', '🛸', '🚜', '🎒', '🧩'
 ];
-
-// Helper to read localStorage safely
-const getSafeLocalStorage = (key: string, defaultValue: number): number => {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? parseInt(saved, 10) : defaultValue;
-  } catch (e) {
-    console.error('Error reading localStorage key', key, e);
-    return defaultValue;
-  }
-};
-
-// Helper to write localStorage safely
-const setSafeLocalStorage = (key: string, value: number) => {
-  try {
-    localStorage.setItem(key, value.toString());
-  } catch (e) {
-    console.error('Error writing localStorage key', key, e);
-  }
-};
 
 // Clean Western words for first/last character matching
 const cleanWesternWord = (word: string, lang?: string): string => {
@@ -191,8 +167,7 @@ const generateOptionsForWord = (
   });
 
   // 3. Select 8 distinct distractors
-  const shuffledDistractors = [...distractorCandidates].sort(() => Math.random() - 0.5);
-  const selectedDistractors = shuffledDistractors.slice(0, 8);
+  const selectedDistractors = shuffle(distractorCandidates).slice(0, 8);
 
   // Japanese specific: If in Japanese mode, sometimes include a 'ん' ending word as a distractor/trap if possible
   if (lang === 'ja' && Math.random() < 0.25) {
@@ -200,13 +175,13 @@ const generateOptionsForWord = (
     if (nEndingCandidates.length > 0) {
       const trapEmoji = nEndingCandidates[Math.floor(Math.random() * nEndingCandidates.length)];
       // Replace one distractor with the trap
-      const optsList = [correctEmoji, trapEmoji, ...selectedDistractors.slice(0, 7)].sort(() => Math.random() - 0.5);
+      const optsList = shuffle([correctEmoji, trapEmoji, ...selectedDistractors.slice(0, 7)]);
       return { options: optsList };
     }
   }
 
   if (correctEmoji) {
-    const optsList = [correctEmoji, ...selectedDistractors].sort(() => Math.random() - 0.5);
+    const optsList = shuffle([correctEmoji, ...selectedDistractors]);
     return { options: optsList };
   } else {
     return { options: [], isGameOver: true };
@@ -239,7 +214,7 @@ const getPandaPlayChoice = (
   return '';
 };
 
-export function Shiritori({ playPop, playSuccess, playError, onStarEarned, challengeMode }: ShiritoriProps) {
+export function Shiritori({ playPop, playSuccess, playError, onStarEarned, challengeMode }: GameProps) {
   const { language, t } = useTranslation();
   
   // Memoized items dictionary
@@ -247,19 +222,19 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     return (t.anlautGame.items || {}) as Record<string, string>;
   }, [t.anlautGame.items]);
 
-  // Initial values computed once on mount
-  const startEmoji = useMemo(() => {
-    return getStartWord(language, itemsDict);
-  }, [language, itemsDict]);
-
-  const initialOptions = useMemo(() => {
-    return generateOptionsForWord(startEmoji, [startEmoji], language, itemsDict).options;
-  }, [startEmoji, language, itemsDict]);
+  // Initial values computed once on mount; App remounts on language change via key={language}
+  const [seed] = useState(() => {
+    const startEmoji = getStartWord(language, itemsDict);
+    return {
+      startEmoji,
+      options: generateOptionsForWord(startEmoji, [startEmoji], language, itemsDict).options,
+    };
+  });
 
   // Core Game State
   const [mode, setMode] = useState<'solo' | 'panda'>('solo');
-  const [chain, setChain] = useState<string[]>(() => [startEmoji]);
-  const [options, setOptions] = useState<string[]>(() => initialOptions);
+  const [chain, setChain] = useState<string[]>(() => [seed.startEmoji]);
+  const [options, setOptions] = useState<string[]>(() => seed.options);
   
   // Interaction/Animation Feedback State
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -277,8 +252,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
   // High Scores
-  const [streak, setStreak] = useState<number>(0);
-  const [highScore, setHighScore] = useState<number>(() => getSafeLocalStorage('shiritori_highscore', 0));
+  const { streak, highScore, registerCorrect, resetStreak } = useStreak('shiritori');
 
   const chainEndRef = useRef<HTMLDivElement>(null);
 
@@ -286,7 +260,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
   const initGame = useCallback((selectedMode: 'solo' | 'panda') => {
     const startEmoji = getStartWord(language, itemsDict);
     setChain([startEmoji]);
-    setStreak(0);
+    resetStreak();
     setMode(selectedMode);
     setTurn('player');
     setIsNRuleLost(false);
@@ -310,7 +284,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     } else {
       setOptions(result.options);
     }
-  }, [language, itemsDict, t.shiritori.yourTurn]);
+  }, [language, itemsDict, t.shiritori.yourTurn, resetStreak]);
 
   // Auto-scroll the chain view as new cards are added
   useEffect(() => {
@@ -375,14 +349,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
       const newChain = [...chain, emoji];
       setChain(newChain);
 
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-
-      // Check for High Score
-      if (newStreak > highScore) {
-        setHighScore(newStreak);
-        setSafeLocalStorage('shiritori_highscore', newStreak);
-      }
+      const newStreak = registerCorrect();
 
       // Check Japanese 'ん' Game Over Rule
       const endingChar = getEndChar(selectedWord, language);
@@ -428,7 +395,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
     } else {
       // INCORRECT MATCH
       playError();
-      setStreak(0);
+      resetStreak();
       setShakeOption(emoji);
 
       if (challengeMode) {
@@ -516,12 +483,7 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-4 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={150}
-          recycle={false}
-        />
+        <GameConfetti pieces={150} />
       )}
 
       {/* Header Panel */}
@@ -682,44 +644,22 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
               const isThisSelected = selectedOption === opt;
               const isShaking = shakeOption === opt;
 
-              let bubbleColorClass =
-                'from-sky-300/40 via-sky-400/70 to-sky-600/90 shadow-[0_10px_20px_rgba(14,165,233,0.25),_inset_0_4px_12px_rgba(255,255,255,0.6)] border-sky-400';
-
-              if (isThisSelected) {
-                if (isCorrect === true) {
-                  bubbleColorClass =
-                    'from-emerald-300 via-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.4)] border-emerald-400 scale-95 duration-100';
-                } else if (isCorrect === false) {
-                  bubbleColorClass =
-                    'from-red-300 via-red-400 to-red-600 shadow-[0_4px_10px_rgba(239,68,68,0.4)] border-red-400 scale-95 duration-100';
-                }
-              } else if (isShaking) {
-                bubbleColorClass =
-                  'from-red-300 via-red-400 to-red-600 shadow-[0_4px_10px_rgba(239,68,68,0.4)] border-red-400 scale-95 duration-100';
-              }
-
               return (
-                <button
+                <AnswerBubble
                   key={opt}
-                  data-testid="shiritori-option"
-                  data-word={itemsDict[opt] || ''}
-                  data-emoji={opt}
+                  selected={isThisSelected}
+                  correct={isCorrect}
+                  shake={isShaking}
                   disabled={selectedOption !== null || turn !== 'player'}
                   onClick={() => handleOptionSelect(opt)}
-                  className={`
-                    relative w-full aspect-square rounded-full flex items-center justify-center
-                    border-4 transition-all duration-150 bg-gradient-to-br hover:scale-105 active:scale-95 
-                    outline-none cursor-pointer overflow-hidden ${bubbleColorClass} ${
-                      isShaking ? 'animate-shake' : ''
-                    }
-                  `}
+                  testId="shiritori-option"
+                  dataAttrs={{
+                    'data-word': itemsDict[opt] || '',
+                    'data-emoji': opt,
+                  }}
                 >
-                  {/* Bubble reflection effect */}
-                  <div className="absolute top-2.5 left-3 w-1/4 h-1/8 bg-white/60 rounded-full -rotate-12 pointer-events-none" />
-                  <div className="absolute bottom-2 right-3.5 w-1/8 h-1/8 bg-white/20 rounded-full pointer-events-none" />
-
                   <span className="text-5xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)]">{opt}</span>
-                </button>
+                </AnswerBubble>
               );
             })}
           </div>

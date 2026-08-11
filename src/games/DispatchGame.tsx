@@ -1,16 +1,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { getItemsByCategory } from '../data/townItems';
 
 type ServiceType = 'police' | 'fire' | 'ambulance';
 
 interface Cell {
-  row: number;
-  col: number;
   decoration?: string;
 }
 
@@ -24,12 +22,7 @@ interface DispatchEvent {
   solved?: boolean;
 }
 
-interface DispatchGameProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-}
+type DispatchGameProps = GameProps;
 
 const VEHICLE_CONFIG: Record<ServiceType, { emoji: string; stationEmoji: string; eventEmoji: string; color: 'blue' | 'red' | 'green' }> = {
   police: { emoji: '🚓', stationEmoji: '🚔', eventEmoji: '🚨', color: 'blue' },
@@ -89,8 +82,6 @@ function generateCity(size: number): Cell[][] {
     const row: Cell[] = [];
     for (let c = 0; c < size; c++) {
       row.push({
-        row: r,
-        col: c,
         decoration: pickWeightedFiller(),
       });
     }
@@ -260,12 +251,7 @@ export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: 
   return (
     <div className="flex-1 flex flex-col items-center w-full h-full select-none max-w-lg mx-auto px-2 py-2">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={120}
-          recycle={false}
-        />
+        <GameConfetti pieces={120} />
       )}
 
       <div className="text-center space-y-1 mb-2">

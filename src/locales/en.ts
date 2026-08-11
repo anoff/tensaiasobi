@@ -299,6 +299,7 @@ export const en = {
     draw: "It's a Draw! 🤝",
     start: "Tap to Start!",
     seconds: "s",
+    playerScore: "Player {count} Score: ",
   },
   shiritori: {
     title: "Word Chain 🔗",

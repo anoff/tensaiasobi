@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import Confetti from 'react-confetti';
+import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
-import { GameDifficulty } from '../types/game';
+import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
+import { shuffle } from '../utils/shuffle';
 
 // Finite Field arithmetic helper for order q
 // Specifically, order 4 (easy, 5 emojis), 5 (medium, 6 emojis), 7 (hard, 8 emojis)
@@ -129,13 +130,13 @@ function getCardLayout(emojis: string[], q: number): CardEmoji[] {
   }
 
   // Shuffle order to avoid DOM z-index bias
-  return layout.sort(() => Math.random() - 0.5);
+  return shuffle(layout);
 }
 
 function buildShuffledDeck(q: number): DobbleCard[] {
   const indicesDeck = generateDobbleDeck(q);
   const numUniqueEmojis = q * q + q + 1;
-  const chosenEmojis = [...EMOJI_POOL].sort(() => Math.random() - 0.5).slice(0, numUniqueEmojis);
+  const chosenEmojis = shuffle(EMOJI_POOL).slice(0, numUniqueEmojis);
 
   const cards: DobbleCard[] = indicesDeck.map((indices, cardId) => {
     const cardEmojis = indices.map((idx) => chosenEmojis[idx]);
@@ -145,7 +146,7 @@ function buildShuffledDeck(q: number): DobbleCard[] {
     };
   });
 
-  return cards.sort(() => Math.random() - 0.5);
+  return shuffle(cards);
 }
 
 // Find the single matching emoji between two cards
@@ -162,32 +163,12 @@ function findMatch(cardA: DobbleCard, cardB: DobbleCard): string {
 
 type Mode = 'solo_time' | 'solo_zen' | 'duel';
 
-interface EmojiMatchProps {
-  playPop: () => void;
-  playSuccess: () => void;
-  playError: () => void;
-  onStarEarned?: (amount: number) => void;
-  challengeMode?: boolean;
-}
+type EmojiMatchProps = GameProps;
 
 export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, challengeMode }: EmojiMatchProps) {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
 
-  const getPlayerScoreLabel = (playerNum: number) => {
-    if (language === 'ja') {
-      return `プレイヤー ${playerNum}のスコア: `;
-    }
-    if (language === 'de') {
-      return `Spieler ${playerNum} Punkte: `;
-    }
-    if (language === 'fr') {
-      return `Score Joueur ${playerNum} : `;
-    }
-    if (language === 'ko') {
-      return `플레이어 ${playerNum} 점수: `;
-    }
-    return `Player ${playerNum} Score: `;
-  };
+  const getPlayerScoreLabel = (playerNum: number) => t.emojiMatch.playerScore.replace('{count}', String(playerNum));
 
   // Setup states
   const [gameStarted, setGameStarted] = useState(false);
@@ -493,12 +474,7 @@ export function EmojiMatch({ playPop, playSuccess, playError, onStarEarned, chal
   return (
     <div className="flex-1 flex flex-col items-center justify-between w-full h-full select-none max-w-lg mx-auto relative">
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          numberOfPieces={140}
-          recycle={false}
-        />
+        <GameConfetti pieces={140} />
       )}
 
       {!gameStarted ? (

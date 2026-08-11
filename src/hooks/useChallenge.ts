@@ -1,10 +1,6 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-
-export interface StarEarnAnimation {
-  id: number;
-  amount: number;
-}
+import { useFlyUpAnimations } from './useFlyUpAnimations';
 
 const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
   math: true,
@@ -29,8 +25,7 @@ export function useChallenge() {
   const [challengeStarsEarned, setChallengeStarsEarned] = useLocalStorage<number>('challenge_stars_earned', 0);
   const [challengeAllowedGames, setChallengeAllowedGames] = useLocalStorage<Record<string, boolean>>('challenge_allowed_games', DEFAULT_ALLOWED_GAMES);
 
-  const [pendingChallengeAnimations, setPendingChallengeAnimations] = useState<StarEarnAnimation[]>([]);
-  const animIdRef = useRef(0);
+  const { pendingAnimations, queueAnimation, clearAnimation, clearAllAnimations } = useFlyUpAnimations();
 
   const challengeStarsRemaining = Math.max(0, challengeStarsTarget - challengeStarsEarned);
 
@@ -39,8 +34,8 @@ export function useChallenge() {
     setChallengeAllowedGames(allowedGames);
     setChallengeStarsEarned(0);
     setChallengeActive(true);
-    setPendingChallengeAnimations([]);
-  }, [setChallengeActive, setChallengeStarsTarget, setChallengeStarsEarned, setChallengeAllowedGames]);
+    clearAllAnimations();
+  }, [setChallengeActive, setChallengeStarsTarget, setChallengeStarsEarned, setChallengeAllowedGames, clearAllAnimations]);
 
   const addChallengeStars = useCallback((amount: number) => {
     if (amount <= 0) return;
@@ -48,27 +43,20 @@ export function useChallenge() {
       const next = prev + amount;
       return next;
     });
-
-    // Queue fly-up animation
-    const id = ++animIdRef.current;
-    setPendingChallengeAnimations((prev) => [...prev, { id, amount }]);
-  }, [setChallengeStarsEarned]);
+    queueAnimation(amount);
+  }, [setChallengeStarsEarned, queueAnimation]);
 
   const claimChallengeReward = useCallback(() => {
     setChallengeActive(false);
     setChallengeStarsEarned(0);
-    setPendingChallengeAnimations([]);
-  }, [setChallengeActive, setChallengeStarsEarned]);
+    clearAllAnimations();
+  }, [setChallengeActive, setChallengeStarsEarned, clearAllAnimations]);
 
   const cancelChallenge = useCallback(() => {
     setChallengeActive(false);
     setChallengeStarsEarned(0);
-    setPendingChallengeAnimations([]);
-  }, [setChallengeActive, setChallengeStarsEarned]);
-
-  const clearChallengeAnimation = useCallback((id: number) => {
-    setPendingChallengeAnimations((prev) => prev.filter((a) => a.id !== id));
-  }, []);
+    clearAllAnimations();
+  }, [setChallengeActive, setChallengeStarsEarned, clearAllAnimations]);
 
   const allowedGamesMerged = { ...DEFAULT_ALLOWED_GAMES, ...challengeAllowedGames };
 
@@ -78,11 +66,11 @@ export function useChallenge() {
     challengeStarsEarned,
     challengeStarsRemaining,
     challengeAllowedGames: allowedGamesMerged,
-    pendingChallengeAnimations,
+    pendingChallengeAnimations: pendingAnimations,
     startChallenge,
     addChallengeStars,
     claimChallengeReward,
     cancelChallenge,
-    clearChallengeAnimation,
+    clearChallengeAnimation: clearAnimation,
   };
 }

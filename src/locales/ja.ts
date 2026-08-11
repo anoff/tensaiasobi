@@ -301,6 +301,7 @@ export const ja: TranslationSchema = {
     draw: "ひきわけ！ 🤝",
     start: "タップしてスタート！",
     seconds: "びょう",
+    playerScore: "プレイヤー {count}のスコア: ",
   },
   shiritori: {
     title: "しりとりあそび 🔗",
