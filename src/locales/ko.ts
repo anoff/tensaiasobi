@@ -29,6 +29,7 @@ export const ko: TranslationSchema = {
     dispatch: "출동",
     physics: "저울",
     towerSort: "타워 정렬",
+    shadowFlashlight: "그림자",
   },
   parentGate: {
     title: "부모님 전용 🔒",
@@ -361,6 +362,12 @@ export const ko: TranslationSchema = {
     moves: "이동",
     perfect: "완벽한 풀이! 🌟",
     playAgain: "다시 하기",
+  },
+  shadowFlashlight: {
+    title: "그림자 손전등! 🔦",
+    subtitle: "빛을 움직여 숨은 모양을 찾아보세요!",
+    help: "손전등을 움직이고 알맞은 이모지를 터치하세요!",
+    victory: "🎉 찾았어요!",
   },
   challenge: {
     title: "도전 모드 🎯",
