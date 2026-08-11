@@ -143,8 +143,6 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
   const leftWeights = weights.filter((w) => w.side === 'left');
   const rightWeights = weights.filter((w) => w.side === 'right');
 
-  const showWeightLegend = difficulty === 'easy' || difficulty === 'medium';
-
   return (
     <div className="flex-1 flex flex-col items-center w-full h-full select-none max-w-lg mx-auto px-2 py-2">
       {showConfetti && (
@@ -219,22 +217,24 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
         </p>
         <div className="flex flex-wrap justify-center gap-2 min-h-[48px]">
           {trayWeights.map((w) => (
-            <button
-              key={w.id}
-              type="button"
-              data-testid="physics-tray-weight"
-              onClick={() => handleWeightClick(w)}
-              className={`
-                w-12 h-12 text-2xl rounded-xl border-2 flex items-center justify-center
-                transition-all duration-75
-                ${selectedWeightId === w.id
-                  ? 'bg-yellow-100 border-yellow-400 scale-110 shadow-md'
-                  : 'bg-white border-slate-200 hover:bg-slate-50 active:scale-95'
-                }
-              `}
-            >
-              {w.emoji}
-            </button>
+            <div key={w.id} className="flex flex-col items-center gap-1">
+              <span className="text-xs font-black text-slate-600 leading-none">{w.mass}</span>
+              <button
+                type="button"
+                data-testid="physics-tray-weight"
+                onClick={() => handleWeightClick(w)}
+                className={`
+                  w-12 h-12 text-2xl rounded-xl border-2 flex items-center justify-center
+                  transition-all duration-75
+                  ${selectedWeightId === w.id
+                    ? 'bg-yellow-100 border-yellow-400 scale-110 shadow-md'
+                    : 'bg-white border-slate-200 hover:bg-slate-50 active:scale-95'
+                  }
+                `}
+              >
+                {w.emoji}
+              </button>
+            </div>
           ))}
         </div>
       </div>
@@ -243,21 +243,6 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
         <span data-testid="physics-left-mass">⬅️ {leftMass}</span>
         <span data-testid="physics-right-mass">➡️ {rightMass}</span>
       </div>
-
-      {showWeightLegend && (
-        <div className="w-full bg-sky-50 rounded-2xl p-3 mb-3">
-          <p className="text-center text-xs font-black text-sky-700 mb-2 uppercase tracking-wider">
-            {t.physicsGame.legend}
-          </p>
-          <div className="flex flex-wrap justify-center gap-2 text-sm font-bold text-slate-700">
-            {WEIGHT_EMOJIS.map((item) => (
-              <span key={item.emoji} className="px-2 py-1 bg-white rounded-lg border border-sky-100">
-                {item.emoji} = {item.mass}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="flex gap-3 w-full">
         <KidButton color="green" size="md" data-testid="physics-reset" onClick={() => { playPop(); initGame(); }}>
