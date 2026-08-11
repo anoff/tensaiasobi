@@ -71,7 +71,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
 
   const leftMass = weights.filter((w) => w.side === 'left').reduce((sum, w) => sum + w.mass, 0);
   const rightMass = weights.filter((w) => w.side === 'right').reduce((sum, w) => sum + w.mass, 0);
-  const tilt = Math.max(-20, Math.min(20, (leftMass - rightMass) * 3));
+  const tilt = Math.max(-20, Math.min(20, (rightMass - leftMass) * 3));
 
   useEffect(() => {
     if (solved) return;
@@ -141,6 +141,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
 
   const leftLabel = `${leftMass}`;
   const rightLabel = `${rightMass}`;
+  const showWeightLegend = difficulty === 'easy' || difficulty === 'medium';
 
   return (
     <div className="flex-1 flex flex-col items-center w-full h-full select-none max-w-lg mx-auto px-2 py-2">
@@ -244,6 +245,21 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
           ))}
         </div>
       </div>
+
+      {showWeightLegend && (
+        <div className="w-full bg-sky-50 rounded-2xl p-3 mb-3">
+          <p className="text-center text-xs font-black text-sky-700 mb-2 uppercase tracking-wider">
+            {t.physicsGame.legend}
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 text-sm font-bold text-slate-700">
+            {WEIGHT_EMOJIS.map((item) => (
+              <span key={item.emoji} className="px-2 py-1 bg-white rounded-lg border border-sky-100">
+                {item.emoji} = {item.mass}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-3 w-full">
         <KidButton color="green" size="md" data-testid="physics-reset" onClick={() => { playPop(); initGame(); }}>

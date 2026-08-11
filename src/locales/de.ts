@@ -352,6 +352,7 @@ export const de: TranslationSchema = {
     subtitle: "Lege Gewichte, damit die Waage waagerecht wird!",
     help: "Tippe ein Gewicht an, dann tippe auf die Seite, um es zu legen!",
     tray: "Gewichte",
+    legend: "Gewichts-Legende",
     victory: "🎉 Perfekt ausbalanciert!",
   },
   towerSort: {

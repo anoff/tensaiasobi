@@ -352,6 +352,7 @@ export const ko: TranslationSchema = {
     subtitle: "무게추를 올려 시소를 평평하게 만드세요!",
     help: "무게추를 터치하고 올릴 쪽을 터치하세요!",
     tray: "무게추",
+    legend: "무게 안내",
     victory: "🎉 완벽하게 균형을 잡았어요!",
   },
   towerSort: {

@@ -352,6 +352,7 @@ export const fr: TranslationSchema = {
     subtitle: "Place les poids pour équilibrer la balançoire !",
     help: "Appuie sur un poids, puis sur le côté où le poser !",
     tray: "Poids",
+    legend: "Légende des poids",
     victory: "🎉 Parfaitement équilibré !",
   },
   towerSort: {
