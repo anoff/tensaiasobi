@@ -33,6 +33,7 @@ export const fr: TranslationSchema = {
     numberTrain: "Train des Chiffres",
     shadowFlashlight: "Ombre",
     fairSharePicnic: "Pique-nique à partager",
+    magnetFishing: "Pêche à l'aimant",
   },
   parentGate: {
     title: "Espace Parents 🔒",

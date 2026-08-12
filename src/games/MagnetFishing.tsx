@@ -91,12 +91,11 @@ function easeToward(current: number, target: number, factor: number) {
   return current + (target - current) * factor;
 }
 
-export default function MagnetFishing({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
+export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: GameProps) {
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [magnet, setMagnet] = useState<MagnetState>({ x: 0, y: 0, dragging: false });
   const [items, setItems] = useState<GameItem[]>([]);
-  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const [won, setWon] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -108,10 +107,19 @@ export default function MagnetFishing({ playPop, playSuccess, playError, onStarE
 
   const config = CONFIG[difficulty];
 
+  const updateMagnetPosition = useCallback((clientX: number, clientY: number) => {
+    if (!stageRef.current) return;
+    const rect = stageRef.current.getBoundingClientRect();
+    setMagnet((prev) => ({
+      ...prev,
+      x: Math.max(16, Math.min(rect.width - 16, clientX - rect.left)),
+      y: Math.max(16, Math.min(rect.height - 16, clientY - rect.top)),
+    }));
+  }, []);
+
   const startRound = useCallback((diff: GameDifficulty) => {
     if (!stageRef.current) return;
     const { width, height } = stageRef.current.getBoundingClientRect();
-    setStageSize({ width, height });
     setItems(generateItems(diff, width, height));
     setWon(false);
     setShowConfetti(false);
@@ -128,26 +136,12 @@ export default function MagnetFishing({ playPop, playSuccess, playError, onStarE
   };
 
   const collectedItems = useMemo(() => items.filter((item) => item.collected), [items]);
-  const remainingMagnetic = useMemo(
-    () => items.filter((item) => item.magnetic && !item.collected).length,
-    [items]
-  );
 
   const handlePointerDown = useCallback((clientX: number, clientY: number) => {
     draggingRef.current = true;
     setMagnet((prev) => ({ ...prev, dragging: true }));
     updateMagnetPosition(clientX, clientY);
-  }, []);
-
-  const updateMagnetPosition = useCallback((clientX: number, clientY: number) => {
-    if (!stageRef.current) return;
-    const rect = stageRef.current.getBoundingClientRect();
-    setMagnet((prev) => ({
-      ...prev,
-      x: Math.max(16, Math.min(rect.width - 16, clientX - rect.left)),
-      y: Math.max(16, Math.min(rect.height - 16, clientY - rect.top)),
-    }));
-  }, []);
+  }, [updateMagnetPosition]);
 
   const handlePointerMove = useCallback(
     (clientX: number, clientY: number) => {

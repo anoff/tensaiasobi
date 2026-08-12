@@ -37,7 +37,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
       const mathLauncher = page.getByTestId('launch-math');
       await expect(mathLauncher).toBeVisible();
 
-      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort', 'shadow'] as const;
+      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort', 'shadow', 'magnet-fishing'] as const;
 
       for (const gameKey of gameKeys) {
         // 2. Launch Game
@@ -250,6 +250,30 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             const choice = page.getByTestId('shadow-choice').first();
             await expect(choice).toBeVisible();
             await choice.click();
+            break;
+          }
+
+          case 'magnet-fishing': {
+            const stage = page.getByTestId('magnet-stage');
+            await expect(stage).toBeVisible();
+
+            // Drag the magnet over a magnetic item, then to the bin.
+            const magneticItem = page.getByTestId('magnet-item-magnetic').first();
+            const bin = page.getByTestId('magnet-bin');
+            await expect(magneticItem).toBeVisible();
+            await expect(bin).toBeVisible();
+
+            const itemBox = await magneticItem.boundingBox();
+            const binBox = await bin.boundingBox();
+            expect(itemBox).not.toBeNull();
+            expect(binBox).not.toBeNull();
+
+            if (itemBox && binBox) {
+              await page.mouse.move(itemBox.x + itemBox.width / 2, itemBox.y + itemBox.height / 2);
+              await page.mouse.down();
+              await page.mouse.move(binBox.x + binBox.width / 2, binBox.y + binBox.height / 2);
+              await page.mouse.up();
+            }
             break;
           }
         }

@@ -33,6 +33,7 @@ export const ko: TranslationSchema = {
     numberTrain: "숫자 기차",
     shadowFlashlight: "그림자",
     fairSharePicnic: "공평한 소풍",
+    magnetFishing: "자석 낚시",
   },
   parentGate: {
     title: "부모님 전용 🔒",
