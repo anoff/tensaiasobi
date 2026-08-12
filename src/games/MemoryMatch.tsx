@@ -122,6 +122,7 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
     if (level === 'medium') return { columns: 3, maxWidth: 'max-w-[320px]' };
     return { columns: 4, maxWidth: 'max-w-[360px]' };
   };
+  const gridLayout = getGridLayout();
 
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
@@ -146,8 +147,8 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
       {/* Grid Container */}
       <div className="flex-1 flex items-center justify-center my-6 w-full">
         <div
-          className={`grid gap-4 w-full justify-center items-center ${getGridLayout().maxWidth}`}
-          style={{ gridTemplateColumns: `repeat(${getGridLayout().columns}, minmax(0, 1fr))` }}
+          className={`grid gap-4 w-full justify-center items-center ${gridLayout.maxWidth}`}
+          style={{ gridTemplateColumns: `repeat(${gridLayout.columns}, minmax(0, 1fr))` }}
         >
           {cards.map((card) => {
             const isOpen = card.isFlipped || card.isMatched;
