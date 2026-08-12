@@ -33,6 +33,7 @@ export const ko: TranslationSchema = {
     numberTrain: "숫자 기차",
     shadowFlashlight: "그림자",
     fairSharePicnic: "공평한 소풍",
+    magnetFishing: "자석 낚시",
   },
   parentGate: {
     title: "부모님 전용 🔒",
@@ -401,6 +402,14 @@ export const ko: TranslationSchema = {
     basketLabel: "간식 바구니",
     leftoverLabel: "남은 것",
     victory: "냠냠! 공평하게 나눴어요!",
+  },
+  magnetFishing: {
+    title: "자석 낚시! 🧲",
+    subtitle: "자석을 움직여 금속 물건만 모아보세요!",
+    help: "금속 물건은 자석에 붙어요. 상자에 넣어보세요!",
+    capacity: "자석: {collected}/{capacity}",
+    binLabel: "금속 상자",
+    victory: "잘했어요! 쓰레기를 분리했어요!",
   },
   challenge: {
     title: "도전 모드 🎯",

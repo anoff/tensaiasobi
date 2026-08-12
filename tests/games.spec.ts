@@ -37,7 +37,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
       const mathLauncher = page.getByTestId('launch-math');
       await expect(mathLauncher).toBeVisible();
 
-      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort', 'shadow'] as const;
+      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort', 'shadow', 'magnet-fishing'] as const;
 
       for (const gameKey of gameKeys) {
         // 2. Launch Game
@@ -250,6 +250,40 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             const choice = page.getByTestId('shadow-choice').first();
             await expect(choice).toBeVisible();
             await choice.click();
+            break;
+          }
+
+          case 'magnet-fishing': {
+            const stage = page.getByTestId('magnet-stage');
+            await expect(stage).toBeVisible();
+
+            const bin = page.getByTestId('magnet-bin');
+            await expect(bin).toBeVisible();
+            const binBox = await bin.boundingBox();
+            expect(binBox).not.toBeNull();
+
+            // Collect all magnetic items, depositing whenever capacity is reached.
+            for (let rounds = 0; rounds < 10; rounds += 1) {
+              const magneticItem = page.getByTestId('magnet-item-magnetic').first();
+              const itemBox = await magneticItem.boundingBox().catch(() => null);
+              if (!itemBox || !binBox) break;
+
+              // Hover the magnet over the item for a moment so it snaps.
+              await page.mouse.move(itemBox.x + itemBox.width / 2, itemBox.y + itemBox.height / 2);
+              await page.mouse.down();
+              await page.waitForTimeout(150);
+
+              // Move directly onto the bin and release to deposit.
+              await page.mouse.move(binBox.x + binBox.width / 2, binBox.y + binBox.height / 2);
+              await page.mouse.up();
+              await page.waitForTimeout(200);
+
+              // Wait for capacity to clear after a partial deposit.
+              await page.waitForTimeout(100);
+            }
+
+            // Wait for victory UI after all items are deposited.
+            await expect(page.locator('p.text-emerald-600')).toBeVisible({ timeout: 5000 });
             break;
           }
         }

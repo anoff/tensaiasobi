@@ -22,6 +22,7 @@ const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
   physics: true,
   towerSort: true,
   numberTrain: true,
+  magnetFishing: true,
 };
 
 export function useChallenge() {

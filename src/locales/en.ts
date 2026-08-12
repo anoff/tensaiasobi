@@ -31,6 +31,7 @@ export const en = {
     numberTrain: "Number Train",
     shadowFlashlight: "Shadow",
     fairSharePicnic: "Fair Share Picnic",
+    magnetFishing: "Magnet Fishing",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -399,6 +400,14 @@ export const en = {
     basketLabel: "Snack Basket",
     leftoverLabel: "Leftovers",
     victory: "Yum! Shared fairly!",
+  },
+  magnetFishing: {
+    title: "Magnet Fishing! 🧲",
+    subtitle: "Drag the magnet to collect only metal objects!",
+    help: "Metal items stick to the magnet. Drop them in the bin!",
+    capacity: "Magnet: {collected}/{capacity}",
+    binLabel: "Metal Bin",
+    victory: "Great job! You sorted the junk!",
   },
   challenge: {
     title: "Challenge Mode 🎯",

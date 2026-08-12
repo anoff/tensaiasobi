@@ -33,6 +33,7 @@ export const ja: TranslationSchema = {
     numberTrain: "かずのれっしゃ",
     shadowFlashlight: "かげ",
     fairSharePicnic: "ピクニックわけっこ",
+    magnetFishing: "じしゃくつり",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -401,6 +402,14 @@ export const ja: TranslationSchema = {
     basketLabel: "おやつバスケット",
     leftoverLabel: "あまり",
     victory: "やったね！ おなじかずに わけられたよ！",
+  },
+  magnetFishing: {
+    title: "じしゃくつり！🧲",
+    subtitle: "じしゃくを うごかして かねものだけ あつめよう！",
+    help: "かねものは じしゃくに くっつくよ。ボックスに いれよう！",
+    capacity: "じしゃく：{collected}/{capacity}",
+    binLabel: "メタルボックス",
+    victory: "すごい！ ぶんべつ できたね！",
   },
   challenge: {
     title: "チャレンジモード 🎯",

@@ -33,6 +33,7 @@ export const fr: TranslationSchema = {
     numberTrain: "Train des Chiffres",
     shadowFlashlight: "Ombre",
     fairSharePicnic: "Pique-nique à partager",
+    magnetFishing: "Pêche à l'aimant",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -401,6 +402,14 @@ export const fr: TranslationSchema = {
     basketLabel: "Panier de collations",
     leftoverLabel: "Restes",
     victory: "Miam ! Partagé équitablement !",
+  },
+  magnetFishing: {
+    title: "Pêche à l'aimant ! 🧲",
+    subtitle: "Déplace l'aimant pour ramasser seulement les objets métalliques !",
+    help: "Les objets métalliques collent à l'aimant. Jette-les dans la poubelle !",
+    capacity: "Aimant : {collected}/{capacity}",
+    binLabel: "Poubelle métal",
+    victory: "Bravo ! Tu as trié les déchets !",
   },
   challenge: {
     title: "Mode Défi 🎯",

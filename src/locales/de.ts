@@ -33,6 +33,7 @@ export const de: TranslationSchema = {
     numberTrain: "Zahlenzug",
     shadowFlashlight: "Schatten",
     fairSharePicnic: "Picknick teilen",
+    magnetFishing: "Magnetfischen",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -401,6 +402,14 @@ export const de: TranslationSchema = {
     basketLabel: "Snack-Korb",
     leftoverLabel: "Reste",
     victory: "Lecker! Fair geteilt!",
+  },
+  magnetFishing: {
+    title: "Magnetfischen! 🧲",
+    subtitle: "Ziehe den Magneten, um nur Metallgegenstände zu sammeln!",
+    help: "Metall haftet am Magneten. Wirf sie in die Tonne!",
+    capacity: "Magnet: {collected}/{capacity}",
+    binLabel: "Metalltonne",
+    victory: "Super! Du hast den Schrott sortiert!",
   },
   challenge: {
     title: "Herausforderungsmodus 🎯",
