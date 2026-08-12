@@ -405,7 +405,9 @@ test.describe('tensaiasobi Gamification Checks', () => {
     // Reloading should restore rainy weather
     await page.reload();
     await page.getByTestId('launch-town').click();
-    await expect(rainOverlay).toBeVisible();
+    await expect(page.locator('h2', { hasText: 'My Town' })).toBeVisible();
+    await expect(weatherToggle).toBeVisible();
     await expect(weatherToggle).toHaveText('🌧️');
+    await expect(rainOverlay).toBeVisible();
   });
 });

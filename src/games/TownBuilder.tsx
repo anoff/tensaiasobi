@@ -123,8 +123,14 @@ export function TownBuilder({
   const { t } = useTranslation();
 
   const [grid, setGrid] = useState<(TownCell | null)[][]>(loadTown);
-  const [timePhase, setTimePhase] = useState<DayPhase>(() => loadEnv().timePhase);
-  const [weatherPhase, setWeatherPhase] = useState<WeatherPhase>(() => loadEnv().weatherPhase);
+  const [timePhase, setTimePhase] = useState<DayPhase>(() => {
+    const { timePhase: savedTime } = loadEnv();
+    return savedTime;
+  });
+  const [weatherPhase, setWeatherPhase] = useState<WeatherPhase>(() => {
+    const { weatherPhase: savedWeather } = loadEnv();
+    return savedWeather;
+  });
   const [catalogCell, setCatalogCell] = useState<{ row: number; col: number } | null>(null);
   const [activeCategory, setActiveCategory] = useState<ShopCategory>('buildings');
   const [removeCell, setRemoveCell] = useState<{ row: number; col: number } | null>(null);
@@ -475,8 +481,8 @@ export function TownBuilder({
                   {cell ? (
                     <span
                       className={`inline-block transition-transform group-active:scale-95 ${
-                        isJustPlaced ? 'town-place' : isPoked ? pokeClass : `${animClass} ${weatherAnim}`
-                      } ${isGlowing ? 'town-night-glow' : ''}`}
+                        isJustPlaced ? 'town-place' : isPoked ? pokeClass : animClass
+                      } ${weatherAnim} ${isGlowing ? 'town-night-glow' : ''}`}
                     >
                       {cell.emoji}
                     </span>
