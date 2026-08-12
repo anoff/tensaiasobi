@@ -28,13 +28,15 @@ import GameConfetti from './components/GameConfetti';
 // Gamification imports
 import { StarCounter } from './components/StarCounter';
 import { FlyUpStar } from './components/FlyUpStar';
-import { StarShop } from './components/StarShop';
+import { CouponShop } from './components/CouponShop';
+import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
+import type { Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
 import { useStars } from './hooks/useStars';
-import { useVouchers } from './hooks/useVouchers';
+import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'shop' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'numberTrain' | 'shadowFlashlight';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'coupons' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'numberTrain' | 'shadowFlashlight';
 
 interface LauncherDef {
   id: Screen;
@@ -77,8 +79,12 @@ function AppContent() {
 
   // Gamification state
   const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
-  const { vouchers, setVoucherCost, toggleVoucher, redeemVoucher, resetVouchers } = useVouchers();
-  const [pendingVoucherRedeemId, setPendingVoucherRedeemId] = useState<string | null>(null);
+  const { coupons, toggleCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
+  const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
+  const [pendingCouponRedeemConfirmId, setPendingCouponRedeemConfirmId] = useState<string | null>(null);
+  const [celebratingCoupon, setCelebratingCoupon] = useState<Coupon | null>(null);
+  const [pendingEarnCouponId, setPendingEarnCouponId] = useState<string | null>(null);
+  const [challengeSetupCouponId, setChallengeSetupCouponId] = useState<string | undefined>(undefined);
 
   // Challenge mode state
   const {
@@ -86,6 +92,7 @@ function AppContent() {
     challengeStarsTarget,
     challengeStarsRemaining,
     challengeAllowedGames,
+    challengeCouponId,
     pendingChallengeAnimations,
     addChallengeStars,
     clearChallengeAnimation,
@@ -112,6 +119,7 @@ function AppContent() {
 
   const handleScreenChange = (screen: Screen) => {
     playPop();
+    if (screen !== 'settings') setChallengeSetupCouponId(undefined);
     setCurrentScreen(screen);
   };
 
@@ -144,7 +152,7 @@ function AppContent() {
 
     // Clear gamification progress
     resetStars();
-    resetVouchers();
+    resetCoupons();
     localStorage.removeItem('gamification_town');
 
     playSuccess();
@@ -309,12 +317,12 @@ function AppContent() {
             playWindBreeze={playWindBreeze}
           />
         );
-      case 'shop':
+      case 'coupons':
         return (
-          <StarShop
-            stars={stars}
-            vouchers={vouchers}
-            onRedeemVoucher={(id) => setPendingVoucherRedeemId(id)}
+          <CouponShop
+            coupons={coupons}
+            onRedeemCoupon={(id) => setPendingCouponRedeemConfirmId(id)}
+            onEarnCoupon={(id) => setPendingEarnCouponId(id)}
             playPop={playPop}
           />
         );
@@ -325,16 +333,17 @@ function AppContent() {
             setSoundEnabled={setSoundEnabled}
             vibrationEnabled={vibrationEnabled}
             setVibrationEnabled={setVibrationEnabled}
-            vouchers={vouchers}
-            onToggleVoucher={toggleVoucher}
-            onSetVoucherCost={setVoucherCost}
+            coupons={coupons}
+            onToggleCoupon={toggleCoupon}
             onClearProgress={handleClearProgress}
             onClose={() => handleScreenChange('menu')}
             challengeActive={challengeActive}
             challengeStarsTarget={challengeStarsTarget}
             challengeAllowedGames={challengeAllowedGames}
+            challengeCouponId={challengeCouponId}
             onStartChallenge={startChallenge}
             onCancelChallenge={cancelChallenge}
+            initialCouponId={challengeSetupCouponId}
           />
         );
       default:
@@ -485,12 +494,12 @@ function AppContent() {
                   <KidButton
                     color="yellow"
                     size="lg"
-                    data-testid="launch-shop"
-                    onClick={() => handleScreenChange('shop')}
+                    data-testid="launch-coupons"
+                    onClick={() => handleScreenChange('coupons')}
                     className="aspect-square flex-col gap-2 rounded-[2rem]"
                   >
-                    <span className="text-4xl">🛒</span>
-                    <span className="text-base font-black block leading-tight">{t.menu.shop}</span>
+                    <span className="text-4xl">🎟️</span>
+                    <span className="text-base font-black block leading-tight">{t.menu.coupons}</span>
                   </KidButton>
                 </div>
               </div>
@@ -521,19 +530,58 @@ function AppContent() {
         />
       )}
 
-      {/* Parent Gate for Voucher Redemption */}
-      {pendingVoucherRedeemId && (
+      {/* Parent Gate for the Coupon Shop's "Earn it!" shortcut -> opens Challenge configuration with this coupon preselected */}
+      {pendingEarnCouponId && (
         <ParentGate
           onSuccess={() => {
-            const success = redeemVoucher(pendingVoucherRedeemId, spendStars);
-            if (success) {
+            setChallengeSetupCouponId(pendingEarnCouponId);
+            setPendingEarnCouponId(null);
+            setCurrentScreen('settings');
+          }}
+          onClose={() => setPendingEarnCouponId(null)}
+        />
+      )}
+
+      {/* Confirmation dialog for Coupon Redemption (first confirmation, triggered by the tap-and-hold gesture) */}
+      {pendingCouponRedeemConfirmId && (() => {
+        const coupon = coupons.find((c) => c.id === pendingCouponRedeemConfirmId);
+        if (!coupon) return null;
+        return (
+          <RedeemConfirmDialog
+            coupon={coupon}
+            onCancel={() => setPendingCouponRedeemConfirmId(null)}
+            onConfirm={() => {
+              setPendingCouponRedeemConfirmId(null);
+              setPendingCouponRedeemGateId(coupon.id);
+            }}
+          />
+        );
+      })()}
+
+      {/* Parent Gate for Coupon Redemption (second confirmation, before the coupon is actually consumed) */}
+      {pendingCouponRedeemGateId && (
+        <ParentGate
+          onSuccess={() => {
+            const id = pendingCouponRedeemGateId;
+            setPendingCouponRedeemGateId(null);
+            const coupon = coupons.find((c) => c.id === id);
+            const success = redeemCoupon(id);
+            if (success && coupon) {
               playSuccess();
+              setCelebratingCoupon(coupon);
             } else {
               playError();
             }
-            setPendingVoucherRedeemId(null);
           }}
-          onClose={() => setPendingVoucherRedeemId(null)}
+          onClose={() => setPendingCouponRedeemGateId(null)}
+        />
+      )}
+
+      {/* Celebration overlay shown after a coupon has been redeemed */}
+      {celebratingCoupon && (
+        <CouponCelebration
+          coupon={celebratingCoupon}
+          onClose={() => setCelebratingCoupon(null)}
         />
       )}
 
@@ -555,6 +603,26 @@ function AppContent() {
               <span className="text-xl font-black text-yellow-800">+{challengeStarsTarget} Stars!</span>
             </div>
 
+            {challengeCouponId && (
+              <div
+                className="flex justify-center items-center gap-1.5 bg-violet-100 border-2 border-violet-300 rounded-2xl py-3 px-6 animate-pulse"
+                data-testid="challenge-coupon-reward"
+              >
+                {(() => {
+                  const coupon = coupons.find((c) => c.id === challengeCouponId);
+                  if (!coupon) return null;
+                  return (
+                    <>
+                      <span className="text-2xl">{coupon.emoji}</span>
+                      <span className="text-lg font-black text-violet-800">
+                        {(t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey}
+                      </span>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+
             <KidButton
               color="green"
               size="lg"
@@ -562,6 +630,7 @@ function AppContent() {
               onClick={() => {
                 playSuccess();
                 addStars(challengeStarsTarget);
+                if (challengeCouponId) awardCoupon(challengeCouponId);
                 claimChallengeReward();
                 setCurrentScreen('menu');
               }}

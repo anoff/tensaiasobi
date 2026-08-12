@@ -25,17 +25,29 @@ export interface ShopItem {
   animation?: string;
 }
 
-/** A redeemable real-world voucher */
-export interface Voucher {
+/** How big of a reward a coupon represents, used to suggest a fitting challenge length */
+export type CouponRewardSize = 'small' | 'medium' | 'large';
+
+/** Suggested challenge target stars for each reward size */
+export const REWARD_SIZE_STAR_TARGETS: Record<CouponRewardSize, number> = {
+  small: 5,
+  medium: 15,
+  large: 30,
+};
+
+/** A real-world coupon that can be awarded by a parent, e.g. via a Challenge */
+export interface Coupon {
   id: string;
   emoji: string;
   nameKey: string;
-  /** Cost set by parent (defaults provided) */
-  cost: number;
-  /** Whether this voucher is available to the child */
+  /** Whether this coupon is available to be selected/awarded */
   enabled: boolean;
-  /** Timestamp of last redemption, or undefined if never redeemed */
-  redeemedAt?: number;
+  /** How big of a reward this coupon is, used to suggest challenge target stars */
+  rewardSize: CouponRewardSize;
+  /** How many times this coupon has been earned so far */
+  earnedCount: number;
+  /** Timestamp of the most recent time this coupon was earned, if any */
+  lastEarnedAt?: number;
 }
 
 /** Default size of the town grid */
