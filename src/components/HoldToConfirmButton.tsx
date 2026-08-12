@@ -32,6 +32,7 @@ export function HoldToConfirmButton({
 }: HoldToConfirmButtonProps) {
   const [progress, setProgress] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const confirmedRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -42,6 +43,7 @@ export function HoldToConfirmButton({
   }, []);
 
   const cancelHold = useCallback(() => {
+    if (confirmedRef.current) return; // hold already completed, ignore the trailing pointerup
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -52,6 +54,7 @@ export function HoldToConfirmButton({
   const startHold = useCallback(() => {
     if (disabled) return;
 
+    confirmedRef.current = false;
     setProgress(0);
     const startTime = Date.now();
 
@@ -61,6 +64,7 @@ export function HoldToConfirmButton({
       setProgress(next);
 
       if (next >= 100) {
+        confirmedRef.current = true;
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;

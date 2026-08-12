@@ -126,7 +126,7 @@ test.describe('tensaiasobi Gamification Checks', () => {
 
     // 2. Tap-and-hold "Redeem" on the Gummy Bear coupon (like clearing the town)
     await redeemButton.dispatchEvent('pointerdown');
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(900);
     await redeemButton.dispatchEvent('pointerup');
 
     // 3. First confirmation: a custom redeem dialog must appear before anything happens
@@ -140,7 +140,7 @@ test.describe('tensaiasobi Gamification Checks', () => {
 
     // 4. Try again and confirm the dialog this time
     await redeemButton.dispatchEvent('pointerdown');
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(900);
     await redeemButton.dispatchEvent('pointerup');
     await expect(redeemDialog).toBeVisible();
     await page.getByTestId('redeem-confirm-submit').click();
@@ -155,7 +155,7 @@ test.describe('tensaiasobi Gamification Checks', () => {
 
     // 6. Redeem again and confirm both steps this time
     await redeemButton.dispatchEvent('pointerdown');
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(900);
     await redeemButton.dispatchEvent('pointerup');
     await expect(redeemDialog).toBeVisible();
     await page.getByTestId('redeem-confirm-submit').click();
