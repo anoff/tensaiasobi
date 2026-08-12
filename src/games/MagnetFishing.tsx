@@ -103,9 +103,14 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
   const magnetRef = useRef<HTMLDivElement>(null);
   const binRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
+  const wonRef = useRef(false);
   const rafRef = useRef<number | null>(null);
 
   const config = CONFIG[difficulty];
+
+  useEffect(() => {
+    wonRef.current = won;
+  }, [won]);
 
   const updateMagnetPosition = useCallback((clientX: number, clientY: number) => {
     if (!stageRef.current) return;
@@ -192,10 +197,11 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
   useEffect(() => {
     const animate = () => {
       setItems((prev) => {
-        if (won) return prev;
+        if (wonRef.current) return prev;
         const magnetX = magnet.x;
         const magnetY = magnet.y;
         let changed = false;
+        const attachedCount = prev.filter((item) => item.collected).length;
         const next = prev.map((item) => {
           if (item.collected) return item;
           const dx = magnetX - item.x;
@@ -204,18 +210,18 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
           const attractRadius = item.size * 2.5;
           const snapRadius = item.size * 1.1;
 
-          if (item.magnetic && distance < snapRadius && collectedItems.length < config.capacity) {
+          if (item.magnetic && distance < snapRadius && attachedCount < config.capacity) {
             changed = true;
             playPop();
             return { ...item, collected: true, wiggle: 0 };
           }
 
-          if (item.magnetic && distance < attractRadius && collectedItems.length < config.capacity) {
+          if (item.magnetic && distance < attractRadius && attachedCount < config.capacity) {
             changed = true;
             return {
               ...item,
-              x: easeToward(item.x, magnetX - dx * 0.15, 0.25),
-              y: easeToward(item.y, magnetY - dy * 0.15, 0.25),
+              x: easeToward(item.x, item.x + dx * 0.85, 0.25),
+              y: easeToward(item.y, item.y + dy * 0.85, 0.25),
               wiggle: 0,
             };
           }
@@ -241,22 +247,7 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [magnet.x, magnet.y, won, collectedItems.length, config.capacity, playPop]);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    if (touch) handlePointerDown(touch.clientX, touch.clientY);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handlePointerDown(e.clientX, e.clientY);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    if (touch) handlePointerMove(touch.clientX, touch.clientY);
-  };
+  }, [magnet.x, magnet.y, config.capacity, playPop]);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-2 w-full select-none max-w-lg mx-auto h-full">
@@ -281,9 +272,10 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
         ref={stageRef}
         data-testid="magnet-stage"
         className="relative flex-1 w-full min-h-[300px] my-4 rounded-3xl border-4 border-slate-200 bg-gradient-to-b from-stone-200 to-stone-300 overflow-hidden"
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          handlePointerDown(e.clientX, e.clientY);
+        }}
       >
         {items.map((item) => {
           if (item.collected) return null;
