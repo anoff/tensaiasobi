@@ -32,6 +32,7 @@ export const fr: TranslationSchema = {
     fruitMathPop: "Calcul des Fruits",
     numberTrain: "Train des Chiffres",
     shadowFlashlight: "Ombre",
+    fairSharePicnic: "Pique-nique à partager",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -392,6 +393,14 @@ export const fr: TranslationSchema = {
     subtitle: "Déplace la lumière pour trouver la forme cachée !",
     help: "Déplace la lampe, puis appuie sur l'emoji correspondant !",
     victory: "🎉 Trouvé !",
+  },
+  fairSharePicnic: {
+    title: "Pique-nique à partager ! 🧺",
+    subtitle: "Partage les collations à parts égales entre tous les amis !",
+    help: "Glisse une collation vers une assiette. Donne le même nombre à chacun !",
+    basketLabel: "Panier de collations",
+    leftoverLabel: "Restes",
+    victory: "Miam ! Partagé équitablement !",
   },
   challenge: {
     title: "Mode Défi 🎯",
