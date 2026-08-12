@@ -31,6 +31,7 @@ export const ko: TranslationSchema = {
     towerSort: "타워 정렬",
     numberTrain: "숫자 기차",
     shadowFlashlight: "그림자",
+    fairSharePicnic: "공평한 소풍",
   },
   parentGate: {
     title: "부모님 전용 🔒",
@@ -385,6 +386,14 @@ export const ko: TranslationSchema = {
     subtitle: "빛을 움직여 숨은 모양을 찾아보세요!",
     help: "손전등을 움직이고 알맞은 이모지를 터치하세요!",
     victory: "🎉 찾았어요!",
+  },
+  fairSharePicnic: {
+    title: "공평한 소풍! 🧺",
+    subtitle: "간식을 친구들에게 똑같이 나눠주세요!",
+    help: "간식을 접시로 끌어다 놓으세요. 모두에게 똑같이 나눠주세요!",
+    basketLabel: "간식 바구니",
+    leftoverLabel: "남은 것",
+    victory: "냠냠! 공평하게 나눴어요!",
   },
   challenge: {
     title: "도전 모드 🎯",

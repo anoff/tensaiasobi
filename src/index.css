@@ -169,6 +169,15 @@
     animation: kid-btn-glow 2s ease-in-out infinite;
   }
 
+  /* ── Fair Share Picnic plate sparkle ── */
+  @keyframes sparkle {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    50% { box-shadow: 0 0 16px 6px rgba(16, 185, 129, 0.5); }
+  }
+  .animate-sparkle {
+    animation: sparkle 1s ease-in-out infinite;
+  }
+
   @keyframes confetti-fall {
     0% { transform: translateY(-10%) rotate(0deg); opacity: 1; }
     100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }

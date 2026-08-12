@@ -31,6 +31,7 @@ export const de: TranslationSchema = {
     towerSort: "Turm-Sortierung",
     numberTrain: "Zahlenzug",
     shadowFlashlight: "Schatten",
+    fairSharePicnic: "Picknick teilen",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -385,6 +386,14 @@ export const de: TranslationSchema = {
     subtitle: "Bewege das Licht, um die versteckte Form zu finden!",
     help: "Ziehe die Taschenlampe und tippe dann das passende Emoji an!",
     victory: "🎉 Gefunden!",
+  },
+  fairSharePicnic: {
+    title: "Picknick teilen! 🧺",
+    subtitle: "Teile die Snacks gleichmäßig unter allen Freunden auf!",
+    help: "Ziehe einen Snack auf einen Teller. Gib jedem gleich viel!",
+    basketLabel: "Snack-Korb",
+    leftoverLabel: "Reste",
+    victory: "Lecker! Fair geteilt!",
   },
   challenge: {
     title: "Herausforderungsmodus 🎯",

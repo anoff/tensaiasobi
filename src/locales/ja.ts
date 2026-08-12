@@ -31,6 +31,7 @@ export const ja: TranslationSchema = {
     towerSort: "タワーソート",
     numberTrain: "かずのれっしゃ",
     shadowFlashlight: "かげ",
+    fairSharePicnic: "ピクニックわけっこ",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -385,6 +386,14 @@ export const ja: TranslationSchema = {
     subtitle: "あかりをうごかして かくれた かたちを みつけよう！",
     help: "ライトをうごかして、あてはまる えもじを タップしてね！",
     victory: "🎉 みつけたね！",
+  },
+  fairSharePicnic: {
+    title: "ピクニックわけっこ！🧺",
+    subtitle: "おやつを みんなに おなじかずずつ わけてあげよう！",
+    help: "おやつを おさらに ドラッグしてね。みんな おなじかずに しよう！",
+    basketLabel: "おやつバスケット",
+    leftoverLabel: "あまり",
+    victory: "やったね！ おなじかずに わけられたよ！",
   },
   challenge: {
     title: "チャレンジモード 🎯",

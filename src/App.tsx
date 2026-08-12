@@ -22,6 +22,7 @@ import PhysicsPuzzleGame from './games/PhysicsPuzzleGame';
 import TowerSort from './games/TowerSort';
 import NumberTrain from './games/NumberTrain';
 import ShadowFlashlight from './games/ShadowFlashlight';
+import FairSharePicnic from './games/FairSharePicnic';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 import GameConfetti from './components/GameConfetti';
 
@@ -36,14 +37,14 @@ import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'coupons' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'numberTrain' | 'shadowFlashlight';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'coupons' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'numberTrain' | 'shadowFlashlight' | 'fairSharePicnic';
 
 interface LauncherDef {
   id: Screen;
   color: 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'red';
   testid: string;
   emoji: string;
-  label: 'math' | 'odd' | 'doodle' | 'match' | 'maze' | 'trace' | 'letterTrace' | 'dobble' | 'anlaut' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'numberTrain' | 'shadowFlashlight';
+  label: 'math' | 'odd' | 'doodle' | 'match' | 'maze' | 'trace' | 'letterTrace' | 'dobble' | 'anlaut' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'numberTrain' | 'shadowFlashlight' | 'fairSharePicnic';
 }
 
 const GAME_LAUNCHERS: LauncherDef[] = [
@@ -63,6 +64,7 @@ const GAME_LAUNCHERS: LauncherDef[] = [
   { id: 'towerSort', color: 'blue', testid: 'launch-tower-sort', emoji: '🗼', label: 'towerSort' },
   { id: 'numberTrain', color: 'green', testid: 'launch-number-train', emoji: '🚂', label: 'numberTrain' },
   { id: 'shadowFlashlight', color: 'purple', testid: 'launch-shadow', emoji: '🔦', label: 'shadowFlashlight' },
+  { id: 'fairSharePicnic', color: 'green', testid: 'launch-fair-share-picnic', emoji: '🧺', label: 'fairSharePicnic' },
 ];
 
 function AppContent() {
@@ -301,6 +303,15 @@ function AppContent() {
             playError={playError}
             onStarEarned={handleStarEarned}
             challengeMode={challengeActive}
+          />
+        );
+      case 'fairSharePicnic':
+        return (
+          <FairSharePicnic
+            playPop={playPop}
+            playSuccess={playSuccess}
+            playError={playError}
+            onStarEarned={handleStarEarned}
           />
         );
       case 'town':
