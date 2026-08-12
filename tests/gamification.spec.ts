@@ -162,4 +162,55 @@ test.describe('tensaiasobi Gamification Checks', () => {
     const starCountBadge = page.getByTestId('stars-total');
     await expect(starCountBadge).toHaveText('92');
   });
+
+  test('Verify tapping a placed Town item triggers "Petting Zoo" feedback instead of opening the catalog', async ({ page }) => {
+    // 1. Inject stars to afford a purchase
+    await page.addInitScript(() => {
+      localStorage.setItem('gamification_stars', '100');
+    });
+
+    await page.goto('/');
+
+    // 2. Open Town Builder
+    const townLauncher = page.getByTestId('launch-town');
+    await expect(townLauncher).toBeVisible();
+    await townLauncher.click();
+
+    // 3. Placement Confetti overlay canvas should be present on the grid
+    const confettiCanvas = page.getByTestId('town-confetti-canvas');
+    await expect(confettiCanvas).toBeVisible();
+
+    // 4. Place a House (cost: 10) in the first cell
+    const emptyCells = page.locator('button[aria-label="Tap an empty spot to build!"]');
+    await expect(emptyCells.first()).toBeVisible();
+    await emptyCells.first().click();
+
+    const houseBtn = page.locator('button', { hasText: 'House' });
+    await expect(houseBtn).toBeVisible();
+    await houseBtn.click();
+
+    // The catalog modal should close after placing the item
+    await expect(houseBtn).not.toBeVisible();
+
+    // 5. Tap the placed House again – it should NOT reopen the catalog modal,
+    //    and it should instead play a swell "poke" animation.
+    // Buildings have an infinite CSS "town-pulse" animation applied, so the
+    // element's bounding box never settles; force the click to bypass
+    // Playwright's actionability/stability check. Also wait out the one-shot
+    // "town-place" placement animation window (500ms) so it doesn't take
+    // rendering priority over the poke animation class.
+    const placedHouse = page.locator('button[aria-label="🏠"]');
+    await expect(placedHouse).toBeVisible();
+    await page.waitForTimeout(600);
+    await placedHouse.click({ force: true });
+
+    // Catalog title should not appear since the tap was consumed as item feedback
+    const catalogTitle = page.locator('h3', { hasText: 'Choose an item' });
+    await expect(catalogTitle).not.toBeVisible();
+
+    // The poke swell animation class should be applied to the emoji inside
+    // the tapped cell (not the cell itself, which must stay in place)
+    // (assert promptly since the class is removed after ~1s).
+    await expect(placedHouse.locator('span')).toHaveClass(/town-poke-swell/, { timeout: 500 });
+  });
 });

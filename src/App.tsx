@@ -69,7 +69,8 @@ function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
   const [showParentGate, setShowParentGate] = useState(false);
 
-  const { playPop, playSuccess, playError } = useSound(soundEnabled, vibrationEnabled);
+  const { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze } =
+    useSound(soundEnabled, vibrationEnabled);
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -302,6 +303,10 @@ function AppContent() {
             addStars={(amt) => addStars(amt)}
             playPop={playPop}
             playSuccess={playSuccess}
+            playAnimalSound={playAnimalSound}
+            playCarHonk={playCarHonk}
+            playDoorChime={playDoorChime}
+            playWindBreeze={playWindBreeze}
           />
         );
       case 'shop':
