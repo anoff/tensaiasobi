@@ -17,6 +17,7 @@ type GameItem = {
   y: number;
   size: number;
   collected: boolean;
+  deposited: boolean;
   wiggle: number;
 };
 
@@ -33,8 +34,8 @@ interface DifficultyConfig {
 }
 
 const CONFIG: Record<GameDifficulty, DifficultyConfig> = {
-  easy: { magnetic: 3, nonMagnetic: 1, itemSize: 56, capacity: 10 },
-  medium: { magnetic: 5, nonMagnetic: 3, itemSize: 44, capacity: 10 },
+  easy: { magnetic: 3, nonMagnetic: 1, itemSize: 56, capacity: 2 },
+  medium: { magnetic: 5, nonMagnetic: 3, itemSize: 44, capacity: 3 },
   hard: { magnetic: 7, nonMagnetic: 5, itemSize: 36, capacity: 3 },
 };
 
@@ -70,6 +71,7 @@ function generateItems(difficulty: GameDifficulty, width: number, height: number
       y,
       size: itemSize,
       collected: false,
+      deposited: false,
       wiggle: 0,
     });
   };
@@ -98,6 +100,7 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
   const [items, setItems] = useState<GameItem[]>([]);
   const [won, setWon] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [depositedCount, setDepositedCount] = useState(0);
 
   const stageRef = useRef<HTMLDivElement>(null);
   const magnetRef = useRef<HTMLDivElement>(null);
@@ -128,6 +131,7 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
     setItems(generateItems(diff, width, height));
     setWon(false);
     setShowConfetti(false);
+    setDepositedCount(0);
     setMagnet((prev) => ({ ...prev, x: width / 2, y: height / 2 }));
   }, []);
 
@@ -141,6 +145,7 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
   };
 
   const collectedItems = useMemo(() => items.filter((item) => item.collected), [items]);
+  const totalMagnetic = useMemo(() => items.filter((item) => item.magnetic).length, [items]);
 
   const handlePointerDown = useCallback((clientX: number, clientY: number) => {
     draggingRef.current = true;
@@ -160,6 +165,8 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
     draggingRef.current = false;
     setMagnet((prev) => ({ ...prev, dragging: false }));
 
+    if (wonRef.current) return;
+
     if (!binRef.current || !magnetRef.current) return;
 
     const binRect = binRef.current.getBoundingClientRect();
@@ -174,12 +181,22 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
       magnetCenterY <= binRect.bottom;
 
     if (overBin && collectedItems.length > 0) {
-      playSuccess();
-      setShowConfetti(true);
-      onStarEarned?.(BASE_STARS * starMultiplier(difficulty));
-      setWon(true);
+      setItems((prev) =>
+        prev.map((item) => (item.collected ? { ...item, collected: false, deposited: true } : item))
+      );
+      const newDeposited = depositedCount + collectedItems.length;
+      setDepositedCount(newDeposited);
+
+      if (newDeposited >= totalMagnetic) {
+        playSuccess();
+        setShowConfetti(true);
+        onStarEarned?.(BASE_STARS * starMultiplier(difficulty));
+        setWon(true);
+      } else {
+        playPop();
+      }
     }
-  }, [collectedItems.length, difficulty, onStarEarned, playSuccess]);
+  }, [collectedItems.length, depositedCount, difficulty, onStarEarned, playPop, playSuccess, totalMagnetic]);
 
   useEffect(() => {
     const onPointerMove = (e: PointerEvent) => handlePointerMove(e.clientX, e.clientY);
@@ -203,7 +220,7 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
         let changed = false;
         const attachedCount = prev.filter((item) => item.collected).length;
         const next = prev.map((item) => {
-          if (item.collected) return item;
+          if (item.collected || item.deposited) return item;
           const dx = magnetX - item.x;
           const dy = magnetY - item.y;
           const distance = Math.hypot(dx, dy);
@@ -266,6 +283,11 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
       <div className="text-center space-y-1 mt-3 shrink-0">
         <h2 className="text-3xl font-black text-slate-800 tracking-tight">{t.magnetFishing.title}</h2>
         <p className="text-sm font-extrabold text-slate-500">{t.magnetFishing.subtitle}</p>
+        {!won && (
+          <p className="text-xs font-black text-amber-500">
+            {t.magnetFishing.capacity?.replace('{collected}', String(collectedItems.length)).replace('{capacity}', String(config.capacity))}
+          </p>
+        )}
       </div>
 
       <div

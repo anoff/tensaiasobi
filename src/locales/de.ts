@@ -407,6 +407,7 @@ export const de: TranslationSchema = {
     title: "Magnetfischen! 🧲",
     subtitle: "Ziehe den Magneten, um nur Metallgegenstände zu sammeln!",
     help: "Metall haftet am Magneten. Wirf sie in die Tonne!",
+    capacity: "Magnet: {collected}/{capacity}",
     binLabel: "Metalltonne",
     victory: "Super! Du hast den Schrott sortiert!",
   },

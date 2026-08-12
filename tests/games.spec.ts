@@ -257,23 +257,33 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             const stage = page.getByTestId('magnet-stage');
             await expect(stage).toBeVisible();
 
-            // Drag the magnet over a magnetic item, then to the bin.
-            const magneticItem = page.getByTestId('magnet-item-magnetic').first();
             const bin = page.getByTestId('magnet-bin');
-            await expect(magneticItem).toBeVisible();
             await expect(bin).toBeVisible();
-
-            const itemBox = await magneticItem.boundingBox();
             const binBox = await bin.boundingBox();
-            expect(itemBox).not.toBeNull();
             expect(binBox).not.toBeNull();
 
-            if (itemBox && binBox) {
+            // Collect all magnetic items, depositing whenever capacity is reached.
+            for (let rounds = 0; rounds < 10; rounds += 1) {
+              const magneticItem = page.getByTestId('magnet-item-magnetic').first();
+              const itemBox = await magneticItem.boundingBox().catch(() => null);
+              if (!itemBox) break;
+
+              // Drag the magnet directly over the item so it snaps, then to the bin.
               await page.mouse.move(itemBox.x + itemBox.width / 2, itemBox.y + itemBox.height / 2);
               await page.mouse.down();
-              await page.mouse.move(binBox.x + binBox.width / 2, binBox.y + binBox.height / 2);
-              await page.mouse.up();
+              await page.waitForTimeout(150);
+
+              if (binBox) {
+                await page.mouse.move(binBox.x + binBox.width / 2, binBox.y + binBox.height / 2);
+                await page.mouse.up();
+                await page.waitForTimeout(200);
+              } else {
+                await page.mouse.up();
+              }
             }
+
+            // Wait for victory UI after all items are deposited.
+            await expect(page.getByTestId('magnet-play-again')).toBeVisible();
             break;
           }
         }

@@ -407,6 +407,7 @@ export const ja: TranslationSchema = {
     title: "じしゃくつり！🧲",
     subtitle: "じしゃくを うごかして かねものだけ あつめよう！",
     help: "かねものは じしゃくに くっつくよ。ボックスに いれよう！",
+    capacity: "じしゃく：{collected}/{capacity}",
     binLabel: "メタルボックス",
     victory: "すごい！ ぶんべつ できたね！",
   },

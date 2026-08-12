@@ -407,6 +407,7 @@ export const fr: TranslationSchema = {
     title: "Pêche à l'aimant ! 🧲",
     subtitle: "Déplace l'aimant pour ramasser seulement les objets métalliques !",
     help: "Les objets métalliques collent à l'aimant. Jette-les dans la poubelle !",
+    capacity: "Aimant : {collected}/{capacity}",
     binLabel: "Poubelle métal",
     victory: "Bravo ! Tu as trié les déchets !",
   },

@@ -405,6 +405,7 @@ export const en = {
     title: "Magnet Fishing! 🧲",
     subtitle: "Drag the magnet to collect only metal objects!",
     help: "Metal items stick to the magnet. Drop them in the bin!",
+    capacity: "Magnet: {collected}/{capacity}",
     binLabel: "Metal Bin",
     victory: "Great job! You sorted the junk!",
   },

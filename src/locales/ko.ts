@@ -407,6 +407,7 @@ export const ko: TranslationSchema = {
     title: "자석 낚시! 🧲",
     subtitle: "자석을 움직여 금속 물건만 모아보세요!",
     help: "금속 물건은 자석에 붙어요. 상자에 넣어보세요!",
+    capacity: "자석: {collected}/{capacity}",
     binLabel: "금속 상자",
     victory: "잘했어요! 쓰레기를 분리했어요!",
   },
