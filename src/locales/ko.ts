@@ -271,6 +271,7 @@ export const ko: TranslationSchema = {
     none: "아직 획득한 쿠폰이 없어요",
     earnedCount: "{count}번 획득",
     redeem: "사용하기",
+    holdToRedeem: "길게 눌러 사용하기",
     notEarnedYet: "아직 획득하지 않음",
     disabled: "사용 안 함",
     redeemConfirmTitle: "이 쿠폰을 사용할까요?",

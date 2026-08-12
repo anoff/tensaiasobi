@@ -271,6 +271,7 @@ export const de: TranslationSchema = {
     none: "Noch keine Gutscheine verdient",
     earnedCount: "{count}x verdient",
     redeem: "Einlösen",
+    holdToRedeem: "Halten zum Einlösen",
     notEarnedYet: "Noch nicht verdient",
     disabled: "Deaktiviert",
     redeemConfirmTitle: "Diesen Gutschein einlösen?",

@@ -302,7 +302,7 @@ function AppContent() {
         return (
           <CouponShop
             coupons={coupons}
-            onRedeemCoupon={(id) => setPendingCouponRedeemGateId(id)}
+            onRedeemCoupon={(id) => setPendingCouponRedeemConfirmId(id)}
             playPop={playPop}
           />
         );
@@ -509,19 +509,7 @@ function AppContent() {
         />
       )}
 
-      {/* Parent Gate for Coupon Redemption (first confirmation) */}
-      {pendingCouponRedeemGateId && (
-        <ParentGate
-          onSuccess={() => {
-            const id = pendingCouponRedeemGateId;
-            setPendingCouponRedeemGateId(null);
-            setPendingCouponRedeemConfirmId(id);
-          }}
-          onClose={() => setPendingCouponRedeemGateId(null)}
-        />
-      )}
-
-      {/* Double-confirmation dialog for Coupon Redemption (second confirmation) */}
+      {/* Confirmation dialog for Coupon Redemption (first confirmation, triggered by the tap-and-hold gesture) */}
       {pendingCouponRedeemConfirmId && (() => {
         const coupon = coupons.find((c) => c.id === pendingCouponRedeemConfirmId);
         if (!coupon) return null;
@@ -530,18 +518,31 @@ function AppContent() {
             coupon={coupon}
             onCancel={() => setPendingCouponRedeemConfirmId(null)}
             onConfirm={() => {
-              const success = redeemCoupon(coupon.id);
               setPendingCouponRedeemConfirmId(null);
-              if (success) {
-                playSuccess();
-                setCelebratingCoupon(coupon);
-              } else {
-                playError();
-              }
+              setPendingCouponRedeemGateId(coupon.id);
             }}
           />
         );
       })()}
+
+      {/* Parent Gate for Coupon Redemption (second confirmation, before the coupon is actually consumed) */}
+      {pendingCouponRedeemGateId && (
+        <ParentGate
+          onSuccess={() => {
+            const id = pendingCouponRedeemGateId;
+            setPendingCouponRedeemGateId(null);
+            const coupon = coupons.find((c) => c.id === id);
+            const success = redeemCoupon(id);
+            if (success && coupon) {
+              playSuccess();
+              setCelebratingCoupon(coupon);
+            } else {
+              playError();
+            }
+          }}
+          onClose={() => setPendingCouponRedeemGateId(null)}
+        />
+      )}
 
       {/* Celebration overlay shown after a coupon has been redeemed */}
       {celebratingCoupon && (

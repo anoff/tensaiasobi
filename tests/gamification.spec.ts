@@ -95,7 +95,7 @@ test.describe('tensaiasobi Gamification Checks', () => {
     await expect(gummyBearCoupon).toBeVisible();
   });
 
-  test('Verify redeeming an earned coupon from the Coupon Shop requires double parent confirmation', async ({ page }) => {
+  test('Verify redeeming an earned coupon from the Coupon Shop requires a tap-and-hold gesture plus double confirmation', async ({ page }) => {
     // 0. Seed an earned Gummy Bear coupon so there is something to redeem
     await page.addInitScript(() => {
       localStorage.setItem('gamification_coupons', JSON.stringify([
@@ -116,39 +116,51 @@ test.describe('tensaiasobi Gamification Checks', () => {
     // No "Award" button exists anywhere - coupons can only be redeemed once earned
     await expect(page.locator('button', { hasText: 'Award' })).toHaveCount(0);
 
-    // 2. Tap "Redeem" on the Gummy Bear coupon
     const redeemButton = page.getByTestId('redeem-coupon-gummy_bear');
     await expect(redeemButton).toBeVisible();
+
+    // A quick tap should NOT redeem the coupon - a sustained hold is required
     await redeemButton.click();
-
-    // 3. First confirmation: Parent Gate math challenge must appear
-    const gateTitle = page.locator('h2', { hasText: 'Parents Only' });
-    await expect(gateTitle).toBeVisible();
-
-    // Cancelling should NOT redeem the coupon
-    await page.locator('form button', { hasText: 'Cancel' }).click();
-    await expect(earnedCoupon).toBeVisible();
-
-    // 4. Try again and solve the gate this time
-    await redeemButton.click();
-    await expect(gateTitle).toBeVisible();
-    await solveParentGate(page);
-
-    // 5. Second confirmation: a custom redeem dialog must appear before anything happens
     const redeemDialog = page.getByTestId('redeem-confirm-dialog');
+    await expect(redeemDialog).toBeHidden();
+
+    // 2. Tap-and-hold "Redeem" on the Gummy Bear coupon (like clearing the town)
+    await redeemButton.dispatchEvent('pointerdown');
+    await page.waitForTimeout(800);
+    await redeemButton.dispatchEvent('pointerup');
+
+    // 3. First confirmation: a custom redeem dialog must appear before anything happens
     await expect(redeemDialog).toBeVisible();
     await expect(redeemDialog).toContainText('Gummy Bear');
 
-    // Cancelling the second confirmation should NOT redeem the coupon either
+    // Cancelling the confirmation dialog should NOT redeem the coupon
     await page.getByTestId('redeem-confirm-cancel').click();
     await expect(redeemDialog).toBeHidden();
     await expect(earnedCoupon).toBeVisible();
 
-    // 6. Redeem again and confirm both steps
-    await redeemButton.click();
-    await solveParentGate(page);
+    // 4. Try again and confirm the dialog this time
+    await redeemButton.dispatchEvent('pointerdown');
+    await page.waitForTimeout(800);
+    await redeemButton.dispatchEvent('pointerup');
     await expect(redeemDialog).toBeVisible();
     await page.getByTestId('redeem-confirm-submit').click();
+
+    // 5. Second confirmation: Parent Gate math challenge must appear
+    const gateTitle = page.locator('h2', { hasText: 'Parents Only' });
+    await expect(gateTitle).toBeVisible();
+
+    // Cancelling the parent gate should NOT redeem the coupon either
+    await page.locator('form button', { hasText: 'Cancel' }).click();
+    await expect(earnedCoupon).toBeVisible();
+
+    // 6. Redeem again and confirm both steps this time
+    await redeemButton.dispatchEvent('pointerdown');
+    await page.waitForTimeout(800);
+    await redeemButton.dispatchEvent('pointerup');
+    await expect(redeemDialog).toBeVisible();
+    await page.getByTestId('redeem-confirm-submit').click();
+    await expect(gateTitle).toBeVisible();
+    await solveParentGate(page);
 
     // 7. A celebration message is shown
     const celebration = page.getByTestId('coupon-celebration');

@@ -271,6 +271,7 @@ export const ja: TranslationSchema = {
     none: "まだクーポンをもらっていません",
     earnedCount: "{count}かいもらった",
     redeem: "つかう",
+    holdToRedeem: "ながおしで つかう",
     notEarnedYet: "まだもらっていない",
     disabled: "むこう",
     redeemConfirmTitle: "このクーポンをつかいますか？",

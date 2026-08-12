@@ -269,6 +269,7 @@ export const en = {
     none: "No coupons earned yet",
     earnedCount: "Earned {count}x",
     redeem: "Redeem",
+    holdToRedeem: "Hold to Redeem",
     notEarnedYet: "Not earned yet",
     disabled: "Disabled",
     redeemConfirmTitle: "Redeem this coupon?",

@@ -1,4 +1,5 @@
 import { useTranslation } from '../hooks/useTranslation';
+import { HoldToConfirmButton } from './HoldToConfirmButton';
 import type { Coupon } from '../types/gamification';
 
 interface CouponShopProps {
@@ -16,7 +17,7 @@ export function CouponShop({ coupons, onRedeemCoupon, playPop }: CouponShopProps
   const couponName = (coupon: Coupon) =>
     (t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey;
 
-  const handleRedeemClick = (coupon: Coupon) => {
+  const handleRedeemHoldConfirm = (coupon: Coupon) => {
     playPop();
     onRedeemCoupon(coupon.id);
   };
@@ -79,13 +80,15 @@ export function CouponShop({ coupons, onRedeemCoupon, playPop }: CouponShopProps
               </div>
               <div className="shrink-0">
                 {isEarned ? (
-                  <button
+                  <HoldToConfirmButton
                     data-testid={`redeem-coupon-${coupon.id}`}
-                    onClick={() => handleRedeemClick(coupon)}
+                    onConfirm={() => handleRedeemHoldConfirm(coupon)}
+                    duration={600}
+                    progressClassName="bg-white/30"
                     className="bg-gradient-to-b from-violet-400 to-violet-500 text-white text-xs font-bold rounded-full px-4 py-1.5 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150"
                   >
-                    {t.coupons.redeem}
-                  </button>
+                    {(progress) => (progress > 0 ? t.coupons.holdToRedeem : t.coupons.redeem)}
+                  </HoldToConfirmButton>
                 ) : coupon.enabled ? (
                   <span className="text-xs font-bold text-gray-400 bg-gray-100 rounded-full px-3 py-1.5">
                     {t.coupons.notEarnedYet}

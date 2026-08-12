@@ -3,6 +3,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { TownCell, createEmptyGrid, TOWN_GRID_SIZE } from '../types/gamification';
 import type { ShopCategory } from '../types/gamification';
 import { SHOP_CATEGORIES, getItemsByCategory, getItemById } from '../data/townItems';
+import { HoldToConfirmButton } from '../components/HoldToConfirmButton';
 
 
 interface TownBuilderProps {
@@ -69,16 +70,6 @@ export function TownBuilder({
   const [justPlaced, setJustPlaced] = useState<string | null>(null); // "row-col"
 
   const [showDeleteAllPrompt, setShowDeleteAllPrompt] = useState(false);
-  const [holdProgress, setHoldProgress] = useState(0);
-  const holdInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (holdInterval.current) {
-        clearInterval(holdInterval.current);
-      }
-    };
-  }, []);
 
   // long-press tracking
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -192,37 +183,12 @@ export function TownBuilder({
     playSuccess();
   }, [grid, addStars, playSuccess]);
 
-  const startDeleteAllHold = () => {
+  const handleDeleteAllHoldConfirm = () => {
     const hasItems = grid.some((row) => row.some((cell) => cell !== null));
     if (!hasItems) return;
 
-    setHoldProgress(0);
-    const startTime = Date.now();
-    const duration = 1000;
-
-    holdInterval.current = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(100, (elapsed / duration) * 100);
-      setHoldProgress(progress);
-
-      if (progress >= 100) {
-        if (holdInterval.current) {
-          clearInterval(holdInterval.current);
-          holdInterval.current = null;
-        }
-        setHoldProgress(0);
-        setShowDeleteAllPrompt(true);
-        playPop();
-      }
-    }, 30);
-  };
-
-  const cancelDeleteAllHold = () => {
-    if (holdInterval.current) {
-      clearInterval(holdInterval.current);
-      holdInterval.current = null;
-    }
-    setHoldProgress(0);
+    setShowDeleteAllPrompt(true);
+    playPop();
   };
 
 
@@ -285,31 +251,20 @@ export function TownBuilder({
 
       {/* Delete All Control */}
       <div className="flex justify-end w-full px-1">
-        <button
-          type="button"
-          onPointerDown={startDeleteAllHold}
-          onPointerUp={cancelDeleteAllHold}
-          onPointerLeave={cancelDeleteAllHold}
-          onContextMenu={(e) => e.preventDefault()}
+        <HoldToConfirmButton
+          onConfirm={handleDeleteAllHoldConfirm}
           disabled={!grid.some((row) => row.some((cell) => cell !== null))}
-          className={`relative overflow-hidden px-5 py-2.5 rounded-2xl font-black text-sm tracking-wide border-2 transition-all cursor-pointer select-none active:scale-95 flex items-center justify-center gap-2 ${
+          className={`px-5 py-2.5 rounded-2xl font-black text-sm tracking-wide border-2 transition-all cursor-pointer active:scale-95 ${
             grid.some((row) => row.some((cell) => cell !== null))
               ? 'text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-900/60 dark:hover:bg-red-950/20'
               : 'text-gray-300 border-gray-100 dark:text-gray-700 dark:border-gray-800 cursor-not-allowed opacity-50'
           }`}
           data-testid="town-delete-all"
         >
-          {/* Progress Fill Layer */}
-          {holdProgress > 0 && (
-            <div
-              className="absolute left-0 top-0 bottom-0 bg-red-500/20 dark:bg-red-500/10 pointer-events-none transition-all duration-75"
-              style={{ width: `${holdProgress}%` }}
-            />
+          {(progress) => (
+            <>🗑️ {progress > 0 ? t.town.holdToDeleteAll : t.town.deleteAll}</>
           )}
-          <span className="relative z-10 flex items-center gap-1.5">
-            🗑️ {holdProgress > 0 ? t.town.holdToDeleteAll : t.town.deleteAll}
-          </span>
-        </button>
+        </HoldToConfirmButton>
       </div>
 
       {/* ============================================================= */}
