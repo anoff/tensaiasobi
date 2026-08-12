@@ -29,6 +29,7 @@ export const ja: TranslationSchema = {
     dispatch: "きんきゅう",
     physics: "てんびん",
     towerSort: "タワーソート",
+    fruitMathPop: "くだもの さんすう",
     numberTrain: "かずのれっしゃ",
     shadowFlashlight: "かげ",
   },
@@ -372,6 +373,12 @@ export const ja: TranslationSchema = {
     moves: "てすう",
     perfect: "パーフェクト！ 🌟",
     playAgain: "もういちどあそぶ",
+  },
+  fruitMathPop: {
+    title: "くだもの さんすう！ 🍎",
+    subtitle: "くだものが ふえたり へったりするのを みてね！",
+    watch: "くだものを みてね！",
+    theme: "テーマを かえる",
   },
   numberTrain: {
     title: "かずのれっしゃ！ 🚂",

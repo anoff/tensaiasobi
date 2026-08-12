@@ -27,6 +27,7 @@ export const en = {
     dispatch: "City Dispatch",
     physics: "Balance",
     towerSort: "Tower Sort",
+    fruitMathPop: "Fruit Math Pop",
     numberTrain: "Number Train",
     shadowFlashlight: "Shadow",
   },
@@ -370,6 +371,12 @@ export const en = {
     moves: "moves",
     perfect: "Perfect solve! 🌟",
     playAgain: "Play Again",
+  },
+  fruitMathPop: {
+    title: "Fruit Math Pop! 🍎",
+    subtitle: "Watch the fruit join or leave, then pick the matching group!",
+    watch: "Watch the fruit!",
+    theme: "Change theme",
   },
   numberTrain: {
     title: "Number Train! 🚂",
