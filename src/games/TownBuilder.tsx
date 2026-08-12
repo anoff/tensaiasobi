@@ -354,10 +354,10 @@ export function TownBuilder({
   // across re-renders while still looking varied.
   const rainDrops = useMemo(
     () =>
-      Array.from({ length: 40 }, (_, i) => ({
+      Array.from({ length: 48 }, (_, i) => ({
         key: i,
         left: `${(i * 37 + 13) % 100}%`,
-        duration: `${0.65 + ((i * 17) % 60) / 100}s`,
+        duration: `${0.9 + ((i * 17) % 80) / 100}s`,
         delay: `${((i * 23) % 100) / 100}s`,
       })),
     []
@@ -777,10 +777,10 @@ export function TownBuilder({
 
         /* Falling rain overlay */
         @keyframes town-rain-fall {
-          0% { transform: translateY(-12%) translateX(0); opacity: 0; }
-          15% { opacity: 0.85; }
-          85% { opacity: 0.75; }
-          100% { transform: translateY(112%) translateX(14px); opacity: 0; }
+          0% { transform: translateY(-20%) translateX(0); opacity: 0; }
+          10% { opacity: 0.9; }
+          90% { opacity: 0.8; }
+          100% { transform: translateY(120%) translateX(18px); opacity: 0; }
         }
         .town-rain-overlay {
           background: linear-gradient(to bottom, rgba(15, 23, 42, 0.15), rgba(15, 23, 42, 0.35));
@@ -789,7 +789,7 @@ export function TownBuilder({
           position: absolute;
           top: 0;
           width: 2px;
-          height: 16px;
+          height: 28px;
           background: rgba(186, 230, 253, 0.85);
           border-radius: 1px;
           transform: rotate(15deg);
