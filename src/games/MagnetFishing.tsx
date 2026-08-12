@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
-import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
 import { starMultiplier } from '../utils/difficulty';
 import { shuffle } from '../utils/shuffle';
@@ -351,19 +350,17 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
       </div>
 
       {won ? (
-        <div className="w-full flex flex-col items-center gap-3 pb-2 shrink-0">
+        <div data-testid="magnet-victory" className="w-full flex flex-col items-center gap-3 pb-2 shrink-0">
           <p className="text-emerald-600 font-black text-lg animate-pulse">
             🎉 {t.magnetFishing.victory}
           </p>
-          <KidButton
-            color="green"
-            size="lg"
+          <button
             data-testid="magnet-play-again"
             onClick={() => { playPop(); startRound(difficulty); }}
-            className="rounded-2xl tracking-wider uppercase"
+            className="rounded-2xl tracking-wider uppercase bg-emerald-400 text-white font-bold px-8 py-6 text-3xl border-b-8 border-emerald-600"
           >
             🔄 {t.common.next}
-          </KidButton>
+          </button>
         </div>
       ) : (
         <div className="text-center font-extrabold text-xs pb-2 pt-2 shrink-0 text-slate-400">

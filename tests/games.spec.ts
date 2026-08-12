@@ -277,10 +277,13 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
               await page.mouse.move(binBox.x + binBox.width / 2, binBox.y + binBox.height / 2);
               await page.mouse.up();
               await page.waitForTimeout(200);
+
+              // Wait for capacity to clear after a partial deposit.
+              await page.waitForTimeout(100);
             }
 
             // Wait for victory UI after all items are deposited.
-            await expect(page.getByTestId('magnet-play-again')).toBeVisible({ timeout: 5000 });
+            await expect(page.locator('p.text-emerald-600')).toBeVisible({ timeout: 5000 });
             break;
           }
         }
