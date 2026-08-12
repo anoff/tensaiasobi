@@ -27,6 +27,7 @@ export const en = {
     dispatch: "City Dispatch",
     physics: "Balance",
     towerSort: "Tower Sort",
+    numberTrain: "Number Train",
     shadowFlashlight: "Shadow",
   },
   parentGate: {
@@ -361,6 +362,13 @@ export const en = {
     moves: "moves",
     perfect: "Perfect solve! 🌟",
     playAgain: "Play Again",
+  },
+  numberTrain: {
+    title: "Number Train! 🚂",
+    subtitle: "Count the passengers and drag the train to the right station!",
+    help: "Drag the train to the matching number station!",
+    oneMore: "+1",
+    oneLess: "-1",
   },
   shadowFlashlight: {
     title: "Shadow Flashlight! 🔦",
