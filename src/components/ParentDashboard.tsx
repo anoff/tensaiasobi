@@ -47,9 +47,8 @@ export function ParentDashboard({
     coupons.find((c) => c.enabled);
   const [selectedTarget, setSelectedTarget] = useState<number>(() => {
     // When arriving via the "Earn it!" shortcut, always size the target to the picked coupon.
-    if (initialCouponId) {
-      const coupon = coupons.find((c) => c.id === initialCouponId);
-      if (coupon) return REWARD_SIZE_STAR_TARGETS[coupon.rewardSize];
+    if (initialCouponId && initialCoupon) {
+      return REWARD_SIZE_STAR_TARGETS[initialCoupon.rewardSize];
     }
     return challengeStarsTarget || (initialCoupon ? REWARD_SIZE_STAR_TARGETS[initialCoupon.rewardSize] : 10);
   });
@@ -258,6 +257,7 @@ export function ParentDashboard({
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-bold text-slate-700">{t.challenge.couponReward}:</span>
                   <select
+                    data-testid="challenge-coupon-select"
                     value={selectedCoupon}
                     onChange={(e) => handleCouponChange(e.target.value)}
                     disabled={enabledCoupons.length === 0}

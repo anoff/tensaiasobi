@@ -203,7 +203,7 @@ test.describe('tensaiasobi Gamification Checks', () => {
     const settingsTitle = page.locator('h2', { hasText: 'Settings' });
     await expect(settingsTitle).toBeVisible();
 
-    const couponSelect = page.locator('select').nth(1);
+    const couponSelect = page.getByTestId('challenge-coupon-select');
     await expect(couponSelect).toHaveValue('movie_night');
   });
 
