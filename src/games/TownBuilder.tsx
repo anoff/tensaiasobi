@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { TownCell, createEmptyGrid, TOWN_GRID_SIZE } from '../types/gamification';
 import type { ShopCategory } from '../types/gamification';
@@ -344,6 +344,19 @@ export function TownBuilder({
   const isNight = timePhase === 'night';
   const isRaining = weatherPhase === 'rainy';
 
+  // Stable randomized raindrop parameters so the overlay is deterministic
+  // across re-renders while still looking varied.
+  const rainDrops = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, i) => ({
+        key: i,
+        left: `${(i * 37 + 13) % 100}%`,
+        duration: `${0.42 + ((i * 17) % 40) / 100}s`,
+        delay: `${((i * 23) % 60) / 100}s`,
+      })),
+    []
+  );
+
   return (
     <div
       className={`flex flex-col items-center gap-4 w-full max-w-lg mx-auto px-2 py-4 select-none rounded-3xl transition-colors duration-700 ${
@@ -483,14 +496,14 @@ export function TownBuilder({
             data-testid="town-rain-overlay"
             aria-hidden="true"
           >
-            {Array.from({ length: 24 }).map((_, i) => (
+            {rainDrops.map((drop) => (
               <span
-                key={i}
+                key={drop.key}
                 className="town-raindrop"
                 style={{
-                  left: `${Math.random() * 100}%`,
-                  animationDuration: `${0.4 + Math.random() * 0.4}s`,
-                  animationDelay: `${Math.random() * 0.6}s`,
+                  left: drop.left,
+                  animationDuration: drop.duration,
+                  animationDelay: drop.delay,
                 }}
               />
             ))}

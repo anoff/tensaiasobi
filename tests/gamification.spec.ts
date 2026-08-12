@@ -325,4 +325,87 @@ test.describe('tensaiasobi Gamification Checks', () => {
     // (assert promptly since the class is removed after ~1s).
     await expect(placedHouse.locator('span')).toHaveClass(/town-poke-swell/, { timeout: 500 });
   });
+
+  test('Verify Town Builder day/night toggle changes theme and glows light-giving items', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('gamification_stars', '100');
+    });
+    await page.goto('/');
+
+    // Open Town Builder
+    await page.getByTestId('launch-town').click();
+
+    // Place a House and a Lantern so we can verify the night glow
+    const emptyCells = page.locator('button[aria-label="Tap an empty spot to build!"]');
+    await emptyCells.nth(0).click();
+    await page.locator('button', { hasText: 'House' }).click();
+
+    await emptyCells.nth(1).click();
+    // Lantern is under the Decor category
+    await page.locator('button', { hasText: 'Decor' }).click();
+    await page.locator('button', { hasText: 'Lamp' }).click();
+
+    const timeToggle = page.getByTestId('town-toggle-time');
+    await expect(timeToggle).toHaveText('☀️');
+
+    // Switch to night
+    await timeToggle.click();
+    await expect(timeToggle).toHaveText('🌙');
+
+    // Light-giving items should now have the warm glow class
+    const placedHouse = page.locator('button[aria-label="🏠"]');
+    const placedLamp = page.locator('button[aria-label="🏮"]');
+    await expect(placedHouse.locator('span')).toHaveClass(/town-night-glow/);
+    await expect(placedLamp.locator('span')).toHaveClass(/town-night-glow/);
+
+    // Switch back to day
+    await timeToggle.click();
+    await expect(timeToggle).toHaveText('☀️');
+    await expect(placedHouse.locator('span')).not.toHaveClass(/town-night-glow/);
+  });
+
+  test('Verify Town Builder weather toggle shows animated rain overlay and persists settings', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('gamification_stars', '100');
+    });
+    await page.goto('/');
+
+    await page.getByTestId('launch-town').click();
+
+    // Place a Tree and a Pond to verify weather-specific animations
+    const emptyCells = page.locator('button[aria-label="Tap an empty spot to build!"]');
+    await emptyCells.nth(0).click();
+    await page.locator('button', { hasText: 'Nature' }).click();
+    await page.locator('button', { hasText: 'Tree' }).click();
+
+    await emptyCells.nth(1).click();
+    await page.locator('button', { hasText: 'Nature' }).click();
+    await page.locator('button', { hasText: 'Pond' }).click();
+
+    const weatherToggle = page.getByTestId('town-toggle-weather');
+    await expect(weatherToggle).toHaveText('🌈');
+
+    // Switch to rain
+    await weatherToggle.click();
+    await expect(weatherToggle).toHaveText('🌧️');
+
+    const rainOverlay = page.getByTestId('town-rain-overlay');
+    await expect(rainOverlay).toBeVisible();
+
+    // Weather-specific ambient animations are applied to trees and ponds
+    const placedTree = page.locator('button[aria-label="🌳"]');
+    const placedPond = page.locator('button[aria-label="💧"]');
+    await expect(placedTree.locator('span')).toHaveClass(/town-weather-shake/);
+    await expect(placedPond.locator('span')).toHaveClass(/town-weather-ripple/);
+
+    // Environment settings are persisted in localStorage
+    const env = await page.evaluate(() => localStorage.getItem('gamification_town_env'));
+    expect(env).toContain('rainy');
+
+    // Reloading should restore rainy weather
+    await page.reload();
+    await page.getByTestId('launch-town').click();
+    await expect(rainOverlay).toBeVisible();
+    await expect(weatherToggle).toHaveText('🌧️');
+  });
 });
