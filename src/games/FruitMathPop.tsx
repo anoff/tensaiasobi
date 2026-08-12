@@ -108,12 +108,9 @@ export default function FruitMathPop({ playPop, playSuccess, playError, onStarEa
       </div>
       <div data-testid="fruit-math-pop-tray" data-operation={round.operation} data-result={round.result} className="flex-1 w-full min-h-[270px] flex flex-col items-center justify-center gap-6 rounded-[2.5rem] bg-white/60 border-8 border-white/80 shadow-inner">
         <div className="flex items-center justify-center gap-3 text-4xl sm:text-5xl font-black">
-          <div data-testid="fruit-math-pop-left" className="flex gap-1 animate-bounce">{group(round.left)}</div>
+          <div data-testid="fruit-math-pop-left" className="flex flex-wrap justify-center gap-1 animate-bounce">{group(round.left)}</div>
           <span aria-hidden="true" className="animate-pulse">{round.operation}</span>
-          <div data-testid="fruit-math-pop-right" className={`flex gap-1 ${round.operation === '+' ? 'animate-pulse' : 'animate-shake'}`}>{group(round.right)}</div>
-        </div>
-        <div className={`flex gap-1 text-4xl sm:text-5xl min-h-14 transition-opacity duration-300 ${phase === 'hiding' ? 'opacity-0' : 'opacity-100'} ${phase === 'success' ? 'animate-bounce' : ''}`}>
-          {group(round.result)}
+          <div data-testid="fruit-math-pop-right" className={`flex flex-wrap justify-center gap-1 ${round.operation === '+' ? 'animate-pulse' : 'animate-shake'}`}>{group(round.right)}</div>
         </div>
       </div>
       {phase === 'choices' || phase === 'success' ? (
