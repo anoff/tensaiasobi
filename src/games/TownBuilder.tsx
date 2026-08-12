@@ -354,11 +354,11 @@ export function TownBuilder({
   // across re-renders while still looking varied.
   const rainDrops = useMemo(
     () =>
-      Array.from({ length: 24 }, (_, i) => ({
+      Array.from({ length: 40 }, (_, i) => ({
         key: i,
         left: `${(i * 37 + 13) % 100}%`,
-        duration: `${0.42 + ((i * 17) % 40) / 100}s`,
-        delay: `${((i * 23) % 60) / 100}s`,
+        duration: `${0.65 + ((i * 17) % 60) / 100}s`,
+        delay: `${((i * 23) % 100) / 100}s`,
       })),
     []
   );
@@ -481,8 +481,12 @@ export function TownBuilder({
                   {cell ? (
                     <span
                       className={`inline-block transition-transform group-active:scale-95 ${
-                        isJustPlaced ? 'town-place' : isPoked ? pokeClass : animClass
-                      } ${weatherAnim} ${isGlowing ? 'town-night-glow' : ''}`}
+                        isJustPlaced
+                          ? 'town-place'
+                          : isPoked
+                            ? pokeClass
+                            : weatherAnim || animClass
+                      } ${isGlowing ? 'town-night-glow' : ''}`}
                     >
                       {cell.emoji}
                     </span>
@@ -773,20 +777,20 @@ export function TownBuilder({
 
         /* Falling rain overlay */
         @keyframes town-rain-fall {
-          0% { transform: translateY(-10%) translateX(0); opacity: 0; }
-          10% { opacity: 0.5; }
-          90% { opacity: 0.4; }
-          100% { transform: translateY(110%) translateX(12px); opacity: 0; }
+          0% { transform: translateY(-12%) translateX(0); opacity: 0; }
+          15% { opacity: 0.85; }
+          85% { opacity: 0.75; }
+          100% { transform: translateY(112%) translateX(14px); opacity: 0; }
         }
         .town-rain-overlay {
-          background: linear-gradient(to bottom, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.25));
+          background: linear-gradient(to bottom, rgba(15, 23, 42, 0.15), rgba(15, 23, 42, 0.35));
         }
         .town-raindrop {
           position: absolute;
           top: 0;
           width: 2px;
-          height: 12px;
-          background: rgba(186, 230, 253, 0.55);
+          height: 16px;
+          background: rgba(186, 230, 253, 0.85);
           border-radius: 1px;
           transform: rotate(15deg);
           animation-name: town-rain-fall;
