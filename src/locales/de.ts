@@ -29,6 +29,7 @@ export const de: TranslationSchema = {
     dispatch: "Einsatz",
     physics: "Waage",
     towerSort: "Turm-Sortierung",
+    fruitMathPop: "Früchte-Rechnen",
     numberTrain: "Zahlenzug",
     shadowFlashlight: "Schatten",
     fairSharePicnic: "Picknick teilen",
@@ -373,6 +374,12 @@ export const de: TranslationSchema = {
     moves: "Züge",
     perfect: "Perfekt gelöst! 🌟",
     playAgain: "Nochmal spielen",
+  },
+  fruitMathPop: {
+    title: "Früchte-Rechnen! 🍎",
+    subtitle: "Sieh zu, wie Früchte dazukommen oder weggehen!",
+    watch: "Schau die Früchte an!",
+    theme: "Thema wechseln",
   },
   numberTrain: {
     title: "Zahlenzug! 🚂",

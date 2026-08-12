@@ -3,40 +3,7 @@ import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import type { GameDifficulty, GameProps } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
-
-interface Theme {
-  id: string;
-  nameEmoji: string;
-  emojis: string[];
-  bgGradient: string;
-}
-
-const THEMES: Theme[] = [
-  {
-    id: 'animals',
-    nameEmoji: '🐶',
-    emojis: ['🐶', '🐱', '🐼', '🦊', '🐸', '🐰'],
-    bgGradient: 'from-emerald-50 via-green-100 to-teal-50',
-  },
-  {
-    id: 'fruits',
-    nameEmoji: '🍎',
-    emojis: ['🍎', '🍌', '🍇', '🍉', '🍓', '🍍'],
-    bgGradient: 'from-rose-50 via-pink-100 to-orange-50',
-  },
-  {
-    id: 'space',
-    nameEmoji: '🚀',
-    emojis: ['🚀', '🪐', '⭐', '☄️', '👽', '🛸'],
-    bgGradient: 'from-slate-900 via-indigo-950 to-slate-900',
-  },
-  {
-    id: 'ocean',
-    nameEmoji: '🐠',
-    emojis: ['🐠', '🐬', '🐙', '🦀', '🐳', '🦈'],
-    bgGradient: 'from-sky-100 via-cyan-100 to-blue-200',
-  },
-];
+import { TOWER_SORT_THEMES, type TowerSortTheme } from './towerSortThemes';
 
 interface DifficultyConfig {
   types: number;
@@ -74,7 +41,7 @@ function isSolved(towers: string[][]): boolean {
 }
 
 
-function generateTowers(difficulty: GameDifficulty, theme: Theme) {
+function generateTowers(difficulty: GameDifficulty, theme: TowerSortTheme) {
   const config = DIFFICULTY_CONFIG[difficulty];
   const { types, towers: totalTowers, height } = config;
 
@@ -143,7 +110,7 @@ export function TowerSort({ playPop, playSuccess, playError, onStarEarned }: Tow
   const [shakeTower, setShakeTower] = useState<number | null>(null);
   const [bestMoves, setBestMoves] = useState(0);
 
-  const theme = THEMES[themeIndex];
+  const theme = TOWER_SORT_THEMES[themeIndex];
   const config = DIFFICULTY_CONFIG[difficulty];
 
   const initGame = useCallback(() => {
@@ -219,7 +186,7 @@ export function TowerSort({ playPop, playSuccess, playError, onStarEarned }: Tow
 
   const changeTheme = () => {
     playPop();
-    setThemeIndex((prev) => (prev + 1) % THEMES.length);
+    setThemeIndex((prev) => (prev + 1) % TOWER_SORT_THEMES.length);
   };
 
   const changeDifficulty = (diff: GameDifficulty) => {

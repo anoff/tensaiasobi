@@ -117,11 +117,12 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
     setLevel(lvl);
   };
 
-  const getGridCols = () => {
-    if (level === 'easy') return 'grid-cols-2 max-w-[240px]';
-    if (level === 'medium') return 'grid-cols-3 max-w-[320px]';
-    return 'grid-cols-4 max-w-[360px]';
+  const getGridLayout = () => {
+    if (level === 'easy') return { columns: 2, maxWidth: 'max-w-[240px]' };
+    if (level === 'medium') return { columns: 3, maxWidth: 'max-w-[320px]' };
+    return { columns: 4, maxWidth: 'max-w-[360px]' };
   };
+  const gridLayout = getGridLayout();
 
   return (
     <div className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
@@ -145,7 +146,10 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
 
       {/* Grid Container */}
       <div className="flex-1 flex items-center justify-center my-6 w-full">
-        <div className={`grid gap-4 w-full aspect-[4/5] justify-center items-center ${getGridCols()}`}>
+        <div
+          className={`grid gap-4 w-full justify-center items-center ${gridLayout.maxWidth}`}
+          style={{ gridTemplateColumns: `repeat(${gridLayout.columns}, minmax(0, 1fr))` }}
+        >
           {cards.map((card) => {
             const isOpen = card.isFlipped || card.isMatched;
 
@@ -156,33 +160,19 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
                 onClick={() => handleCardClick(card.id)}
                 className={`
                   w-full aspect-square rounded-2xl border-4 text-5xl flex items-center justify-center
-                  transition-all duration-300 transform outline-none cursor-pointer relative preserve-3d
-                  ${isOpen ? '[transform:rotateY(180deg)]' : ''}
+                  outline-none cursor-pointer relative
                   ${card.isMatched ? 'bg-emerald-100 border-emerald-400 opacity-80' : ''}
                 `}
               >
-                {/* Back side */}
-                <div
-                  className={`
-                    absolute inset-0 w-full h-full rounded-xl flex items-center justify-center backface-hidden text-white font-extrabold text-3xl border-slate-300
-                    bg-gradient-to-br from-candy-pink to-pink-500 shadow-[0_6px_0_0_#d81b60] border-2
-                    ${isOpen ? 'hidden' : 'flex'}
-                  `}
-                >
-                  ❓
-                </div>
-
-                {/* Front side */}
-                <div
-                  className={`
-                    absolute inset-0 w-full h-full rounded-xl flex items-center justify-center backface-hidden [transform:rotateY(180deg)] bg-white border-2 border-slate-200
-                    ${isOpen ? 'flex shadow-inner' : 'hidden'}
-                  `}
-                >
+                {isOpen ? (
                   <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)] select-none">
                     {card.emoji}
                   </span>
-                </div>
+                ) : (
+                  <span className="text-white font-extrabold text-3xl">
+                    ❓
+                  </span>
+                )}
               </button>
             );
           })}
