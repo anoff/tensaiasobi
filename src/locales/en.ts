@@ -29,6 +29,7 @@ export const en = {
     towerSort: "Tower Sort",
     numberTrain: "Number Train",
     shadowFlashlight: "Shadow",
+    fairSharePicnic: "Fair Share Picnic",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -383,6 +384,14 @@ export const en = {
     subtitle: "Move the light to find the hidden shape!",
     help: "Drag the flashlight, then tap the matching emoji!",
     victory: "🎉 You found it!",
+  },
+  fairSharePicnic: {
+    title: "Fair Share Picnic! 🧺",
+    subtitle: "Share the snacks equally between all the friends!",
+    help: "Drag a snack to a plate. Give everyone the same amount!",
+    basketLabel: "Snack Basket",
+    leftoverLabel: "Leftovers",
+    victory: "Yum! Shared fairly!",
   },
   challenge: {
     title: "Challenge Mode 🎯",
