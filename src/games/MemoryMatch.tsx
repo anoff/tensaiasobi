@@ -160,7 +160,7 @@ export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: G
                 onClick={() => handleCardClick(card.id)}
                 className={`
                   w-full aspect-square rounded-2xl border-4 text-5xl flex items-center justify-center
-                  transition-all duration-300 transform outline-none cursor-pointer relative
+                  outline-none cursor-pointer relative
                   ${card.isMatched ? 'bg-emerald-100 border-emerald-400 opacity-80' : ''}
                 `}
               >
