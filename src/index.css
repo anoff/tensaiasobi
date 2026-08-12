@@ -104,10 +104,10 @@
     animation: town-poke-swell 1s ease-in-out;
   }
 
-  /* Vehicles slide from the left side of the cell to the right side when tapped */
+  /* Vehicles drive from the right side of the cell to the left side when tapped */
   @keyframes town-poke-slide {
-    0% { transform: translateX(-60%); }
-    100% { transform: translateX(60%); }
+    0% { transform: translateX(60%); }
+    100% { transform: translateX(-60%); }
   }
   .town-poke-slide {
     animation: town-poke-slide 1s ease-in-out;
