@@ -29,6 +29,7 @@ export const fr: TranslationSchema = {
     dispatch: "Interventions",
     physics: "Balance",
     towerSort: "Tri des Tours",
+    numberTrain: "Train des Chiffres",
     shadowFlashlight: "Ombre",
   },
   parentGate: {
@@ -370,6 +371,13 @@ export const fr: TranslationSchema = {
     moves: "coups",
     perfect: "Solution parfaite ! 🌟",
     playAgain: "Rejouer",
+  },
+  numberTrain: {
+    title: "Train des Chiffres ! 🚂",
+    subtitle: "Compte les passagers et amène le train à la bonne gare !",
+    help: "Fais glisser le train vers la gare du bon chiffre !",
+    oneMore: "+1",
+    oneLess: "-1",
   },
   shadowFlashlight: {
     title: "Lampe Ombre! 🔦",

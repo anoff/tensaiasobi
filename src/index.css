@@ -93,6 +93,54 @@
     animation: town-place 0.4s ease-out;
   }
 
+  /* Played once when a placed item is tapped ("Petting Zoo" interaction).
+     Buildings double in size and shrink back to their original size. */
+  @keyframes town-poke-swell {
+    0% { transform: scale(1); }
+    50% { transform: scale(2); }
+    100% { transform: scale(1); }
+  }
+  .town-poke-swell {
+    animation: town-poke-swell 1s ease-in-out;
+  }
+
+  /* Vehicles drive from the right side of the cell to the left side when tapped */
+  @keyframes town-poke-slide {
+    0% { transform: translateX(60%); }
+    100% { transform: translateX(-60%); }
+  }
+  .town-poke-slide {
+    animation: town-poke-slide 1s ease-in-out;
+  }
+
+  /* Animals jump up and down twice: bottom -> top -> bottom -> top -> bottom */
+  @keyframes town-poke-jump {
+    0%, 50%, 100% { transform: translateY(0); }
+    25%, 75% { transform: translateY(-14px); }
+  }
+  .town-poke-jump {
+    animation: town-poke-jump 1s ease-in-out;
+  }
+
+  /* Decorations rotate once, a full turn */
+  @keyframes town-poke-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .town-poke-rotate {
+    animation: town-poke-rotate 1s ease-in-out;
+  }
+
+  /* Nature sways left/right only a few pixels, three full swings */
+  @keyframes town-poke-sway-small {
+    0%, 100% { transform: translateX(0); }
+    16.67%, 50%, 83.33% { transform: translateX(-4px); }
+    33.33%, 66.67% { transform: translateX(4px); }
+  }
+  .town-poke-sway-small {
+    animation: town-poke-sway-small 1s ease-in-out;
+  }
+
   /* ── Emoji Match Animations ── */
   @keyframes card-in {
     0% { transform: scale(0.7); opacity: 0; }

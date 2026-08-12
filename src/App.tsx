@@ -20,6 +20,7 @@ import PuzzleGame from './games/PuzzleGame';
 import DispatchGame from './games/DispatchGame';
 import PhysicsPuzzleGame from './games/PhysicsPuzzleGame';
 import TowerSort from './games/TowerSort';
+import NumberTrain from './games/NumberTrain';
 import ShadowFlashlight from './games/ShadowFlashlight';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 import GameConfetti from './components/GameConfetti';
@@ -35,14 +36,14 @@ import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'coupons' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'shadowFlashlight';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'coupons' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'numberTrain' | 'shadowFlashlight';
 
 interface LauncherDef {
   id: Screen;
   color: 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'red';
   testid: string;
   emoji: string;
-  label: 'math' | 'odd' | 'doodle' | 'match' | 'maze' | 'trace' | 'letterTrace' | 'dobble' | 'anlaut' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'shadowFlashlight';
+  label: 'math' | 'odd' | 'doodle' | 'match' | 'maze' | 'trace' | 'letterTrace' | 'dobble' | 'anlaut' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'numberTrain' | 'shadowFlashlight';
 }
 
 const GAME_LAUNCHERS: LauncherDef[] = [
@@ -60,6 +61,7 @@ const GAME_LAUNCHERS: LauncherDef[] = [
   { id: 'dispatch', color: 'red', testid: 'launch-dispatch', emoji: '🚒', label: 'dispatch' },
   { id: 'physics', color: 'purple', testid: 'launch-physics', emoji: '⚖️', label: 'physics' },
   { id: 'towerSort', color: 'blue', testid: 'launch-tower-sort', emoji: '🗼', label: 'towerSort' },
+  { id: 'numberTrain', color: 'green', testid: 'launch-number-train', emoji: '🚂', label: 'numberTrain' },
   { id: 'shadowFlashlight', color: 'purple', testid: 'launch-shadow', emoji: '🔦', label: 'shadowFlashlight' },
 ];
 
@@ -69,7 +71,8 @@ function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
   const [showParentGate, setShowParentGate] = useState(false);
 
-  const { playPop, playSuccess, playError } = useSound(soundEnabled, vibrationEnabled);
+  const { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze } =
+    useSound(soundEnabled, vibrationEnabled);
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -278,6 +281,15 @@ function AppContent() {
             onStarEarned={handleStarEarned}
           />
         );
+      case 'numberTrain':
+        return (
+          <NumberTrain
+            playPop={playPop}
+            playSuccess={playSuccess}
+            playError={playError}
+            onStarEarned={handleStarEarned}
+          />
+        );
       case 'shadowFlashlight':
         return (
           <ShadowFlashlight
@@ -296,6 +308,10 @@ function AppContent() {
             addStars={(amt) => addStars(amt)}
             playPop={playPop}
             playSuccess={playSuccess}
+            playAnimalSound={playAnimalSound}
+            playCarHonk={playCarHonk}
+            playDoorChime={playDoorChime}
+            playWindBreeze={playWindBreeze}
           />
         );
       case 'coupons':
