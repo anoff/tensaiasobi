@@ -402,6 +402,13 @@ export const ja: TranslationSchema = {
     leftoverLabel: "あまり",
     victory: "やったね！ おなじかずに わけられたよ！",
   },
+  magnetFishing: {
+    title: "じしゃくつり！🧲",
+    subtitle: "じしゃくを うごかして かねものだけ あつめよう！",
+    help: "かねものは じしゃくに くっつくよ。ボックスに いれよう！",
+    binLabel: "メタルボックス",
+    victory: "すごい！ ぶんべつ できたね！",
+  },
   challenge: {
     title: "チャレンジモード 🎯",
     subtitle: "ごほうびを アンロックするために チャレンジに ちょうせん しよう！",

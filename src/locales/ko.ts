@@ -402,6 +402,13 @@ export const ko: TranslationSchema = {
     leftoverLabel: "남은 것",
     victory: "냠냠! 공평하게 나눴어요!",
   },
+  magnetFishing: {
+    title: "자석 낚시! 🧲",
+    subtitle: "자석을 움직여 금속 물건만 모아보세요!",
+    help: "금속 물건은 자석에 붙어요. 상자에 넣어보세요!",
+    binLabel: "금속 상자",
+    victory: "잘했어요! 쓰레기를 분리했어요!",
+  },
   challenge: {
     title: "도전 모드 🎯",
     subtitle: "도전을 완료하고 보상을 잠금 해제하세요!",

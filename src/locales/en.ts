@@ -400,6 +400,13 @@ export const en = {
     leftoverLabel: "Leftovers",
     victory: "Yum! Shared fairly!",
   },
+  magnetFishing: {
+    title: "Magnet Fishing! 🧲",
+    subtitle: "Drag the magnet to collect only metal objects!",
+    help: "Metal items stick to the magnet. Drop them in the bin!",
+    binLabel: "Metal Bin",
+    victory: "Great job! You sorted the junk!",
+  },
   challenge: {
     title: "Challenge Mode 🎯",
     subtitle: "Complete challenges to unlock rewards!",
