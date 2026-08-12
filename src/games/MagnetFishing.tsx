@@ -300,7 +300,7 @@ export default function MagnetFishing({ playPop, playSuccess, onStarEarned }: Ga
         }}
       >
         {items.map((item) => {
-          if (item.collected) return null;
+          if (item.collected || item.deposited) return null;
           const rotation = item.wiggle > 0 ? Math.sin(item.wiggle * 0.5) * 12 : 0;
           return (
             <div

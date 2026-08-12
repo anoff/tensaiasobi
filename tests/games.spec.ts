@@ -266,24 +266,21 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             for (let rounds = 0; rounds < 10; rounds += 1) {
               const magneticItem = page.getByTestId('magnet-item-magnetic').first();
               const itemBox = await magneticItem.boundingBox().catch(() => null);
-              if (!itemBox) break;
+              if (!itemBox || !binBox) break;
 
-              // Drag the magnet directly over the item so it snaps, then to the bin.
+              // Hover the magnet over the item for a moment so it snaps.
               await page.mouse.move(itemBox.x + itemBox.width / 2, itemBox.y + itemBox.height / 2);
               await page.mouse.down();
               await page.waitForTimeout(150);
 
-              if (binBox) {
-                await page.mouse.move(binBox.x + binBox.width / 2, binBox.y + binBox.height / 2);
-                await page.mouse.up();
-                await page.waitForTimeout(200);
-              } else {
-                await page.mouse.up();
-              }
+              // Move directly onto the bin and release to deposit.
+              await page.mouse.move(binBox.x + binBox.width / 2, binBox.y + binBox.height / 2);
+              await page.mouse.up();
+              await page.waitForTimeout(200);
             }
 
             // Wait for victory UI after all items are deposited.
-            await expect(page.getByTestId('magnet-play-again')).toBeVisible();
+            await expect(page.getByTestId('magnet-play-again')).toBeVisible({ timeout: 5000 });
             break;
           }
         }
