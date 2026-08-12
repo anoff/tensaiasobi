@@ -18,6 +18,8 @@ interface ParentDashboardProps {
   challengeCouponId: string;
   onStartChallenge: (targetStars: number, allowedGames: Record<string, boolean>, couponId: string) => void;
   onCancelChallenge: () => void;
+  /** Optional coupon id to preselect in the challenge reward picker, e.g. when arriving via the Coupon Shop's "Earn it!" button */
+  initialCouponId?: string;
 }
 
 export function ParentDashboard({
@@ -35,15 +37,24 @@ export function ParentDashboard({
   challengeCouponId,
   onStartChallenge,
   onCancelChallenge,
+  initialCouponId,
 }: ParentDashboardProps) {
   const { t } = useTranslation();
 
-  const initialCoupon = coupons.find((c) => c.id === challengeCouponId) || coupons.find((c) => c.enabled);
-  const [selectedTarget, setSelectedTarget] = useState<number>(
-    challengeStarsTarget || (initialCoupon ? REWARD_SIZE_STAR_TARGETS[initialCoupon.rewardSize] : 10)
-  );
+  const initialCoupon =
+    coupons.find((c) => c.id === initialCouponId) ||
+    coupons.find((c) => c.id === challengeCouponId) ||
+    coupons.find((c) => c.enabled);
+  const [selectedTarget, setSelectedTarget] = useState<number>(() => {
+    // When arriving via the "Earn it!" shortcut, always size the target to the picked coupon.
+    if (initialCouponId) {
+      const coupon = coupons.find((c) => c.id === initialCouponId);
+      if (coupon) return REWARD_SIZE_STAR_TARGETS[coupon.rewardSize];
+    }
+    return challengeStarsTarget || (initialCoupon ? REWARD_SIZE_STAR_TARGETS[initialCoupon.rewardSize] : 10);
+  });
   const [selectedCoupon, setSelectedCoupon] = useState<string>(
-    challengeCouponId || initialCoupon?.id || ''
+    initialCouponId || challengeCouponId || initialCoupon?.id || ''
   );
 
   const handleCouponChange = (id: string) => {

@@ -6,10 +6,12 @@ interface CouponShopProps {
   coupons: Coupon[];
   /** Requests to redeem an already-earned coupon; the caller is responsible for confirming before it is used up */
   onRedeemCoupon: (id: string) => void;
+  /** Requests to start a challenge to earn a not-yet-earned coupon; the caller handles the parent gate + challenge setup */
+  onEarnCoupon: (id: string) => void;
   playPop: () => void;
 }
 
-export function CouponShop({ coupons, onRedeemCoupon, playPop }: CouponShopProps) {
+export function CouponShop({ coupons, onRedeemCoupon, onEarnCoupon, playPop }: CouponShopProps) {
   const { t } = useTranslation();
 
   const earnedCoupons = coupons.filter((c) => c.earnedCount > 0);
@@ -20,6 +22,11 @@ export function CouponShop({ coupons, onRedeemCoupon, playPop }: CouponShopProps
   const handleRedeemHoldConfirm = (coupon: Coupon) => {
     playPop();
     onRedeemCoupon(coupon.id);
+  };
+
+  const handleEarnClick = (coupon: Coupon) => {
+    playPop();
+    onEarnCoupon(coupon.id);
   };
 
   return (
@@ -90,9 +97,15 @@ export function CouponShop({ coupons, onRedeemCoupon, playPop }: CouponShopProps
                     {(progress) => (progress > 0 ? t.coupons.holdToRedeem : t.coupons.redeem)}
                   </HoldToConfirmButton>
                 ) : coupon.enabled ? (
-                  <span className="text-xs font-bold text-gray-400 bg-gray-100 rounded-full px-3 py-1.5">
-                    {t.coupons.notEarnedYet}
-                  </span>
+                  <button
+                    type="button"
+                    data-testid={`earn-coupon-${coupon.id}`}
+                    onClick={() => handleEarnClick(coupon)}
+                    className="flex items-center gap-1 bg-gradient-to-b from-amber-400 to-amber-500 text-white text-xs font-bold rounded-full px-4 py-1.5 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer outline-none"
+                  >
+                    <span>🎯</span>
+                    <span>{t.coupons.earnIt}</span>
+                  </button>
                 ) : (
                   <span className="text-xs font-bold text-gray-400 bg-gray-200 rounded-full px-3 py-1.5">
                     {t.coupons.disabled}

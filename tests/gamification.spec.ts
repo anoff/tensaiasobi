@@ -175,6 +175,38 @@ test.describe('tensaiasobi Gamification Checks', () => {
     await expect(earnedCoupon).toBeHidden();
   });
 
+  test('Verify "Earn it!" on a not-yet-earned coupon opens the Parent Gate and pre-fills Challenge Mode setup', async ({ page }) => {
+    // 1. Open Coupon Shop - all default coupons start un-earned
+    const couponsLauncher = page.getByTestId('launch-coupons');
+    await couponsLauncher.click();
+
+    const earnButton = page.getByTestId('earn-coupon-movie_night');
+    await expect(earnButton).toBeVisible();
+    await expect(earnButton).toContainText('Earn it!');
+    await earnButton.click();
+
+    // 2. Parent Gate must appear before anything else happens
+    const gateTitle = page.locator('h2', { hasText: 'Parents Only' });
+    await expect(gateTitle).toBeVisible();
+
+    // Cancelling should return to the Coupon Shop without navigating away
+    await page.locator('form button', { hasText: 'Cancel' }).click();
+    await expect(gateTitle).toBeHidden();
+    await expect(earnButton).toBeVisible();
+
+    // 3. Click again and solve the gate this time
+    await earnButton.click();
+    await expect(gateTitle).toBeVisible();
+    await solveParentGate(page);
+
+    // 4. Lands on the Settings dashboard with Challenge Mode configuration, coupon preselected
+    const settingsTitle = page.locator('h2', { hasText: 'Settings' });
+    await expect(settingsTitle).toBeVisible();
+
+    const couponSelect = page.locator('select').nth(1);
+    await expect(couponSelect).toHaveValue('movie_night');
+  });
+
   test('Verify Town Builder Delete All with reimbursement', async ({ page }) => {
     // 1. Injected 100 stars via localStorage to afford purchases
     await page.addInitScript(() => {

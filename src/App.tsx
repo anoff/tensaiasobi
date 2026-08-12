@@ -83,6 +83,8 @@ function AppContent() {
   const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
   const [pendingCouponRedeemConfirmId, setPendingCouponRedeemConfirmId] = useState<string | null>(null);
   const [celebratingCoupon, setCelebratingCoupon] = useState<Coupon | null>(null);
+  const [pendingEarnCouponId, setPendingEarnCouponId] = useState<string | null>(null);
+  const [challengeSetupCouponId, setChallengeSetupCouponId] = useState<string | undefined>(undefined);
 
   // Challenge mode state
   const {
@@ -117,6 +119,7 @@ function AppContent() {
 
   const handleScreenChange = (screen: Screen) => {
     playPop();
+    if (screen !== 'settings') setChallengeSetupCouponId(undefined);
     setCurrentScreen(screen);
   };
 
@@ -319,6 +322,7 @@ function AppContent() {
           <CouponShop
             coupons={coupons}
             onRedeemCoupon={(id) => setPendingCouponRedeemConfirmId(id)}
+            onEarnCoupon={(id) => setPendingEarnCouponId(id)}
             playPop={playPop}
           />
         );
@@ -339,6 +343,7 @@ function AppContent() {
             challengeCouponId={challengeCouponId}
             onStartChallenge={startChallenge}
             onCancelChallenge={cancelChallenge}
+            initialCouponId={challengeSetupCouponId}
           />
         );
       default:
@@ -522,6 +527,18 @@ function AppContent() {
             setCurrentScreen('settings');
           }}
           onClose={() => setShowParentGate(false)}
+        />
+      )}
+
+      {/* Parent Gate for the Coupon Shop's "Earn it!" shortcut -> opens Challenge configuration with this coupon preselected */}
+      {pendingEarnCouponId && (
+        <ParentGate
+          onSuccess={() => {
+            setChallengeSetupCouponId(pendingEarnCouponId);
+            setPendingEarnCouponId(null);
+            setCurrentScreen('settings');
+          }}
+          onClose={() => setPendingEarnCouponId(null)}
         />
       )}
 

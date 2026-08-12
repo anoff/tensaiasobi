@@ -272,6 +272,7 @@ export const en = {
     redeem: "Redeem",
     holdToRedeem: "Hold to Redeem",
     notEarnedYet: "Not earned yet",
+    earnIt: "Earn it!",
     disabled: "Disabled",
     redeemConfirmTitle: "Redeem this coupon?",
     redeemConfirmBody: "Once redeemed, {name} will be used up. Ask a grown-up to help you enjoy it!",

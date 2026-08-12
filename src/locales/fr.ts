@@ -274,6 +274,7 @@ export const fr: TranslationSchema = {
     redeem: "Utiliser",
     holdToRedeem: "Maintenir pour utiliser",
     notEarnedYet: "Pas encore gagné",
+    earnIt: "Le gagner !",
     disabled: "Désactivé",
     redeemConfirmTitle: "Utiliser ce coupon ?",
     redeemConfirmBody: "Une fois utilisé, {name} sera consommé. Demande à un adulte de t'aider à en profiter !",

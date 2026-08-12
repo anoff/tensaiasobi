@@ -274,6 +274,7 @@ export const ja: TranslationSchema = {
     redeem: "つかう",
     holdToRedeem: "ながおしで つかう",
     notEarnedYet: "まだもらっていない",
+    earnIt: "がんばる！",
     disabled: "むこう",
     redeemConfirmTitle: "このクーポンをつかいますか？",
     redeemConfirmBody: "つかうと {name} は なくなります。おうちのひとと いっしょに たのしんでね！",
