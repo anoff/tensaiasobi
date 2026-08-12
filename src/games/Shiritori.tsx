@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
 import AnswerBubble from '../components/AnswerBubble';
@@ -254,6 +254,9 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
 
   const { streak, highScore, registerCorrect, resetStreak } = useStreak('shiritori');
 
+  const chainEndRef = useRef<HTMLDivElement>(null);
+
+
   const initGame = useCallback((selectedMode: 'solo' | 'panda') => {
     const startEmoji = getStartWord(language, itemsDict);
     setChain([startEmoji]);
@@ -282,6 +285,14 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
       setOptions(result.options);
     }
   }, [language, itemsDict, t.shiritori.yourTurn, resetStreak]);
+
+  // Auto-scroll the chain view as new cards are added
+  useEffect(() => {
+    if (chainEndRef.current) {
+      chainEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' });
+    }
+  }, [chain]);
+
 
   const handlePandaPlay = useCallback((currentChain: string[]) => {
     const pandaChoice = getPandaPlayChoice(currentChain, language, itemsDict);
@@ -400,6 +411,71 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
   };
 
 
+  const renderHighlightedWord = (emoji: string) => {
+    const word = itemsDict[emoji] || '';
+    if (!word) return '';
+
+    if (language === 'ja' || language === 'ko') {
+      // For Japanese and Korean, highlight first and last character
+      // We skip trailing long vowels 'ー' for end highlight in Japanese, but show the whole word
+      let trimmed = word;
+      if (language === 'ja') {
+        while (trimmed.endsWith('ー') && trimmed.length > 1) {
+          trimmed = trimmed.slice(0, -1);
+        }
+      }
+      const rawEndC = trimmed[trimmed.length - 1];
+      const endIdx = word.lastIndexOf(rawEndC);
+
+      return (
+        <span className="flex items-center justify-center font-black tracking-widest text-3xl md:text-4xl text-slate-700">
+          {word.split('').map((char, index) => {
+            let colorClass = '';
+            let animClass = '';
+            if (index === 0) {
+              colorClass = 'text-emerald-500 font-extrabold';
+            } else if (index === endIdx) {
+              colorClass = 'text-candy-pink font-extrabold';
+              animClass = 'animate-pulse';
+            }
+            return (
+              <span key={index} className={`${colorClass} ${animClass}`}>
+                {char}
+              </span>
+            );
+          })}
+        </span>
+      );
+    } else {
+      // English/German/French highlight first and last letter
+      const cleaned = cleanWesternWord(word, language);
+      if (!cleaned) return <span className="font-black text-3xl">{word}</span>;
+
+      const firstLetterIdx = word.toLowerCase().indexOf(cleaned[0]);
+      const lastLetterIdx = word.toLowerCase().lastIndexOf(cleaned[cleaned.length - 1]);
+
+      return (
+        <span className="flex items-center justify-center font-black tracking-wider text-3xl md:text-4xl text-slate-700 capitalize">
+          {word.split('').map((char, index) => {
+            let colorClass = '';
+            let animClass = '';
+            if (index === firstLetterIdx) {
+              colorClass = 'text-emerald-500';
+            } else if (index === lastLetterIdx) {
+              colorClass = 'text-candy-pink';
+              animClass = 'animate-pulse';
+            }
+            return (
+              <span key={index} className={`${colorClass} ${animClass}`}>
+                {char}
+              </span>
+            );
+          })}
+        </span>
+      );
+    }
+  };
+
   const activeEmoji = chain[chain.length - 1];
   const activeWord = useMemo(() => (activeEmoji ? itemsDict[activeEmoji] || '' : ''), [activeEmoji, itemsDict]);
   const targetLetter = useMemo(() => (activeEmoji ? getEndChar(activeWord, language) : ''), [activeEmoji, activeWord, language]);
@@ -450,10 +526,10 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
       </div>
 
       {/* Scrolling Chain Track */}
-      <div className="w-full bg-white/70 border-2 border-slate-200/80 rounded-3xl p-3 my-3 shadow-inner">
-        <div className="grid grid-cols-4 gap-2 px-2 py-1">
+      <div className="w-full bg-white/70 border-2 border-slate-200/80 rounded-3xl p-3 my-3 shadow-inner overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+        <div className="flex items-center gap-2 min-w-max px-2 py-1">
           {chain.map((emoji, index) => (
-            <div key={index} className="flex min-w-0 items-center justify-center">
+            <div key={index} className="flex items-center gap-2">
               <div
                 className={`flex flex-col items-center justify-center bg-white border-2 border-slate-200 rounded-2xl w-14 h-14 shadow-sm hover:scale-105 transition-transform duration-200 relative ${
                   index === chain.length - 1 ? 'ring-4 ring-candy-pink/50 border-candy-pink' : ''
@@ -470,8 +546,12 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
                   </span>
                 )}
               </div>
+              {index < chain.length - 1 && (
+                <span className="text-slate-300 font-black text-xl">➔</span>
+              )}
             </div>
           ))}
+          <div ref={chainEndRef} />
         </div>
       </div>
 
@@ -539,6 +619,9 @@ export function Shiritori({ playPop, playSuccess, playError, onStarEarned, chall
             <span className="text-8xl drop-shadow-[0_8px_8px_rgba(0,0,0,0.1)] animate-bounce-subtle">
               {activeEmoji}
             </span>
+            <div className="mt-4 text-center">
+              {renderHighlightedWord(activeEmoji)}
+            </div>
 
             {/* Target Letter Indicator Badge */}
             <div className="absolute bottom-[-15px] bg-candy-pink text-white font-black px-4 py-1.5 rounded-full border-2 border-white text-sm shadow-md animate-pulse">
