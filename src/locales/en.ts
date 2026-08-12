@@ -28,6 +28,7 @@ export const en = {
     physics: "Balance",
     towerSort: "Tower Sort",
     numberTrain: "Number Train",
+    shadowFlashlight: "Shadow",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -368,6 +369,12 @@ export const en = {
     help: "Drag the train to the matching number station!",
     oneMore: "+1",
     oneLess: "-1",
+  },
+  shadowFlashlight: {
+    title: "Shadow Flashlight! 🔦",
+    subtitle: "Move the light to find the hidden shape!",
+    help: "Drag the flashlight, then tap the matching emoji!",
+    victory: "🎉 You found it!",
   },
   challenge: {
     title: "Challenge Mode 🎯",

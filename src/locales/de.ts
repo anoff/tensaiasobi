@@ -30,6 +30,7 @@ export const de: TranslationSchema = {
     physics: "Waage",
     towerSort: "Turm-Sortierung",
     numberTrain: "Zahlenzug",
+    shadowFlashlight: "Schatten",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -370,6 +371,12 @@ export const de: TranslationSchema = {
     help: "Ziehe den Zug zur passenden Zahlen-Station!",
     oneMore: "+1",
     oneLess: "-1",
+  },
+  shadowFlashlight: {
+    title: "Schatten-Taschenlampe! 🔦",
+    subtitle: "Bewege das Licht, um die versteckte Form zu finden!",
+    help: "Ziehe die Taschenlampe und tippe dann das passende Emoji an!",
+    victory: "🎉 Gefunden!",
   },
   challenge: {
     title: "Herausforderungsmodus 🎯",

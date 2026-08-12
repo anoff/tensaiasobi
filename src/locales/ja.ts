@@ -30,6 +30,7 @@ export const ja: TranslationSchema = {
     physics: "てんびん",
     towerSort: "タワーソート",
     numberTrain: "かずのれっしゃ",
+    shadowFlashlight: "かげ",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -370,6 +371,12 @@ export const ja: TranslationSchema = {
     help: "あう すうじの えきに れっしゃを ドラッグしてね！",
     oneMore: "＋１",
     oneLess: "－１",
+  },
+  shadowFlashlight: {
+    title: "かげのフラッシュライト！🔦",
+    subtitle: "あかりをうごかして かくれた かたちを みつけよう！",
+    help: "ライトをうごかして、あてはまる えもじを タップしてね！",
+    victory: "🎉 みつけたね！",
   },
   challenge: {
     title: "チャレンジモード 🎯",

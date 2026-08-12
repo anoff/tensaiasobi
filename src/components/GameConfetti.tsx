@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 interface GameConfettiProps {
   pieces?: number;
   recycle?: boolean;
@@ -26,7 +28,11 @@ function makeItems(count: number): Piece[] {
 }
 
 export default function GameConfetti({ pieces = 150, recycle = false }: GameConfettiProps) {
-  const items = makeItems(pieces);
+  // Generate the random pieces once per mount instead of on every render.
+  // Without this, any parent re-render (e.g. from cursor/pointer move state
+  // updates) would regenerate all pieces with new random positions/timing,
+  // making the confetti jump around and look broken while it's animating.
+  const items = useMemo(() => makeItems(pieces), [pieces]);
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">

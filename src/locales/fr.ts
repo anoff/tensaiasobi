@@ -30,6 +30,7 @@ export const fr: TranslationSchema = {
     physics: "Balance",
     towerSort: "Tri des Tours",
     numberTrain: "Train des Chiffres",
+    shadowFlashlight: "Ombre",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -370,6 +371,12 @@ export const fr: TranslationSchema = {
     help: "Fais glisser le train vers la gare du bon chiffre !",
     oneMore: "+1",
     oneLess: "-1",
+  },
+  shadowFlashlight: {
+    title: "Lampe Ombre! 🔦",
+    subtitle: "Déplace la lumière pour trouver la forme cachée !",
+    help: "Déplace la lampe, puis appuie sur l'emoji correspondant !",
+    victory: "🎉 Trouvé !",
   },
   challenge: {
     title: "Mode Défi 🎯",
