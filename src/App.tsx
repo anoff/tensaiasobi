@@ -75,8 +75,18 @@ function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
   const [showParentGate, setShowParentGate] = useState(false);
 
-  const { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze } =
-    useSound(soundEnabled, vibrationEnabled);
+  const {
+    playPop,
+    playSuccess,
+    playError,
+    playAnimalSound,
+    playCarHonk,
+    playDoorChime,
+    playWindBreeze,
+    playCrickets,
+    playBirdChirp,
+    playRain,
+  } = useSound(soundEnabled, vibrationEnabled);
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -337,6 +347,9 @@ function AppContent() {
             playCarHonk={playCarHonk}
             playDoorChime={playDoorChime}
             playWindBreeze={playWindBreeze}
+            playCrickets={playCrickets}
+            playBirdChirp={playBirdChirp}
+            playRain={playRain}
           />
         );
       case 'coupons':

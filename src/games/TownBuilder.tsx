@@ -36,13 +36,17 @@ interface TownBuilderProps {
   playCarHonk: () => void;
   playDoorChime: () => void;
   playWindBreeze: () => void;
+  playCrickets: () => void;
+  playBirdChirp: () => void;
+  playRain: () => void;
 }
 
 
-// localStorage helpers
-
+type DayPhase = 'day' | 'night';
+type WeatherPhase = 'sunny' | 'rainy';
 
 const STORAGE_KEY = 'gamification_town';
+const ENV_STORAGE_KEY = 'gamification_town_env';
 
 function loadTown(): (TownCell | null)[][] {
   try {
@@ -57,6 +61,31 @@ function loadTown(): (TownCell | null)[][] {
 function saveTown(grid: (TownCell | null)[][]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(grid));
+  } catch {
+    /* ignore */
+  }
+}
+
+function loadEnv(): { timePhase: DayPhase; weatherPhase: WeatherPhase } {
+  try {
+    const raw = localStorage.getItem(ENV_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (
+      parsed &&
+      (parsed.timePhase === 'day' || parsed.timePhase === 'night') &&
+      (parsed.weatherPhase === 'sunny' || parsed.weatherPhase === 'rainy')
+    ) {
+      return { timePhase: parsed.timePhase, weatherPhase: parsed.weatherPhase };
+    }
+  } catch {
+    /* ignore */
+  }
+  return { timePhase: 'day', weatherPhase: 'sunny' };
+}
+
+function saveEnv(env: { timePhase: DayPhase; weatherPhase: WeatherPhase }) {
+  try {
+    localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify(env));
   } catch {
     /* ignore */
   }
@@ -87,11 +116,15 @@ export function TownBuilder({
   playCarHonk,
   playDoorChime,
   playWindBreeze,
+  playCrickets,
+  playBirdChirp,
+  playRain,
 }: TownBuilderProps) {
   const { t } = useTranslation();
 
-
   const [grid, setGrid] = useState<(TownCell | null)[][]>(loadTown);
+  const [timePhase, setTimePhase] = useState<DayPhase>(() => loadEnv().timePhase);
+  const [weatherPhase, setWeatherPhase] = useState<WeatherPhase>(() => loadEnv().weatherPhase);
   const [catalogCell, setCatalogCell] = useState<{ row: number; col: number } | null>(null);
   const [activeCategory, setActiveCategory] = useState<ShopCategory>('buildings');
   const [removeCell, setRemoveCell] = useState<{ row: number; col: number } | null>(null);
@@ -133,6 +166,11 @@ export function TownBuilder({
   useEffect(() => {
     saveTown(grid);
   }, [grid]);
+
+  // persist environment settings whenever they change
+  useEffect(() => {
+    saveEnv({ timePhase, weatherPhase });
+  }, [timePhase, weatherPhase]);
 
 
   // "Petting Zoo" – tapping an already-placed item plays sound/haptic feedback
@@ -303,22 +341,80 @@ export function TownBuilder({
 
   const catalogItems = getItemsByCategory(activeCategory);
 
+  const isNight = timePhase === 'night';
+  const isRaining = weatherPhase === 'rainy';
+
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto px-2 py-4 select-none">
+    <div
+      className={`flex flex-col items-center gap-4 w-full max-w-lg mx-auto px-2 py-4 select-none rounded-3xl transition-colors duration-700 ${
+        isNight ? 'bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-950' : 'bg-gradient-to-b from-sky-100 to-amber-50'
+      }`}
+    >
       {/* Title */}
-      <h2 className="text-2xl font-bold text-amber-800 dark:text-amber-300 tracking-tight">
+      <h2
+        className={`text-2xl font-bold tracking-tight transition-colors duration-700 ${
+          isNight ? 'text-amber-200' : 'text-amber-800'
+        }`}
+      >
         {t.town.title}
       </h2>
 
       {/* Subtitle hint */}
-      <p className="text-sm text-amber-700/70 dark:text-amber-400/60 -mt-2">
+      <p className={`text-sm -mt-2 transition-colors duration-700 ${isNight ? 'text-amber-300/70' : 'text-amber-700/70'}`}>
         {t.town.empty}
       </p>
+
+      {/* Environment controls */}
+      <div className="flex justify-end w-full gap-2 px-1 -mb-2">
+        <button
+          type="button"
+          onClick={() => {
+            setTimePhase((prev) => {
+              const next = prev === 'day' ? 'night' : 'day';
+              if (next === 'night') playCrickets();
+              else playBirdChirp();
+              return next;
+            });
+            playPop();
+          }}
+          aria-label={isNight ? t.town.toggleDay : t.town.toggleNight}
+          data-testid="town-toggle-time"
+          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl text-2xl sm:text-3xl flex items-center justify-center shadow-md active:scale-90 transition-all duration-300 ${
+            isNight
+              ? 'bg-indigo-900/60 text-yellow-200 border-2 border-indigo-700/60 hover:bg-indigo-800/60'
+              : 'bg-yellow-100 text-amber-600 border-2 border-yellow-300 hover:bg-yellow-200'
+          }`}
+        >
+          {isNight ? '🌙' : '☀️'}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setWeatherPhase((prev) => {
+              const next = prev === 'sunny' ? 'rainy' : 'sunny';
+              if (next === 'rainy') playRain();
+              return next;
+            });
+            playPop();
+          }}
+          aria-label={isRaining ? t.town.toggleSunny : t.town.toggleRain}
+          data-testid="town-toggle-weather"
+          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl text-2xl sm:text-3xl flex items-center justify-center shadow-md active:scale-90 transition-all duration-300 ${
+            isRaining
+              ? 'bg-slate-700/60 text-sky-200 border-2 border-slate-500/60 hover:bg-slate-600/60'
+              : 'bg-sky-100 text-sky-500 border-2 border-sky-300 hover:bg-sky-200'
+          }`}
+        >
+          {isRaining ? '🌧️' : '🌈'}
+        </button>
+      </div>
 
       {/* Grid */}
       <div ref={gridContainerRef} className="relative w-full">
         <div
-          className="grid gap-1.5 w-full rounded-2xl p-3 bg-amber-50/60 dark:bg-amber-900/20 shadow-inner"
+          className={`grid gap-1.5 w-full rounded-2xl p-3 shadow-inner transition-colors duration-700 ${
+            isNight ? 'bg-indigo-950/40' : 'bg-amber-50/60 dark:bg-amber-900/20'
+          }`}
           style={{
             gridTemplateColumns: `repeat(${TOWN_GRID_SIZE}, 1fr)`,
           }}
@@ -331,6 +427,14 @@ export function TownBuilder({
               const item = cell ? getItemById(cell.itemId) : null;
               const animClass = item?.animation ?? '';
               const pokeClass = getPokeClassForCategory(item?.category);
+              const isGlowing =
+                isNight && cell && (cell.itemId === 'house' || cell.itemId === 'castle' || cell.itemId === 'lamp');
+              const weatherAnim =
+                isRaining && cell && (cell.itemId === 'tree' || cell.itemId === 'pond')
+                  ? cell.itemId === 'tree'
+                    ? 'town-weather-shake'
+                    : 'town-weather-ripple'
+                  : '';
 
               return (
                 <button
@@ -338,13 +442,15 @@ export function TownBuilder({
                   type="button"
                   className={
                     cell
-                      ? `group aspect-square flex items-center justify-center rounded-xl text-2xl sm:text-3xl
-                         bg-amber-100/80 dark:bg-amber-800/30`
+                      ? `group aspect-square flex items-center justify-center rounded-xl text-2xl sm:text-3xl transition-colors duration-700 ${
+                          isNight ? 'bg-slate-800/50' : 'bg-amber-100/80 dark:bg-amber-800/30'
+                        }`
                       : `aspect-square flex items-center justify-center rounded-xl
-                         bg-green-100 dark:bg-green-900/30
-                         border-2 border-dashed border-green-300 dark:border-green-700
-                         text-green-400 dark:text-green-600 text-xl
-                         hover:bg-green-200/60 dark:hover:bg-green-800/30 transition-colors`
+                         border-2 border-dashed text-xl transition-colors duration-700 ${
+                           isNight
+                             ? 'bg-slate-800/30 border-slate-600 text-slate-500 hover:bg-slate-700/40'
+                             : 'bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700 text-green-400 dark:text-green-600 hover:bg-green-200/60 dark:hover:bg-green-800/30'
+                         }`
                   }
                   onClick={() => handleCellClick(ri, ci)}
                   onPointerDown={() => handlePointerDown(ri, ci)}
@@ -355,7 +461,9 @@ export function TownBuilder({
                 >
                   {cell ? (
                     <span
-                      className={`inline-block transition-transform group-active:scale-95 ${isJustPlaced ? 'town-place' : isPoked ? pokeClass : animClass}`}
+                      className={`inline-block transition-transform group-active:scale-95 ${
+                        isJustPlaced ? 'town-place' : isPoked ? pokeClass : `${animClass} ${weatherAnim}`
+                      } ${isGlowing ? 'town-night-glow' : ''}`}
                     >
                       {cell.emoji}
                     </span>
@@ -367,6 +475,27 @@ export function TownBuilder({
             })
           )}
         </div>
+
+        {/* Rain overlay – purely decorative, sits above the grid cells */}
+        {isRaining && (
+          <div
+            className="absolute inset-0 rounded-2xl pointer-events-none overflow-hidden town-rain-overlay"
+            data-testid="town-rain-overlay"
+            aria-hidden="true"
+          >
+            {Array.from({ length: 24 }).map((_, i) => (
+              <span
+                key={i}
+                className="town-raindrop"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDuration: `${0.4 + Math.random() * 0.4}s`,
+                  animationDelay: `${Math.random() * 0.6}s`,
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Placement Confetti overlay – purely decorative, sits above the grid */}
         <canvas
@@ -599,6 +728,52 @@ export function TownBuilder({
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Night glow for houses, castle and lanterns */
+        .town-night-glow {
+          filter: drop-shadow(0 0 8px rgba(253, 224, 71, 0.6));
+        }
+
+        /* Weather-specific ambient animations */
+        @keyframes town-weather-shake {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-3deg); }
+          75% { transform: rotate(3deg); }
+        }
+        .town-weather-shake {
+          animation: town-weather-shake 1.2s ease-in-out infinite;
+        }
+
+        @keyframes town-weather-ripple {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.08); }
+        }
+        .town-weather-ripple {
+          animation: town-weather-ripple 1.5s ease-in-out infinite;
+        }
+
+        /* Falling rain overlay */
+        @keyframes town-rain-fall {
+          0% { transform: translateY(-10%) translateX(0); opacity: 0; }
+          10% { opacity: 0.5; }
+          90% { opacity: 0.4; }
+          100% { transform: translateY(110%) translateX(12px); opacity: 0; }
+        }
+        .town-rain-overlay {
+          background: linear-gradient(to bottom, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.25));
+        }
+        .town-raindrop {
+          position: absolute;
+          top: 0;
+          width: 2px;
+          height: 12px;
+          background: rgba(186, 230, 253, 0.55);
+          border-radius: 1px;
+          transform: rotate(15deg);
+          animation-name: town-rain-fall;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
       `}</style>
     </div>
   );

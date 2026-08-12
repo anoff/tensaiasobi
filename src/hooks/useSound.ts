@@ -255,5 +255,109 @@ export function useSound(soundEnabled: boolean, vibrationEnabled: boolean) {
     }
   };
 
-  return { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze };
+  // Relaxed evening crickets: two high chirps repeating softly.
+  const playCrickets = () => {
+    if (!soundEnabled) return;
+
+    try {
+      const ctx = getAudioContext();
+      const chirp = (start: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(4200, start);
+        osc.frequency.exponentialRampToValueAtTime(3500, start + 0.04);
+
+        gain.gain.setValueAtTime(0.001, start);
+        gain.gain.linearRampToValueAtTime(0.06, start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.05);
+
+        osc.start(start);
+        osc.stop(start + 0.06);
+      };
+
+      const now = ctx.currentTime;
+      for (let i = 0; i < 5; i++) {
+        chirp(now + i * 0.14);
+        chirp(now + i * 0.14 + 0.04);
+      }
+    } catch (e) {
+      console.error('Failed to play crickets sound:', e);
+    }
+  };
+
+  // Happy dawn bird chirp: a short cheerful whistle.
+  const playBirdChirp = () => {
+    if (!soundEnabled) return;
+
+    try {
+      const ctx = getAudioContext();
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1800, now);
+      osc.frequency.linearRampToValueAtTime(2200, now + 0.08);
+      osc.frequency.linearRampToValueAtTime(1600, now + 0.18);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.1, now + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+      osc.start(now);
+      osc.stop(now + 0.25);
+    } catch (e) {
+      console.error('Failed to play bird chirp sound:', e);
+    }
+  };
+
+  // Soft calming rain: filtered white noise shaped into droplet-like bursts.
+  const playRain = () => {
+    if (!soundEnabled) return;
+
+    try {
+      const ctx = getAudioContext();
+      const duration = 0.8;
+      const bufferSize = Math.floor(ctx.sampleRate * duration);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.Q.value = 0.6;
+
+      const gain = ctx.createGain();
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      const now = ctx.currentTime;
+      filter.frequency.setValueAtTime(1200, now);
+      filter.frequency.exponentialRampToValueAtTime(400, now + duration);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.12, now + 0.1);
+      gain.gain.linearRampToValueAtTime(0.08, now + duration);
+
+      noise.start(now);
+      noise.stop(now + duration);
+    } catch (e) {
+      console.error('Failed to play rain sound:', e);
+    }
+  };
+
+  return { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze, playCrickets, playBirdChirp, playRain };
 }

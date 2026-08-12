@@ -226,6 +226,10 @@ export const en = {
   town: {
     title: "My Town 🏘️",
     empty: "Tap an empty spot to build!",
+    toggleDay: "Switch to day",
+    toggleNight: "Switch to night",
+    toggleRain: "Switch to rain",
+    toggleSunny: "Switch to sunny",
     remove: "Remove?",
     confirmRemove: "Remove this item?",
     deleteAll: "Delete All",
