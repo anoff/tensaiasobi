@@ -165,7 +165,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
             type="button"
             data-testid="physics-pan-left"
             onClick={() => handleSideClick('left')}
-            className="absolute -left-2 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-amber-100 border-4 border-amber-300 flex flex-wrap items-center justify-center gap-1 p-2 hover:bg-amber-50 transition-colors"
+            className="absolute -left-2 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-amber-100 border-4 border-amber-300 grid grid-cols-3 items-center justify-items-center gap-0.5 p-2 hover:bg-amber-50 transition-colors"
           >
             {leftWeights.map((w) => (
               <span key={w.id} onClick={(e) => { e.stopPropagation(); handleWeightClick(w); }} className="text-2xl cursor-pointer">
@@ -179,7 +179,7 @@ export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: Physic
             type="button"
             data-testid="physics-pan-right"
             onClick={() => handleSideClick('right')}
-            className="absolute -right-2 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-amber-100 border-4 border-amber-300 flex flex-wrap items-center justify-center gap-1 p-2 hover:bg-amber-50 transition-colors"
+            className="absolute -right-2 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-amber-100 border-4 border-amber-300 grid grid-cols-3 items-center justify-items-center gap-0.5 p-2 hover:bg-amber-50 transition-colors"
           >
             {rightWeights.map((w) => (
               <span key={w.id} onClick={(e) => { e.stopPropagation(); handleWeightClick(w); }} className="text-2xl cursor-pointer">

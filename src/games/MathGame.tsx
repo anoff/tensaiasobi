@@ -11,7 +11,9 @@ import AnswerBubble from '../components/AnswerBubble';
 
 
 interface Question {
-  text: string;
+  num1: number;
+  num2: number;
+  operator: string;
   answer: number;
   options: number[];
 }
@@ -87,7 +89,9 @@ const generateQuestion = (currentLevel: GameDifficulty): Question => {
     const options = shuffle(Array.from(optionsSet));
 
     return {
-      text: `${num1} ${operator} ${num2}`,
+      num1,
+      num2,
+      operator,
       answer,
       options,
     };
@@ -170,8 +174,10 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
         <div className="text-sm font-black tracking-widest text-slate-400 uppercase text-center">
           {t.mathGame.title}
         </div>
-        <div data-testid="math-equation" className="text-7xl md:text-8xl font-black text-slate-800 tracking-tight select-none">
-          {question?.text}
+        <div data-testid="math-equation" className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-2 text-center font-black text-slate-800 tracking-tight select-none">
+          <span className="text-6xl md:text-8xl">{question?.num1}</span>
+          <span className="text-8xl md:text-9xl leading-none">{question?.operator}</span>
+          <span className="text-6xl md:text-8xl">{question?.num2}</span>
         </div>
         
         {/* Streak Counter */}
@@ -180,7 +186,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
 
       {/* Answer Bubbles */}
       <div className="w-full flex flex-col items-center gap-6 pb-4">
-        <div className="w-full grid grid-cols-3 gap-4 max-w-sm">
+        <div className="w-full grid grid-cols-3 gap-3 max-w-xs">
           {question?.options.map((opt) => {
             const isThisSelected = selectedAnswer === opt;
 
@@ -192,7 +198,7 @@ export function MathGame({ playPop, playSuccess, playError, onStarEarned, challe
                 disabled={selectedAnswer !== null}
                 onClick={() => handleAnswerSelect(opt)}
                 testId="math-answer-option"
-                className="text-4xl md:text-5xl font-black text-white"
+                className="text-3xl md:text-4xl font-black text-white"
               >
                 {opt}
               </AnswerBubble>
