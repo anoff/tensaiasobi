@@ -402,6 +402,16 @@ export const ko: TranslationSchema = {
     leftoverLabel: "남은 것",
     victory: "냠냠! 공평하게 나눴어요!",
   },
+  waveSurfer: {
+    title: "파도 서퍼! 🏄",
+    subtitle: "서퍼를 조종해서 정답을 잡아보세요!",
+    help: "레인을 터치하거나 위아래로 스와이프하세요!",
+    victory: "🎉 멋진 파도 타기였어요!",
+    playAgain: "다시 하기",
+    round: "라운드 {current}/{total}",
+    challenge: "문제",
+    earnedStars: "별 {count}개를 받았어요!",
+  },
   challenge: {
     title: "도전 모드 🎯",
     subtitle: "도전을 완료하고 보상을 잠금 해제하세요!",

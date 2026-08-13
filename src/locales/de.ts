@@ -402,6 +402,16 @@ export const de: TranslationSchema = {
     leftoverLabel: "Reste",
     victory: "Lecker! Fair geteilt!",
   },
+  waveSurfer: {
+    title: "Wellenreiter! 🏄",
+    subtitle: "Lenke den Surfer zur richtigen Antwort!",
+    help: "Tippe auf eine Bahn oder wische hoch und runter!",
+    victory: "🎉 Tolle Wellenfahrt!",
+    playAgain: "Nochmal spielen",
+    round: "Runde {current}/{total}",
+    challenge: "Aufgabe",
+    earnedStars: "Du hast {count} Sterne verdient!",
+  },
   challenge: {
     title: "Herausforderungsmodus 🎯",
     subtitle: "Schließe Herausforderungen ab, um Belohnungen freizuschalten!",

@@ -402,6 +402,16 @@ export const fr: TranslationSchema = {
     leftoverLabel: "Restes",
     victory: "Miam ! Partagé équitablement !",
   },
+  waveSurfer: {
+    title: "Surfeur des Vagues ! 🏄",
+    subtitle: "Guide le surfeur vers la bonne réponse !",
+    help: "Tape sur une piste ou glisse de haut en bas !",
+    victory: "🎉 Super session de surf !",
+    playAgain: "Rejouer",
+    round: "Manche {current}/{total}",
+    challenge: "Défi",
+    earnedStars: "Tu as gagné {count} étoiles !",
+  },
   challenge: {
     title: "Mode Défi 🎯",
     subtitle: "Réussis les défis pour débloquer des récompenses !",

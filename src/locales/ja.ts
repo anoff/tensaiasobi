@@ -402,6 +402,16 @@ export const ja: TranslationSchema = {
     leftoverLabel: "あまり",
     victory: "やったね！ おなじかずに わけられたよ！",
   },
+  waveSurfer: {
+    title: "ウェーブサーファー！ 🏄",
+    subtitle: "サーファーを あやつって ただしい こたえを つかまえよう！",
+    help: "レーンを タップするか うえしたに スワイプして うごかそう！",
+    victory: "🎉 すごい なみのり だね！",
+    playAgain: "もういちど あそぶ",
+    round: "ラウンド {current}/{total}",
+    challenge: "もんだい",
+    earnedStars: "スターを {count} こ もらったよ！",
+  },
   challenge: {
     title: "チャレンジモード 🎯",
     subtitle: "ごほうびを アンロックするために チャレンジに ちょうせん しよう！",

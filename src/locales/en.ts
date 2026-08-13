@@ -400,6 +400,16 @@ export const en = {
     leftoverLabel: "Leftovers",
     victory: "Yum! Shared fairly!",
   },
+  waveSurfer: {
+    title: "Wave Surfer! 🏄",
+    subtitle: "Steer the surfer to catch the right answer!",
+    help: "Tap a lane or swipe up and down to move!",
+    victory: "🎉 Awesome wave riding!",
+    playAgain: "Play Again",
+    round: "Round {current}/{total}",
+    challenge: "Challenge",
+    earnedStars: "You earned {count} stars!",
+  },
   challenge: {
     title: "Challenge Mode 🎯",
     subtitle: "Complete challenges to unlock rewards!",
