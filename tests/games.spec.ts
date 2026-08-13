@@ -37,7 +37,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
       const mathLauncher = page.getByTestId('launch-math');
       await expect(mathLauncher).toBeVisible();
 
-      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort', 'shadow'] as const;
+      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort', 'shadow', 'wave-surfer'] as const;
 
       for (const gameKey of gameKeys) {
         // 2. Launch Game
@@ -250,6 +250,21 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             const choice = page.getByTestId('shadow-choice').first();
             await expect(choice).toBeVisible();
             await choice.click();
+            break;
+          }
+
+          case 'wave-surfer': {
+            const stage = page.getByTestId('wave-stage');
+            await expect(stage).toBeVisible();
+
+            // Tap a lane to move the surfer
+            const lane = page.getByTestId('wave-lane-0');
+            await expect(lane).toBeVisible();
+            await lane.click();
+
+            // Verify the three floating answer items rendered
+            const items = page.getByTestId('wave-item');
+            await expect(items.first()).toBeVisible();
             break;
           }
         }
