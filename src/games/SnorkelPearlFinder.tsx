@@ -11,6 +11,7 @@ interface PearlColor {
   name: string;
   bgClass: string;
   borderClass: string;
+  borderColor: string;
   shell: string;
   pearl: string;
   star: string;
@@ -34,10 +35,10 @@ interface DifficultyConfig {
 }
 
 const COLORS: PearlColor[] = [
-  { id: 'red', name: 'red', bgClass: 'bg-rose-400', borderClass: 'border-rose-600', shell: '🐚', pearl: '🔴', star: '⭐' },
-  { id: 'yellow', name: 'yellow', bgClass: 'bg-amber-300', borderClass: 'border-amber-500', shell: '🐚', pearl: '🟡', star: '🌟' },
-  { id: 'blue', name: 'blue', bgClass: 'bg-sky-400', borderClass: 'border-sky-600', shell: '🐚', pearl: '🔵', star: '✨' },
-  { id: 'green', name: 'green', bgClass: 'bg-emerald-400', borderClass: 'border-emerald-600', shell: '🐚', pearl: '🟢', star: '💫' },
+  { id: 'red', name: 'red', bgClass: 'bg-rose-400', borderClass: 'border-rose-600', borderColor: '#fb7185', shell: '🐚', pearl: '🔴', star: '⭐' },
+  { id: 'yellow', name: 'yellow', bgClass: 'bg-amber-300', borderClass: 'border-amber-500', borderColor: '#fcd34d', shell: '🐚', pearl: '🟡', star: '🌟' },
+  { id: 'blue', name: 'blue', bgClass: 'bg-sky-400', borderClass: 'border-sky-600', borderColor: '#38bdf8', shell: '🐚', pearl: '🔵', star: '✨' },
+  { id: 'green', name: 'green', bgClass: 'bg-emerald-400', borderClass: 'border-emerald-600', borderColor: '#34d399', shell: '🐚', pearl: '🟢', star: '💫' },
 ];
 
 const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
@@ -196,10 +197,11 @@ export function SnorkelPearlFinder({ playPop, playSuccess, playError, onStarEarn
   }, [difficulty, startRound]);
 
   useEffect(() => {
+    if (!config.bubblesMove) return;
+
     const animate = () => {
       setBubbles((prev) =>
         prev.map((bubble) => {
-          if (!config.bubblesMove) return bubble;
           const nextY = bubble.y + bubble.speedY;
           const nextX = bubble.x + bubble.speedX + Math.sin(Date.now() / 1000 + bubble.phase) * 0.3;
           return {
@@ -467,7 +469,7 @@ export function SnorkelPearlFinder({ playPop, playSuccess, playError, onStarEarn
                 style={{
                   left: pearl.x - PEARL_SIZE / 2,
                   top: pearl.y - PEARL_SIZE / 2,
-                  borderColor: color?.bgClass.replace('bg-', '') ?? '#cbd5e1',
+                  borderColor: color?.borderColor ?? '#cbd5e1',
                   touchAction: 'none',
                 }}
                 aria-label={color?.name ?? pearl.colorId}
@@ -501,7 +503,7 @@ export function SnorkelPearlFinder({ playPop, playSuccess, playError, onStarEarn
                 left: dragPos.x,
                 top: dragPos.y,
                 transform: 'translate(-50%, -50%) scale(1.2)',
-                borderColor: colorById.get(pearlById.colorId)?.bgClass.replace('bg-', '') ?? '#cbd5e1',
+                borderColor: colorById.get(pearlById.colorId)?.borderColor ?? '#cbd5e1',
               }}
             >
               <span>{colorById.get(pearlById.colorId)?.pearl}</span>

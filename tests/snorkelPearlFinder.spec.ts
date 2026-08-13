@@ -90,10 +90,11 @@ test.describe('Snorkel Pearl Finder E2E Tests', () => {
     const matchingClam = page.locator(`[data-clam-color="${pearlColor}"]`);
     await expect(matchingClam).toBeVisible();
 
+    const initialCount = await page.getByTestId('snorkel-pearl').count();
     await pearl.dragTo(matchingClam);
 
     // The pearl should be collected (removed from stage).
-    await expect(page.getByTestId('snorkel-pearl')).toHaveCount(2);
+    await expect(page.getByTestId('snorkel-pearl')).toHaveCount(initialCount - 1);
   });
 
   test('Verify incorrect match does not collect pearl', async ({ page }) => {
