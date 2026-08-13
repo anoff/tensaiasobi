@@ -33,6 +33,7 @@ export const ja: TranslationSchema = {
     numberTrain: "かずのれっしゃ",
     shadowFlashlight: "かげ",
     fairSharePicnic: "ピクニックわけっこ",
+    waveSurfer: "ウェーブサーファー",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",

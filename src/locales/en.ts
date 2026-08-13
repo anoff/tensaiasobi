@@ -31,6 +31,7 @@ export const en = {
     numberTrain: "Number Train",
     shadowFlashlight: "Shadow",
     fairSharePicnic: "Fair Share Picnic",
+    waveSurfer: "Wave Surfer",
   },
   parentGate: {
     title: "Parents Only 🔒",
