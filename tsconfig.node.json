@@ -27,6 +27,7 @@
     "tailwind.config.js",
     "postcss.config.js",
     "playwright.config.ts",
+    "vitest.config.ts",
     "tests/**/*.ts"
   ]
 }
