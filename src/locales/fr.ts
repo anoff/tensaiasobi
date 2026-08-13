@@ -33,6 +33,7 @@ export const fr: TranslationSchema = {
     numberTrain: "Train des Chiffres",
     shadowFlashlight: "Ombre",
     fairSharePicnic: "Pique-nique à partager",
+    snorkelPearlFinder: "Chercheur de perles",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -401,6 +402,13 @@ export const fr: TranslationSchema = {
     basketLabel: "Panier de collations",
     leftoverLabel: "Restes",
     victory: "Miam ! Partagé équitablement !",
+  },
+  snorkelPearlFinder: {
+    title: "Chercheur de perles ! 🐚",
+    subtitle: "Essuie les bulles et glisse les perles vers les palourdes de la même couleur !",
+    help: "Glisse une perle vers la palourde de la même couleur !",
+    victory: "🎉 Toutes les perles sont associées !",
+    playAgain: "Rejouer",
   },
   challenge: {
     title: "Mode Défi 🎯",

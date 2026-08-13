@@ -188,6 +188,15 @@
     animation-fill-mode: forwards;
   }
 
+  /* ── Snorkel Pearl Finder sparkle float ── */
+  @keyframes sparkle-float {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    100% { transform: translate(-50%, -180%) scale(1.2); opacity: 0; }
+  }
+  .animate-sparkle {
+    animation: sparkle-float 0.9s ease-out forwards;
+  }
+
   /* ── Safe area helpers (iOS notch / home indicator) ── */
   .pt-safe {
     padding-top: env(safe-area-inset-top);

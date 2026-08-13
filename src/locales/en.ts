@@ -31,6 +31,7 @@ export const en = {
     numberTrain: "Number Train",
     shadowFlashlight: "Shadow",
     fairSharePicnic: "Fair Share Picnic",
+    snorkelPearlFinder: "Pearl Finder",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -399,6 +400,13 @@ export const en = {
     basketLabel: "Snack Basket",
     leftoverLabel: "Leftovers",
     victory: "Yum! Shared fairly!",
+  },
+  snorkelPearlFinder: {
+    title: "Snorkel Pearl Finder! 🐚",
+    subtitle: "Wipe bubbles away and drag pearls to matching clams!",
+    help: "Drag a pearl to the clam with the same color!",
+    victory: "🎉 All pearls matched!",
+    playAgain: "Play Again",
   },
   challenge: {
     title: "Challenge Mode 🎯",
