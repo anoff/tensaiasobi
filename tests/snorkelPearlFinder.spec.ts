@@ -104,9 +104,6 @@ test.describe('Snorkel Pearl Finder E2E Tests', () => {
     const pearlColor = await pearl.getAttribute('data-pearl-color');
     expect(pearlColor).not.toBeNull();
 
-    const wrongClam = page.getByTestId('snorkel-clam').filter({
-      hasNot: page.locator(`..`),
-    }).first();
     const clams = page.getByTestId('snorkel-clam');
     let targetClam = clams.first();
     for (let i = 0; i < await clams.count(); i++) {
