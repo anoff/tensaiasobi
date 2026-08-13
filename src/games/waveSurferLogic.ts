@@ -132,14 +132,7 @@ function generateSpellingChallenge(difficulty: GameDifficulty): SpellingChalleng
   const target = wordList[randomInt(0, wordList.length - 1)];
   const answer = difficulty === 'hard' ? target.word : target.startsWith;
 
-  let text: string;
-  if (difficulty === 'easy') {
-    text = `Starts with '${answer}'`;
-  } else if (difficulty === 'medium') {
-    text = `Starts with '${answer}'`;
-  } else {
-    text = `Find: ${target.emoji}`;
-  }
+  const text = difficulty === 'hard' ? `Find: ${target.emoji}` : `Starts with '${answer}'`;
 
   const optionsSet = new Set<string>([answer]);
   while (optionsSet.size < LANE_COUNT) {
@@ -196,14 +189,16 @@ export function generateObstacles(difficulty: GameDifficulty, stageWidth: number
     return obstacles;
   }
 
-  // Hard: multiple obstacles, never block all lanes.
-  const laneBlocked = new Set<number>();
+  // Hard: multiple obstacles, but never block all lanes.
+  const blockedLanes = new Set<number>();
   const count = randomInt(2, 4);
   for (let i = 0; i < count; i++) {
     const lane = randomInt(0, LANE_COUNT - 1);
-    if (!laneBlocked.has(lane)) {
-      laneBlocked.add(lane);
+    if (blockedLanes.size === LANE_COUNT - 1 && !blockedLanes.has(lane)) {
+      // Adding this lane would block every lane; skip it.
+      continue;
     }
+    blockedLanes.add(lane);
     const x = stageWidth * (0.35 + Math.random() * 0.5);
     obstacles.push({
       lane,
