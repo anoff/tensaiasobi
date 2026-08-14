@@ -34,6 +34,7 @@ export const fr: TranslationSchema = {
     shadowFlashlight: "Ombre",
     fairSharePicnic: "Pique-nique à partager",
     snorkelPearlFinder: "Chercheur de perles",
+    bodyboardWaveRider: "Surfeur de vagues",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -408,6 +409,18 @@ export const fr: TranslationSchema = {
     subtitle: "Essuie les bulles et glisse les perles vers les palourdes de la même couleur !",
     help: "Glisse une perle vers la palourde de la même couleur !",
     victory: "🎉 Toutes les perles sont associées !",
+    playAgain: "Rejouer",
+  },
+  bodyboardWaveRider: {
+    title: "Bodyboard sur les vagues ! 🏄",
+    subtitle: "Attends la grande vague et surfe jusqu'à la plage !",
+    help: "Pagaye dans la lueur verte. Glisse vers le haut ou le bas !",
+    paddle: "PAGAYER",
+    distance: "Distance",
+    caught: "Tu as attrapé une vague parfaite !",
+    missed: "Oups ! Attends la lueur verte.",
+    rock: "Plouf ! Évite les rochers !",
+    victory: "Super glisse jusqu'à la plage !",
     playAgain: "Rejouer",
   },
   challenge: {

@@ -25,6 +25,7 @@ import NumberTrain from './games/NumberTrain';
 import ShadowFlashlight from './games/ShadowFlashlight';
 import FairSharePicnic from './games/FairSharePicnic';
 import SnorkelPearlFinder from './games/SnorkelPearlFinder';
+import BodyboardWaveRider from './games/BodyboardWaveRider';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 import GameConfetti from './components/GameConfetti';
 
@@ -39,14 +40,14 @@ import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'coupons' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'fruitMathPop' | 'numberTrain' | 'shadowFlashlight' | 'fairSharePicnic' | 'snorkelPearlFinder';
+type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'coupons' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'fruitMathPop' | 'numberTrain' | 'shadowFlashlight' | 'fairSharePicnic' | 'snorkelPearlFinder' | 'bodyboardWaveRider';
 
 interface LauncherDef {
   id: Screen;
   color: 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'red';
   testid: string;
   emoji: string;
-   label: 'math' | 'odd' | 'doodle' | 'match' | 'maze' | 'trace' | 'letterTrace' | 'dobble' | 'anlaut' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'fruitMathPop' | 'numberTrain' | 'shadowFlashlight' | 'fairSharePicnic' | 'snorkelPearlFinder';
+   label: 'math' | 'odd' | 'doodle' | 'match' | 'maze' | 'trace' | 'letterTrace' | 'dobble' | 'anlaut' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'fruitMathPop' | 'numberTrain' | 'shadowFlashlight' | 'fairSharePicnic' | 'snorkelPearlFinder' | 'bodyboardWaveRider';
 }
 
 const GAME_LAUNCHERS: LauncherDef[] = [
@@ -69,6 +70,7 @@ const GAME_LAUNCHERS: LauncherDef[] = [
   { id: 'shadowFlashlight', color: 'purple', testid: 'launch-shadow', emoji: '🔦', label: 'shadowFlashlight' },
   { id: 'fairSharePicnic', color: 'green', testid: 'launch-fair-share-picnic', emoji: '🧺', label: 'fairSharePicnic' },
   { id: 'snorkelPearlFinder', color: 'blue', testid: 'launch-snorkel-pearl-finder', emoji: '🤿', label: 'snorkelPearlFinder' },
+  { id: 'bodyboardWaveRider', color: 'purple', testid: 'launch-bodyboard-wave-rider', emoji: '🏄', label: 'bodyboardWaveRider' },
 ];
 
 function AppContent() {
@@ -330,6 +332,15 @@ function AppContent() {
       case 'snorkelPearlFinder':
         return (
           <SnorkelPearlFinder
+            playPop={playPop}
+            playSuccess={playSuccess}
+            playError={playError}
+            onStarEarned={handleStarEarned}
+          />
+        );
+      case 'bodyboardWaveRider':
+        return (
+          <BodyboardWaveRider
             playPop={playPop}
             playSuccess={playSuccess}
             playError={playError}
