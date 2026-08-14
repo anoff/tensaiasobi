@@ -1,8 +1,6 @@
 import { shuffle } from '../utils/shuffle';
 import type { GameDifficulty } from '../types/game';
 
-export type WaveChallengeType = 'math' | 'spelling';
-
 export interface MathChallenge {
   type: 'math';
   text: string;
@@ -10,15 +8,7 @@ export interface MathChallenge {
   options: number[];
 }
 
-export interface SpellingChallenge {
-  type: 'spelling';
-  text: string;
-  answer: string;
-  options: string[];
-  promptEmoji?: string;
-}
-
-export type WaveChallenge = MathChallenge | SpellingChallenge;
+export type WaveChallenge = MathChallenge;
 
 export interface WaveRound {
   challenge: WaveChallenge;
@@ -36,39 +26,7 @@ export interface WaveFrame {
   obstacles: WaveObstacle[];
 }
 
-export interface WordItem {
-  emoji: string;
-  word: string;
-  startsWith: string;
-}
-
 const LANE_COUNT = 3;
-const EASY_WORDS: WordItem[] = [
-  { emoji: '🐟', word: 'fish', startsWith: 'F' },
-  { emoji: '🦀', word: 'crab', startsWith: 'C' },
-  { emoji: '🐙', word: 'octopus', startsWith: 'O' },
-  { emoji: '🦐', word: 'shrimp', startsWith: 'SH' },
-  { emoji: '🐠', word: 'tropical fish', startsWith: 'T' },
-  { emoji: '🐡', word: 'pufferfish', startsWith: 'P' },
-];
-
-const MEDIUM_WORDS: WordItem[] = [
-  { emoji: '🐬', word: 'dolphin', startsWith: 'D' },
-  { emoji: '🐳', word: 'whale', startsWith: 'W' },
-  { emoji: '🦑', word: 'squid', startsWith: 'S' },
-  { emoji: '🐚', word: 'shell', startsWith: 'SH' },
-  { emoji: '🪸', word: 'coral', startsWith: 'C' },
-  { emoji: '🦭', word: 'seal', startsWith: 'SE' },
-];
-
-const HARD_WORDS: WordItem[] = [
-  { emoji: '🦈', word: 'shark', startsWith: 'SH' },
-  { emoji: '🐋', word: 'blue whale', startsWith: 'B' },
-  { emoji: '🧜', word: 'mermaid', startsWith: 'M' },
-  { emoji: '🦞', word: 'lobster', startsWith: 'L' },
-  { emoji: '🦪', word: 'oyster', startsWith: 'O' },
-  { emoji: '🌊', word: 'wave', startsWith: 'W' },
-];
 
 function randomInt(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
@@ -98,12 +56,17 @@ function generateMathChallenge(difficulty: GameDifficulty): MathChallenge {
     answer = operator === '+' ? num1 + num2 : num1 - num2;
     text = `${num1} ${operator} ${num2} = ?`;
   } else {
-    num1 = randomInt(10, 50);
-    num2 = randomInt(1, 20);
+    const maxAnswer = 50;
     operator = Math.random() > 0.5 ? '+' : '-';
-    if (operator === '-' && num1 < num2) {
-      [num1, num2] = [num2, num1];
+
+    if (operator === '+') {
+      num1 = randomInt(10, maxAnswer - 1);
+      num2 = randomInt(1, maxAnswer - num1);
+    } else {
+      num1 = randomInt(10, maxAnswer);
+      num2 = randomInt(1, num1);
     }
+
     answer = operator === '+' ? num1 + num2 : num1 - num2;
     text = `${num1} ${operator} ${num2} = ?`;
   }
@@ -126,38 +89,8 @@ function generateMathChallenge(difficulty: GameDifficulty): MathChallenge {
   };
 }
 
-function generateSpellingChallenge(difficulty: GameDifficulty): SpellingChallenge {
-  const wordList = difficulty === 'easy' ? EASY_WORDS : difficulty === 'medium' ? MEDIUM_WORDS : HARD_WORDS;
-  const target = wordList[randomInt(0, wordList.length - 1)];
-  const answer = difficulty === 'hard' ? target.word : target.startsWith;
-
-  const text = difficulty === 'hard' ? `Find: ${target.emoji}` : `Starts with '${answer}'`;
-
-  const optionsSet = new Set<string>([answer]);
-  while (optionsSet.size < LANE_COUNT) {
-    const candidate = wordList[randomInt(0, wordList.length - 1)];
-    const value = difficulty === 'hard' ? candidate.word : candidate.startsWith;
-    if (value !== answer) {
-      optionsSet.add(value);
-    }
-  }
-
-  return {
-    type: 'spelling',
-    text,
-    answer,
-    options: shuffle(Array.from(optionsSet)),
-    promptEmoji: difficulty === 'hard' ? target.emoji : undefined,
-  };
-}
-
 export function generateWaveRound(difficulty: GameDifficulty): WaveRound {
-  const challengeType: WaveChallengeType =
-    difficulty === 'easy' ? 'math' : Math.random() > 0.5 ? 'math' : 'spelling';
-
-  const challenge = challengeType === 'math'
-    ? generateMathChallenge(difficulty)
-    : generateSpellingChallenge(difficulty);
+  const challenge = generateMathChallenge(difficulty);
 
   const itemLanes = shuffle([0, 1, 2]);
   const correctIndex = challenge.options.findIndex((opt) => opt === challenge.answer);
@@ -178,34 +111,12 @@ export function generateObstacles(difficulty: GameDifficulty, stageWidth: number
     return obstacles;
   }
 
-  if (difficulty === 'medium') {
-    const blockedLane = randomInt(0, LANE_COUNT - 1);
-    obstacles.push({
-      lane: blockedLane,
-      x: stageWidth * 0.6,
-      emoji: emojis[0],
-    });
-    return obstacles;
-  }
-
-  // Hard: multiple obstacles, but never block all lanes.
-  const blockedLanes = new Set<number>();
-  const count = randomInt(2, 4);
-  for (let i = 0; i < count; i++) {
-    const lane = randomInt(0, LANE_COUNT - 1);
-    if (blockedLanes.size === LANE_COUNT - 1 && !blockedLanes.has(lane)) {
-      // Adding this lane would block every lane; skip it.
-      continue;
-    }
-    blockedLanes.add(lane);
-    const x = stageWidth * (0.35 + Math.random() * 0.5);
-    obstacles.push({
-      lane,
-      x,
-      emoji: emojis[randomInt(0, emojis.length - 1)],
-    });
-  }
-
+  const blockedLane = randomInt(0, LANE_COUNT - 1);
+  obstacles.push({
+    lane: blockedLane,
+    x: stageWidth * 0.6,
+    emoji: emojis[0],
+  });
   return obstacles;
 }
 

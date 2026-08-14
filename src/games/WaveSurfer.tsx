@@ -21,8 +21,8 @@ const TARGET_ROUNDS = 4;
 
 const SPEEDS: Record<GameDifficulty, number> = {
   easy: 1.4,
-  medium: 2.2,
-  hard: 3.2,
+  medium: 1.4,
+  hard: 1.7,
 };
 
 const ITEM_SIZE = 72;
@@ -487,7 +487,6 @@ export default function WaveSurfer({ playPop, playSuccess, playError, onStarEarn
         <div className="bg-white/80 border-2 border-sky-300 rounded-2xl px-4 py-2 text-center shadow-sm">
           <div className="text-xs font-black text-slate-400 uppercase tracking-wider">{t.waveSurfer.challenge}</div>
           <div className="text-xl md:text-2xl font-black text-slate-800">
-            {round.challenge.type === 'spelling' && round.challenge.promptEmoji ? `${round.challenge.promptEmoji} ` : ''}
             {round.challenge.text}
           </div>
         </div>
