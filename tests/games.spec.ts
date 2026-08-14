@@ -37,7 +37,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
       const mathLauncher = page.getByTestId('launch-math');
       await expect(mathLauncher).toBeVisible();
 
-      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort', 'shadow'] as const;
+      const gameKeys = ['math', 'odd', 'doodle', 'memory', 'maze', 'trace', 'letterTrace', 'anlaut', 'dispatch', 'physics', 'tower-sort', 'shadow', 'bodyboard-wave-rider'] as const;
 
       for (const gameKey of gameKeys) {
         // 2. Launch Game
@@ -250,6 +250,17 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
             const choice = page.getByTestId('shadow-choice').first();
             await expect(choice).toBeVisible();
             await choice.click();
+            break;
+          }
+
+          case 'bodyboard-wave-rider': {
+            const canvas = page.getByTestId('bodyboard-canvas');
+            await expect(canvas).toBeVisible();
+
+            // Verify the paddle button is visible and tappable.
+            const paddleBtn = page.getByTestId('bodyboard-paddle');
+            await expect(paddleBtn).toBeVisible();
+            await paddleBtn.click();
             break;
           }
         }

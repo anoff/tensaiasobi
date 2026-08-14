@@ -249,9 +249,11 @@ export function BodyboardWaveRider({ playPop, playSuccess, playError, onStarEarn
   const handlePaddle = useCallback(() => {
     if (statusRef.current !== 'waiting') return;
     playPop();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const forceMiss = typeof window !== 'undefined' && (window as any).__bodyboardForceMiss === true;
     const currentWaves = waves;
     const activeWave = getActiveWave(currentWaves, BOARD_X, elapsed);
-    if (activeWave && isAligned(activeWave, elapsed, BOARD_X, config.alignmentWindow)) {
+    if (!forceMiss && activeWave && isAligned(activeWave, elapsed, BOARD_X, config.alignmentWindow)) {
       setStatus('riding');
       statusRef.current = 'riding';
       setRidingWaveId(activeWave.id);
