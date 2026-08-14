@@ -123,6 +123,7 @@ export default function BodyboardWaveRider({ playPop, playSuccess, playError, on
   useEffect(() => {
     let frame = 0;
     const tick = (now: number) => {
+      if (phaseRef.current === 'missed' || phaseRef.current === 'won') return;
       const previous = lastFrameRef.current ?? now;
       const delta = Math.min(now - previous, 50);
       lastFrameRef.current = now;
