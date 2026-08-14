@@ -34,6 +34,7 @@ export const de: TranslationSchema = {
     shadowFlashlight: "Schatten",
     fairSharePicnic: "Picknick teilen",
     snorkelPearlFinder: "Perlen-Taucher",
+    bodyboardWaveRider: "Wellenreiter",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -408,6 +409,17 @@ export const de: TranslationSchema = {
     subtitle: "Wische Blasen weg und ziehe Perlen zur passenden Muschel!",
     help: "Ziehe eine Perle zur Muschel in der gleichen Farbe!",
     victory: "🎉 Alle Perlen zugeordnet!",
+    playAgain: "Nochmal spielen",
+  },
+  bodyboardWaveRider: {
+    title: "Bodyboard-Welle! 🏄‍♂️",
+    subtitle: "Fange die perfekte Welle und reite zum Strand!",
+    help: "Tippe PADDELN, wenn das grüne Leuchten am stärksten ist, dann wische hoch und runter zum Steuern!",
+    paddle: "Paddeln",
+    distance: "Strecke",
+    riding: "Auf der Welle! 🌊",
+    missed: "Die Welle ist vorbei. Versuch es nochmal!",
+    victory: "🎉 Du hast den Strand erreicht!",
     playAgain: "Nochmal spielen",
   },
   challenge: {

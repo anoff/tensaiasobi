@@ -34,6 +34,7 @@ export const ko: TranslationSchema = {
     shadowFlashlight: "그림자",
     fairSharePicnic: "공평한 소풍",
     snorkelPearlFinder: "진주 찾기",
+    bodyboardWaveRider: "파도 타기",
   },
   parentGate: {
     title: "부모님 전용 🔒",
@@ -408,6 +409,17 @@ export const ko: TranslationSchema = {
     subtitle: "거품을 닦아내고 진주를 같은 색 조개로 끌어다 놓으세요!",
     help: "진주를 같은 색 조개로 끌어다 놓으세요!",
     victory: "🎉 모든 진주를 맞췄어요!",
+    playAgain: "다시 하기",
+  },
+  bodyboardWaveRider: {
+    title: "바디보드 서핑! 🏄‍♂️",
+    subtitle: "완벽한 파도를 잡아 해변까지 달려가요!",
+    help: "초록색 빛이 가장 쎌 때 PADDLE을 누르고, 위아래로 스와이프해서 조종하세요!",
+    paddle: "PADDLE",
+    distance: "거리",
+    riding: "파도를 타고 있어요! 🌊",
+    missed: "파도를 놓쳤어요. 다시 해보세요!",
+    victory: "🎉 해변에 도착했어요!",
     playAgain: "다시 하기",
   },
   challenge: {
