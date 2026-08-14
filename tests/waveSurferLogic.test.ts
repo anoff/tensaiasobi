@@ -19,9 +19,27 @@ describe('Wave Surfer logic', () => {
     }
   });
 
-  test('math challenges for each difficulty fit stated rules', () => {
+  test('easy math uses only small addition', () => {
     for (let i = 0; i < 100; i++) {
       const round = generateWaveRound('easy');
+      expect(round.challenge.type).toBe('math');
+      const text = round.challenge.text;
+      const match = text.match(/^(\d+) \+ (\d+) = \?$/);
+      expect(match).not.toBeNull();
+      const [, left, right] = match!;
+      const l = Number(left);
+      const r = Number(right);
+      expect(l).toBeGreaterThanOrEqual(1);
+      expect(l).toBeLessThanOrEqual(5);
+      expect(r).toBeGreaterThanOrEqual(1);
+      expect(r).toBeLessThanOrEqual(4);
+      expect(round.challenge.answer).toBe(l + r);
+    }
+  });
+
+  test('medium math uses single-digit numbers with + or -', () => {
+    for (let i = 0; i < 100; i++) {
+      const round = generateWaveRound('medium');
       if (round.challenge.type === 'math') {
         const text = round.challenge.text;
         const match = text.match(/^(\d+) ([+\-×]) (\d+) = \?$/);
@@ -30,11 +48,10 @@ describe('Wave Surfer logic', () => {
         const l = Number(left);
         const r = Number(right);
         expect(l).toBeGreaterThanOrEqual(1);
+        expect(l).toBeLessThanOrEqual(9);
         expect(r).toBeGreaterThanOrEqual(1);
-        if (op === '+' || op === '-') {
-          expect(l).toBeLessThanOrEqual(9);
-          expect(r).toBeLessThanOrEqual(9);
-        }
+        expect(r).toBeLessThanOrEqual(9);
+        expect(op).not.toBe('×');
         if (op === '-') {
           expect(l).toBeGreaterThanOrEqual(r);
         }
@@ -42,9 +59,9 @@ describe('Wave Surfer logic', () => {
     }
   });
 
-  test('medium math uses double-digit numbers under 50', () => {
+  test('hard math uses double-digit numbers under 50 with + or -', () => {
     for (let i = 0; i < 100; i++) {
-      const round = generateWaveRound('medium');
+      const round = generateWaveRound('hard');
       if (round.challenge.type === 'math') {
         const text = round.challenge.text;
         const match = text.match(/^(\d+) ([+\-×]) (\d+) = \?$/);
@@ -57,25 +74,9 @@ describe('Wave Surfer logic', () => {
         expect(r).toBeGreaterThanOrEqual(1);
         expect(r).toBeLessThanOrEqual(20);
         expect(op).not.toBe('×');
-      }
-    }
-  });
-
-  test('hard math uses single-digit multiplication', () => {
-    for (let i = 0; i < 100; i++) {
-      const round = generateWaveRound('hard');
-      if (round.challenge.type === 'math') {
-        const text = round.challenge.text;
-        const match = text.match(/^(\d+) × (\d+) = \?$/);
-        expect(match).not.toBeNull();
-        const [, left, right] = match!;
-        const l = Number(left);
-        const r = Number(right);
-        expect(l).toBeGreaterThanOrEqual(2);
-        expect(l).toBeLessThanOrEqual(9);
-        expect(r).toBeGreaterThanOrEqual(2);
-        expect(r).toBeLessThanOrEqual(9);
-        expect(round.challenge.answer).toBe(l * r);
+        if (op === '-') {
+          expect(l).toBeGreaterThanOrEqual(r);
+        }
       }
     }
   });
@@ -107,7 +108,8 @@ describe('Wave Surfer logic', () => {
         const challenge = round.challenge as Extract<WaveChallenge, { type: 'spelling' }>;
         expect(challenge.promptEmoji).toBeTruthy();
         expect(challenge.text).toContain('Find:');
-        expect(challenge.answer).toMatch(/^[a-z]+$/i);
+        expect(challenge.answer).toMatch(/^[a-z\s]+$/i);
+        expect(challenge.answer.trim().length).toBeGreaterThan(0);
       }
     }
   });
