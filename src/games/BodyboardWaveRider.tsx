@@ -4,7 +4,7 @@ import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
 import type { GameDifficulty, GameProps } from '../types/game';
-import { isWaveAligned, isWaveRideableAtBeach, waveAmplitudeAt, waveKindAt } from './bodyboardWaveRiderLogic';
+import { isWaveAligned, isWaveRideableAtBeach, waveAmplitudeAt, waveKindAt, waveProgressAt } from './bodyboardWaveRiderLogic';
 
 type Phase = 'waiting' | 'riding' | 'missed' | 'won';
 
@@ -146,7 +146,8 @@ export default function BodyboardWaveRider({ playPop, playSuccess, playError, on
           distanceRef.current = nextDistance;
           setDistance(Math.floor(nextDistance));
           const nextProgress = Math.min(1, nextDistance / config.target);
-          const ridingWaveX = ridingWaveStartRef.current + WAVE_LENGTH * 0.45 * nextProgress;
+          const waveStart = Math.floor(ridingWaveStartRef.current / WAVE_LENGTH) * WAVE_LENGTH;
+          const ridingWaveX = waveStart + WAVE_LENGTH * Math.min(0.95, waveProgressAt(ridingWaveStartRef.current) + 0.45 * nextProgress);
           const nextAmplitude = waveAmplitudeAt(ridingWaveX);
           setRideProgress(nextProgress);
           setRidingWaveAmplitude(nextAmplitude);
