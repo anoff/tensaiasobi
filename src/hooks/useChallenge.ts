@@ -17,12 +17,13 @@ const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
   emojiMatch: false,
   anlaut: true,
   shiritori: true,
-  puzzle: true,
-  dispatch: true,
+  puzzle: false,
+  dispatch: false,
   physics: true,
   towerSort: true,
-  numberTrain: true,
-  waveSurfer: true,
+  numberTrain: false,
+  waveSurfer: false,
+  snorkelPearlFinder: false,
 };
 
 export function useChallenge() {

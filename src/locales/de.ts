@@ -34,6 +34,7 @@ export const de: TranslationSchema = {
     shadowFlashlight: "Schatten",
     fairSharePicnic: "Picknick teilen",
     waveSurfer: "Wellenreiter",
+    snorkelPearlFinder: "Perlen-Taucher",
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -412,6 +413,13 @@ export const de: TranslationSchema = {
     round: "Runde {current}/{total}",
     challenge: "Aufgabe",
     earnedStars: "Du hast {count} Sterne verdient!",
+  },
+  snorkelPearlFinder: {
+    title: "Perlen-Taucher! 🐚",
+    subtitle: "Wische Blasen weg und ziehe Perlen zur passenden Muschel!",
+    help: "Ziehe eine Perle zur Muschel in der gleichen Farbe!",
+    victory: "🎉 Alle Perlen zugeordnet!",
+    playAgain: "Nochmal spielen",
   },
   challenge: {
     title: "Herausforderungsmodus 🎯",

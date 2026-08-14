@@ -34,6 +34,7 @@ export const ja: TranslationSchema = {
     shadowFlashlight: "かげ",
     fairSharePicnic: "ピクニックわけっこ",
     waveSurfer: "ウェーブサーファー",
+    snorkelPearlFinder: "しんじゅさがし",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -412,6 +413,13 @@ export const ja: TranslationSchema = {
     round: "ラウンド {current}/{total}",
     challenge: "もんだい",
     earnedStars: "スターを {count} こ もらったよ！",
+  },
+  snorkelPearlFinder: {
+    title: "しんじゅさがし！🐚",
+    subtitle: "あわを ふいて しんじゅを おなじいろの はまぐりに いれよう！",
+    help: "しんじゅを おなじいろの はまぐりに ドラッグしてね！",
+    victory: "🎉 ぜんぶの しんじゅが あいだよ！",
+    playAgain: "もういちどあそぶ",
   },
   challenge: {
     title: "チャレンジモード 🎯",

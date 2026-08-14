@@ -34,6 +34,7 @@ export const fr: TranslationSchema = {
     shadowFlashlight: "Ombre",
     fairSharePicnic: "Pique-nique à partager",
     waveSurfer: "Surfeur des Vagues",
+    snorkelPearlFinder: "Chercheur de perles",
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -412,6 +413,13 @@ export const fr: TranslationSchema = {
     round: "Manche {current}/{total}",
     challenge: "Défi",
     earnedStars: "Tu as gagné {count} étoiles !",
+  },
+  snorkelPearlFinder: {
+    title: "Chercheur de perles ! 🐚",
+    subtitle: "Essuie les bulles et glisse les perles vers les palourdes de la même couleur !",
+    help: "Glisse une perle vers la palourde de la même couleur !",
+    victory: "🎉 Toutes les perles sont associées !",
+    playAgain: "Rejouer",
   },
   challenge: {
     title: "Mode Défi 🎯",

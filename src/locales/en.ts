@@ -32,6 +32,7 @@ export const en = {
     shadowFlashlight: "Shadow",
     fairSharePicnic: "Fair Share Picnic",
     waveSurfer: "Wave Surfer",
+    snorkelPearlFinder: "Pearl Finder",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -409,7 +410,14 @@ export const en = {
     playAgain: "Play Again",
     round: "Round {current}/{total}",
     challenge: "Challenge",
-    earnedStars: "You earned {count} stars!",
+    earnedStars: "You earned {count} stars!"
+  },
+  snorkelPearlFinder: {
+    title: "Snorkel Pearl Finder! 🐚",
+    subtitle: "Wipe bubbles away and drag pearls to matching clams!",
+    help: "Drag a pearl to the clam with the same color!",
+    victory: "🎉 All pearls matched!",
+    playAgain: "Play Again",
   },
   challenge: {
     title: "Challenge Mode 🎯",

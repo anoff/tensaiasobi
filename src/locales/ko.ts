@@ -34,6 +34,7 @@ export const ko: TranslationSchema = {
     shadowFlashlight: "그림자",
     fairSharePicnic: "공평한 소풍",
     waveSurfer: "파도 서퍼",
+    snorkelPearlFinder: "진주 찾기",
   },
   parentGate: {
     title: "부모님 전용 🔒",
@@ -412,6 +413,13 @@ export const ko: TranslationSchema = {
     round: "라운드 {current}/{total}",
     challenge: "문제",
     earnedStars: "별 {count}개를 받았어요!",
+  },
+  snorkelPearlFinder: {
+    title: "진주 찾기! 🐚",
+    subtitle: "거품을 닦아내고 진주를 같은 색 조개로 끌어다 놓으세요!",
+    help: "진주를 같은 색 조개로 끌어다 놓으세요!",
+    victory: "🎉 모든 진주를 맞췄어요!",
+    playAgain: "다시 하기",
   },
   challenge: {
     title: "도전 모드 🎯",
