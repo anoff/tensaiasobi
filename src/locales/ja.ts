@@ -33,6 +33,7 @@ export const ja: TranslationSchema = {
     numberTrain: "かずのれっしゃ",
     shadowFlashlight: "かげ",
     fairSharePicnic: "ピクニックわけっこ",
+    waveSurfer: "ウェーブサーファー",
     snorkelPearlFinder: "しんじゅさがし",
   },
   parentGate: {
@@ -402,6 +403,18 @@ export const ja: TranslationSchema = {
     basketLabel: "おやつバスケット",
     leftoverLabel: "あまり",
     victory: "やったね！ おなじかずに わけられたよ！",
+  },
+  waveSurfer: {
+    title: "ウェーブサーファー！ 🏄",
+    subtitle: "サーファーを あやつって ただしい こたえを つかまえよう！",
+    help: "レーンを タップするか うえしたに スワイプして うごかそう！",
+    victory: "🎉 すごい なみのり だね！",
+    playAgain: "もういちど あそぶ",
+    tryAgain: "ずぶぬれ！ もういちど？",
+    retry: "もういちど",
+    round: "ラウンド {current}/{total}",
+    challenge: "もんだい",
+    earnedStars: "スターを {count} こ もらったよ！",
   },
   snorkelPearlFinder: {
     title: "しんじゅさがし！🐚",

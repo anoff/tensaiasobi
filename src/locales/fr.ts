@@ -33,6 +33,7 @@ export const fr: TranslationSchema = {
     numberTrain: "Train des Chiffres",
     shadowFlashlight: "Ombre",
     fairSharePicnic: "Pique-nique à partager",
+    waveSurfer: "Surfeur des Vagues",
     snorkelPearlFinder: "Chercheur de perles",
   },
   parentGate: {
@@ -402,6 +403,18 @@ export const fr: TranslationSchema = {
     basketLabel: "Panier de collations",
     leftoverLabel: "Restes",
     victory: "Miam ! Partagé équitablement !",
+  },
+  waveSurfer: {
+    title: "Surfeur des Vagues ! 🏄",
+    subtitle: "Guide le surfeur vers la bonne réponse !",
+    help: "Tape sur une piste ou glisse de haut en bas !",
+    victory: "🎉 Super session de surf !",
+    playAgain: "Rejouer",
+    tryAgain: "Trempé ! Réessayer ?",
+    retry: "Réessayer",
+    round: "Manche {current}/{total}",
+    challenge: "Défi",
+    earnedStars: "Tu as gagné {count} étoiles !",
   },
   snorkelPearlFinder: {
     title: "Chercheur de perles ! 🐚",

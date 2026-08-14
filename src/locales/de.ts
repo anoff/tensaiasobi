@@ -33,6 +33,7 @@ export const de: TranslationSchema = {
     numberTrain: "Zahlenzug",
     shadowFlashlight: "Schatten",
     fairSharePicnic: "Picknick teilen",
+    waveSurfer: "Wellenreiter",
     snorkelPearlFinder: "Perlen-Taucher",
   },
   parentGate: {
@@ -402,6 +403,18 @@ export const de: TranslationSchema = {
     basketLabel: "Snack-Korb",
     leftoverLabel: "Reste",
     victory: "Lecker! Fair geteilt!",
+  },
+  waveSurfer: {
+    title: "Wellenreiter! 🏄",
+    subtitle: "Lenke den Surfer zur richtigen Antwort!",
+    help: "Tippe auf eine Bahn oder wische hoch und runter!",
+    victory: "🎉 Tolle Wellenfahrt!",
+    playAgain: "Nochmal spielen",
+    tryAgain: "Abgesoffen! Nochmal?",
+    retry: "Nochmal versuchen",
+    round: "Runde {current}/{total}",
+    challenge: "Aufgabe",
+    earnedStars: "Du hast {count} Sterne verdient!",
   },
   snorkelPearlFinder: {
     title: "Perlen-Taucher! 🐚",

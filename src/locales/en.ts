@@ -31,6 +31,7 @@ export const en = {
     numberTrain: "Number Train",
     shadowFlashlight: "Shadow",
     fairSharePicnic: "Fair Share Picnic",
+    waveSurfer: "Wave Surfer",
     snorkelPearlFinder: "Pearl Finder",
   },
   parentGate: {
@@ -400,6 +401,18 @@ export const en = {
     basketLabel: "Snack Basket",
     leftoverLabel: "Leftovers",
     victory: "Yum! Shared fairly!",
+  },
+  waveSurfer: {
+    title: "Wave Surfer! 🏄",
+    subtitle: "Steer the surfer to catch the right answer!",
+    help: "Tap a lane or swipe up and down to move!",
+    victory: "🎉 Awesome wave riding!",
+    playAgain: "Play Again",
+    tryAgain: "Splashed! Try again?",
+    retry: "Retry",
+    round: "Round {current}/{total}",
+    challenge: "Challenge",
+    earnedStars: "You earned {count} stars!"
   },
   snorkelPearlFinder: {
     title: "Snorkel Pearl Finder! 🐚",

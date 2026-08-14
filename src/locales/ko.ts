@@ -33,6 +33,7 @@ export const ko: TranslationSchema = {
     numberTrain: "숫자 기차",
     shadowFlashlight: "그림자",
     fairSharePicnic: "공평한 소풍",
+    waveSurfer: "파도 서퍼",
     snorkelPearlFinder: "진주 찾기",
   },
   parentGate: {
@@ -402,6 +403,18 @@ export const ko: TranslationSchema = {
     basketLabel: "간식 바구니",
     leftoverLabel: "남은 것",
     victory: "냠냠! 공평하게 나눴어요!",
+  },
+  waveSurfer: {
+    title: "파도 서퍼! 🏄",
+    subtitle: "서퍼를 조종해서 정답을 잡아보세요!",
+    help: "레인을 터치하거나 위아래로 스와이프하세요!",
+    victory: "🎉 멋진 파도 타기였어요!",
+    playAgain: "다시 하기",
+    tryAgain: "물에 빠졌어요! 다시 해볼까요?",
+    retry: "다시 시도",
+    round: "라운드 {current}/{total}",
+    challenge: "문제",
+    earnedStars: "별 {count}개를 받았어요!",
   },
   snorkelPearlFinder: {
     title: "진주 찾기! 🐚",
