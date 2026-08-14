@@ -13,16 +13,16 @@ import {
 
 const LANE_COUNT = 3;
 const SURFER_EMOJI = '🏄';
-const BOARD_EMOJI = '🏄‍♂️';
-const FLOAT_EMOJIS = ['🛟', '🏐', '🌊', '🐠', '🦀'];
+const BOARD_EMOJI = '🤿';
+const FLOAT_EMOJIS = ['🐚', '🦪', '🪸', '🐡', '🐙'];
 
 const STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
 const TARGET_ROUNDS = 4;
 
 const SPEEDS: Record<GameDifficulty, number> = {
-  easy: 1.8,
-  medium: 2.8,
-  hard: 4.2,
+  easy: 1.4,
+  medium: 2.2,
+  hard: 3.2,
 };
 
 const ITEM_SIZE = 72;
@@ -178,22 +178,20 @@ export default function WaveSurfer({ playPop, playSuccess, playError, onStarEarn
       setGameState('hit');
       playError();
       setSplash(true);
-      window.setTimeout(() => {
-        setSplash(false);
-        setGameState('playing');
-      }, 700);
     }
   }, [difficulty, makeParticles, onStarEarned, playError, playSuccess, startRound]);
+
+  const handleRetry = useCallback(() => {
+    playPop();
+    setSplash(false);
+    startRound(difficulty);
+  }, [difficulty, playPop, startRound]);
 
   const handleObstacleHit = useCallback(() => {
     if (gameStateRef.current !== 'playing') return;
     setGameState('hit');
     playError();
     setSplash(true);
-    window.setTimeout(() => {
-      setSplash(false);
-      setGameState('playing');
-    }, 700);
   }, [playError]);
 
   useEffect(() => {
@@ -451,6 +449,19 @@ export default function WaveSurfer({ playPop, playSuccess, playError, onStarEarn
             />
           );
         })}
+
+        {/* Retry overlay */}
+        {gameState === 'hit' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 z-20">
+            <div className="bg-white/95 border-4 border-sky-400 rounded-[2rem] p-6 text-center shadow-2xl">
+              <div className="text-5xl mb-2">🌊</div>
+              <h3 className="text-2xl font-black text-slate-800 mb-2">{t.waveSurfer.tryAgain}</h3>
+              <KidButton color="blue" size="md" onClick={handleRetry} data-testid="wave-retry">
+                {t.waveSurfer.retry}
+              </KidButton>
+            </div>
+          </div>
+        )}
 
         {/* Victory overlay */}
         {gameState === 'victory' && (

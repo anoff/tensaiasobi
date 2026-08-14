@@ -410,6 +410,8 @@ export const de: TranslationSchema = {
     help: "Tippe auf eine Bahn oder wische hoch und runter!",
     victory: "🎉 Tolle Wellenfahrt!",
     playAgain: "Nochmal spielen",
+    tryAgain: "Abgesoffen! Nochmal?",
+    retry: "Nochmal versuchen",
     round: "Runde {current}/{total}",
     challenge: "Aufgabe",
     earnedStars: "Du hast {count} Sterne verdient!",

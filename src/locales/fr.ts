@@ -410,6 +410,8 @@ export const fr: TranslationSchema = {
     help: "Tape sur une piste ou glisse de haut en bas !",
     victory: "🎉 Super session de surf !",
     playAgain: "Rejouer",
+    tryAgain: "Trempé ! Réessayer ?",
+    retry: "Réessayer",
     round: "Manche {current}/{total}",
     challenge: "Défi",
     earnedStars: "Tu as gagné {count} étoiles !",

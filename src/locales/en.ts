@@ -408,6 +408,8 @@ export const en = {
     help: "Tap a lane or swipe up and down to move!",
     victory: "🎉 Awesome wave riding!",
     playAgain: "Play Again",
+    tryAgain: "Splashed! Try again?",
+    retry: "Retry",
     round: "Round {current}/{total}",
     challenge: "Challenge",
     earnedStars: "You earned {count} stars!"

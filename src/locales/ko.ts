@@ -410,6 +410,8 @@ export const ko: TranslationSchema = {
     help: "레인을 터치하거나 위아래로 스와이프하세요!",
     victory: "🎉 멋진 파도 타기였어요!",
     playAgain: "다시 하기",
+    tryAgain: "물에 빠졌어요! 다시 해볼까요?",
+    retry: "다시 시도",
     round: "라운드 {current}/{total}",
     challenge: "문제",
     earnedStars: "별 {count}개를 받았어요!",

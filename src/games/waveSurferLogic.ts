@@ -44,32 +44,30 @@ export interface WordItem {
 
 const LANE_COUNT = 3;
 const EASY_WORDS: WordItem[] = [
-  { emoji: '🐈', word: 'cat', startsWith: 'C' },
-  { emoji: '🐕', word: 'dog', startsWith: 'D' },
-  { emoji: '🐘', word: 'elephant', startsWith: 'E' },
   { emoji: '🐟', word: 'fish', startsWith: 'F' },
-  { emoji: '🍎', word: 'apple', startsWith: 'A' },
-  { emoji: '🍌', word: 'banana', startsWith: 'B' },
-  { emoji: '🦁', word: 'lion', startsWith: 'L' },
-  { emoji: '☀️', word: 'sun', startsWith: 'S' },
+  { emoji: '🦀', word: 'crab', startsWith: 'C' },
+  { emoji: '🐙', word: 'octopus', startsWith: 'O' },
+  { emoji: '🦐', word: 'shrimp', startsWith: 'SH' },
+  { emoji: '🐠', word: 'tropical fish', startsWith: 'T' },
+  { emoji: '🐡', word: 'pufferfish', startsWith: 'P' },
 ];
 
 const MEDIUM_WORDS: WordItem[] = [
-  { emoji: '🦒', word: 'giraffe', startsWith: 'G' },
-  { emoji: '🍉', word: 'watermelon', startsWith: 'W' },
-  { emoji: '🦓', word: 'zebra', startsWith: 'Z' },
-  { emoji: '🐧', word: 'penguin', startsWith: 'P' },
-  { emoji: '🍍', word: 'pineapple', startsWith: 'P' },
-  { emoji: '🐢', word: 'turtle', startsWith: 'T' },
+  { emoji: '🐬', word: 'dolphin', startsWith: 'D' },
+  { emoji: '🐳', word: 'whale', startsWith: 'W' },
+  { emoji: '🦑', word: 'squid', startsWith: 'S' },
+  { emoji: '🐚', word: 'shell', startsWith: 'SH' },
+  { emoji: '🪸', word: 'coral', startsWith: 'C' },
+  { emoji: '🦭', word: 'seal', startsWith: 'SE' },
 ];
 
 const HARD_WORDS: WordItem[] = [
   { emoji: '🦈', word: 'shark', startsWith: 'SH' },
-  { emoji: '🐌', word: 'snail', startsWith: 'SN' },
-  { emoji: '🍒', word: 'cherry', startsWith: 'CH' },
-  { emoji: '🦋', word: 'butterfly', startsWith: 'B' },
-  { emoji: '🐬', word: 'dolphin', startsWith: 'D' },
-  { emoji: '🦉', word: 'owl', startsWith: 'OW' },
+  { emoji: '🐋', word: 'blue whale', startsWith: 'B' },
+  { emoji: '🧜', word: 'mermaid', startsWith: 'M' },
+  { emoji: '🦞', word: 'lobster', startsWith: 'L' },
+  { emoji: '🦪', word: 'oyster', startsWith: 'O' },
+  { emoji: '🌊', word: 'wave', startsWith: 'W' },
 ];
 
 function randomInt(min: number, max: number): number {
@@ -84,6 +82,13 @@ function generateMathChallenge(difficulty: GameDifficulty): MathChallenge {
   let text: string;
 
   if (difficulty === 'easy') {
+    // Very simple addition with small numbers; no subtraction to avoid negatives.
+    num1 = randomInt(1, 5);
+    num2 = randomInt(1, 4);
+    operator = '+';
+    answer = num1 + num2;
+    text = `${num1} ${operator} ${num2} = ?`;
+  } else if (difficulty === 'medium') {
     num1 = randomInt(1, 9);
     num2 = randomInt(1, 9);
     operator = Math.random() > 0.5 ? '+' : '-';
@@ -92,7 +97,7 @@ function generateMathChallenge(difficulty: GameDifficulty): MathChallenge {
     }
     answer = operator === '+' ? num1 + num2 : num1 - num2;
     text = `${num1} ${operator} ${num2} = ?`;
-  } else if (difficulty === 'medium') {
+  } else {
     num1 = randomInt(10, 50);
     num2 = randomInt(1, 20);
     operator = Math.random() > 0.5 ? '+' : '-';
@@ -100,12 +105,6 @@ function generateMathChallenge(difficulty: GameDifficulty): MathChallenge {
       [num1, num2] = [num2, num1];
     }
     answer = operator === '+' ? num1 + num2 : num1 - num2;
-    text = `${num1} ${operator} ${num2} = ?`;
-  } else {
-    num1 = randomInt(2, 9);
-    num2 = randomInt(2, 9);
-    answer = num1 * num2;
-    operator = '×';
     text = `${num1} ${operator} ${num2} = ?`;
   }
 
@@ -173,7 +172,7 @@ export function generateWaveRound(difficulty: GameDifficulty): WaveRound {
 
 export function generateObstacles(difficulty: GameDifficulty, stageWidth: number): WaveObstacle[] {
   const obstacles: WaveObstacle[] = [];
-  const emojis = difficulty === 'medium' ? ['🪨'] : ['🪨', '🦈'];
+  const emojis = ['🪨', '🐡'];
 
   if (difficulty === 'easy') {
     return obstacles;

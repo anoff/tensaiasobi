@@ -410,6 +410,8 @@ export const ja: TranslationSchema = {
     help: "レーンを タップするか うえしたに スワイプして うごかそう！",
     victory: "🎉 すごい なみのり だね！",
     playAgain: "もういちど あそぶ",
+    tryAgain: "ずぶぬれ！ もういちど？",
+    retry: "もういちど",
     round: "ラウンド {current}/{total}",
     challenge: "もんだい",
     earnedStars: "スターを {count} こ もらったよ！",
