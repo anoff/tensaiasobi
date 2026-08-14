@@ -4,7 +4,7 @@ import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
 import type { GameDifficulty, GameProps } from '../types/game';
-import { isWaveAligned, waveAmplitudeAt, waveKindAt } from './bodyboardWaveRiderLogic';
+import { isWaveAligned, isWaveRideableAtBeach, waveAmplitudeAt, waveKindAt } from './bodyboardWaveRiderLogic';
 
 type Phase = 'waiting' | 'riding' | 'missed' | 'won';
 
@@ -32,12 +32,15 @@ export default function BodyboardWaveRider({ playPop, playSuccess, playError, on
   const [elapsed, setElapsed] = useState(0);
   const [distance, setDistance] = useState(0);
   const [riderY, setRiderY] = useState(0.5);
+  const [rideProgress, setRideProgress] = useState(0);
+  const [ridingWaveAmplitude, setRidingWaveAmplitude] = useState(0);
   const [message, setMessage] = useState('');
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const phaseRef = useRef<Phase>('waiting');
   const riderYRef = useRef(0.5);
   const distanceRef = useRef(0);
+  const ridingWaveStartRef = useRef(0);
   const lastFrameRef = useRef<number | null>(null);
 
   const config = CONFIG[difficulty];
@@ -48,10 +51,13 @@ export default function BodyboardWaveRider({ playPop, playSuccess, playError, on
     phaseRef.current = 'waiting';
     riderYRef.current = 0.5;
     distanceRef.current = 0;
+    ridingWaveStartRef.current = 0;
     setPhase('waiting');
     setElapsed(0);
     setDistance(0);
     setRiderY(0.5);
+    setRideProgress(0);
+    setRidingWaveAmplitude(0);
     setMessage('');
   }, []);
 
@@ -139,12 +145,24 @@ export default function BodyboardWaveRider({ playPop, playSuccess, playError, on
           const nextDistance = distanceRef.current + (0.012 + pocket * 0.045) * delta;
           distanceRef.current = nextDistance;
           setDistance(Math.floor(nextDistance));
+          const nextProgress = Math.min(1, nextDistance / config.target);
+          const ridingWaveX = ridingWaveStartRef.current + WAVE_LENGTH * 0.45 * nextProgress;
+          const nextAmplitude = waveAmplitudeAt(ridingWaveX);
+          setRideProgress(nextProgress);
+          setRidingWaveAmplitude(nextAmplitude);
           if (nextDistance >= config.target) {
-            phaseRef.current = 'won';
-            setPhase('won');
-            setMessage(t.bodyboardWaveRider.victory);
-            playSuccess();
-            onStarEarned?.(STARS[difficulty]);
+            if (isWaveRideableAtBeach(ridingWaveX)) {
+              phaseRef.current = 'won';
+              setPhase('won');
+              setMessage(t.bodyboardWaveRider.victory);
+              playSuccess();
+              onStarEarned?.(STARS[difficulty]);
+            } else {
+              phaseRef.current = 'missed';
+              setPhase('missed');
+              setMessage(t.bodyboardWaveRider.missed);
+              playError();
+            }
           }
         }
       }
@@ -158,6 +176,8 @@ export default function BodyboardWaveRider({ playPop, playSuccess, playError, on
     if (phase !== 'waiting') return;
     if (aligned) {
       phaseRef.current = 'riding';
+      ridingWaveStartRef.current = boardWorldX;
+      setRidingWaveAmplitude(waveAmplitudeAt(boardWorldX));
       setPhase('riding');
       setMessage(t.bodyboardWaveRider.caught);
       playPop();
@@ -194,6 +214,8 @@ export default function BodyboardWaveRider({ playPop, playSuccess, playError, on
         data-aligned={aligned}
         data-wave-kind={waveKindAt(boardWorldX)}
         data-alignment-window={config.alignmentWindow}
+        data-rider-progress={rideProgress.toFixed(2)}
+        data-riding-wave-amplitude={ridingWaveAmplitude.toFixed(1)}
         onPointerDown={steer}
         onPointerMove={steer}
         className="relative flex-1 min-h-[330px] w-full overflow-hidden rounded-[2.5rem] border-8 border-sky-200 shadow-inner touch-none"
@@ -203,8 +225,11 @@ export default function BodyboardWaveRider({ playPop, playSuccess, playError, on
         {aligned && phase === 'waiting' && <div data-testid="bodyboard-alignment" className="absolute left-[24%] top-[35%] w-28 h-28 rounded-full bg-emerald-300/40 border-4 border-emerald-100 animate-pulse" />}
         <div
           data-testid="bodyboard-rider"
-          className="absolute z-10 text-4xl transition-transform duration-75"
-          style={{ left: '25%', top: `${riderY * 58 + 20}%` }}
+          className={`absolute z-10 text-4xl transition-all duration-75 ${phase === 'riding' ? 'animate-bounce' : ''}`}
+          style={{
+            left: `${25 + rideProgress * 62}%`,
+            top: `${62 - ridingWaveAmplitude * 0.22 + (riderY - 0.5) * 58}%`,
+          }}
         >
           🦦🏄
         </div>
