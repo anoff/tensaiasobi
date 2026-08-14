@@ -34,6 +34,7 @@ export const ja: TranslationSchema = {
     shadowFlashlight: "かげ",
     fairSharePicnic: "ピクニックわけっこ",
     snorkelPearlFinder: "しんじゅさがし",
+    bodyboardWaveRider: "なみのり",
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -409,6 +410,18 @@ export const ja: TranslationSchema = {
     help: "しんじゅを おなじいろの はまぐりに ドラッグしてね！",
     victory: "🎉 ぜんぶの しんじゅが あいだよ！",
     playAgain: "もういちどあそぶ",
+  },
+  bodyboardWaveRider: {
+    title: "ボディボード なみのり！🏄",
+    subtitle: "おおきな なみを まって、はままで のろう！",
+    help: "みどりに ひかったら パドル。うえとしたに スワイプしてね！",
+    paddle: "パドル",
+    distance: "きょり",
+    caught: "ぴったりの なみに のれたよ！",
+    missed: "おっと！みどりの ひかりを まってね。",
+    rock: "じゃぶん！いわを よけよう！",
+    victory: "はままで だいせいこう！",
+    playAgain: "もういちど のる",
   },
   challenge: {
     title: "チャレンジモード 🎯",

@@ -32,6 +32,7 @@ export const en = {
     shadowFlashlight: "Shadow",
     fairSharePicnic: "Fair Share Picnic",
     snorkelPearlFinder: "Pearl Finder",
+    bodyboardWaveRider: "Wave Rider",
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -407,6 +408,18 @@ export const en = {
     help: "Drag a pearl to the clam with the same color!",
     victory: "🎉 All pearls matched!",
     playAgain: "Play Again",
+  },
+  bodyboardWaveRider: {
+    title: "Bodyboard Wave Rider! 🏄",
+    subtitle: "Wait for the big growing swell, then ride to the beach!",
+    help: "Paddle in the green glow. Swipe up and down to stay in the pocket!",
+    paddle: "PADDLE",
+    distance: "Distance",
+    caught: "You caught a perfect swell!",
+    missed: "Oops! Wait for the green glow.",
+    rock: "Splash! Steer around the rocks!",
+    victory: "Amazing ride to the beach!",
+    playAgain: "Ride Again",
   },
   challenge: {
     title: "Challenge Mode 🎯",
