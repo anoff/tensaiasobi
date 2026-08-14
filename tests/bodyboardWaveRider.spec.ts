@@ -39,4 +39,15 @@ test.describe('Bodyboard Wave Rider', () => {
     await page.getByTestId('bodyboard-paddle').click();
     await expect(page.getByText('Amazing ride to the beach!')).toBeVisible({ timeout: 3000 });
   });
+
+  test('animates the rider along a tall riding wave', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('launch-bodyboard-wave-rider').click();
+    await expect(page.getByTestId('bodyboard-alignment')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('bodyboard-paddle').click();
+
+    const rider = page.getByTestId('bodyboard-rider');
+    await expect(rider).toHaveClass(/animate-bounce/);
+    await expect(page.getByTestId('bodyboard-stage')).toHaveAttribute('data-riding-wave-amplitude', /[3-9]\d\.\d/);
+  });
 });

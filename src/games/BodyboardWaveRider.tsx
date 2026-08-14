@@ -170,7 +170,7 @@ export default function BodyboardWaveRider({ playPop, playSuccess, playError, on
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [config.rocks, config.target, difficulty, onStarEarned, playError, playSuccess, t.bodyboardWaveRider.rock, t.bodyboardWaveRider.victory]);
+  }, [config.rocks, config.target, difficulty, onStarEarned, playError, playSuccess, t.bodyboardWaveRider.missed, t.bodyboardWaveRider.rock, t.bodyboardWaveRider.victory]);
 
   const paddle = () => {
     if (phase !== 'waiting') return;
