@@ -229,6 +229,10 @@ export const fr: TranslationSchema = {
   town: {
     title: "Ma Ville 🏘️",
     empty: "Appuie sur un espace vide pour construire !",
+    toggleDay: "Passer au jour",
+    toggleNight: "Passer à la nuit",
+    toggleRain: "Passer à la pluie",
+    toggleSunny: "Passer au soleil",
     remove: "Retirer ?",
     confirmRemove: "Retirer cet élément ?",
     deleteAll: "Tout supprimer",

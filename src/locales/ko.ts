@@ -229,6 +229,10 @@ export const ko: TranslationSchema = {
   town: {
     title: "나의 마을 🏘️",
     empty: "빈 곳을 터치해 건물을 지어보세요!",
+    toggleDay: "낮으로 바꾸기",
+    toggleNight: "밤으로 바꾸기",
+    toggleRain: "비로 바꾸기",
+    toggleSunny: "맑음으로 바꾸기",
     remove: "철거할까요?",
     confirmRemove: "이 항목을 철거하시겠습니까?",
     deleteAll: "모두 삭제",

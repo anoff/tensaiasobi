@@ -229,6 +229,10 @@ export const ja: TranslationSchema = {
   town: {
     title: "まちづくり 🏘️",
     empty: "あいているところをタップしてたてよう！",
+    toggleDay: "ひるにする",
+    toggleNight: "よるにする",
+    toggleRain: "あめにする",
+    toggleSunny: "はれにする",
     remove: "とりのぞく？",
     confirmRemove: "これをとりのぞきますか？",
     deleteAll: "すべて削除",
