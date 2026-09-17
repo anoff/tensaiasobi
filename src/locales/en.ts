@@ -42,6 +42,9 @@ export const en = {
     error: "Oops! Try again.",
     cancel: "Cancel",
     verify: "Verify",
+    biometricReason: "Confirm you are a grown-up",
+    biometricPending: "Waiting for Face ID or device passcode…",
+    biometricFallback: "Device unlock wasn’t available. Please solve this problem instead:",
   },
   parentDashboard: {
     title: "Settings ⚙️",

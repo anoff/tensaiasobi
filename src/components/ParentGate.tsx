@@ -1,5 +1,7 @@
+import { Capacitor } from '@capacitor/core';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
+import { verifyParentIdentity } from '../utils/nativeParentAuth';
 
 interface ParentGateProps {
   onSuccess: () => void;
@@ -47,9 +49,32 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
   const [challenge] = useState(() => generateHardEquation());
   const [answer, setAnswer] = useState('');
   const [error, setError] = useState(false);
+  const [showMath, setShowMath] = useState(() => !Capacitor.isNativePlatform());
+  const [biometricFailed, setBiometricFailed] = useState(false);
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = 'parent-gate-title';
+  const onSuccessRef = useRef(onSuccess);
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+  }, [onSuccess]);
+
+  useEffect(() => {
+    if (showMath) return;
+    let cancelled = false;
+    void verifyParentIdentity(t.parentGate.biometricReason).then((result) => {
+      if (cancelled) return;
+      if (result === 'success') {
+        onSuccessRef.current();
+        return;
+      }
+      setBiometricFailed(true);
+      setShowMath(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [showMath, t.parentGate.biometricReason]);
 
   useEffect(() => {
     const focusables = () =>
@@ -104,8 +129,21 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
         onClick={(event) => event.stopPropagation()}
       >
         <h2 id={titleId} className="text-2xl font-bold text-slate-800 mb-2">{t.parentGate.title}</h2>
+        {!showMath ? (
+          <div className="space-y-6">
+            <p className="text-slate-600 text-sm">{t.parentGate.biometricPending}</p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-2xl transition-colors cursor-pointer text-sm"
+            >
+              {t.parentGate.cancel}
+            </button>
+          </div>
+        ) : (
+          <>
         <p className="text-slate-600 mb-6 text-sm">
-          {t.parentGate.instruction}
+          {biometricFailed ? t.parentGate.biometricFallback : t.parentGate.instruction}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -147,6 +185,8 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
             </button>
           </div>
         </form>
+          </>
+        )}
       </div>
     </div>
   );

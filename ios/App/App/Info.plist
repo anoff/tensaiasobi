@@ -66,5 +66,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>We use Face ID or your device passcode to confirm a grown-up before showing parent settings.</string>
 </dict>
 </plist>

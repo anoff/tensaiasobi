@@ -44,6 +44,9 @@ export const ja: TranslationSchema = {
     error: "おっと！もういちどためしてね。",
     cancel: "キャンセル",
     verify: "かくにん",
+    biometricReason: "おとなかどうかかくにんします",
+    biometricPending: "Face ID またはパスコードをまっています…",
+    biometricFallback: "ききのロックがつかえませんでした。このさんすうをもういちど：",
   },
   parentDashboard: {
     title: "せってい ⚙️",

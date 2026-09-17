@@ -44,6 +44,9 @@ export const fr: TranslationSchema = {
     error: "Oups ! Réessayez.",
     cancel: "Annuler",
     verify: "Vérifier",
+    biometricReason: "Confirmez que vous êtes un adulte",
+    biometricPending: "En attente de Face ID ou du code de l’appareil…",
+    biometricFallback: "Le déverrouillage n’était pas disponible. Résolvez plutôt ce calcul :",
   },
   parentDashboard: {
     title: "Paramètres ⚙️",

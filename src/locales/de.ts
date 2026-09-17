@@ -44,6 +44,9 @@ export const de: TranslationSchema = {
     error: "Huch! Versuch es noch einmal.",
     cancel: "Abbrechen",
     verify: "Bestätigen",
+    biometricReason: "Bitte bestätigen, dass du erwachsen bist",
+    biometricPending: "Warte auf Face ID oder Gerätecode…",
+    biometricFallback: "Geräteentsperrung war nicht verfügbar. Bitte löse stattdessen diese Aufgabe:",
   },
   parentDashboard: {
     title: "Einstellungen ⚙️",

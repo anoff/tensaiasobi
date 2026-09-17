@@ -19,7 +19,7 @@ When picking this up, start at the top of the next slice. Product beats engineer
 
 ## Slice D — native parent gate
 
-- [ ] **Face ID / device passcode first, math as fallback.** Spec already lives in [issue-parent-gate-biometrics.md](./issue-parent-gate-biometrics.md). Do not make algebra the primary UX; keep the equation for web / failed biometrics.
+- [x] **Face ID / device passcode first, math as fallback.** Spec already lives in [issue-parent-gate-biometrics.md](./issue-parent-gate-biometrics.md). Do not make algebra the primary UX; keep the equation for web / failed biometrics.
 
 ## Slice E — engineering hygiene
 

@@ -44,6 +44,9 @@ export const ko: TranslationSchema = {
     error: "이런! 다시 시도해보세요.",
     cancel: "취소",
     verify: "확인",
+    biometricReason: "보호자인지 확인합니다",
+    biometricPending: "Face ID 또는 기기 암호를 기다리는 중…",
+    biometricFallback: "기기 잠금 해제를 쓸 수 없습니다. 대신 이 문제를 풀어 주세요:",
   },
   parentDashboard: {
     title: "설정 ⚙️",
