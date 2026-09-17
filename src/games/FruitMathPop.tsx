@@ -4,14 +4,16 @@ import DifficultySelector from '../components/DifficultySelector';
 import GameConfetti from '../components/GameConfetti';
 import { useTranslation } from '../hooks/useTranslation';
 import { TOWER_SORT_THEMES } from './towerSortThemes';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
 import { generateFruitMathRound } from './fruitMathPopLogic';
+import { useGameFX } from '../hooks/gameFXContext';
 
 const STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
 
 type Phase = 'animating' | 'hiding' | 'choices' | 'success';
 
-export default function FruitMathPop({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
+export default function FruitMathPop() {
+  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [themeIndex, setThemeIndex] = useState(1);

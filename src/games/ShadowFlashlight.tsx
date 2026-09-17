@@ -5,7 +5,8 @@ import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 import { starMultiplier } from '../utils/difficulty';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
+import { useGameFX } from '../hooks/gameFXContext';
 
 interface ShadowItem {
   emoji: string;
@@ -52,8 +53,6 @@ const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
   hard: { choices: 6, radius: 36, baseStars: 2 },
 };
 
-type ShadowFlashlightProps = GameProps;
-
 function generateRound(difficulty: GameDifficulty): { target: ShadowItem; choices: ShadowItem[] } {
   const config = DIFFICULTY_CONFIG[difficulty];
   const pool = shuffle([...SHADOW_ITEMS]);
@@ -63,12 +62,8 @@ function generateRound(difficulty: GameDifficulty): { target: ShadowItem; choice
   return { target, choices };
 }
 
-export function ShadowFlashlight({
-  playPop,
-  playSuccess,
-  playError,
-  onStarEarned,
-}: ShadowFlashlightProps) {
+export function ShadowFlashlight() {
+  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [target, setTarget] = useState<ShadowItem | null>(null);

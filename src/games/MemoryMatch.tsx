@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 import { starMultiplier } from '../utils/difficulty';
+import { useGameFX } from '../hooks/gameFXContext';
 
 
 interface Card {
@@ -16,7 +17,8 @@ interface Card {
 
 const ANIMAL_POOL = ['🦁', '🐯', '🐼', '🐨', '🦊', '🐰', '🐸', '🐷', '🐮', '🐔', '🐧', '🦉', '🐻', '🐹', '🐭', '🐱'];
 
-export function MemoryMatch({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
+export function MemoryMatch() {
+  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const [level, setLevel] = useState<GameDifficulty>('easy');
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<number[]>([]);

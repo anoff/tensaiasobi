@@ -8,6 +8,7 @@ import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
+import { GameFXProvider } from './hooks/useGameFX';
 import GameConfetti from './components/GameConfetti';
 
 import { StarCounter } from './components/StarCounter';
@@ -145,14 +146,17 @@ function AppContent() {
       const Game = GAMES.find((game) => game.id === currentScreen)?.Component;
       if (!Game) return null;
       return (
-        <Game
-          key={language}
-          playPop={playPop}
-          playSuccess={playSuccess}
-          playError={playError}
-          onStarEarned={handleStarEarned}
-          challengeMode={challengeActive}
-        />
+        <GameFXProvider
+          value={{
+            playPop,
+            playSuccess,
+            playError,
+            onStarEarned: handleStarEarned,
+            challengeMode: challengeActive,
+          }}
+        >
+          <Game key={language} />
+        </GameFXProvider>
       );
     }
 

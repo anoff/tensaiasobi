@@ -4,7 +4,8 @@ import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
+import { useGameFX } from '../hooks/gameFXContext';
 
 interface RoundConfig {
   passengerCount: number;
@@ -76,7 +77,8 @@ function generateRound(difficulty: GameDifficulty, overrideCount?: number): Roun
   };
 }
 
-export default function NumberTrain({ playSuccess, playError, onStarEarned }: GameProps) {
+export default function NumberTrain() {
+  const { playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [round, setRound] = useState<RoundConfig>(() => generateRound('easy'));

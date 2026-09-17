@@ -2,9 +2,10 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { getItemsByCategory } from '../data/townItems';
+import { useGameFX } from '../hooks/gameFXContext';
 
 type ServiceType = 'police' | 'fire' | 'ambulance';
 
@@ -21,8 +22,6 @@ interface DispatchEvent {
   maxAge: number;
   solved?: boolean;
 }
-
-type DispatchGameProps = GameProps;
 
 const VEHICLE_CONFIG: Record<ServiceType, { emoji: string; stationEmoji: string; eventEmoji: string; color: 'blue' | 'red' | 'green' }> = {
   police: { emoji: '🚓', stationEmoji: '🚔', eventEmoji: '🚨', color: 'blue' },
@@ -91,7 +90,8 @@ function generateCity(size: number): Cell[][] {
   return grid;
 }
 
-export function DispatchGame({ playPop, playSuccess, playError, onStarEarned }: DispatchGameProps) {
+export function DispatchGame() {
+  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
   const [grid, setGrid] = useState<Cell[][]>([]);

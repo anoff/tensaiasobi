@@ -1,5 +1,4 @@
 import type { ComponentType } from 'react';
-import type { GameProps } from '../types/game';
 import MathGame from './MathGame';
 import OddOneOut from './OddOneOut';
 import DoodlePad from './DoodlePad';
@@ -53,7 +52,7 @@ export interface GameCatalogEntry {
   challengeDefault: boolean;
   storageKeys: readonly string[];
   storageKeyPrefixes?: readonly string[];
-  Component: ComponentType<GameProps>;
+  Component: ComponentType;
 }
 
 export const GAMES = [

@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { TOWER_SORT_THEMES, type TowerSortTheme } from './towerSortThemes';
+import { useGameFX } from '../hooks/gameFXContext';
 
 interface DifficultyConfig {
   types: number;
@@ -18,8 +19,6 @@ const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
   medium: { types: 4, towers: 6, height: 4, scrambleSteps: 20, starsAward: 10 },
   hard: { types: 5, towers: 7, height: 5, scrambleSteps: 30, starsAward: 18 },
 };
-
-type TowerSortProps = GameProps;
 
 function canMove(towers: string[][], from: number, to: number): boolean {
   if (from === to) return false;
@@ -97,7 +96,8 @@ function saveBestMoves(difficulty: GameDifficulty, themeId: string, moves: numbe
   }
 }
 
-export function TowerSort({ playPop, playSuccess, playError, onStarEarned }: TowerSortProps) {
+export function TowerSort() {
+  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [themeIndex, setThemeIndex] = useState(0);

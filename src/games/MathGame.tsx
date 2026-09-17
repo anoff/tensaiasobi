@@ -2,12 +2,13 @@ import { useState } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import StreakBadge from '../components/StreakBadge';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
 import { starMultiplier } from '../utils/difficulty';
 import AnswerBubble from '../components/AnswerBubble';
+import { useGameFX } from '../hooks/gameFXContext';
 
 
 interface Question {
@@ -97,7 +98,8 @@ const generateQuestion = (currentLevel: GameDifficulty): Question => {
     };
   };
 
-export function MathGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: GameProps) {
+export function MathGame() {
+  const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const [level, setLevel] = useState<GameDifficulty>('easy');
   const [question, setQuestion] = useState<Question>(() => generateQuestion('easy'));
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);

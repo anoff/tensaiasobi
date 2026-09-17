@@ -5,8 +5,8 @@ import StreakBadge from '../components/StreakBadge';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
-import type { GameProps } from '../types/game';
 import AnswerBubble from '../components/AnswerBubble';
+import { useGameFX } from '../hooks/gameFXContext';
 
 // 63 child-friendly emoji keys
 const EMOJI_ITEMS: string[] = [
@@ -67,7 +67,8 @@ const generateOptions = (
   return shuffle([correctChar, ...Array.from(wrongOptionsSet)]);
 };
 
-export function AnlautGame({ playPop, playSuccess, playError, onStarEarned, challengeMode }: GameProps) {
+export function AnlautGame() {
+  const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const { language, t } = useTranslation();
 
   const [currentItem, setCurrentItem] = useState<string>(() => {
