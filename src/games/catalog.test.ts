@@ -6,6 +6,14 @@ describe('game catalog', () => {
     localStorage.clear();
   });
 
+  it('points signature launchers at SVG icons', () => {
+    const withIcons = GAMES.filter((game): game is typeof game & { iconSrc: string } => 'iconSrc' in game);
+    expect(withIcons.map((game) => game.id).sort()).toEqual(['letterTrace', 'math', 'puzzle', 'trace']);
+    for (const game of withIcons) {
+      expect(game.iconSrc).toMatch(/\/icons\/.+\.svg$/);
+    }
+  });
+
   it('has unique ids and testids', () => {
     const ids = GAMES.map((game) => game.id);
     const testids = GAMES.map((game) => game.testid);

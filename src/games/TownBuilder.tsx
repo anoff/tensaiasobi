@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { TownCell, createEmptyGrid, TOWN_GRID_SIZE } from '../types/gamification';
+import { GRASS_ICON_SRC } from './catalog';
 import type { ShopCategory } from '../types/gamification';
 import { SHOP_CATEGORIES, getItemsByCategory, getItemById } from '../data/townItems';
 import { HoldToConfirmButton } from '../components/HoldToConfirmButton';
@@ -360,7 +361,11 @@ export function TownBuilder({
                       {cell.emoji}
                     </span>
                   ) : (
-                    '+'
+                    <img
+                      src={GRASS_ICON_SRC}
+                      alt=""
+                      className="w-8 h-8 opacity-80 pointer-events-none"
+                    />
                   )}
                 </button>
               );

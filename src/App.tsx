@@ -17,7 +17,7 @@ import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
 import { couponLabel, type Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
-import { GAMES, clearPersistedProgress, gameVisibleForAge, isGameId, type AgeBandFilter, type GameId } from './games/catalog';
+import { GAMES, TOWN_ICON_SRC, clearPersistedProgress, gameVisibleForAge, isGameId, type AgeBandFilter, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
@@ -354,7 +354,11 @@ function AppContent() {
                     onClick={() => handleScreenChange(game.id)}
                     className="aspect-square flex-col gap-2 rounded-[2rem]"
                   >
-                    <span className="text-5xl">{game.emoji}</span>
+                    {'iconSrc' in game && game.iconSrc ? (
+                      <img src={game.iconSrc} alt="" className="w-12 h-12 pointer-events-none" />
+                    ) : (
+                      <span className="text-5xl">{game.emoji}</span>
+                    )}
                     <span className="text-lg font-black block leading-tight">{t.menu[game.labelKey]}</span>
                   </KidButton>
                 );
@@ -372,7 +376,7 @@ function AppContent() {
                     onClick={() => handleScreenChange('town')}
                     className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
                   >
-                    <span className="text-5xl">🏘️</span>
+                    <img src={TOWN_ICON_SRC} alt="" className="w-12 h-12 pointer-events-none" />
                     <span className="text-lg font-black block leading-tight">{t.menu.town}</span>
                   </KidButton>
 
