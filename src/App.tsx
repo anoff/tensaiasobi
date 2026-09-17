@@ -15,12 +15,13 @@ import { StarCounter } from './components/StarCounter';
 import { FlyUpStar } from './components/FlyUpStar';
 import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
-import type { Coupon } from './types/gamification';
+import { couponLabel, type Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
-import { GAMES, clearPersistedProgress, isGameId, type GameId } from './games/catalog';
+import { GAMES, clearPersistedProgress, gameVisibleForAge, isGameId, type AgeBandFilter, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
+import { formatRemaining, useSessionTimer } from './hooks/useSessionTimer';
 
 type Screen = 'menu' | 'town' | 'coupons' | 'settings' | GameId;
 
@@ -38,7 +39,9 @@ function AppContent() {
 
   // Gamification state
   const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
-  const { coupons, toggleCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
+  const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
+  const [ageBand, setAgeBand] = useLocalStorage<AgeBandFilter>('settings_age_band', 'all');
+  const { minutes: sessionMinutes, setMinutes: setSessionMinutes, remainingMs, locked: sessionLocked, startOrRefresh, startIfIdle, unlock } = useSessionTimer();
   const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
   const [pendingCouponRedeemConfirmId, setPendingCouponRedeemConfirmId] = useState<string | null>(null);
   const [celebratingCoupon, setCelebratingCoupon] = useState<Coupon | null>(null);
@@ -130,6 +133,8 @@ function AppContent() {
   const handleScreenChange = (screen: Screen) => {
     playPop();
     if (screen !== 'settings') setChallengeSetupCouponId(undefined);
+    if (sessionLocked && screen !== 'settings' && screen !== 'menu') return;
+    if (screen !== 'menu' && screen !== 'settings') startIfIdle();
     setCurrentScreen(screen);
   };
 
@@ -194,7 +199,11 @@ function AppContent() {
             coupons={coupons}
             onToggleCoupon={toggleCoupon}
             onClearProgress={handleClearProgress}
-            onClose={() => handleScreenChange('menu')}
+            onClose={() => {
+              if (sessionMinutes > 0) startOrRefresh();
+              else unlock();
+              handleScreenChange('menu');
+            }}
             challengeActive={challengeActive}
             challengeStarsTarget={challengeStarsTarget}
             challengeAllowedGames={challengeAllowedGames}
@@ -202,6 +211,12 @@ function AppContent() {
             onStartChallenge={startChallenge}
             onCancelChallenge={cancelChallenge}
             initialCouponId={challengeSetupCouponId}
+            ageBand={ageBand}
+            setAgeBand={setAgeBand}
+            sessionMinutes={sessionMinutes}
+            setSessionMinutes={setSessionMinutes}
+            onAddCoupon={addCustomCoupon}
+            onRemoveCoupon={removeCustomCoupon}
           />
         );
       default:
@@ -212,7 +227,7 @@ function AppContent() {
   return (
     <div className="w-screen h-[100dvh] flex flex-col bg-sky-50 text-slate-800 relative pt-safe pb-safe">
       {/* Top Navigation Bar */}
-      <header className="flex justify-between items-center p-4 z-10">
+      <header className="flex justify-between items-center p-4 z-50">
         <div>
           {currentScreen !== 'menu' && currentScreen !== 'settings' && (
             <HomeButton data-testid="home-button" onClick={() => handleScreenChange('menu')} />
@@ -221,6 +236,13 @@ function AppContent() {
 
         {/* Universal Star Counter displaying earned stars & animating fly-ups */}
         <div className="flex items-center gap-3 ml-auto">
+          {sessionMinutes > 0 && remainingMs > 0 && !sessionLocked && (
+            <div className="flex items-center gap-1.5 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5" data-testid="session-remaining">
+              <span className="text-sm">⏱️</span>
+              <span className="text-sm font-black text-slate-700 tabular-nums">{formatRemaining(remainingMs)}</span>
+            </div>
+          )}
+
           {challengeActive && (
             <div className="relative" data-testid="challenge-countdown-badge">
               <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300 rounded-full px-3 py-1.5 shadow-sm select-none justify-center">
@@ -322,6 +344,7 @@ function AppContent() {
               {GAMES.map((game) => {
                 const allowed = !challengeActive || challengeAllowedGames[game.id];
                 if (!allowed) return null;
+                if (!gameVisibleForAge(game, ageBand)) return null;
                 return (
                   <KidButton
                     key={game.id}
@@ -477,7 +500,7 @@ function AppContent() {
                     <>
                       <span className="text-2xl">{coupon.emoji}</span>
                       <span className="text-lg font-black text-violet-800">
-                        {(t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey}
+                        {couponLabel(coupon, t.coupons.couponNames as Record<string, string>)}
                       </span>
                     </>
                   );
@@ -500,6 +523,16 @@ function AppContent() {
             >
               {t.challenge.claimStars.replace('{count}', challengeStarsTarget.toString())}
             </KidButton>
+          </div>
+        </div>
+      )}
+
+      {sessionLocked && currentScreen !== 'settings' && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/70 p-6" data-testid="session-locked">
+          <div className="bg-white rounded-[2rem] border-4 border-slate-300 p-8 max-w-sm w-full text-center space-y-4">
+            <span className="text-6xl block">⏰</span>
+            <h2 className="text-2xl font-black text-slate-800">{t.session.timesUpTitle}</h2>
+            <p className="text-slate-500 font-bold text-sm">{t.session.timesUpBody}</p>
           </div>
         </div>
       )}

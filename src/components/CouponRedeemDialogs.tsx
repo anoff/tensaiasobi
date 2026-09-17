@@ -1,11 +1,11 @@
 import { useTranslation } from '../hooks/useTranslation';
 import GameConfetti from './GameConfetti';
 import KidButton from './KidButton';
-import type { Coupon } from '../types/gamification';
+import { couponLabel, type Coupon } from '../types/gamification';
 import type { TranslationSchema } from '../locales';
 
 function couponName(coupon: Coupon, t: TranslationSchema): string {
-  return (t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey;
+  return couponLabel(coupon, t.coupons.couponNames as Record<string, string>);
 }
 
 interface RedeemConfirmDialogProps {

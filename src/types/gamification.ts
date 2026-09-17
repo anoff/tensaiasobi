@@ -40,6 +40,9 @@ export interface Coupon {
   id: string;
   emoji: string;
   nameKey: string;
+  /** Parent-authored label; wins over `nameKey` when set */
+  customName?: string;
+  isCustom?: boolean;
   /** Whether this coupon is available to be selected/awarded */
   enabled: boolean;
   /** How big of a reward this coupon is, used to suggest challenge target stars */
@@ -48,6 +51,11 @@ export interface Coupon {
   earnedCount: number;
   /** Timestamp of the most recent time this coupon was earned, if any */
   lastEarnedAt?: number;
+}
+
+export function couponLabel(coupon: Coupon, names: Record<string, string>): string {
+  if (coupon.customName) return coupon.customName;
+  return names[coupon.nameKey] ?? coupon.nameKey;
 }
 
 /** Default size of the town grid */

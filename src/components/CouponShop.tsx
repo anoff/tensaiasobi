@@ -1,6 +1,6 @@
 import { useTranslation } from '../hooks/useTranslation';
 import { HoldToConfirmButton } from './HoldToConfirmButton';
-import type { Coupon } from '../types/gamification';
+import { couponLabel, type Coupon } from '../types/gamification';
 
 interface CouponShopProps {
   coupons: Coupon[];
@@ -17,7 +17,7 @@ export function CouponShop({ coupons, onRedeemCoupon, onEarnCoupon, playPop }: C
   const earnedCoupons = coupons.filter((c) => c.earnedCount > 0);
 
   const couponName = (coupon: Coupon) =>
-    (t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey;
+    couponLabel(coupon, t.coupons.couponNames as Record<string, string>);
 
   const handleRedeemHoldConfirm = (coupon: Coupon) => {
     playPop();

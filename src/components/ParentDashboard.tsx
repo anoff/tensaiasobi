@@ -2,7 +2,9 @@ import { useState } from 'react';
 import KidButton from './KidButton';
 import { GAMES, defaultChallengeAllowedGames } from '../games/catalog';
 import { useTranslation } from '../hooks/useTranslation';
-import { REWARD_SIZE_STAR_TARGETS, type Coupon } from '../types/gamification';
+import { couponLabel, REWARD_SIZE_STAR_TARGETS, type Coupon, type CouponRewardSize } from '../types/gamification';
+import type { AgeBandFilter } from '../games/catalog';
+import { SESSION_MINUTE_OPTIONS, type SessionMinutes } from '../hooks/useSessionTimer';
 
 interface ParentDashboardProps {
   soundEnabled: boolean;
@@ -21,6 +23,12 @@ interface ParentDashboardProps {
   onCancelChallenge: () => void;
   /** Optional coupon id to preselect in the challenge reward picker, e.g. when arriving via the Coupon Shop's "Earn it!" button */
   initialCouponId?: string;
+  ageBand: AgeBandFilter;
+  setAgeBand: (v: AgeBandFilter) => void;
+  sessionMinutes: SessionMinutes;
+  setSessionMinutes: (v: SessionMinutes) => void;
+  onAddCoupon: (input: { emoji: string; name: string; rewardSize: CouponRewardSize }) => void;
+  onRemoveCoupon: (id: string) => void;
 }
 
 export function ParentDashboard({
@@ -39,8 +47,17 @@ export function ParentDashboard({
   onStartChallenge,
   onCancelChallenge,
   initialCouponId,
+  ageBand,
+  setAgeBand,
+  sessionMinutes,
+  setSessionMinutes,
+  onAddCoupon,
+  onRemoveCoupon,
 }: ParentDashboardProps) {
   const { t } = useTranslation();
+  const [newEmoji, setNewEmoji] = useState('🎟️');
+  const [newName, setNewName] = useState('');
+  const [newSize, setNewSize] = useState<CouponRewardSize>('small');
 
   const initialCoupon =
     coupons.find((c) => c.id === initialCouponId) ||
@@ -139,6 +156,55 @@ export function ParentDashboard({
             </button>
           </div>
 
+          {/* Age band */}
+          <div className="p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 space-y-3">
+            <div>
+              <span className="text-lg font-bold text-slate-800 block">{t.parentDashboard.ageBand}</span>
+              <span className="text-xs text-slate-500">{t.parentDashboard.ageBandDesc}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                ['all', t.parentDashboard.ageAll],
+                ['little', t.parentDashboard.ageLittle],
+                ['big', t.parentDashboard.ageBig],
+              ] as const).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  data-testid={`age-band-${id}`}
+                  onClick={() => setAgeBand(id)}
+                  className={`py-2 px-2 rounded-xl text-xs font-bold border-2 ${
+                    ageBand === id
+                      ? 'bg-purple-100 border-purple-400 text-purple-800'
+                      : 'bg-white border-slate-200 text-slate-500'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Session timer */}
+          <div className="p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 space-y-3">
+            <div>
+              <span className="text-lg font-bold text-slate-800 block">{t.parentDashboard.sessionTimer}</span>
+              <span className="text-xs text-slate-500">{t.parentDashboard.sessionTimerDesc}</span>
+            </div>
+            <select
+              data-testid="session-minutes"
+              value={sessionMinutes}
+              onChange={(e) => setSessionMinutes(Number(e.target.value) as SessionMinutes)}
+              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-2 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-purple-400"
+            >
+              {SESSION_MINUTE_OPTIONS.map((num) => (
+                <option key={num} value={num}>
+                  {num === 0 ? t.parentDashboard.sessionOff : `${num} ${t.parentDashboard.sessionMinutes}`}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Coupons section */}
           <div className="p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 space-y-4">
             <div>
@@ -154,7 +220,7 @@ export function ParentDashboard({
                       <span className="text-2xl">{coupon.emoji}</span>
                       <div className="min-w-0">
                         <span className="text-sm font-bold text-slate-800 block truncate">
-                          {(t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey}
+                          {couponLabel(coupon, t.coupons.couponNames as Record<string, string>)}
                         </span>
                         {coupon.earnedCount > 0 && coupon.lastEarnedAt && (
                           <span className="text-[10px] text-green-600 block">
@@ -164,21 +230,82 @@ export function ParentDashboard({
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => onToggleCoupon(coupon.id)}
-                      className={`
-                        px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer outline-none border shrink-0
-                        ${coupon.enabled
-                          ? 'bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600'
-                          : 'bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200'}
-                      `}
-                    >
-                      {coupon.enabled ? t.parentDashboard.couponEnabled : t.coupons.disabled}
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => onToggleCoupon(coupon.id)}
+                        className={`
+                          px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer outline-none border
+                          ${coupon.enabled
+                            ? 'bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600'
+                            : 'bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200'}
+                        `}
+                      >
+                        {coupon.enabled ? t.parentDashboard.couponEnabled : t.coupons.disabled}
+                      </button>
+                      {coupon.isCustom && (
+                        <button
+                          type="button"
+                          data-testid={`remove-coupon-${coupon.id}`}
+                          onClick={() => onRemoveCoupon(coupon.id)}
+                          className="px-2 py-1 rounded-full text-xs font-bold text-red-600 border border-red-200 hover:bg-red-50"
+                        >
+                          {t.parentDashboard.removeCoupon}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
+
+            <form
+              className="space-y-2 pt-2 border-t border-slate-200"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newName.trim()) return;
+                onAddCoupon({ emoji: newEmoji, name: newName, rewardSize: newSize });
+                setNewName('');
+                setNewEmoji('🎟️');
+                setNewSize('small');
+              }}
+            >
+              <span className="text-sm font-bold text-slate-700 block">{t.parentDashboard.addCoupon}</span>
+              <div className="flex gap-2">
+                <input
+                  data-testid="custom-coupon-emoji"
+                  value={newEmoji}
+                  onChange={(e) => setNewEmoji(e.target.value)}
+                  className="w-14 text-center text-xl border-2 border-slate-200 rounded-xl"
+                  aria-label={t.parentDashboard.couponEmoji}
+                />
+                <input
+                  data-testid="custom-coupon-name"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder={t.parentDashboard.couponNamePlaceholder}
+                  className="flex-1 text-sm border-2 border-slate-200 rounded-xl px-3"
+                />
+              </div>
+              <div className="flex gap-2">
+                <select
+                  data-testid="custom-coupon-size"
+                  value={newSize}
+                  onChange={(e) => setNewSize(e.target.value as CouponRewardSize)}
+                  className="flex-1 bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-sm font-bold"
+                >
+                  <option value="small">{t.parentDashboard.rewardSmall}</option>
+                  <option value="medium">{t.parentDashboard.rewardMedium}</option>
+                  <option value="large">{t.parentDashboard.rewardLarge}</option>
+                </select>
+                <button
+                  type="submit"
+                  data-testid="custom-coupon-add"
+                  className="px-3 py-1.5 rounded-xl text-sm font-bold bg-purple-600 text-white"
+                >
+                  {t.parentDashboard.addCouponBtn}
+                </button>
+              </div>
+            </form>
           </div>
 
           {/* Challenge Mode Section */}
@@ -208,7 +335,7 @@ export function ParentDashboard({
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
                     <span>{t.challenge.couponReward}:</span>
                     <span className="text-purple-700">
-                      {challengeCoupon.emoji} {(t.coupons.couponNames as Record<string, string>)[challengeCoupon.nameKey] ?? challengeCoupon.nameKey}
+                      {challengeCoupon.emoji} {couponLabel(challengeCoupon, t.coupons.couponNames as Record<string, string>)}
                     </span>
                   </div>
                 )}
@@ -225,6 +352,7 @@ export function ParentDashboard({
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-bold text-slate-700">{t.challenge.targetStars}:</span>
                   <select
+                    data-testid="challenge-target-stars"
                     value={selectedTarget}
                     onChange={(e) => setSelectedTarget(parseInt(e.target.value, 10))}
                     className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer"
@@ -247,7 +375,7 @@ export function ParentDashboard({
                     {enabledCoupons.length === 0 && <option value="">{t.challenge.noCouponsAvailable}</option>}
                     {enabledCoupons.map((coupon) => (
                       <option key={coupon.id} value={coupon.id}>
-                        {coupon.emoji} {(t.coupons.couponNames as Record<string, string>)[coupon.nameKey] ?? coupon.nameKey}
+                        {coupon.emoji} {couponLabel(coupon, t.coupons.couponNames as Record<string, string>)}
                       </option>
                     ))}
                   </select>

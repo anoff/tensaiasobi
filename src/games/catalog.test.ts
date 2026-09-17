@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { APP_PROGRESS_KEYS, GAMES, clearPersistedProgress, defaultChallengeAllowedGames, isGameId } from './catalog';
+import { APP_PROGRESS_KEYS, GAMES, clearPersistedProgress, defaultChallengeAllowedGames, gameVisibleForAge, isGameId } from './catalog';
 
 describe('game catalog', () => {
   afterEach(() => {
@@ -11,6 +11,16 @@ describe('game catalog', () => {
     const testids = GAMES.map((game) => game.testid);
     expect(new Set(ids).size).toBe(ids.length);
     expect(new Set(testids).size).toBe(testids.length);
+  });
+
+  it('assigns every game at least one age band', () => {
+    for (const game of GAMES) {
+      expect(game.ageBands.length).toBeGreaterThan(0);
+    }
+    expect(gameVisibleForAge(GAMES.find((g) => g.id === 'doodle')!, 'little')).toBe(true);
+    expect(gameVisibleForAge(GAMES.find((g) => g.id === 'doodle')!, 'big')).toBe(false);
+    expect(gameVisibleForAge(GAMES.find((g) => g.id === 'shiritori')!, 'little')).toBe(false);
+    expect(gameVisibleForAge(GAMES.find((g) => g.id === 'math')!, 'all')).toBe(true);
   });
 
   it('covers every GameId in challenge defaults', () => {

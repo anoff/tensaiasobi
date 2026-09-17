@@ -8,9 +8,9 @@ When picking this up, start at the top of the next slice. Product beats engineer
 
 ## Slice B — parent controls that match real use
 
-- [ ] **Age-band menu filter.** Parent setting (little / big, or 3–5 / 6–8) that hides launchers. A three-year-old should not land on Shiritori and City Dispatch next to Doodle. Add an `ageBand` (or similar) field on `src/games/catalog.ts` so this does not become a fifth drifted list.
-- [ ] **Session timer.** Parent picks “10 quiet minutes, then menu / lock.” Restaurant use case. Optional overlay when time is up; does not replace challenge-for-coupon, it sits beside it.
-- [ ] **Custom coupons, free.** Parents can add/edit real-world rewards (“15 extra minutes at the playground”) and star costs in the parent cabin. Do not gate this on premium.
+- [x] **Age-band menu filter.** Parent setting (little / big, or 3–5 / 6–8) that hides launchers. A three-year-old should not land on Shiritori and City Dispatch next to Doodle. Add an `ageBand` (or similar) field on `src/games/catalog.ts` so this does not become a fifth drifted list.
+- [x] **Session timer.** Parent picks “10 quiet minutes, then menu / lock.” Restaurant use case. Optional overlay when time is up; does not replace challenge-for-coupon, it sits beside it.
+- [x] **Custom coupons, free.** Parents can add/edit real-world rewards (“15 extra minutes at the playground”) and star costs in the parent cabin. Do not gate this on premium.
 
 ## Slice C — family on one phone
 

@@ -79,7 +79,7 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
 
     // Let's configure the challenge: target 5 stars, only Math allowed
     // Select 5 Stars from the target dropdown
-    const targetSelect = page.locator('select').first();
+    const targetSelect = page.getByTestId('challenge-target-stars');
     await expect(targetSelect).toBeVisible();
     await targetSelect.selectOption('5'); // 5 Stars
 
@@ -107,11 +107,11 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     await parentsButton.click();
     await solveParentGate(page);
 
-    const targetSelect = page.locator('select').first();
+    const targetSelect = page.getByTestId('challenge-target-stars');
     await targetSelect.selectOption('5'); // 5 Stars target
 
     // Select the "Ice Cream" coupon as the challenge reward
-    const couponSelect = page.locator('select').nth(1);
+    const couponSelect = page.getByTestId('challenge-coupon-select');
     await couponSelect.selectOption('ice_cream');
 
     await allowOnlyMath(page);
