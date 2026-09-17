@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import KidButton from './KidButton';
+import { GAMES, defaultChallengeAllowedGames } from '../games/catalog';
 import { useTranslation } from '../hooks/useTranslation';
 import { REWARD_SIZE_STAR_TARGETS, type Coupon } from '../types/gamification';
 
@@ -63,36 +64,16 @@ export function ParentDashboard({
       setSelectedTarget(REWARD_SIZE_STAR_TARGETS[coupon.rewardSize]);
     }
   };
-  const [allowedGames, setAllowedGames] = useState<Record<string, boolean>>(() => {
-    return {
-      math: true,
-      odd: true,
-      doodle: true,
-      memory: true,
-      maze: true,
-      trace: true,
-      letterTrace: true,
-      emojiMatch: true,
-      anlaut: true,
-      shiritori: true,
-      puzzle: true,
-      ...challengeAllowedGames
-    };
-  });
+  const [allowedGames, setAllowedGames] = useState<Record<string, boolean>>(() => ({
+    ...defaultChallengeAllowedGames(),
+    ...challengeAllowedGames,
+  }));
 
-  const gamesList = [
-    { id: 'math', label: t.menu.math, icon: '🎈' },
-    { id: 'odd', label: t.menu.odd, icon: '🧐' },
-    { id: 'doodle', label: t.menu.doodle, icon: '🎨' },
-    { id: 'memory', label: t.menu.match, icon: '🐯' },
-    { id: 'maze', label: t.menu.maze, icon: '🗺️' },
-    { id: 'trace', label: t.menu.trace, icon: '⭐' },
-    { id: 'letterTrace', label: t.menu.letterTrace, icon: '✏️' },
-    { id: 'emojiMatch', label: t.menu.dobble, icon: '⚡' },
-    { id: 'anlaut', label: t.menu.anlaut, icon: '🔤' },
-    { id: 'shiritori', label: t.menu.shiritori, icon: '🔗' },
-    { id: 'puzzle', label: t.menu.puzzle, icon: '🧩' },
-  ];
+  const gamesList = GAMES.map((game) => ({
+    id: game.id,
+    label: t.menu[game.labelKey],
+    icon: game.emoji,
+  }));
 
   const toggleGame = (gameId: string) => {
     setAllowedGames((prev) => ({
@@ -279,8 +260,9 @@ export function ParentDashboard({
                       <button
                         key={game.id}
                         type="button"
+                        data-testid={`challenge-game-${game.id}`}
                         onClick={() => toggleGame(game.id)}
-                        className={`flex items-center gap-1.5 p-2 rounded-xl border transition-all cursor-pointer font-bold outline-none ${allowedGames[game.id]
+                        className={`flex items-center gap-1.5 p-2 rounded-xl border transition-all cursor-pointer font-bold outline-none focus-visible:ring-2 focus-visible:ring-purple-400 ${allowedGames[game.id]
                           ? 'bg-purple-100 border-purple-300 text-purple-800'
                           : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
                           }`}

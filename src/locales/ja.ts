@@ -8,11 +8,13 @@ export const ja: TranslationSchema = {
     download: "ダウンロード",
     next: "次へ",
     play: "スタート",
+    home: "ホーム",
   },
   menu: {
     subtitle: "たのしく あそんで まなぼう！",
     footer: "まなびのために ❤️ をこめて",
     parents: "ほごしゃ",
+    language: "げんご",
     math: "さんすうポップ",
     odd: "なかまはずれ",
     doodle: "おえかき",

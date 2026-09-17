@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface GameConfettiProps {
   pieces?: number;
@@ -27,12 +27,31 @@ function makeItems(count: number): Piece[] {
   }));
 }
 
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = () => setReduced(media.matches);
+    onChange();
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  return reduced;
+}
+
 export default function GameConfetti({ pieces = 150, recycle = false }: GameConfettiProps) {
+  const reduceMotion = usePrefersReducedMotion();
   // Generate the random pieces once per mount instead of on every render.
   // Without this, any parent re-render (e.g. from cursor/pointer move state
   // updates) would regenerate all pieces with new random positions/timing,
   // making the confetti jump around and look broken while it's animating.
   const items = useMemo(() => makeItems(pieces), [pieces]);
+
+  if (reduceMotion) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">

@@ -8,11 +8,13 @@ export const ko: TranslationSchema = {
     download: "다운로드",
     next: "다음",
     play: "시작",
+    home: "홈",
   },
   menu: {
     subtitle: "재미있게 놀며 배워요!",
     footer: "배움을 위해 ❤️로 만듦",
     parents: "부모님",
+    language: "언어",
     math: "수학 팝",
     odd: "다른 그림 찾기",
     doodle: "낙서장",

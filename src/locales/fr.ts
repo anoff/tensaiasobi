@@ -8,11 +8,13 @@ export const fr: TranslationSchema = {
     download: "Télécharger",
     next: "Suivant",
     play: "Jouer",
+    home: "Accueil",
   },
   menu: {
     subtitle: "Jeux amusants pour apprendre !",
     footer: "Créé avec ❤️ pour l'apprentissage",
     parents: "Parents",
+    language: "Langue",
     math: "Math Pop",
     odd: "L'intrus",
     doodle: "Dessin",

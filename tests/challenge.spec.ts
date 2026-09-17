@@ -1,6 +1,21 @@
 import { test, expect, Page } from '@playwright/test';
 
 // Helper to solve the ParentGate problem
+async function allowOnlyMath(page: Page) {
+  const toggles = page.locator('[data-testid^="challenge-game-"]');
+  const count = await toggles.count();
+  expect(count).toBeGreaterThan(1);
+  for (let i = 0; i < count; i++) {
+    const btn = toggles.nth(i);
+    const testid = await btn.getAttribute('data-testid');
+    const className = (await btn.getAttribute('class')) ?? '';
+    const enabled = className.includes('bg-purple-100');
+    const isMath = testid === 'challenge-game-math';
+    if (isMath && !enabled) await btn.click();
+    if (!isMath && enabled) await btn.click();
+  }
+}
+
 async function solveParentGate(page: Page) {
   const gateTextElement = page.locator('form div.text-4xl');
   await expect(gateTextElement).toBeVisible();
@@ -68,27 +83,7 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     await expect(targetSelect).toBeVisible();
     await targetSelect.selectOption('5'); // 5 Stars
 
-    // Deselect all games except Math Pop
-    // The default enabled buttons will have class 'bg-purple-100'
-    const gamesToDisable = [
-      '🧐 Odd One',
-      '🎨 Doodle',
-      '🐯 Match',
-      '🗺️ Mazes',
-      '⭐ Trace',
-      '⚡ Emoji Match',
-      '🔤 First Sound',
-      '🔗 Word Chain'
-    ];
-
-    for (const name of gamesToDisable) {
-      const btn = page.getByRole('button', { name, exact: true });
-      await expect(btn).toBeVisible();
-      const className = await btn.getAttribute('class');
-      if (className && className.includes('bg-purple-100')) {
-        await btn.click();
-      }
-    }
+    await allowOnlyMath(page);
 
     // Start Challenge Mode
     const startButton = page.locator('button', { hasText: 'Start Challenge Mode' });
@@ -101,27 +96,9 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     const remaining = page.getByTestId('challenge-stars-remaining');
     await expect(remaining).toHaveText('5');
 
-    // Verify only Math Pop launcher is visible, and others are hidden
     const mathLauncher = page.getByTestId('launch-math');
     await expect(mathLauncher).toBeVisible();
-
-    const hiddenLaunchers = [
-      'launch-odd',
-      'launch-doodle',
-      'launch-memory',
-      'launch-maze',
-      'launch-trace',
-      'launch-emojimatch',
-      'launch-anlaut',
-      'launch-shiritori',
-      'launch-town',
-      'launch-coupons'
-    ];
-
-    for (const launcherId of hiddenLaunchers) {
-      const launcher = page.getByTestId(launcherId);
-      await expect(launcher).toBeHidden();
-    }
+    await expect(page.locator('[data-testid^="launch-"]')).toHaveCount(1);
   });
 
   test('Verify Math Game no-retry and completion flow in challenge mode', async ({ page }) => {
@@ -137,16 +114,7 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     const couponSelect = page.locator('select').nth(1);
     await couponSelect.selectOption('ice_cream');
 
-    const gamesToDisable = [
-      '🧐 Odd One', '🎨 Doodle', '🐯 Match', '🗺️ Mazes', '⭐ Trace', '⚡ Emoji Match', '🔤 First Sound', '🔗 Word Chain'
-    ];
-    for (const name of gamesToDisable) {
-      const btn = page.getByRole('button', { name, exact: true });
-      const className = await btn.getAttribute('class');
-      if (className && className.includes('bg-purple-100')) {
-        await btn.click();
-      }
-    }
+    await allowOnlyMath(page);
 
     await page.locator('button', { hasText: 'Start Challenge Mode' }).click();
 

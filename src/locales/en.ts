@@ -6,11 +6,13 @@ export const en = {
     download: "Download",
     next: "Next",
     play: "Play",
+    home: "Home",
   },
   menu: {
     subtitle: "Fun play & learn games!",
     footer: "Made with ❤️ for learning",
     parents: "Parents",
+    language: "Language",
     math: "Math Pop",
     odd: "Odd One",
     doodle: "Doodle",

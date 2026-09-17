@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { App as CapacitorApp } from '@capacitor/app';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useSound } from './hooks/useSound';
 import { useWakeLock } from './hooks/useWakeLock';
@@ -6,73 +7,24 @@ import KidButton from './components/KidButton';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
-import MathGame from './games/MathGame';
-import OddOneOut from './games/OddOneOut';
-import DoodlePad from './games/DoodlePad';
-import MemoryMatch from './games/MemoryMatch';
-import MazeGame from './games/MazeGame';
-import ShapeTrace from './games/ShapeTrace';
-import LetterTrace from './games/LetterTrace';
-import AnlautGame from './games/AnlautGame';
-import { EmojiMatch } from './games/EmojiMatch';
-import Shiritori from './games/Shiritori';
-import PuzzleGame from './games/PuzzleGame';
-import DispatchGame from './games/DispatchGame';
-import PhysicsPuzzleGame from './games/PhysicsPuzzleGame';
-import TowerSort from './games/TowerSort';
-import FruitMathPop from './games/FruitMathPop';
-import NumberTrain from './games/NumberTrain';
-import ShadowFlashlight from './games/ShadowFlashlight';
-import FairSharePicnic from './games/FairSharePicnic';
-import SnorkelPearlFinder from './games/SnorkelPearlFinder';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 import GameConfetti from './components/GameConfetti';
 
-// Gamification imports
 import { StarCounter } from './components/StarCounter';
 import { FlyUpStar } from './components/FlyUpStar';
 import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
 import type { Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
+import { GAMES, clearPersistedProgress, isGameId, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 
-type Screen = 'menu' | 'math' | 'odd' | 'doodle' | 'memory' | 'maze' | 'trace' | 'letterTrace' | 'anlaut' | 'emojiMatch' | 'town' | 'coupons' | 'settings' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'fruitMathPop' | 'numberTrain' | 'shadowFlashlight' | 'fairSharePicnic' | 'snorkelPearlFinder';
-
-interface LauncherDef {
-  id: Screen;
-  color: 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'red';
-  testid: string;
-  emoji: string;
-   label: 'math' | 'odd' | 'doodle' | 'match' | 'maze' | 'trace' | 'letterTrace' | 'dobble' | 'anlaut' | 'shiritori' | 'puzzle' | 'dispatch' | 'physics' | 'towerSort' | 'fruitMathPop' | 'numberTrain' | 'shadowFlashlight' | 'fairSharePicnic' | 'snorkelPearlFinder';
-}
-
-const GAME_LAUNCHERS: LauncherDef[] = [
-  { id: 'math', color: 'blue', testid: 'launch-math', emoji: '🎈', label: 'math' },
-  { id: 'odd', color: 'yellow', testid: 'launch-odd', emoji: '🧐', label: 'odd' },
-  { id: 'doodle', color: 'pink', testid: 'launch-doodle', emoji: '🎨', label: 'doodle' },
-  { id: 'memory', color: 'orange', testid: 'launch-memory', emoji: '🐯', label: 'match' },
-  { id: 'maze', color: 'green', testid: 'launch-maze', emoji: '🗺️', label: 'maze' },
-  { id: 'trace', color: 'purple', testid: 'launch-trace', emoji: '⭐', label: 'trace' },
-  { id: 'letterTrace', color: 'red', testid: 'launch-letterTrace', emoji: '✏️', label: 'letterTrace' },
-  { id: 'emojiMatch', color: 'pink', testid: 'launch-emojimatch', emoji: '⚡', label: 'dobble' },
-  { id: 'anlaut', color: 'red', testid: 'launch-anlaut', emoji: '🔤', label: 'anlaut' },
-  { id: 'shiritori', color: 'purple', testid: 'launch-shiritori', emoji: '🔗', label: 'shiritori' },
-  { id: 'puzzle', color: 'orange', testid: 'launch-puzzle', emoji: '🧩', label: 'puzzle' },
-  { id: 'dispatch', color: 'red', testid: 'launch-dispatch', emoji: '🚒', label: 'dispatch' },
-  { id: 'physics', color: 'purple', testid: 'launch-physics', emoji: '⚖️', label: 'physics' },
-  { id: 'towerSort', color: 'blue', testid: 'launch-tower-sort', emoji: '🗼', label: 'towerSort' },
-  { id: 'fruitMathPop', color: 'orange', testid: 'launch-fruit-math-pop', emoji: '🍎', label: 'fruitMathPop' },
-  { id: 'numberTrain', color: 'green', testid: 'launch-number-train', emoji: '🚂', label: 'numberTrain' },
-  { id: 'shadowFlashlight', color: 'purple', testid: 'launch-shadow', emoji: '🔦', label: 'shadowFlashlight' },
-  { id: 'fairSharePicnic', color: 'green', testid: 'launch-fair-share-picnic', emoji: '🧺', label: 'fairSharePicnic' },
-  { id: 'snorkelPearlFinder', color: 'blue', testid: 'launch-snorkel-pearl-finder', emoji: '🤿', label: 'snorkelPearlFinder' },
-];
+type Screen = 'menu' | 'town' | 'coupons' | 'settings' | GameId;
 
 function AppContent() {
-  const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', true);
+  const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', false);
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>('settings_vibration_enabled', true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
   const [showParentGate, setShowParentGate] = useState(false);
@@ -123,6 +75,57 @@ function AppContent() {
     return () => document.removeEventListener('mousedown', handler);
   }, [langOpen]);
 
+  useEffect(() => {
+    let removed = false;
+    let handle: { remove: () => Promise<void> } | undefined;
+
+    CapacitorApp.addListener('backButton', () => {
+      if (showParentGate) {
+        setShowParentGate(false);
+        return;
+      }
+      if (pendingEarnCouponId) {
+        setPendingEarnCouponId(null);
+        return;
+      }
+      if (pendingCouponRedeemConfirmId) {
+        setPendingCouponRedeemConfirmId(null);
+        return;
+      }
+      if (pendingCouponRedeemGateId) {
+        setPendingCouponRedeemGateId(null);
+        return;
+      }
+      if (celebratingCoupon) {
+        setCelebratingCoupon(null);
+        return;
+      }
+      if (currentScreen !== 'menu') {
+        setCurrentScreen('menu');
+        return;
+      }
+      CapacitorApp.exitApp();
+    }).then((listener) => {
+      if (removed) {
+        void listener.remove();
+        return;
+      }
+      handle = listener;
+    });
+
+    return () => {
+      removed = true;
+      void handle?.remove();
+    };
+  }, [
+    showParentGate,
+    pendingEarnCouponId,
+    pendingCouponRedeemConfirmId,
+    pendingCouponRedeemGateId,
+    celebratingCoupon,
+    currentScreen,
+  ]);
+
   const handleScreenChange = (screen: Screen) => {
     playPop();
     if (screen !== 'settings') setChallengeSetupCouponId(undefined);
@@ -130,212 +133,30 @@ function AppContent() {
   };
 
   const handleClearProgress = () => {
-    localStorage.removeItem('math_streak');
-    localStorage.removeItem('math_highscore');
-    localStorage.removeItem('odd_streak');
-    localStorage.removeItem('odd_highscore');
-    localStorage.removeItem('anlaut_streak');
-    localStorage.removeItem('anlaut_highscore');
-    localStorage.removeItem('shiritori_highscore');
-
-    // Clear Emoji Match progress
-    localStorage.removeItem('dobble_high_solo_zen_easy');
-    localStorage.removeItem('dobble_high_solo_zen_medium');
-    localStorage.removeItem('dobble_high_solo_zen_hard');
-    localStorage.removeItem('dobble_high_solo_time_medium');
-    localStorage.removeItem('dobble_high_solo_time_hard');
-
-    // Clear new game progress
-    localStorage.removeItem('dispatch_highscore');
-    localStorage.removeItem('physics_highscore');
-
-    // Clear Tower Sort best moves
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('tower_sort_best_moves_')) {
-        localStorage.removeItem(key);
-      }
-    });
-
-    // Clear gamification progress
+    clearPersistedProgress();
     resetStars();
     resetCoupons();
-    localStorage.removeItem('gamification_town');
-
+    cancelChallenge();
     playSuccess();
   };
 
   const renderActiveScreen = () => {
+    if (isGameId(currentScreen)) {
+      const Game = GAMES.find((game) => game.id === currentScreen)?.Component;
+      if (!Game) return null;
+      return (
+        <Game
+          key={language}
+          playPop={playPop}
+          playSuccess={playSuccess}
+          playError={playError}
+          onStarEarned={handleStarEarned}
+          challengeMode={challengeActive}
+        />
+      );
+    }
+
     switch (currentScreen) {
-      case 'math':
-        return (
-          <MathGame
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-            challengeMode={challengeActive}
-          />
-        );
-      case 'odd':
-        return (
-          <OddOneOut
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-            challengeMode={challengeActive}
-          />
-        );
-      case 'doodle':
-        return <DoodlePad playPop={playPop} />;
-      case 'memory':
-        return (
-          <MemoryMatch
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'maze':
-        return (
-          <MazeGame
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'trace':
-        return (
-          <ShapeTrace
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'letterTrace':
-        return (
-          <LetterTrace
-            key={language}
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'anlaut':
-        return (
-          <AnlautGame
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-            challengeMode={challengeActive}
-          />
-        );
-      case 'emojiMatch':
-        return (
-          <EmojiMatch
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-            challengeMode={challengeActive}
-          />
-        );
-      case 'shiritori':
-        return (
-          <Shiritori
-            key={language}
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-            challengeMode={challengeActive}
-          />
-        );
-      case 'puzzle':
-        return (
-          <PuzzleGame
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'dispatch':
-        return (
-          <DispatchGame
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'physics':
-        return (
-          <PhysicsPuzzleGame
-            playPop={playPop}
-            playSuccess={playSuccess}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'towerSort':
-        return (
-          <TowerSort
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'fruitMathPop':
-        return (
-          <FruitMathPop
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'numberTrain':
-        return (
-          <NumberTrain
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'shadowFlashlight':
-        return (
-          <ShadowFlashlight
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-            challengeMode={challengeActive}
-          />
-        );
-      case 'fairSharePicnic':
-        return (
-          <FairSharePicnic
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
-      case 'snorkelPearlFinder':
-        return (
-          <SnorkelPearlFinder
-            playPop={playPop}
-            playSuccess={playSuccess}
-            playError={playError}
-            onStarEarned={handleStarEarned}
-          />
-        );
       case 'town':
         return (
           <TownBuilder
@@ -436,8 +257,12 @@ function AppContent() {
                     <>
                       <button
                         data-testid="lang-dropdown-trigger"
+                        type="button"
+                        aria-label={t.menu.language}
+                        aria-expanded={langOpen}
+                        aria-haspopup="listbox"
                         onClick={() => { playPop(); setLangOpen((o) => !o); }}
-                        className="flex items-center gap-1 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5 text-base shadow-sm cursor-pointer outline-none hover:bg-slate-50 transition-all"
+                        className="flex items-center gap-1 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5 text-base shadow-sm cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-indigo-300 hover:bg-slate-50 transition-all"
                       >
                         {labelMap[language]}
                         <span className="text-slate-400 text-xs">{langOpen ? '▲' : '▼'}</span>
@@ -462,11 +287,12 @@ function AppContent() {
               </div>
 
               <button
+                type="button"
                 onClick={() => {
                   playPop();
                   setShowParentGate(true);
                 }}
-                className="bg-white/90 border-2 border-slate-300 rounded-full px-4 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none"
+                className="bg-white/90 border-2 border-slate-300 rounded-full px-4 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-indigo-300"
               >
                 ⚙️ {t.menu.parents}
               </button>
@@ -481,7 +307,7 @@ function AppContent() {
           <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
             {/* Title Block */}
             <div className="text-center space-y-2 mt-4">
-              <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-candy-pink via-candy-blue to-candy-purple drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)] animate-pulse">
+              <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-candy-pink via-candy-blue to-candy-purple drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)]">
                 tensaiasobi 🎮
               </h1>
               <p className="text-slate-400 font-extrabold text-base">{t.menu.subtitle}</p>
@@ -489,21 +315,20 @@ function AppContent() {
 
             {/* Launchers Grid */}
             <div className="grid grid-cols-3 gap-4 my-8">
-              {GAME_LAUNCHERS.map((launcher) => {
-                const key = launcher.id;
-                const allowed = !challengeActive || challengeAllowedGames[key];
+              {GAMES.map((game) => {
+                const allowed = !challengeActive || challengeAllowedGames[game.id];
                 if (!allowed) return null;
                 return (
                   <KidButton
-                    key={key}
-                    color={launcher.color}
+                    key={game.id}
+                    color={game.color}
                     size="lg"
-                    data-testid={launcher.testid}
-                    onClick={() => handleScreenChange(key)}
+                    data-testid={game.testid}
+                    onClick={() => handleScreenChange(game.id)}
                     className="aspect-square flex-col gap-2 rounded-[2rem]"
                   >
-                    <span className="text-5xl">{launcher.emoji}</span>
-                    <span className="text-lg font-black block leading-tight">{t.menu[launcher.label]}</span>
+                    <span className="text-5xl">{game.emoji}</span>
+                    <span className="text-lg font-black block leading-tight">{t.menu[game.labelKey]}</span>
                   </KidButton>
                 );
               })}
@@ -621,7 +446,7 @@ function AppContent() {
       {/* Challenge Unlocked Celebration Overlay */}
       {challengeActive && challengeStarsRemaining === 0 && (
         <div className="fixed inset-0 bg-slate-900/80 z-50 flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-300" data-testid="challenge-completion-modal">
-          <GameConfetti pieces={200} recycle />
+          <GameConfetti pieces={200} />
           <div className="bg-white rounded-[3rem] border-8 border-purple-400 p-8 max-w-sm w-full text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
             <span className="text-8xl block animate-bounce">🏆🎉</span>
             <h2 className="text-3xl font-black text-purple-800 leading-tight">

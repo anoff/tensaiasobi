@@ -11,7 +11,7 @@ interface EmojiItem {
   isOdd: boolean;
 }
 
-type OddOneOutProps = Omit<GameProps, 'playPop'>;
+
 
 const CATEGORIES: Record<string, string[]> = {
   animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🦆', '🦉'],
@@ -22,7 +22,7 @@ const CATEGORIES: Record<string, string[]> = {
   clothing: ['👕', '👖', '👗', '🧥', '🧦', '👟', '👒', '🕶️', '👜', '👑', '🧤', '🧣'],
 };
 
-export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode }: OddOneOutProps) {
+export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode }: GameProps) {
   const [items, setItems] = useState<EmojiItem[]>([]);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);

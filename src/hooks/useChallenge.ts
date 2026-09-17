@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { defaultChallengeAllowedGames } from '../games/catalog';
 import { useLocalStorage } from './useLocalStorage';
 
 interface StarEarnAnimation {
@@ -6,24 +7,7 @@ interface StarEarnAnimation {
   amount: number;
 }
 
-const DEFAULT_ALLOWED_GAMES: Record<string, boolean> = {
-  math: true,
-  odd: true,
-  doodle: false,
-  memory: true,
-  maze: false,
-  trace: false,
-  letterTrace: false,
-  emojiMatch: false,
-  anlaut: true,
-  shiritori: true,
-  puzzle: true,
-  dispatch: true,
-  physics: true,
-  towerSort: true,
-  numberTrain: true,
-  snorkelPearlFinder: true,
-};
+const DEFAULT_ALLOWED_GAMES = defaultChallengeAllowedGames();
 
 export function useChallenge() {
   const [challengeActive, setChallengeActive] = useLocalStorage<boolean>('challenge_active', false);
