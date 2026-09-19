@@ -4,6 +4,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useSound } from './hooks/useSound';
 import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
+import { LauncherGlyph } from './components/LauncherGlyph';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
@@ -17,7 +18,7 @@ import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
 import { couponLabel, type Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
-import { GAMES, TOWN_ICON_SRC, clearPersistedProgress, gameVisibleForAge, isGameId, type AgeBandFilter, type GameId } from './games/catalog';
+import { GAMES, clearPersistedProgress, gameVisibleForAge, isGameId, type AgeBandFilter, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
@@ -354,12 +355,8 @@ function AppContent() {
                     onClick={() => handleScreenChange(game.id)}
                     className="aspect-square flex-col gap-2 rounded-[2rem]"
                   >
-                    {'iconSrc' in game && game.iconSrc ? (
-                      <img src={game.iconSrc} alt="" className="w-12 h-12 pointer-events-none" />
-                    ) : (
-                      <span className="text-5xl">{game.emoji}</span>
-                    )}
-                    <span className="text-lg font-black block leading-tight">{t.menu[game.labelKey]}</span>
+                    <LauncherGlyph emoji={game.emoji} />
+                    <span className="text-lg font-black leading-none">{t.menu[game.labelKey]}</span>
                   </KidButton>
                 );
               })}
@@ -376,8 +373,10 @@ function AppContent() {
                     onClick={() => handleScreenChange('town')}
                     className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
                   >
-                    <img src={TOWN_ICON_SRC} alt="" className="w-12 h-12 pointer-events-none" />
-                    <span className="text-lg font-black block leading-tight">{t.menu.town}</span>
+                    <span className="flex flex-row items-center justify-center gap-3">
+                      <LauncherGlyph emoji="🏘️" />
+                      <span className="text-lg font-black leading-none">{t.menu.town}</span>
+                    </span>
                   </KidButton>
 
                   <KidButton
@@ -387,8 +386,8 @@ function AppContent() {
                     onClick={() => handleScreenChange('coupons')}
                     className="aspect-square flex-col gap-2 rounded-[2rem]"
                   >
-                    <span className="text-4xl">🎟️</span>
-                    <span className="text-base font-black block leading-tight">{t.menu.coupons}</span>
+                    <LauncherGlyph emoji="🎟️" />
+                    <span className="text-base font-black leading-none">{t.menu.coupons}</span>
                   </KidButton>
                 </div>
               </div>

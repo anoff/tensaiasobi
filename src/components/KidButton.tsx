@@ -58,7 +58,7 @@ export function KidButton({
       }}
       {...props}
     >
-      <span className="relative drop-shadow-[0_2px_2px_rgba(0,0,0,0.2)]">
+      <span className="relative inline-flex flex-col items-center justify-center gap-1 leading-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.2)]">
         {children}
       </span>
     </button>

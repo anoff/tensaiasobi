@@ -15,7 +15,10 @@ interface ShadowItem {
 
 interface DifficultyConfig {
   choices: number;
+  /** Flashlight beam radius in px — kept large enough to aim comfortably at every tier. */
   radius: number;
+  /** Silhouette scale. Harder rounds grow the shadow so the beam only shows a fragment. */
+  shadowScale: number;
   baseStars: number;
 }
 
@@ -48,9 +51,9 @@ const SHADOW_ITEMS: ShadowItem[] = [
 ];
 
 const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
-  easy: { choices: 3, radius: 64, baseStars: 2 },
-  medium: { choices: 5, radius: 48, baseStars: 2 },
-  hard: { choices: 6, radius: 36, baseStars: 2 },
+  easy: { choices: 3, radius: 64, shadowScale: 0.72, baseStars: 2 },
+  medium: { choices: 5, radius: 64, shadowScale: 1.15, baseStars: 2 },
+  hard: { choices: 6, radius: 64, shadowScale: 1.8, baseStars: 2 },
 };
 
 function generateRound(difficulty: GameDifficulty): { target: ShadowItem; choices: ShadowItem[] } {
@@ -199,7 +202,11 @@ export function ShadowFlashlight() {
               className="absolute inset-0 flex items-center justify-center pointer-events-none bg-white"
               style={maskStyle}
             >
-              <div className="relative flex items-center justify-center">
+              <div
+                className="relative flex items-center justify-center"
+                data-testid="shadow-silhouette"
+                style={{ transform: `scale(${config.shadowScale})` }}
+              >
                 {/* Outline layer: black silhouette slightly enlarged forms the outline ring */}
                 <span
                   className="absolute inset-0 flex items-center justify-center text-[10rem] leading-none"
@@ -227,6 +234,7 @@ export function ShadowFlashlight() {
           {/* Flashlight rim */}
           {!isRevealed && (
             <div
+              data-testid="shadow-beam"
               className="absolute rounded-full border-4 border-white/70 shadow-[0_0_24px_8px_rgba(255,255,255,0.45)] pointer-events-none"
               style={flashlightStyle}
             />

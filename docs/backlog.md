@@ -28,7 +28,7 @@ When picking this up, start at the top of the next slice. Product beats engineer
 
 ## Slice F — art direction (gradual)
 
-- [x] **SVG for signature surfaces.** Emoji stays the iteration language. Redraw menu / town / puzzle / trace toward the path already started in `public/puzzles/`. Do not boil the ocean in one PR. First pass: candy SVG launchers for math / trace / letters / puzzle / town, grass tile in Town.
+- [ ] **SVG for signature surfaces.** Emoji stays the iteration language. Menu launchers stay emoji — custom candy SVGs looked worse and sat off-center. Puzzle art in `public/puzzles/` is the existing SVG path to build on, not the home grid.
 
 ## Already-specced town follow-ups (optional, after B–C)
 
