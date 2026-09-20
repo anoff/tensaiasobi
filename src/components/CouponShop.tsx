@@ -17,7 +17,7 @@ export function CouponShop({ coupons, onRedeemCoupon, onEarnCoupon, playPop }: C
   const earnedCoupons = coupons.filter((c) => c.earnedCount > 0);
 
   const couponName = (coupon: Coupon) =>
-    couponLabel(coupon, t.coupons.couponNames as Record<string, string>);
+    couponLabel(coupon, t.coupons.couponNames);
 
   const handleRedeemHoldConfirm = (coupon: Coupon) => {
     playPop();

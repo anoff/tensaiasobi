@@ -7,13 +7,13 @@ test.describe('Shadow Flashlight difficulty', () => {
     await expect(page.getByTestId('shadow-stage')).toBeVisible();
 
     const easyScale = await page.getByTestId('shadow-silhouette').evaluate((el) => el.style.transform);
-    const easyBeam = await page.getByTestId('shadow-beam').evaluate((el) => (el as HTMLElement).style.width);
+    const easyBeam = await page.getByTestId('shadow-beam').evaluate((el) => (el as { style: { width: string } }).style.width);
 
     await page.getByTestId('difficulty-hard').click();
     await expect(page.getByTestId('shadow-silhouette')).toBeVisible();
 
     const hardScale = await page.getByTestId('shadow-silhouette').evaluate((el) => el.style.transform);
-    const hardBeam = await page.getByTestId('shadow-beam').evaluate((el) => (el as HTMLElement).style.width);
+    const hardBeam = await page.getByTestId('shadow-beam').evaluate((el) => (el as { style: { width: string } }).style.width);
 
     expect(easyBeam).toBe(hardBeam);
     expect(easyScale).toContain('0.72');

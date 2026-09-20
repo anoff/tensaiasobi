@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { couponLabel, type Coupon } from './gamification';
 
-const names = { iceCream: 'Ice Cream' };
+const names = {
+  iceCream: 'Ice Cream',
+  movieNight: 'Movie Night',
+  newToy: 'New Toy',
+  gummyBear: 'Gummy Bear',
+  zoo: 'Zoo',
+  gaming: 'Gaming',
+};
 
 describe('couponLabel', () => {
   it('prefers a custom name over the translation key', () => {

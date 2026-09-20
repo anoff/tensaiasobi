@@ -23,6 +23,8 @@ export type GameColor = 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'orang
 
 export type AgeBand = 'little' | 'big';
 export type AgeBandFilter = 'all' | AgeBand;
+/** Learning games are the challenge focus; play games unlock after the star quota. */
+export type GameKind = 'learn' | 'play';
 
 /** Keys on `t.menu` used as launcher labels (id is not always the label key). */
 export type GameLabelKey =
@@ -52,7 +54,7 @@ export interface GameCatalogEntry {
   color: GameColor;
   testid: string;
   labelKey: GameLabelKey;
-  challengeDefault: boolean;
+  kind: GameKind;
   ageBands: readonly AgeBand[];
   storageKeys: readonly string[];
   storageKeyPrefixes?: readonly string[];
@@ -60,25 +62,25 @@ export interface GameCatalogEntry {
 }
 
 export const GAMES = [
-  { id: 'math', color: 'blue', testid: 'launch-math', emoji: '🎈', labelKey: 'math', ageBands: ['little', 'big'], challengeDefault: true, storageKeys: ['math_streak', 'math_highscore'], Component: MathGame },
-  { id: 'odd', color: 'yellow', testid: 'launch-odd', emoji: '🧐', labelKey: 'odd', ageBands: ['little', 'big'], challengeDefault: true, storageKeys: ['odd_streak', 'odd_highscore'], Component: OddOneOut },
-  { id: 'doodle', color: 'pink', testid: 'launch-doodle', emoji: '🎨', labelKey: 'doodle', ageBands: ['little'], challengeDefault: false, storageKeys: [], Component: DoodlePad },
-  { id: 'memory', color: 'orange', testid: 'launch-memory', emoji: '🐯', labelKey: 'match', ageBands: ['little', 'big'], challengeDefault: true, storageKeys: [], Component: MemoryMatch },
-  { id: 'maze', color: 'green', testid: 'launch-maze', emoji: '🗺️', labelKey: 'maze', ageBands: ['little', 'big'], challengeDefault: false, storageKeys: [], Component: MazeGame },
-  { id: 'trace', color: 'purple', testid: 'launch-trace', emoji: '⭐', labelKey: 'trace', ageBands: ['little'], challengeDefault: false, storageKeys: [], Component: ShapeTrace },
-  { id: 'letterTrace', color: 'red', testid: 'launch-letterTrace', emoji: '✏️', labelKey: 'letterTrace', ageBands: ['big'], challengeDefault: false, storageKeys: [], Component: LetterTrace },
-  { id: 'emojiMatch', color: 'pink', testid: 'launch-emojimatch', emoji: '⚡', labelKey: 'dobble', ageBands: ['little', 'big'], challengeDefault: false, storageKeys: [], storageKeyPrefixes: ['dobble_high_'], Component: EmojiMatch },
-  { id: 'anlaut', color: 'red', testid: 'launch-anlaut', emoji: '🔤', labelKey: 'anlaut', ageBands: ['big'], challengeDefault: true, storageKeys: ['anlaut_streak', 'anlaut_highscore'], Component: AnlautGame },
-  { id: 'shiritori', color: 'purple', testid: 'launch-shiritori', emoji: '🔗', labelKey: 'shiritori', ageBands: ['big'], challengeDefault: true, storageKeys: ['shiritori_streak', 'shiritori_highscore'], Component: Shiritori },
-  { id: 'puzzle', color: 'orange', testid: 'launch-puzzle', emoji: '🧩', labelKey: 'puzzle', ageBands: ['little', 'big'], challengeDefault: true, storageKeys: [], Component: PuzzleGame },
-  { id: 'dispatch', color: 'red', testid: 'launch-dispatch', emoji: '🚒', labelKey: 'dispatch', ageBands: ['big'], challengeDefault: true, storageKeys: [], Component: DispatchGame },
-  { id: 'physics', color: 'purple', testid: 'launch-physics', emoji: '⚖️', labelKey: 'physics', ageBands: ['big'], challengeDefault: true, storageKeys: [], Component: PhysicsPuzzleGame },
-  { id: 'towerSort', color: 'blue', testid: 'launch-tower-sort', emoji: '🗼', labelKey: 'towerSort', ageBands: ['big'], challengeDefault: true, storageKeys: [], storageKeyPrefixes: ['tower_sort_best_moves_'], Component: TowerSort },
-  { id: 'fruitMathPop', color: 'orange', testid: 'launch-fruit-math-pop', emoji: '🍎', labelKey: 'fruitMathPop', ageBands: ['little', 'big'], challengeDefault: true, storageKeys: [], Component: FruitMathPop },
-  { id: 'numberTrain', color: 'green', testid: 'launch-number-train', emoji: '🚂', labelKey: 'numberTrain', ageBands: ['little', 'big'], challengeDefault: true, storageKeys: [], Component: NumberTrain },
-  { id: 'shadowFlashlight', color: 'purple', testid: 'launch-shadow', emoji: '🔦', labelKey: 'shadowFlashlight', ageBands: ['little'], challengeDefault: true, storageKeys: [], Component: ShadowFlashlight },
-  { id: 'fairSharePicnic', color: 'green', testid: 'launch-fair-share-picnic', emoji: '🧺', labelKey: 'fairSharePicnic', ageBands: ['little', 'big'], challengeDefault: true, storageKeys: [], Component: FairSharePicnic },
-  { id: 'snorkelPearlFinder', color: 'blue', testid: 'launch-snorkel-pearl-finder', emoji: '🤿', labelKey: 'snorkelPearlFinder', ageBands: ['little'], challengeDefault: true, storageKeys: [], Component: SnorkelPearlFinder },
+  { id: 'math', color: 'blue', testid: 'launch-math', emoji: '🎈', labelKey: 'math', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['math_streak', 'math_highscore'], Component: MathGame },
+  { id: 'odd', color: 'yellow', testid: 'launch-odd', emoji: '🧐', labelKey: 'odd', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['odd_streak', 'odd_highscore'], Component: OddOneOut },
+  { id: 'doodle', color: 'pink', testid: 'launch-doodle', emoji: '🎨', labelKey: 'doodle', ageBands: ['little'], kind: 'play', storageKeys: [], Component: DoodlePad },
+  { id: 'memory', color: 'orange', testid: 'launch-memory', emoji: '🐯', labelKey: 'match', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: MemoryMatch },
+  { id: 'maze', color: 'green', testid: 'launch-maze', emoji: '🗺️', labelKey: 'maze', ageBands: ['little', 'big'], kind: 'play', storageKeys: [], Component: MazeGame },
+  { id: 'trace', color: 'purple', testid: 'launch-trace', emoji: '⭐', labelKey: 'trace', ageBands: ['little'], kind: 'play', storageKeys: [], Component: ShapeTrace },
+  { id: 'letterTrace', color: 'red', testid: 'launch-letterTrace', emoji: '✏️', labelKey: 'letterTrace', ageBands: ['big'], kind: 'learn', storageKeys: [], Component: LetterTrace },
+  { id: 'emojiMatch', color: 'pink', testid: 'launch-emojimatch', emoji: '⚡', labelKey: 'dobble', ageBands: ['little', 'big'], kind: 'play', storageKeys: [], storageKeyPrefixes: ['dobble_high_'], Component: EmojiMatch },
+  { id: 'anlaut', color: 'red', testid: 'launch-anlaut', emoji: '🔤', labelKey: 'anlaut', ageBands: ['big'], kind: 'learn', storageKeys: ['anlaut_streak', 'anlaut_highscore'], Component: AnlautGame },
+  { id: 'shiritori', color: 'purple', testid: 'launch-shiritori', emoji: '🔗', labelKey: 'shiritori', ageBands: ['big'], kind: 'learn', storageKeys: ['shiritori_streak', 'shiritori_highscore'], Component: Shiritori },
+  { id: 'puzzle', color: 'orange', testid: 'launch-puzzle', emoji: '🧩', labelKey: 'puzzle', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: PuzzleGame },
+  { id: 'dispatch', color: 'red', testid: 'launch-dispatch', emoji: '🚒', labelKey: 'dispatch', ageBands: ['big'], kind: 'learn', storageKeys: [], Component: DispatchGame },
+  { id: 'physics', color: 'purple', testid: 'launch-physics', emoji: '⚖️', labelKey: 'physics', ageBands: ['big'], kind: 'learn', storageKeys: [], Component: PhysicsPuzzleGame },
+  { id: 'towerSort', color: 'blue', testid: 'launch-tower-sort', emoji: '🗼', labelKey: 'towerSort', ageBands: ['big'], kind: 'learn', storageKeys: [], storageKeyPrefixes: ['tower_sort_best_moves_'], Component: TowerSort },
+  { id: 'fruitMathPop', color: 'orange', testid: 'launch-fruit-math-pop', emoji: '🍎', labelKey: 'fruitMathPop', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: FruitMathPop },
+  { id: 'numberTrain', color: 'green', testid: 'launch-number-train', emoji: '🚂', labelKey: 'numberTrain', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: NumberTrain },
+  { id: 'shadowFlashlight', color: 'purple', testid: 'launch-shadow', emoji: '🔦', labelKey: 'shadowFlashlight', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: ShadowFlashlight },
+  { id: 'fairSharePicnic', color: 'green', testid: 'launch-fair-share-picnic', emoji: '🧺', labelKey: 'fairSharePicnic', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: FairSharePicnic },
+  { id: 'snorkelPearlFinder', color: 'blue', testid: 'launch-snorkel-pearl-finder', emoji: '🤿', labelKey: 'snorkelPearlFinder', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: SnorkelPearlFinder },
 ] as const satisfies readonly GameCatalogEntry[];
 
 export type GameId = (typeof GAMES)[number]['id'];
@@ -98,7 +100,16 @@ export function gameVisibleForAge(
 }
 
 export function defaultChallengeAllowedGames(): Record<GameId, boolean> {
-  return Object.fromEntries(GAMES.map((game) => [game.id, game.challengeDefault])) as Record<GameId, boolean>;
+  return Object.fromEntries(GAMES.map((game) => [game.id, game.kind === 'learn'])) as Record<GameId, boolean>;
+}
+
+export function gameVisibleInChallenge(
+  game: { id: string; kind: GameKind },
+  options: { focusActive: boolean; allowedGames: Record<string, boolean> },
+): boolean {
+  if (!options.focusActive) return true;
+  if (game.kind === 'play') return false;
+  return Boolean(options.allowedGames[game.id]);
 }
 
 /** Progress keys owned by stars/coupons/town/challenge — not settings or language. */
@@ -111,6 +122,7 @@ export const APP_PROGRESS_KEYS = [
   'challenge_stars_earned',
   'challenge_allowed_games',
   'challenge_coupon_id',
+  'challenge_play_unlocked',
 ] as const;
 
 export function clearPersistedProgress(): void {

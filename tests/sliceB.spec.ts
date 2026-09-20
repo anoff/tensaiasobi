@@ -21,9 +21,10 @@ test.describe('Slice B parent controls', () => {
   });
 
   test('little age band hides big-kid games and keeps doodle', async ({ page }) => {
-    await openSettings(page);
+    await page.getByTestId('open-session').click();
+    await solveParentGate(page);
     await page.getByTestId('age-band-little').click();
-    await page.getByRole('button', { name: /Close Settings|Einstellungen schließen|とじる|Fermer|닫기/ }).click();
+    await page.getByTestId('session-start').click();
 
     await expect(page.getByTestId('launch-doodle')).toBeVisible();
     await expect(page.getByTestId('launch-shiritori')).toHaveCount(0);

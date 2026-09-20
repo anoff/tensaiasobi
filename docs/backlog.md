@@ -2,7 +2,9 @@
 
 Residual work from the takeover review. **Slice A is done** (game catalog, wipe-via-catalog, sound default off, reduced motion, parent-chrome a11y, Capacitor back, Vitest). Do not re-litigate those.
 
-When picking this up, start at the top of the next slice. Product beats engineering hygiene; hygiene beats art.
+Learn-first challenge (unlock play games after the star goal) and tiny cleanups (typed coupon names, README catalog) landed after Slice F.
+
+When picking this up, start at Slice C if two kids share a phone. Product beats engineering hygiene; hygiene beats art.
 
 ---
 

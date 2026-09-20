@@ -62,20 +62,12 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
 
   test('Verify Parent Settings includes Challenge Mode and configuring it limits launchers', async ({ page }) => {
     // 1. Open Parents Settings Dashboard
-    const parentsButton = page.locator('button', { hasText: 'Parents' });
-    await expect(parentsButton).toBeVisible();
-    await parentsButton.click();
-
-    // Solve Parent Gate
+    await page.getByTestId('open-session').click();
     await solveParentGate(page);
 
-    // Verify Settings Dashboard is shown
-    const settingsTitle = page.locator('h2', { hasText: 'Settings' });
-    await expect(settingsTitle).toBeVisible();
-
-    // Verify Challenge Mode Section header is visible
-    const challengeHeader = page.locator('span', { hasText: 'Challenge Mode' });
-    await expect(challengeHeader).toBeVisible();
+    await expect(page.locator('h2', { hasText: 'Hand over' })).toBeVisible();
+    await page.getByTestId('session-mode-learn').click();
+    await expect(page.getByText('Learning first', { exact: true })).toBeVisible();
 
     // Let's configure the challenge: target 5 stars, only Math allowed
     // Select 5 Stars from the target dropdown
@@ -86,7 +78,7 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     await allowOnlyMath(page);
 
     // Start Challenge Mode
-    const startButton = page.locator('button', { hasText: 'Start Challenge Mode' });
+    const startButton = page.getByTestId('session-start');
     await expect(startButton).toBeVisible();
     await startButton.click();
 
@@ -103,9 +95,9 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
 
   test('Verify Math Game no-retry and completion flow in challenge mode', async ({ page }) => {
     // 1. Activate challenge mode via Parent settings (5 Stars target, Math only)
-    const parentsButton = page.locator('button', { hasText: 'Parents' });
-    await parentsButton.click();
+    await page.getByTestId('open-session').click();
     await solveParentGate(page);
+    await page.getByTestId('session-mode-learn').click();
 
     const targetSelect = page.getByTestId('challenge-target-stars');
     await targetSelect.selectOption('5'); // 5 Stars target
@@ -116,7 +108,7 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
 
     await allowOnlyMath(page);
 
-    await page.locator('button', { hasText: 'Start Challenge Mode' }).click();
+    await page.getByTestId('session-start').click();
 
     // 2. Play Math Game
     const mathLauncher = page.getByTestId('launch-math');
@@ -196,14 +188,13 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     await expect(claimButton).toBeVisible();
     await claimButton.click();
 
-    // Verify we are back in normal mode (countdown badge is hidden, other games are visible)
     await expect(completionModal).toBeHidden();
-    const countdownBadge = page.getByTestId('challenge-countdown-badge');
-    await expect(countdownBadge).toBeHidden();
+    await expect(page.getByTestId('challenge-countdown-badge')).toBeHidden();
+    await expect(page.getByTestId('challenge-play-unlocked-badge')).toBeVisible();
 
-    // Verify other games are visible again (e.g. Odd One)
-    const oddLauncher = page.getByTestId('launch-odd');
-    await expect(oddLauncher).toBeVisible();
+    await expect(page.getByTestId('launch-odd')).toBeVisible();
+    await expect(page.getByTestId('launch-doodle')).toBeVisible();
+    await expect(page.getByTestId('launch-town')).toBeVisible();
 
     // Verify the coupon was awarded and persisted in the Coupon Shop
     const couponsLauncher = page.getByTestId('launch-coupons');

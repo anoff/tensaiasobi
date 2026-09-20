@@ -40,8 +40,9 @@ test.describe('Slice A catalog, motion, a11y', () => {
   });
 
   test('challenge setup lists the full catalog including newer games', async ({ page }) => {
-    await page.getByRole('button', { name: /Parents|Eltern|ほごしゃ|부모님/ }).click();
+    await page.getByTestId('open-session').click();
     await solveParentGate(page);
+    await page.getByTestId('session-mode-learn').click();
 
     await expect(page.getByTestId('challenge-game-math')).toBeVisible();
     await expect(page.getByTestId('challenge-game-fruitMathPop')).toBeVisible();
@@ -51,6 +52,7 @@ test.describe('Slice A catalog, motion, a11y', () => {
     await expect(page.getByTestId('challenge-game-snorkelPearlFinder')).toBeVisible();
 
     const toggles = page.locator('[data-testid^="challenge-game-"]');
-    await expect(toggles).toHaveCount(19);
+    await expect(toggles).toHaveCount(15);
+    await expect(page.getByTestId('challenge-game-doodle')).toHaveCount(0);
   });
 });

@@ -36,10 +36,12 @@ export const REWARD_SIZE_STAR_TARGETS: Record<CouponRewardSize, number> = {
 };
 
 /** A real-world coupon that can be awarded by a parent, e.g. via a Challenge */
+export type CouponNameKey = 'iceCream' | 'movieNight' | 'newToy' | 'gummyBear' | 'zoo' | 'gaming';
+
 export interface Coupon {
   id: string;
   emoji: string;
-  nameKey: string;
+  nameKey: CouponNameKey | '';
   /** Parent-authored label; wins over `nameKey` when set */
   customName?: string;
   isCustom?: boolean;
@@ -53,9 +55,10 @@ export interface Coupon {
   lastEarnedAt?: number;
 }
 
-export function couponLabel(coupon: Coupon, names: Record<string, string>): string {
+export function couponLabel(coupon: Coupon, names: Record<CouponNameKey, string>): string {
   if (coupon.customName) return coupon.customName;
-  return names[coupon.nameKey] ?? coupon.nameKey;
+  if (!coupon.nameKey) return coupon.id;
+  return names[coupon.nameKey];
 }
 
 /** Default size of the town grid */

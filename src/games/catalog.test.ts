@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { APP_PROGRESS_KEYS, GAMES, clearPersistedProgress, defaultChallengeAllowedGames, gameVisibleForAge, isGameId } from './catalog';
+import { APP_PROGRESS_KEYS, GAMES, clearPersistedProgress, defaultChallengeAllowedGames, gameVisibleForAge, gameVisibleInChallenge, isGameId } from './catalog';
 
 describe('game catalog', () => {
   afterEach(() => {
@@ -26,10 +26,21 @@ describe('game catalog', () => {
   it('covers every GameId in challenge defaults', () => {
     const defaults = defaultChallengeAllowedGames();
     for (const game of GAMES) {
-      expect(defaults[game.id]).toBe(game.challengeDefault);
+      expect(defaults[game.id]).toBe(game.kind === 'learn');
       expect(isGameId(game.id)).toBe(true);
     }
     expect(isGameId('town')).toBe(false);
+    expect(GAMES.find((g) => g.id === 'doodle')?.kind).toBe('play');
+    expect(GAMES.find((g) => g.id === 'math')?.kind).toBe('learn');
+  });
+
+  it('hides play games while a challenge is in the focus phase', () => {
+    const doodle = GAMES.find((g) => g.id === 'doodle')!;
+    const math = GAMES.find((g) => g.id === 'math')!;
+    const allowed = defaultChallengeAllowedGames();
+    expect(gameVisibleInChallenge(doodle, { focusActive: true, allowedGames: allowed })).toBe(false);
+    expect(gameVisibleInChallenge(math, { focusActive: true, allowedGames: allowed })).toBe(true);
+    expect(gameVisibleInChallenge(doodle, { focusActive: false, allowedGames: allowed })).toBe(true);
   });
 
   it('clearPersistedProgress removes exact keys, prefixes, and app progress', () => {

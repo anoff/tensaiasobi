@@ -31,13 +31,14 @@ export function useSessionTimer() {
     }
   }, [setMinutesState, setEndsAt, setLocked]);
 
-  const startOrRefresh = useCallback(() => {
-    if (minutes <= 0) {
+  const startOrRefresh = useCallback((override?: SessionMinutes) => {
+    const duration = override ?? minutes;
+    if (duration <= 0) {
       setEndsAt(null);
       setLocked(false);
       return;
     }
-    setEndsAt(Date.now() + minutes * 60_000);
+    setEndsAt(Date.now() + duration * 60_000);
     setLocked(false);
   }, [minutes, setEndsAt, setLocked]);
 

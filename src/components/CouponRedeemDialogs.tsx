@@ -5,7 +5,7 @@ import { couponLabel, type Coupon } from '../types/gamification';
 import type { TranslationSchema } from '../locales';
 
 function couponName(coupon: Coupon, t: TranslationSchema): string {
-  return couponLabel(coupon, t.coupons.couponNames as Record<string, string>);
+  return couponLabel(coupon, t.coupons.couponNames);
 }
 
 interface RedeemConfirmDialogProps {

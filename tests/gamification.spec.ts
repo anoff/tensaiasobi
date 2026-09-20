@@ -75,7 +75,7 @@ test.describe('tensaiasobi Gamification Checks', () => {
 
   test('Verify Parent Settings Dashboard displays Reward Coupons section', async ({ page }) => {
     // Open Settings (triggers Parent Gate)
-    const parentsButton = page.locator('button', { hasText: 'Parents' });
+    const parentsButton = page.getByTestId('open-settings');
     await expect(parentsButton).toBeVisible();
     await parentsButton.click();
 
@@ -199,9 +199,8 @@ test.describe('tensaiasobi Gamification Checks', () => {
     await expect(gateTitle).toBeVisible();
     await solveParentGate(page);
 
-    // 4. Lands on the Settings dashboard with Challenge Mode configuration, coupon preselected
-    const settingsTitle = page.locator('h2', { hasText: 'Settings' });
-    await expect(settingsTitle).toBeVisible();
+    await expect(page.locator('h2', { hasText: 'Hand over' })).toBeVisible();
+    await expect(page.getByTestId('session-mode-learn')).toHaveClass(/bg-purple-100/);
 
     const couponSelect = page.getByTestId('challenge-coupon-select');
     await expect(couponSelect).toHaveValue('movie_night');

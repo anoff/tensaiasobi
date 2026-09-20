@@ -8,6 +8,7 @@ import { LauncherGlyph } from './components/LauncherGlyph';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
+import SessionCard, { type SessionStartConfig } from './components/SessionCard';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 import { GameFXProvider } from './hooks/useGameFX';
 import GameConfetti from './components/GameConfetti';
@@ -18,19 +19,21 @@ import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
 import { couponLabel, type Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
-import { GAMES, clearPersistedProgress, gameVisibleForAge, isGameId, type AgeBandFilter, type GameId } from './games/catalog';
+import { GAMES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, isGameId, type AgeBandFilter, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 import { formatRemaining, useSessionTimer } from './hooks/useSessionTimer';
 
-type Screen = 'menu' | 'town' | 'coupons' | 'settings' | GameId;
+type Screen = 'menu' | 'town' | 'coupons' | 'settings' | 'session' | GameId;
+type ParentGateNext = 'settings' | 'session';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', false);
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>('settings_vibration_enabled', true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
   const [showParentGate, setShowParentGate] = useState(false);
+  const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
 
   const { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze } =
     useSound(soundEnabled, vibrationEnabled);
@@ -56,6 +59,7 @@ function AppContent() {
     challengeStarsRemaining,
     challengeAllowedGames,
     challengeCouponId,
+    challengePlayUnlocked,
     pendingChallengeAnimations,
     addChallengeStars,
     clearChallengeAnimation,
@@ -64,8 +68,10 @@ function AppContent() {
     claimChallengeReward,
   } = useChallenge();
 
+  const challengeFocusActive = challengeActive && !challengePlayUnlocked;
+
   const handleStarEarned = (amount: number) => {
-    if (challengeActive) addChallengeStars(amount);
+    if (challengeFocusActive) addChallengeStars(amount);
     else addStars(amount);
   };
 
@@ -133,9 +139,9 @@ function AppContent() {
 
   const handleScreenChange = (screen: Screen) => {
     playPop();
-    if (screen !== 'settings') setChallengeSetupCouponId(undefined);
-    if (sessionLocked && screen !== 'settings' && screen !== 'menu') return;
-    if (screen !== 'menu' && screen !== 'settings') startIfIdle();
+    if (screen !== 'settings' && screen !== 'session') setChallengeSetupCouponId(undefined);
+    if (sessionLocked && screen !== 'settings' && screen !== 'session' && screen !== 'menu') return;
+    if (screen !== 'menu' && screen !== 'settings' && screen !== 'session') startIfIdle();
     setCurrentScreen(screen);
   };
 
@@ -145,6 +151,19 @@ function AppContent() {
     resetCoupons();
     cancelChallenge();
     playSuccess();
+  };
+
+  const handleStartSession = (config: SessionStartConfig) => {
+    setAgeBand(config.ageBand);
+    setSessionMinutes(config.minutes);
+    if (config.minutes > 0) startOrRefresh(config.minutes);
+    else unlock();
+    if (config.mode === 'learn') {
+      startChallenge(config.targetStars, config.allowedGames, config.couponId);
+    } else {
+      cancelChallenge();
+    }
+    handleScreenChange('menu');
   };
 
   const renderActiveScreen = () => {
@@ -158,7 +177,7 @@ function AppContent() {
             playSuccess,
             playError,
             onStarEarned: handleStarEarned,
-            challengeMode: challengeActive,
+            challengeMode: challengeFocusActive,
           }}
         >
           <Game key={language} />
@@ -190,6 +209,26 @@ function AppContent() {
             playPop={playPop}
           />
         );
+      case 'session':
+        return (
+          <SessionCard
+            ageBand={ageBand}
+            sessionMinutes={sessionMinutes}
+            coupons={coupons}
+            challengeActive={challengeActive}
+            challengePlayUnlocked={challengePlayUnlocked}
+            challengeStarsTarget={challengeStarsTarget}
+            challengeAllowedGames={challengeAllowedGames}
+            challengeCouponId={challengeCouponId}
+            initialCouponId={challengeSetupCouponId}
+            onStart={handleStartSession}
+            onEndSession={() => {
+              cancelChallenge();
+              unlock();
+            }}
+            onClose={() => handleScreenChange('menu')}
+          />
+        );
       case 'settings':
         return (
           <ParentDashboard
@@ -200,22 +239,7 @@ function AppContent() {
             coupons={coupons}
             onToggleCoupon={toggleCoupon}
             onClearProgress={handleClearProgress}
-            onClose={() => {
-              if (sessionMinutes > 0) startOrRefresh();
-              else unlock();
-              handleScreenChange('menu');
-            }}
-            challengeActive={challengeActive}
-            challengeStarsTarget={challengeStarsTarget}
-            challengeAllowedGames={challengeAllowedGames}
-            challengeCouponId={challengeCouponId}
-            onStartChallenge={startChallenge}
-            onCancelChallenge={cancelChallenge}
-            initialCouponId={challengeSetupCouponId}
-            ageBand={ageBand}
-            setAgeBand={setAgeBand}
-            sessionMinutes={sessionMinutes}
-            setSessionMinutes={setSessionMinutes}
+            onClose={() => handleScreenChange('menu')}
             onAddCoupon={addCustomCoupon}
             onRemoveCoupon={removeCustomCoupon}
           />
@@ -230,7 +254,7 @@ function AppContent() {
       {/* Top Navigation Bar */}
       <header className="flex justify-between items-center p-4 z-50">
         <div>
-          {currentScreen !== 'menu' && currentScreen !== 'settings' && (
+          {currentScreen !== 'menu' && currentScreen !== 'settings' && currentScreen !== 'session' && (
             <HomeButton data-testid="home-button" onClick={() => handleScreenChange('menu')} />
           )}
         </div>
@@ -244,7 +268,7 @@ function AppContent() {
             </div>
           )}
 
-          {challengeActive && (
+          {challengeFocusActive && (
             <div className="relative" data-testid="challenge-countdown-badge">
               <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300 rounded-full px-3 py-1.5 shadow-sm select-none justify-center">
                 <span className="text-lg">🎯</span>
@@ -264,6 +288,18 @@ function AppContent() {
                   </span>
                 </FlyUpStar>
               ))}
+            </div>
+          )}
+
+          {challengeActive && challengePlayUnlocked && (
+            <div
+              className="flex items-center gap-1.5 bg-emerald-100 border-2 border-emerald-300 rounded-full px-3 py-1.5 shadow-sm select-none"
+              data-testid="challenge-play-unlocked-badge"
+            >
+              <span className="text-lg">🎉</span>
+              <span className="text-xs font-black text-emerald-800 uppercase tracking-wider">
+                {t.challenge.playUnlockedBadge}
+              </span>
             </div>
           )}
 
@@ -315,13 +351,28 @@ function AppContent() {
 
               <button
                 type="button"
+                data-testid="open-session"
                 onClick={() => {
                   playPop();
+                  setParentGateNext('session');
                   setShowParentGate(true);
                 }}
-                className="bg-white/90 border-2 border-slate-300 rounded-full px-4 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-indigo-300"
+                className="bg-purple-500 text-white border-2 border-purple-700 rounded-full px-4 py-2 text-sm font-extrabold hover:bg-purple-600 cursor-pointer shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-purple-300"
               >
-                ⚙️ {t.menu.parents}
+                ▶️ {t.menu.session}
+              </button>
+              <button
+                type="button"
+                data-testid="open-settings"
+                onClick={() => {
+                  playPop();
+                  setParentGateNext('settings');
+                  setShowParentGate(true);
+                }}
+                className="bg-white/90 border-2 border-slate-300 rounded-full px-3 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-indigo-300"
+                aria-label={t.menu.parents}
+              >
+                ⚙️
               </button>
             </div>
           )}
@@ -343,8 +394,7 @@ function AppContent() {
             {/* Launchers Grid */}
             <div className="grid grid-cols-3 gap-4 my-8">
               {GAMES.map((game) => {
-                const allowed = !challengeActive || challengeAllowedGames[game.id];
-                if (!allowed) return null;
+                if (!gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames })) return null;
                 if (!gameVisibleForAge(game, ageBand)) return null;
                 return (
                   <KidButton
@@ -363,7 +413,7 @@ function AppContent() {
             </div>
 
             {/* Gamification section separated by a gap and border */}
-            {!challengeActive && (
+            {!challengeFocusActive && (
               <div className="border-t-2 border-slate-200/60 pt-6 mt-2 mb-4">
                 <div className="grid grid-cols-3 gap-4">
                   <KidButton
@@ -412,7 +462,7 @@ function AppContent() {
         <ParentGate
           onSuccess={() => {
             setShowParentGate(false);
-            setCurrentScreen('settings');
+            setCurrentScreen(parentGateNext);
           }}
           onClose={() => setShowParentGate(false)}
         />
@@ -424,7 +474,7 @@ function AppContent() {
           onSuccess={() => {
             setChallengeSetupCouponId(pendingEarnCouponId);
             setPendingEarnCouponId(null);
-            setCurrentScreen('settings');
+            setCurrentScreen('session');
           }}
           onClose={() => setPendingEarnCouponId(null)}
         />
@@ -474,7 +524,7 @@ function AppContent() {
       )}
 
       {/* Challenge Unlocked Celebration Overlay */}
-      {challengeActive && challengeStarsRemaining === 0 && (
+      {challengeFocusActive && challengeStarsRemaining === 0 && (
         <div className="fixed inset-0 bg-slate-900/80 z-50 flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-300" data-testid="challenge-completion-modal">
           <GameConfetti pieces={200} />
           <div className="bg-white rounded-[3rem] border-8 border-purple-400 p-8 max-w-sm w-full text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
@@ -503,7 +553,7 @@ function AppContent() {
                     <>
                       <span className="text-2xl">{coupon.emoji}</span>
                       <span className="text-lg font-black text-violet-800">
-                        {couponLabel(coupon, t.coupons.couponNames as Record<string, string>)}
+                        {couponLabel(coupon, t.coupons.couponNames)}
                       </span>
                     </>
                   );
@@ -524,13 +574,13 @@ function AppContent() {
               }}
               className="w-full rounded-2xl tracking-wider uppercase"
             >
-              {t.challenge.claimStars.replace('{count}', challengeStarsTarget.toString())}
+              {t.challenge.claimPlay.replace('{count}', challengeStarsTarget.toString())}
             </KidButton>
           </div>
         </div>
       )}
 
-      {sessionLocked && currentScreen !== 'settings' && (
+      {sessionLocked && currentScreen !== 'settings' && currentScreen !== 'session' && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/70 p-6" data-testid="session-locked">
           <div className="bg-white rounded-[2rem] border-4 border-slate-300 p-8 max-w-sm w-full text-center space-y-4">
             <span className="text-6xl block">⏰</span>

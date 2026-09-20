@@ -20,20 +20,35 @@ A modern, lightning-fast static web app designed for young children (ages 3-8). 
 
 ## 🕹️ The Games
 
-1. **Math Pop 🎈**: Bubble-popping math quiz with adjustable difficulties (addition/subtraction).
-2. **Odd One 🧐**: A categorization and logic puzzle for pre-readers.
-3. **Animal Match 🐯**: Classic memory card game scaling from 2x2 to larger grids.
-4. **Doodle Pad 🎨**: A canvas for drawing with rainbow gradients and stamping emojis.
-5. **Mazes 🌀**: A procedurally generated maze solver with different sizes.
-6. **Trace ✏️**: Learn shapes and motor control by tracing outlines.
-7. **First Sound 🗣️**: Phonics and starting-letter recognition challenge.
-8. **Emoji Match 🃏**: Speed matching card patterns using colorful emojis.
-9. **Word Chain (Shiritori) 🗣️**: A fun word-building chain game.
-10. **Magic Puzzle 🧩**: Jigsaw puzzle with interlocking pieces, silhouette guides, and dynamic SVG cuts.
-11. **Tower Sort 🗼**: A tap-to-sort emoji stacking puzzle — move the top emoji between towers until each tower holds only matching emojis.
-12. **My Town 🏡**: A sandbox builder to place trees, houses, and roads using stars earned from other games.
-13. **City Dispatch 🚓🚒🚑**: Race to send the right emergency vehicle to fires, injuries, and alerts across a tiny city.
-14. **Balance ⚖️**: A physics puzzle where kids place weights to level a seesaw.
+Learning games (star challenges focus here first):
+
+1. **Math Pop 🎈** — Bubble-popping addition/subtraction.
+2. **Odd One 🧐** — Categorization for pre-readers.
+3. **Animal Match 🐯** — Memory pairs.
+4. **Letters ✏️** — Stroke tracing (Latin, Hiragana, Katakana, Hangul).
+5. **First Sound 🔤** — Starting-letter / phonics.
+6. **Word Chain 🔗** — Shiritori-style last-character matching.
+7. **Magic Puzzle 🧩** — Interlocking SVG jigsaw.
+8. **City Dispatch 🚒** — Send the right emergency vehicle.
+9. **Balance ⚖️** — Seesaw physics.
+10. **Tower Sort 🗼** — Stack matching emojis.
+11. **Fruit Math Pop 🍎** — Count fruit, then pick the total.
+12. **Number Train 🚂** — Count passengers onto the right station.
+13. **Shadow 🔦** — Identify a silhouette with a flashlight.
+14. **Fair Share Picnic 🧺** — Equal sharing / early division.
+15. **Pearl Finder 🤿** — Sort pearls into matching clams.
+
+Play games (unlock after a learn-first star goal):
+
+16. **Doodle Pad 🎨** — Finger painting.
+17. **Mazes 🗺️** — Path tracing through a generated maze.
+18. **Trace ⭐** — Shape outlines.
+19. **Emoji Match ⚡** — Dobble-style speed match.
+
+Always available after a goal (and whenever learn-first is off):
+
+- **My Town 🏘️** — Spend stars on a 6×6 sandbox.
+- **Coupons 🎟️** — Parent-approved real-world rewards.
 
 
 ## 🚀 Local Development
