@@ -3,7 +3,6 @@ import { LauncherGlyph } from './LauncherGlyph';
 
 const FILLS = ['#ff4d3a', '#1f9a62', '#ffc21a'] as const;
 const INK = '#2a1c14';
-const PAPER = '#fff6e8';
 
 function tileTilt(id: string): number {
   let h = 0;
@@ -27,8 +26,6 @@ interface BlockTileProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 export function BlockTile({ emoji, label, index, tileId, className = '', style, ...props }: BlockTileProps) {
   const fill = tileFill(index);
   const tilt = tileTilt(tileId);
-  const inkGlyph = fill === '#ffc21a';
-  const glyphColor = inkGlyph ? INK : PAPER;
 
   return (
     <div className="min-h-24 min-w-24" style={{ transform: `rotate(${tilt}deg)` }}>
@@ -45,13 +42,17 @@ export function BlockTile({ emoji, label, index, tileId, className = '', style, 
         style={{
           backgroundColor: fill,
           borderColor: INK,
-          color: glyphColor,
           boxShadow: `5px 6px 0 0 ${INK}`,
           ...style,
         }}
         {...props}
       >
-        <LauncherGlyph emoji={emoji} sizeClass="h-14 w-14" />
+        <span
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 bg-white"
+          style={{ borderColor: INK }}
+        >
+          <LauncherGlyph emoji={emoji} sizeClass="h-11 w-11" />
+        </span>
         <span
           className="w-full truncate px-0.5 text-center text-[13px] font-black leading-tight tracking-tight sm:text-sm"
           style={{ color: INK }}
