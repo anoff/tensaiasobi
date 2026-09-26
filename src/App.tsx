@@ -4,7 +4,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useSound } from './hooks/useSound';
 import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
-import { BlockTile, tileFill, tileTilt } from './components/BlockTile';
+import { BlockTile } from './components/BlockTile';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
@@ -41,7 +41,6 @@ function AppContent() {
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
-  // Gamification state
   const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
   const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
   const [ageBand, setAgeBand] = useLocalStorage<AgeBandFilter>('settings_age_band', 'all');
@@ -52,7 +51,6 @@ function AppContent() {
   const [pendingEarnCouponId, setPendingEarnCouponId] = useState<string | null>(null);
   const [challengeSetupCouponId, setChallengeSetupCouponId] = useState<string | undefined>(undefined);
 
-  // Challenge mode state
   const {
     challengeActive,
     challengeStarsTarget,
@@ -266,16 +264,12 @@ function AppContent() {
       }
     >
       {currentScreen === 'menu' && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-40 flex h-1.5"
-        >
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-40 flex h-1.5">
           <span className="flex-1" style={{ backgroundColor: '#ff4d3a' }} />
           <span className="flex-1" style={{ backgroundColor: '#1f9a62' }} />
           <span className="flex-1" style={{ backgroundColor: '#ffc21a' }} />
         </div>
       )}
-      {/* Top Navigation Bar */}
       <header className="flex justify-between items-center p-4 z-50">
         <div>
           {currentScreen !== 'menu' && currentScreen !== 'settings' && currentScreen !== 'session' && (
@@ -283,7 +277,6 @@ function AppContent() {
           )}
         </div>
 
-        {/* Universal Star Counter displaying earned stars & animating fly-ups */}
         <div className="flex items-center gap-3 ml-auto">
           {sessionMinutes > 0 && remainingMs > 0 && !sessionLocked && (
             <div className="flex items-center gap-1.5 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5" data-testid="session-remaining">
@@ -303,8 +296,6 @@ function AppContent() {
                   {challengeStarsRemaining}
                 </span>
               </div>
-
-              {/* Countdown fly-down/up animations */}
               {pendingChallengeAnimations.map((anim) => (
                 <FlyUpStar key={anim.id} onDone={() => clearChallengeAnimation(anim.id)}>
                   <span className="text-sm font-black text-pink-600 whitespace-nowrap drop-shadow-sm">
@@ -335,7 +326,6 @@ function AppContent() {
 
           {currentScreen === 'menu' && (
             <div className="flex items-center gap-3">
-              {/* Language Switcher Dropdown */}
               <div className="relative" ref={langRef}>
                 {(() => {
                   const labelMap = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵', fr: '🇫🇷', ko: '🇰🇷' } as const;
@@ -403,11 +393,9 @@ function AppContent() {
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6">
         {currentScreen === 'menu' ? (
           <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
-            {/* Title Block */}
             <div className="text-center space-y-2 mt-4">
               <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">
                 tensaiasobi 🎮
@@ -415,7 +403,6 @@ function AppContent() {
               <p className="text-[#2a1c14]/50 font-extrabold text-base">{t.menu.subtitle}</p>
             </div>
 
-            {/* Block-table launchers: 3 equal columns, same tile for games + town/coupons */}
             <div className="grid grid-cols-3 gap-3 my-8">
               {GAMES.map((game, i) => {
                 if (!gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames })) return null;
@@ -425,8 +412,8 @@ function AppContent() {
                     key={game.id}
                     emoji={game.emoji}
                     label={t.menu[game.labelKey]}
-                    fill={tileFill(i)}
-                    tilt={tileTilt(game.id)}
+                    index={i}
+                    tileId={game.id}
                     data-testid={game.testid}
                     onClick={() => handleScreenChange(game.id)}
                   />
@@ -437,16 +424,16 @@ function AppContent() {
                   <BlockTile
                     emoji="🏘️"
                     label={t.menu.town}
-                    fill={tileFill(GAMES.length)}
-                    tilt={tileTilt('town')}
+                    index={GAMES.length}
+                    tileId="town"
                     data-testid="launch-town"
                     onClick={() => handleScreenChange('town')}
                   />
                   <BlockTile
                     emoji="🎟️"
                     label={t.menu.coupons}
-                    fill={tileFill(GAMES.length + 1)}
-                    tilt={tileTilt('coupons')}
+                    index={GAMES.length + 1}
+                    tileId="coupons"
                     data-testid="launch-coupons"
                     onClick={() => handleScreenChange('coupons')}
                   />
@@ -468,7 +455,6 @@ function AppContent() {
         )}
       </main>
 
-      {/* Parent Gate Dialog */}
       {showParentGate && (
         <ParentGate
           onSuccess={() => {
@@ -479,7 +465,6 @@ function AppContent() {
         />
       )}
 
-      {/* Parent Gate for the Coupon Shop's "Earn it!" shortcut -> opens Challenge configuration with this coupon preselected */}
       {pendingEarnCouponId && (
         <ParentGate
           onSuccess={() => {
@@ -491,7 +476,6 @@ function AppContent() {
         />
       )}
 
-      {/* Confirmation dialog for Coupon Redemption (first confirmation, triggered by the tap-and-hold gesture) */}
       {pendingCouponRedeemConfirmId && (() => {
         const coupon = coupons.find((c) => c.id === pendingCouponRedeemConfirmId);
         if (!coupon) return null;
@@ -507,7 +491,6 @@ function AppContent() {
         );
       })()}
 
-      {/* Parent Gate for Coupon Redemption (second confirmation, before the coupon is actually consumed) */}
       {pendingCouponRedeemGateId && (
         <ParentGate
           onSuccess={() => {
@@ -526,7 +509,6 @@ function AppContent() {
         />
       )}
 
-      {/* Celebration overlay shown after a coupon has been redeemed */}
       {celebratingCoupon && (
         <CouponCelebration
           coupon={celebratingCoupon}
@@ -534,7 +516,6 @@ function AppContent() {
         />
       )}
 
-      {/* Challenge Unlocked Celebration Overlay */}
       {challengeFocusActive && challengeStarsRemaining === 0 && (
         <div className="fixed inset-0 bg-slate-900/80 z-50 flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-300" data-testid="challenge-completion-modal">
           <GameConfetti pieces={200} />
