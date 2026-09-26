@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { translations, Language, TranslationSchema } from '../locales';
 
 export type { Language };
@@ -34,6 +34,10 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLanguageState(lang);
     localStorage.setItem('app_language', lang);
   };
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const t = translations[language];
 

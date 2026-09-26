@@ -8,7 +8,8 @@ import { getCanvasCoords } from '../utils/canvas';
 import { starMultiplier } from '../utils/difficulty';
 import { useCanvasLoop } from '../hooks/useCanvasLoop';
 import { spawnParticles, drawParticles, type Particle } from '../utils/particles';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
+import { useGameFX } from '../hooks/gameFXContext';
 
 interface Cell {
   col: number;
@@ -100,7 +101,8 @@ const THEMES: Theme[] = [
   },
 ];
 
-export function MazeGame({ playPop, playSuccess, playError, onStarEarned }: GameProps) {
+export function MazeGame() {
+  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
   const [themeIndex, setThemeIndex] = useState(0);

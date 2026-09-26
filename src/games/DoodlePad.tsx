@@ -3,10 +3,7 @@ import KidButton from '../components/KidButton';
 import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import { useTranslation } from '../hooks/useTranslation';
 import { getCanvasCoords } from '../utils/canvas';
-
-interface DoodlePadProps {
-  playPop: () => void;
-}
+import { useGameFX } from '../hooks/gameFXContext';
 
 const PRESETS_COLORS = [
   '#FF4D4D', // Red
@@ -26,7 +23,8 @@ const PRESETS_COLORS = [
   '#2C3E50', // Dark Blue/Black
 ];
 
-export function DoodlePad({ playPop }: DoodlePadProps) {
+export function DoodlePad() {
+  const { playPop } = useGameFX();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);

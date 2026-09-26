@@ -19,12 +19,14 @@ function loadCoupons(): Coupon[] {
     if (raw) {
       const saved = JSON.parse(raw) as Coupon[];
 
-      return DEFAULT_COUPONS.map((def) => {
+      const builtins = DEFAULT_COUPONS.map((def) => {
         const found = saved.find((c) => c.id === def.id);
         return found
           ? { ...def, enabled: found.enabled, earnedCount: found.earnedCount ?? 0, lastEarnedAt: found.lastEarnedAt }
           : def;
       });
+      const custom = saved.filter((c) => c.isCustom);
+      return [...builtins, ...custom];
     }
     return DEFAULT_COUPONS.map((c) => ({ ...c }));
   } catch {
@@ -43,6 +45,8 @@ function saveCoupons(coupons: Coupon[]): void {
 export interface UseCouponsReturn {
   coupons: Coupon[];
   toggleCoupon: (id: string) => void;
+  addCustomCoupon: (input: { emoji: string; name: string; rewardSize: Coupon['rewardSize'] }) => Coupon;
+  removeCustomCoupon: (id: string) => void;
   awardCoupon: (id: string) => boolean;
   redeemCoupon: (id: string) => boolean;
   resetCoupons: () => void;
@@ -64,6 +68,25 @@ export function useCoupons(): UseCouponsReturn {
   const toggleCoupon = useCallback((id: string) => {
     const next = couponsRef.current.map((c) => (c.id === id ? { ...c, enabled: !c.enabled } : c));
     commit(next);
+  }, [commit]);
+
+  const addCustomCoupon = useCallback((input: { emoji: string; name: string; rewardSize: Coupon['rewardSize'] }): Coupon => {
+    const coupon: Coupon = {
+      id: `custom_${Date.now()}`,
+      emoji: input.emoji.trim() || '🎟️',
+      nameKey: '',
+      customName: input.name.trim(),
+      isCustom: true,
+      enabled: true,
+      rewardSize: input.rewardSize,
+      earnedCount: 0,
+    };
+    commit([...couponsRef.current, coupon]);
+    return coupon;
+  }, [commit]);
+
+  const removeCustomCoupon = useCallback((id: string) => {
+    commit(couponsRef.current.filter((c) => !(c.isCustom && c.id === id)));
   }, [commit]);
 
   const awardCoupon = useCallback((id: string): boolean => {
@@ -95,5 +118,5 @@ export function useCoupons(): UseCouponsReturn {
     commit(fresh);
   }, [commit]);
 
-  return { coupons, toggleCoupon, awardCoupon, redeemCoupon, resetCoupons };
+  return { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons };
 }

@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
+import { useGameFX } from '../hooks/gameFXContext';
 
 interface Weight {
   id: number;
@@ -12,7 +13,7 @@ interface Weight {
   side: 'left' | 'right' | 'tray';
 }
 
-type PhysicsPuzzleGameProps = Omit<GameProps, 'playError'>;
+
 
 const WEIGHT_EMOJIS = [
   { emoji: '🍎', mass: 1 },
@@ -63,7 +64,8 @@ function buildWeights(diff: GameDifficulty): Weight[] {
   return newWeights;
 }
 
-export function PhysicsPuzzleGame({ playPop, playSuccess, onStarEarned }: PhysicsPuzzleGameProps) {
+export function PhysicsPuzzleGame() {
+  const { playPop, playSuccess, onStarEarned } = useGameFX();
   const { t } = useTranslation();
   const difficulty: GameDifficulty = 'hard';
   const [weights, setWeights] = useState<Weight[]>(() => buildWeights(difficulty));

@@ -1,6 +1,21 @@
 import { test, expect, Page } from '@playwright/test';
 
 // Helper to solve the ParentGate problem
+async function allowOnlyMath(page: Page) {
+  const toggles = page.locator('[data-testid^="challenge-game-"]');
+  const count = await toggles.count();
+  expect(count).toBeGreaterThan(1);
+  for (let i = 0; i < count; i++) {
+    const btn = toggles.nth(i);
+    const testid = await btn.getAttribute('data-testid');
+    const className = (await btn.getAttribute('class')) ?? '';
+    const enabled = className.includes('bg-purple-100');
+    const isMath = testid === 'challenge-game-math';
+    if (isMath && !enabled) await btn.click();
+    if (!isMath && enabled) await btn.click();
+  }
+}
+
 async function solveParentGate(page: Page) {
   const gateTextElement = page.locator('form div.text-4xl');
   await expect(gateTextElement).toBeVisible();
@@ -47,51 +62,23 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
 
   test('Verify Parent Settings includes Challenge Mode and configuring it limits launchers', async ({ page }) => {
     // 1. Open Parents Settings Dashboard
-    const parentsButton = page.locator('button', { hasText: 'Parents' });
-    await expect(parentsButton).toBeVisible();
-    await parentsButton.click();
-
-    // Solve Parent Gate
+    await page.getByTestId('open-session').click();
     await solveParentGate(page);
 
-    // Verify Settings Dashboard is shown
-    const settingsTitle = page.locator('h2', { hasText: 'Settings' });
-    await expect(settingsTitle).toBeVisible();
-
-    // Verify Challenge Mode Section header is visible
-    const challengeHeader = page.locator('span', { hasText: 'Challenge Mode' });
-    await expect(challengeHeader).toBeVisible();
+    await expect(page.locator('h2', { hasText: 'Hand over' })).toBeVisible();
+    await page.getByTestId('session-mode-learn').click();
+    await expect(page.getByText('Learning first', { exact: true })).toBeVisible();
 
     // Let's configure the challenge: target 5 stars, only Math allowed
     // Select 5 Stars from the target dropdown
-    const targetSelect = page.locator('select').first();
+    const targetSelect = page.getByTestId('challenge-target-stars');
     await expect(targetSelect).toBeVisible();
     await targetSelect.selectOption('5'); // 5 Stars
 
-    // Deselect all games except Math Pop
-    // The default enabled buttons will have class 'bg-purple-100'
-    const gamesToDisable = [
-      '🧐 Odd One',
-      '🎨 Doodle',
-      '🐯 Match',
-      '🗺️ Mazes',
-      '⭐ Trace',
-      '⚡ Emoji Match',
-      '🔤 First Sound',
-      '🔗 Word Chain'
-    ];
-
-    for (const name of gamesToDisable) {
-      const btn = page.getByRole('button', { name, exact: true });
-      await expect(btn).toBeVisible();
-      const className = await btn.getAttribute('class');
-      if (className && className.includes('bg-purple-100')) {
-        await btn.click();
-      }
-    }
+    await allowOnlyMath(page);
 
     // Start Challenge Mode
-    const startButton = page.locator('button', { hasText: 'Start Challenge Mode' });
+    const startButton = page.getByTestId('session-start');
     await expect(startButton).toBeVisible();
     await startButton.click();
 
@@ -101,54 +88,27 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     const remaining = page.getByTestId('challenge-stars-remaining');
     await expect(remaining).toHaveText('5');
 
-    // Verify only Math Pop launcher is visible, and others are hidden
     const mathLauncher = page.getByTestId('launch-math');
     await expect(mathLauncher).toBeVisible();
-
-    const hiddenLaunchers = [
-      'launch-odd',
-      'launch-doodle',
-      'launch-memory',
-      'launch-maze',
-      'launch-trace',
-      'launch-emojimatch',
-      'launch-anlaut',
-      'launch-shiritori',
-      'launch-town',
-      'launch-coupons'
-    ];
-
-    for (const launcherId of hiddenLaunchers) {
-      const launcher = page.getByTestId(launcherId);
-      await expect(launcher).toBeHidden();
-    }
+    await expect(page.locator('[data-testid^="launch-"]')).toHaveCount(1);
   });
 
   test('Verify Math Game no-retry and completion flow in challenge mode', async ({ page }) => {
     // 1. Activate challenge mode via Parent settings (5 Stars target, Math only)
-    const parentsButton = page.locator('button', { hasText: 'Parents' });
-    await parentsButton.click();
+    await page.getByTestId('open-session').click();
     await solveParentGate(page);
+    await page.getByTestId('session-mode-learn').click();
 
-    const targetSelect = page.locator('select').first();
+    const targetSelect = page.getByTestId('challenge-target-stars');
     await targetSelect.selectOption('5'); // 5 Stars target
 
     // Select the "Ice Cream" coupon as the challenge reward
-    const couponSelect = page.locator('select').nth(1);
+    const couponSelect = page.getByTestId('challenge-coupon-select');
     await couponSelect.selectOption('ice_cream');
 
-    const gamesToDisable = [
-      '🧐 Odd One', '🎨 Doodle', '🐯 Match', '🗺️ Mazes', '⭐ Trace', '⚡ Emoji Match', '🔤 First Sound', '🔗 Word Chain'
-    ];
-    for (const name of gamesToDisable) {
-      const btn = page.getByRole('button', { name, exact: true });
-      const className = await btn.getAttribute('class');
-      if (className && className.includes('bg-purple-100')) {
-        await btn.click();
-      }
-    }
+    await allowOnlyMath(page);
 
-    await page.locator('button', { hasText: 'Start Challenge Mode' }).click();
+    await page.getByTestId('session-start').click();
 
     // 2. Play Math Game
     const mathLauncher = page.getByTestId('launch-math');
@@ -228,14 +188,13 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     await expect(claimButton).toBeVisible();
     await claimButton.click();
 
-    // Verify we are back in normal mode (countdown badge is hidden, other games are visible)
     await expect(completionModal).toBeHidden();
-    const countdownBadge = page.getByTestId('challenge-countdown-badge');
-    await expect(countdownBadge).toBeHidden();
+    await expect(page.getByTestId('challenge-countdown-badge')).toBeHidden();
+    await expect(page.getByTestId('challenge-play-unlocked-badge')).toBeVisible();
 
-    // Verify other games are visible again (e.g. Odd One)
-    const oddLauncher = page.getByTestId('launch-odd');
-    await expect(oddLauncher).toBeVisible();
+    await expect(page.getByTestId('launch-odd')).toBeVisible();
+    await expect(page.getByTestId('launch-doodle')).toBeVisible();
+    await expect(page.getByTestId('launch-town')).toBeVisible();
 
     // Verify the coupon was awarded and persisted in the Coupon Shop
     const couponsLauncher = page.getByTestId('launch-coupons');

@@ -4,14 +4,14 @@ import StreakBadge from '../components/StreakBadge';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
-import type { GameProps } from '../types/game';
+import { useGameFX } from '../hooks/gameFXContext';
 
 interface EmojiItem {
   emoji: string;
   isOdd: boolean;
 }
 
-type OddOneOutProps = Omit<GameProps, 'playPop'>;
+
 
 const CATEGORIES: Record<string, string[]> = {
   animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🦆', '🦉'],
@@ -22,7 +22,8 @@ const CATEGORIES: Record<string, string[]> = {
   clothing: ['👕', '👖', '👗', '🧥', '🧦', '👟', '👒', '🕶️', '👜', '👑', '🧤', '🧣'],
 };
 
-export function OddOneOut({ playSuccess, playError, onStarEarned, challengeMode }: OddOneOutProps) {
+export function OddOneOut() {
+  const { playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const [items, setItems] = useState<EmojiItem[]>([]);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);

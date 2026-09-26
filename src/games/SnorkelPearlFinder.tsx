@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
-import type { GameDifficulty, GameProps } from '../types/game';
+import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
+import { useGameFX } from '../hooks/gameFXContext';
 
 interface PearlColor {
   id: string;
@@ -147,9 +148,8 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-type SnorkelPearlFinderProps = GameProps;
-
-export function SnorkelPearlFinder({ playPop, playSuccess, playError, onStarEarned }: SnorkelPearlFinderProps) {
+export function SnorkelPearlFinder() {
+  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [pearls, setPearls] = useState<Pearl[]>([]);
