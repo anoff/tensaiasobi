@@ -4,7 +4,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useSound } from './hooks/useSound';
 import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
-import { LauncherGlyph } from './components/LauncherGlyph';
+import { BlockTile, tileFill, tileTilt } from './components/BlockTile';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
@@ -250,7 +250,31 @@ function AppContent() {
   };
 
   return (
-    <div className="w-screen h-[100dvh] flex flex-col bg-sky-50 text-slate-800 relative pt-safe pb-safe">
+    <div
+      className={`w-screen h-[100dvh] flex flex-col relative pt-safe pb-safe ${
+        currentScreen === 'menu' ? 'text-[#2a1c14]' : 'bg-sky-50 text-slate-800'
+      }`}
+      style={
+        currentScreen === 'menu'
+          ? {
+              backgroundColor: '#ffe7c2',
+              backgroundImage:
+                'radial-gradient(circle at 12px 12px, rgba(42,28,20,0.07) 1.6px, transparent 1.8px)',
+              backgroundSize: '28px 28px',
+            }
+          : undefined
+      }
+    >
+      {currentScreen === 'menu' && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 z-40 flex h-1.5"
+        >
+          <span className="flex-1" style={{ backgroundColor: '#ff4d3a' }} />
+          <span className="flex-1" style={{ backgroundColor: '#1f9a62' }} />
+          <span className="flex-1" style={{ backgroundColor: '#ffc21a' }} />
+        </div>
+      )}
       {/* Top Navigation Bar */}
       <header className="flex justify-between items-center p-4 z-50">
         <div>
@@ -385,65 +409,52 @@ function AppContent() {
           <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
             {/* Title Block */}
             <div className="text-center space-y-2 mt-4">
-              <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-candy-pink via-candy-blue to-candy-purple drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)]">
+              <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">
                 tensaiasobi 🎮
               </h1>
-              <p className="text-slate-400 font-extrabold text-base">{t.menu.subtitle}</p>
+              <p className="text-[#2a1c14]/50 font-extrabold text-base">{t.menu.subtitle}</p>
             </div>
 
-            {/* Launchers Grid */}
-            <div className="grid grid-cols-3 gap-4 my-8">
-              {GAMES.map((game) => {
+            {/* Block-table launchers: 3 equal columns, same tile for games + town/coupons */}
+            <div className="grid grid-cols-3 gap-3 my-8">
+              {GAMES.map((game, i) => {
                 if (!gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames })) return null;
                 if (!gameVisibleForAge(game, ageBand)) return null;
                 return (
-                  <KidButton
+                  <BlockTile
                     key={game.id}
-                    color={game.color}
-                    size="lg"
+                    emoji={game.emoji}
+                    label={t.menu[game.labelKey]}
+                    fill={tileFill(i)}
+                    tilt={tileTilt(game.id)}
                     data-testid={game.testid}
                     onClick={() => handleScreenChange(game.id)}
-                    className="aspect-square flex-col gap-2 rounded-[2rem]"
-                  >
-                    <LauncherGlyph emoji={game.emoji} />
-                    <span className="text-lg font-black leading-none">{t.menu[game.labelKey]}</span>
-                  </KidButton>
+                  />
                 );
               })}
-            </div>
-
-            {/* Gamification section separated by a gap and border */}
-            {!challengeFocusActive && (
-              <div className="border-t-2 border-slate-200/60 pt-6 mt-2 mb-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <KidButton
-                    color="green"
-                    size="lg"
+              {!challengeFocusActive && (
+                <>
+                  <BlockTile
+                    emoji="🏘️"
+                    label={t.menu.town}
+                    fill={tileFill(GAMES.length)}
+                    tilt={tileTilt('town')}
                     data-testid="launch-town"
                     onClick={() => handleScreenChange('town')}
-                    className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
-                  >
-                    <span className="flex flex-row items-center justify-center gap-3">
-                      <LauncherGlyph emoji="🏘️" />
-                      <span className="text-lg font-black leading-none">{t.menu.town}</span>
-                    </span>
-                  </KidButton>
-
-                  <KidButton
-                    color="yellow"
-                    size="lg"
+                  />
+                  <BlockTile
+                    emoji="🎟️"
+                    label={t.menu.coupons}
+                    fill={tileFill(GAMES.length + 1)}
+                    tilt={tileTilt('coupons')}
                     data-testid="launch-coupons"
                     onClick={() => handleScreenChange('coupons')}
-                    className="aspect-square flex-col gap-2 rounded-[2rem]"
-                  >
-                    <LauncherGlyph emoji="🎟️" />
-                    <span className="text-base font-black leading-none">{t.menu.coupons}</span>
-                  </KidButton>
-                </div>
-              </div>
-            )}
+                  />
+                </>
+              )}
+            </div>
 
-            <div className="text-center text-xs text-slate-300 font-bold">
+            <div className="text-center text-xs text-[#2a1c14]/35 font-bold">
               {t.menu.footer}
               <div className="text-[10px] text-slate-400/80 font-mono mt-1" data-testid="git-hash">
                 <a href="https://github.com/anoff/tensaiasobi" target="_blank">
