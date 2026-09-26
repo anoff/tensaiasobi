@@ -5,25 +5,28 @@ const FILLS = ['#ff4d3a', '#1f9a62', '#ffc21a'] as const;
 const INK = '#2a1c14';
 const PAPER = '#fff6e8';
 
-/** Stable -4°…4° tilt from a string id so tiles stay crooked across renders. */
-export function tileTilt(id: string): number {
+function tileTilt(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
   return (((h % 9) + 9) % 9) - 4;
 }
 
-export function tileFill(index: number): string {
+function tileFill(index: number): string {
   return FILLS[index % FILLS.length];
 }
 
 interface BlockTileProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   emoji: string;
   label: string;
-  fill: string;
-  tilt: number;
+  /** Catalog / grid index — cycles coral, leaf, butter. */
+  index: number;
+  /** Stable id used for the slight tile tilt. */
+  tileId: string;
 }
 
-export function BlockTile({ emoji, label, fill, tilt, className = '', style, ...props }: BlockTileProps) {
+export function BlockTile({ emoji, label, index, tileId, className = '', style, ...props }: BlockTileProps) {
+  const fill = tileFill(index);
+  const tilt = tileTilt(tileId);
   const inkGlyph = fill === '#ffc21a';
   const glyphColor = inkGlyph ? INK : PAPER;
 
