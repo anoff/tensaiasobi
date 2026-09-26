@@ -4,6 +4,10 @@ import { LauncherGlyph } from './LauncherGlyph';
 const FILLS = ['#ff4d3a', '#1f9a62', '#ffc21a'] as const;
 const INK = '#2a1c14';
 
+/** 4px white halo that follows the glyph outline (plain CSS, no disc). */
+const EMOJI_HALO =
+  'drop-shadow(4px 0 0 #fff) drop-shadow(-4px 0 0 #fff) drop-shadow(0 4px 0 #fff) drop-shadow(0 -4px 0 #fff) drop-shadow(3px 3px 0 #fff) drop-shadow(-3px 3px 0 #fff) drop-shadow(3px -3px 0 #fff) drop-shadow(-3px -3px 0 #fff)';
+
 function tileTilt(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
@@ -47,11 +51,8 @@ export function BlockTile({ emoji, label, index, tileId, className = '', style, 
         }}
         {...props}
       >
-        <span
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 bg-white"
-          style={{ borderColor: INK }}
-        >
-          <LauncherGlyph emoji={emoji} sizeClass="h-11 w-11" />
+        <span className="flex shrink-0 items-center justify-center" style={{ filter: EMOJI_HALO }}>
+          <LauncherGlyph emoji={emoji} sizeClass="h-14 w-14" />
         </span>
         <span
           className="w-full truncate px-0.5 text-center text-[13px] font-black leading-tight tracking-tight sm:text-sm"
