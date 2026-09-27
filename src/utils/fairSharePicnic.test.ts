@@ -27,9 +27,8 @@ describe('generateRound', () => {
         }
 
         if (difficulty === 'hard') {
-          expect(round.friends).toBeGreaterThanOrEqual(3);
-          expect(round.friends).toBeLessThanOrEqual(4);
-          expect(round.totalSnacks).toBeLessThanOrEqual(20);
+          expect(round.friends).toBe(3);
+          expect(round.totalSnacks).toBeLessThanOrEqual(18);
           if (round.hasLeftover) {
             expect(round.leftoverCount).toBeGreaterThan(0);
             expect(round.leftoverCount).toBeLessThan(round.friends);

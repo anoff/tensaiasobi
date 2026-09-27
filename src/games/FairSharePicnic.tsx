@@ -231,38 +231,39 @@ export function FairSharePicnic() {
           })}
         </div>
 
-        {/* Leftover basket (hard mode only) */}
-        {round.hasLeftover && (
-          <div className="flex flex-col items-center gap-1">
+        {/* Basket of remaining snacks, with the leftover side pocket (hard only) beside it */}
+        <div className="flex items-end justify-center gap-3 w-full max-w-sm">
+          <div className="flex-1 flex flex-col items-center gap-1">
             <span className="text-xs font-black text-slate-500 uppercase tracking-wide">
-              {t.fairSharePicnic.leftoverLabel}
+              {t.fairSharePicnic.basketLabel}
             </span>
             <div
-              data-testid="picnic-leftover"
-              data-drop-target="leftover"
-              className="min-w-[96px] min-h-[96px] w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-dashed border-amber-300 bg-amber-50 flex flex-wrap items-center justify-center content-center gap-0.5 p-1"
+              data-testid="picnic-basket"
+              data-drop-target="basket"
+              className="min-w-[96px] min-h-[96px] w-full rounded-3xl border-4 border-dashed border-slate-300 bg-slate-50 flex flex-wrap items-center justify-center content-center gap-1 p-2"
             >
-              {leftoverSnacks.map(renderSnack)}
+              {basketSnacks.length === 0 ? (
+                <span className="text-slate-300 text-sm font-bold">🧺</span>
+              ) : (
+                basketSnacks.map(renderSnack)
+              )}
             </div>
           </div>
-        )}
 
-        {/* Basket of remaining snacks */}
-        <div className="flex flex-col items-center gap-1 w-full">
-          <span className="text-xs font-black text-slate-500 uppercase tracking-wide">
-            {t.fairSharePicnic.basketLabel}
-          </span>
-          <div
-            data-testid="picnic-basket"
-            data-drop-target="basket"
-            className="min-w-[96px] min-h-[96px] w-full max-w-xs rounded-3xl border-4 border-dashed border-slate-300 bg-slate-50 flex flex-wrap items-center justify-center content-center gap-1 p-2"
-          >
-            {basketSnacks.length === 0 ? (
-              <span className="text-slate-300 text-sm font-bold">🧺</span>
-            ) : (
-              basketSnacks.map(renderSnack)
-            )}
-          </div>
+          {round.hasLeftover && (
+            <div className="shrink-0 flex flex-col items-center gap-1">
+              <span className="text-xs font-black text-slate-500 uppercase tracking-wide">
+                {t.fairSharePicnic.leftoverLabel}
+              </span>
+              <div
+                data-testid="picnic-leftover"
+                data-drop-target="leftover"
+                className="min-w-[96px] min-h-[96px] w-24 rounded-2xl border-4 border-dashed border-amber-300 bg-amber-50 flex flex-wrap items-center justify-center content-center gap-0.5 p-1"
+              >
+                {leftoverSnacks.map(renderSnack)}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

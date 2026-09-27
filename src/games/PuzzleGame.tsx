@@ -20,6 +20,8 @@ interface JigsawPieceProps {
   isLocked: boolean;
   isSelected: boolean;
   isSilhouette?: boolean;
+  /** Silhouette shows only the dashed outline, not the faded picture (hard). */
+  outlineOnly?: boolean;
   isWrong?: boolean;
   onClick?: () => void;
   className?: string;
@@ -33,6 +35,7 @@ export function JigsawPiece({
   isLocked,
   isSelected,
   isSilhouette = false,
+  outlineOnly = false,
   isWrong = false,
   onClick,
   className = '',
@@ -82,15 +85,17 @@ export function JigsawPiece({
         </defs>
 
         {/* Clipped portion of the SVG */}
-        <g clipPath={`url(#${clipPathId})`}>
-          <image
-            href={svgDataUrl}
-            x={-correctCol * 100}
-            y={-correctRow * 100}
-            width={size * 100}
-            height={size * 100}
-          />
-        </g>
+        {!(isSilhouette && outlineOnly) && (
+          <g clipPath={`url(#${clipPathId})`}>
+            <image
+              href={svgDataUrl}
+              x={-correctCol * 100}
+              y={-correctRow * 100}
+              width={size * 100}
+              height={size * 100}
+            />
+          </g>
+        )}
 
         {/* Borders */}
         {isSilhouette ? (
@@ -166,14 +171,10 @@ export function PuzzleGame() {
   const { t } = useTranslation();
 
 
-  const size = useMemo(() => {
-    switch (level) {
-      case 'easy': return 2;
-      case 'medium': return 3;
-      case 'hard': return 5;
-      default: return 2;
-    }
-  }, [level]);
+  // Capped at 3×3 so tray pieces stay tap-sized; hard drops the picture
+  // hints from the empty slots instead of adding more tiles.
+  const size = level === 'easy' ? 2 : 3;
+  const outlineOnly = level === 'hard';
 
   // Check if state is in transition/out of sync
   const isSyncing = useMemo(() => {
@@ -203,7 +204,7 @@ export function PuzzleGame() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     initGame(size);
-  }, [selectedImage, size]);
+  }, [selectedImage, size, level]);
 
   const svgDataUrl = useMemo(() => selectedImage.src, [selectedImage]);
 
@@ -266,7 +267,7 @@ export function PuzzleGame() {
 
           let starAward = 4;
           if (level === 'medium') starAward = 10;
-          else if (level === 'hard') starAward = 28;
+          else if (level === 'hard') starAward = 15;
 
           onStarEarned?.(starAward);
         }
@@ -300,7 +301,6 @@ export function PuzzleGame() {
     switch (size) {
       case 2: return 'grid-cols-2 max-w-[260px]';
       case 3: return 'grid-cols-3 max-w-[290px]';
-      case 5: return 'grid-cols-5 max-w-[350px]';
       default: return 'grid-cols-2 max-w-[260px]';
     }
   };
@@ -412,6 +412,7 @@ export function PuzzleGame() {
                     isLocked={false}
                     isSelected={false}
                     isSilhouette={true}
+                    outlineOnly={outlineOnly}
                   />
                 )}
 
@@ -455,7 +456,7 @@ export function PuzzleGame() {
                   if (pieceId == null || edgeProfiles[pieceId] === undefined) return null;
                   const isSelected = selectedTrayIdx === idx;
                   return (
-                    <div key={pieceId} className="w-14 h-14 flex-shrink-0 relative">
+                    <div key={pieceId} data-testid="puzzle-tray-piece" className="w-16 h-16 flex-shrink-0 relative">
                       <JigsawPiece
                         pieceId={pieceId}
                         size={size}

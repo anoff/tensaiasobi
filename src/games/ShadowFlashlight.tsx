@@ -4,7 +4,7 @@ import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
-import { starMultiplier } from '../utils/difficulty';
+import { starMultiplier, wrongMeansNewRound } from '../utils/difficulty';
 import type { GameDifficulty } from '../types/game';
 import { useGameFX } from '../hooks/gameFXContext';
 
@@ -66,13 +66,15 @@ function generateRound(difficulty: GameDifficulty): { target: ShadowItem; choice
 }
 
 export function ShadowFlashlight() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [target, setTarget] = useState<ShadowItem | null>(null);
   const [choices, setChoices] = useState<ShadowItem[]>([]);
   const [position, setPosition] = useState({ x: 50, y: 50 });
   const [isRevealed, setIsRevealed] = useState(false);
+  const [missed, setMissed] = useState(false);
+  const [roundNo, setRoundNo] = useState(0);
   const [shakeChoice, setShakeChoice] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -84,6 +86,8 @@ export function ShadowFlashlight() {
     setTarget(round.target);
     setChoices(round.choices);
     setIsRevealed(false);
+    setMissed(false);
+    setRoundNo((n) => n + 1);
     setShakeChoice(null);
     setShowConfetti(false);
   }, [difficulty]);
@@ -115,7 +119,7 @@ export function ShadowFlashlight() {
   const handlePointerUp = () => {};
 
   const handleChoice = (item: ShadowItem) => {
-    if (isRevealed || !target) return;
+    if (isRevealed || missed || !target) return;
 
     if (item.emoji === target.emoji) {
       setIsRevealed(true);
@@ -125,7 +129,13 @@ export function ShadowFlashlight() {
     } else {
       playError();
       setShakeChoice(item.emoji);
-      setTimeout(() => setShakeChoice((prev) => (prev === item.emoji ? null : prev)), 400);
+      if (wrongMeansNewRound(difficulty, challengeMode)) {
+        // Hard: no guessing through every silhouette — a miss brings a new shadow.
+        setMissed(true);
+        setTimeout(initRound, 900);
+      } else {
+        setTimeout(() => setShakeChoice((prev) => (prev === item.emoji ? null : prev)), 400);
+      }
     }
   };
 
@@ -180,6 +190,8 @@ export function ShadowFlashlight() {
         <div
           ref={stageRef}
           data-testid="shadow-stage"
+          data-target={target?.emoji}
+          data-round={roundNo}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -270,7 +282,7 @@ export function ShadowFlashlight() {
               <button
                 key={`${item.emoji}-${idx}`}
                 data-testid="shadow-choice"
-                disabled={isRevealed}
+                disabled={isRevealed || missed}
                 onClick={() => handleChoice(item)}
                 className={`
                   aspect-square rounded-[2rem] border-4 bg-white border-slate-200 shadow-[0_6px_0_0_#cbd5e1]

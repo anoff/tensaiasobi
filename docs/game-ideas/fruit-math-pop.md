@@ -4,6 +4,12 @@
 **Learning category**: Numeracy - concrete addition and subtraction  
 **Target age**: 4-6 years
 
+> **Update (#70, #72):** the problem fruit is static (one-shot pop-in, no
+> looping bounce/pulse/shake), always visible, and sits on the notebook answer
+> sheet. Answers are notebook lines with the numeral plus a still dot tally.
+> Easy always shows the tally; medium hides it until the first miss; hard hides
+> it and a miss brings a new sum (no retry), so button-smashing doesn't pay.
+
 ## Goal
 
 Let children who can count up to five, but do not yet recognize numerals, practice addition and subtraction by watching emoji objects join or leave a tray and selecting the matching quantity.
