@@ -48,6 +48,8 @@ interface NotebookChoiceProps {
   onClick: () => void;
   testId?: string;
   dataAttrs?: Record<string, string>;
+  /** Optional non-text helper on the right of the line, e.g. a still dot tally. */
+  aside?: ReactNode;
 }
 
 /**
@@ -55,7 +57,7 @@ interface NotebookChoiceProps {
  * numeral/letter next to it. Correct = soft green wash + tick, wrong = shake
  * (the caller clears the state so the child can try again).
  */
-export function NotebookChoice({ children, state, disabled, onClick, testId, dataAttrs }: NotebookChoiceProps) {
+export function NotebookChoice({ children, state, disabled, onClick, testId, dataAttrs, aside }: NotebookChoiceProps) {
   const rowClass =
     state === 'correct'
       ? 'bg-emerald-100/90 border-emerald-300'
@@ -81,6 +83,23 @@ export function NotebookChoice({ children, state, disabled, onClick, testId, dat
         {state === 'correct' ? '✓' : null}
       </span>
       <span className="flex-1 text-left text-5xl font-black tabular-nums leading-none text-ink">{children}</span>
+      {aside && <span aria-hidden="true" className="shrink-0">{aside}</span>}
     </button>
+  );
+}
+
+/** Still dot tally in groups of five, so pre-readers can match a quantity without the numeral. */
+export function NotebookTally({ count }: { count: number }) {
+  const groups = Array.from({ length: Math.ceil(count / 5) }, (_, g) => Math.min(5, count - g * 5));
+  return (
+    <span className="flex flex-col gap-1">
+      {groups.map((size, g) => (
+        <span key={g} className="flex gap-1">
+          {Array.from({ length: size }, (_, i) => (
+            <span key={i} className="w-3 h-3 rounded-full bg-ink/60" />
+          ))}
+        </span>
+      ))}
+    </span>
   );
 }

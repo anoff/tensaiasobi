@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import DifficultySelector from '../components/DifficultySelector';
 import GameConfetti from '../components/GameConfetti';
-import { NotebookChoice, NotebookOperator, NotebookSheet } from '../components/Notebook';
+import { NotebookChoice, NotebookOperator, NotebookSheet, NotebookTally } from '../components/Notebook';
 import { useTranslation } from '../hooks/useTranslation';
 import { TOWER_SORT_THEMES, type TowerSortTheme } from './towerSortThemes';
 import type { GameDifficulty } from '../types/game';
@@ -157,6 +157,7 @@ export default function FruitMathPop() {
                 state={selected === choice && choice === round.result ? 'correct' : wrongChoice === choice ? 'wrong' : 'idle'}
                 disabled={phase === 'success'}
                 onClick={() => handleChoice(choice)}
+                aside={<NotebookTally count={choice} />}
               >
                 {choice}
               </NotebookChoice>

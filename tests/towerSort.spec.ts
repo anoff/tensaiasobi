@@ -47,23 +47,29 @@ test.describe('Tower Sort', () => {
 
   test('a full tube refuses the drop and the piece stays in hand', async ({ page }) => {
     await page.getByTestId('difficulty-hard').click();
-    const capacity = Number(await towers(page).first().getAttribute('data-capacity'));
+    // Hard board: 3 types × 4 pieces in tubes of capacity 4.
+    await expect.poll(async () => (await counts(page)).reduce((a, b) => a + b, 0)).toBe(12);
+    const capacity = 4;
+    const hold = page.getByTestId('tower-sort-hold');
 
     // Fill tube 0 by moving pieces onto it from the others.
     for (let guard = 0; guard < 20 && (await counts(page))[0] < capacity; guard++) {
       const current = await counts(page);
       const source = current.findIndex((n, i) => i !== 0 && n > 0);
       await towers(page).nth(source).click();
+      await expect(hold).toHaveAttribute('data-holding', 'true');
       await towers(page).nth(0).click();
+      await expect(hold).toHaveAttribute('data-holding', 'false');
     }
     expect((await counts(page))[0]).toBe(capacity);
 
     const current = await counts(page);
     const source = current.findIndex((n, i) => i !== 0 && n > 0);
     await towers(page).nth(source).click();
+    await expect(hold).toHaveAttribute('data-holding', 'true');
     await towers(page).nth(0).click();
 
-    await expect(page.getByTestId('tower-sort-hold')).toHaveAttribute('data-holding', 'true');
+    await expect(hold).toHaveAttribute('data-holding', 'true');
     expect((await counts(page))[0]).toBe(capacity);
   });
 });
