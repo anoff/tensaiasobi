@@ -1,0 +1,86 @@
+import type { ReactNode } from 'react';
+
+/** Rule spacing of the notebook page, in px. Choice rows span two rules. */
+const RULE = 40;
+
+interface NotebookSheetProps {
+  children: ReactNode;
+  className?: string;
+  testId?: string;
+  dataAttrs?: Record<string, string>;
+}
+
+/**
+ * Cream, ruled notebook page for school-style games (math, first sound).
+ * Physical/toy games keep their own stages — this is only the answer sheet.
+ */
+export function NotebookSheet({ children, className = '', testId, dataAttrs }: NotebookSheetProps) {
+  return (
+    <div
+      data-testid={testId}
+      {...dataAttrs}
+      className={`relative w-full rounded-[2rem] bg-paper border-2 border-paper-edge shadow-[0_6px_0_0_#EADFC4] text-ink ${className}`}
+      style={{
+        backgroundImage: `repeating-linear-gradient(to bottom, transparent 0, transparent ${RULE - 1}px, #D3E3F1 ${RULE - 1}px, #D3E3F1 ${RULE}px)`,
+        backgroundPosition: `0 ${RULE / 2}px`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** Small butter circle that holds the operator (+, −) between the numerals. */
+export function NotebookOperator({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-butter border-2 border-amber-300 text-3xl md:text-4xl font-black leading-none text-ink">
+      {children}
+    </span>
+  );
+}
+
+export type NotebookChoiceState = 'idle' | 'correct' | 'wrong';
+
+interface NotebookChoiceProps {
+  children: ReactNode;
+  state: NotebookChoiceState;
+  disabled: boolean;
+  onClick: () => void;
+  testId?: string;
+  dataAttrs?: Record<string, string>;
+}
+
+/**
+ * One answer line on the notebook sheet: hollow circle on the left, big
+ * numeral/letter next to it. Correct = soft green wash + tick, wrong = shake
+ * (the caller clears the state so the child can try again).
+ */
+export function NotebookChoice({ children, state, disabled, onClick, testId, dataAttrs }: NotebookChoiceProps) {
+  const rowClass =
+    state === 'correct'
+      ? 'bg-emerald-100/90 border-emerald-300'
+      : state === 'wrong'
+        ? 'bg-rose-50/80 border-rose-200 animate-shake'
+        : 'bg-white/40 border-transparent hover:bg-white/80 active:bg-sky-100/70';
+
+  return (
+    <button
+      type="button"
+      data-testid={testId}
+      {...dataAttrs}
+      disabled={disabled}
+      onClick={onClick}
+      className={`w-full min-h-[72px] flex items-center gap-5 px-5 rounded-2xl border-2 transition-colors duration-150 outline-none cursor-pointer select-none touch-manipulation focus-visible:ring-4 focus-visible:ring-sky-300 ${rowClass}`}
+    >
+      <span
+        aria-hidden="true"
+        className={`shrink-0 w-10 h-10 rounded-full border-4 flex items-center justify-center text-xl font-black leading-none transition-colors duration-150 ${
+          state === 'correct' ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-ink/35 bg-transparent'
+        }`}
+      >
+        {state === 'correct' ? '✓' : null}
+      </span>
+      <span className="flex-1 text-left text-5xl font-black tabular-nums leading-none text-ink">{children}</span>
+    </button>
+  );
+}

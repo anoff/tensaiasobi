@@ -7,7 +7,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
 import { starMultiplier } from '../utils/difficulty';
-import AnswerBubble from '../components/AnswerBubble';
+import { NotebookChoice, NotebookOperator, NotebookSheet, type NotebookChoiceState } from '../components/Notebook';
 import { useGameFX } from '../hooks/gameFXContext';
 
 
@@ -158,59 +158,67 @@ export function MathGame() {
     loadNewQuestion(newLevel);
   };
 
+  const choiceState = (opt: number): NotebookChoiceState => {
+    if (selectedAnswer !== opt) return 'idle';
+    return isCorrect ? 'correct' : 'wrong';
+  };
+
+  // Two-digit sums (hard) need a smaller size so "88 − 88 = ?" fits a phone row.
+  const numClass = level === 'hard' ? 'text-5xl md:text-7xl' : 'text-6xl md:text-8xl';
+
   return (
-    <div className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
+    <div className="flex-1 flex flex-col items-center p-4 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
         <GameConfetti pieces={150} />
       )}
 
-      {/* Level Selection Tabs */}
-      <DifficultySelector
-        selected={level}
-        options={['easy', 'medium', 'hard']}
-        onChange={handleLevelChange}
-      />
+      <NotebookSheet className="flex-1 flex flex-col gap-4 p-4 pb-5">
+        {/* Level Selection Tabs */}
+        <DifficultySelector
+          selected={level}
+          options={['easy', 'medium', 'hard']}
+          onChange={handleLevelChange}
+          variant="paper"
+        />
 
-      {/* Equation Panel */}
-      <div className="flex-1 flex flex-col items-center justify-center my-6 space-y-4">
-        <div className="text-sm font-black tracking-widest text-slate-400 uppercase text-center">
-          {t.mathGame.title}
-        </div>
-        <div data-testid="math-equation" className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-2 text-center font-black text-slate-800 tracking-tight select-none">
-          <span className="text-6xl md:text-8xl">{question?.num1}</span>
-          <span className="text-8xl md:text-9xl leading-none">{question?.operator}</span>
-          <span className="text-6xl md:text-8xl">{question?.num2}</span>
-        </div>
-        
-        {/* Streak Counter */}
-        <StreakBadge streak={streak} highScore={highScore} />
-      </div>
+        {/* Equation */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 min-h-[140px]">
+          <h2 className="sr-only">{t.mathGame.title}</h2>
+          <div
+            data-testid="math-equation"
+            className="flex items-center justify-center gap-2 md:gap-4 font-black tracking-tight tabular-nums text-ink"
+          >
+            <span className={numClass}>{question.num1}</span>
+            <NotebookOperator>{question.operator === '-' ? '−' : question.operator}</NotebookOperator>
+            <span className={numClass}>{question.num2}</span>
+            <span aria-hidden="true" className="text-4xl md:text-6xl text-ink/40">=</span>
+            <span
+              aria-hidden="true"
+              className={`min-w-[1em] text-center ${numClass} ${isCorrect ? 'text-emerald-600' : 'text-ink/25'}`}
+            >
+              {isCorrect ? question.answer : '?'}
+            </span>
+          </div>
 
-      {/* Answer Bubbles */}
-      <div className="w-full flex flex-col items-center gap-6 pb-4">
-        <div className="w-full grid grid-cols-3 gap-3 max-w-xs">
-          {question?.options.map((opt) => {
-            const isThisSelected = selectedAnswer === opt;
+          {/* Streak Counter */}
+          <StreakBadge streak={streak} highScore={highScore} size="sm" />
+        </div>
 
-            return (
-              <AnswerBubble
-                key={opt}
-                selected={isThisSelected}
-                correct={isCorrect}
-                disabled={selectedAnswer !== null}
-                onClick={() => handleAnswerSelect(opt)}
-                testId="math-answer-option"
-                className="text-3xl md:text-4xl font-black text-white"
-              >
-                {opt}
-              </AnswerBubble>
-            );
-          })}
+        {/* Answer lines */}
+        <div className="w-full flex flex-col gap-2">
+          {question.options.map((opt) => (
+            <NotebookChoice
+              key={opt}
+              state={choiceState(opt)}
+              disabled={selectedAnswer !== null}
+              onClick={() => handleAnswerSelect(opt)}
+              testId="math-answer-option"
+            >
+              {opt}
+            </NotebookChoice>
+          ))}
         </div>
-        <div className="text-slate-400 font-extrabold text-xs text-center">
-          {t.mathGame.help}
-        </div>
-      </div>
+      </NotebookSheet>
     </div>
   );
 }
