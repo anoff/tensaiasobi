@@ -29,4 +29,28 @@ test.describe('Fruit Math Pop', () => {
       expect(quantities.every((quantity) => quantity >= 1 && quantity <= (difficulty === 'hard' ? 10 : 5))).toBe(true);
     }
   });
+
+  test('answers are numerals and the problem fruit never loops an animation', async ({ page }) => {
+    for (const difficulty of ['easy', 'medium', 'hard'] as const) {
+      await page.getByTestId(`difficulty-${difficulty}`).click();
+      await expect(page.getByTestId('fruit-math-pop-answer').first()).toBeVisible();
+      const answers = await page.getByTestId('fruit-math-pop-answer').evaluateAll((els) =>
+        els.map((el) => ({ text: (el.textContent ?? '').trim(), quantity: el.getAttribute('data-quantity') })),
+      );
+      for (const answer of answers) expect(answer.text).toBe(answer.quantity);
+
+      const looping = await page.getByTestId('fruit-math-pop-tray').evaluate((tray) =>
+        [tray, ...tray.querySelectorAll('*')].filter((el) => /animate-(bounce|pulse|shake)/.test(el.getAttribute('class') ?? '')).length,
+      );
+      expect(looping).toBe(0);
+    }
+  });
+
+  test('hard covers the fruit before the answers appear', async ({ page }) => {
+    await page.getByTestId('difficulty-hard').click();
+    await expect(page.getByTestId('fruit-math-pop-cover')).toBeVisible();
+    await expect(page.getByTestId('fruit-math-pop-answer')).toHaveCount(0);
+    await expect(page.getByTestId('fruit-math-pop-answer').first()).toBeVisible();
+    await expect(page.getByTestId('fruit-math-pop-cover')).toBeVisible();
+  });
 });

@@ -104,7 +104,8 @@ function generateBubbles(difficulty: GameDifficulty, width: number, height: numb
   const config = DIFFICULTY_CONFIG[difficulty];
   if (config.bubbleDensity === 0) return [];
 
-  const count = config.bubbleDensity === 1 ? 18 : 35;
+  // Capped so hard stays calm: bubbles are the hide mechanic, not visual noise.
+  const count = config.bubbleDensity === 1 ? 8 : 12;
   const bubbles: Bubble[] = [];
 
   for (let i = 0; i < count; i++) {
@@ -514,7 +515,7 @@ export function SnorkelPearlFinder() {
           {sparkles.map((sparkle) => (
             <div
               key={sparkle.id}
-              className="fixed z-40 pointer-events-none text-2xl animate-sparkle"
+              className="fixed z-40 pointer-events-none text-2xl animate-sparkle-float"
               style={{ left: sparkle.x, top: sparkle.y, transform: 'translate(-50%, -50%)' }}
             >
               {sparkle.color}

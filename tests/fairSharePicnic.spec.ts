@@ -30,14 +30,14 @@ test.describe('Fair Share Picnic round generator', () => {
     }
   });
 
-  test('hard rounds always split evenly between 3-4 friends (up to 20 snacks), leftovers are intentional', () => {
+  test('hard rounds always split evenly between 3 friends (up to 18 snacks), leftovers are intentional', () => {
     let sawLeftover = false;
     let sawNoLeftover = false;
 
     for (let i = 0; i < ITERATIONS; i++) {
       const round = generateRound('hard');
-      expect([3, 4]).toContain(round.friends);
-      expect(round.totalSnacks).toBeLessThanOrEqual(20);
+      expect(round.friends).toBe(3);
+      expect(round.totalSnacks).toBeLessThanOrEqual(18);
       expect(round.perFriend).toBeGreaterThan(0);
 
       // The friend-shareable portion of the snacks (total minus any
