@@ -189,7 +189,7 @@ export function MathGame() {
             className="flex items-center justify-center gap-2 md:gap-4 font-black tracking-tight tabular-nums text-ink"
           >
             <span className={numClass}>{question.num1}</span>
-            <NotebookOperator>{question.operator === '-' ? '−' : question.operator}</NotebookOperator>
+            <NotebookOperator op={question.operator} />
             <span className={numClass}>{question.num2}</span>
             <span aria-hidden="true" className="text-4xl md:text-6xl text-ink/40">=</span>
             <span

@@ -134,7 +134,7 @@ export default function FruitMathPop() {
         >
           <div key={roundNo} className="flex items-center justify-center gap-3 animate-pop-in">
             <div data-testid="fruit-math-pop-left">{group(round.left, false)}</div>
-            <NotebookOperator>{round.operation === '-' ? '−' : '+'}</NotebookOperator>
+            <NotebookOperator op={round.operation} />
             <div data-testid="fruit-math-pop-right">{group(round.right, round.operation === '-')}</div>
           </div>
           {covered && (

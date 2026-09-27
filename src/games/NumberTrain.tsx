@@ -4,6 +4,7 @@ import DifficultySelector from '../components/DifficultySelector';
 import { useTranslation } from '../hooks/useTranslation';
 import type { GameDifficulty } from '../types/game';
 import { useGameFX } from '../hooks/gameFXContext';
+import { OPERATION_CLASSES, operationOf } from '../utils/operatorColors';
 import {
   generateNumberTrainRound,
   NUMBER_TRAIN_CONFIG,
@@ -101,11 +102,7 @@ export default function NumberTrain() {
               {round.delta !== 0 && (
                 <span
                   data-testid="number-train-delta"
-                  className={`absolute -top-5 -right-2 z-10 flex items-center text-2xl font-black px-3 py-0.5 rounded-full border-4 shadow-sm ${
-                    round.delta > 0
-                      ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
-                      : 'bg-rose-100 border-rose-300 text-rose-700'
-                  }`}
+                  className={`absolute -top-5 -right-2 z-10 flex items-center text-2xl font-black px-3 py-0.5 rounded-full border-4 shadow-sm ${OPERATION_CLASSES[operationOf(round.delta)]}`}
                 >
                   {round.delta > 0 ? t.numberTrain.oneMore : t.numberTrain.oneLess}
                   <span aria-hidden="true" className="ml-1 text-xl">{passengerEmoji}</span>

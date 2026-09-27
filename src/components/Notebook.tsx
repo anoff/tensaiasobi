@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { OPERATION_CLASSES, operationOf } from '../utils/operatorColors';
 
 /** Rule spacing of the notebook page, in px. Choice rows span two rules. */
 const RULE = 40;
@@ -30,11 +31,18 @@ export function NotebookSheet({ children, className = '', testId, dataAttrs }: N
   );
 }
 
-/** Small butter circle that holds the operator (+, −) between the numerals. */
-export function NotebookOperator({ children }: { children: ReactNode }) {
+/**
+ * Small circle that holds the operator between the numerals, coloured by
+ * operation (green +, red −) via the shared operator palette.
+ */
+export function NotebookOperator({ op }: { op: string }) {
+  const operation = operationOf(op);
   return (
-    <span className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-butter border-2 border-amber-300 text-3xl md:text-4xl font-black leading-none text-ink">
-      {children}
+    <span
+      data-operation={operation}
+      className={`inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full border-2 text-3xl md:text-4xl font-black leading-none ${OPERATION_CLASSES[operation]}`}
+    >
+      {operation === 'minus' ? '−' : '+'}
     </span>
   );
 }
