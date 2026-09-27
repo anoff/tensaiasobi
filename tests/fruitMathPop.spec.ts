@@ -46,11 +46,32 @@ test.describe('Fruit Math Pop', () => {
     }
   });
 
-  test('hard covers the fruit before the answers appear', async ({ page }) => {
+  test('dot tallies: always on easy, hidden on medium until a miss', async ({ page }) => {
+    const answers = page.getByTestId('fruit-math-pop-answer');
+    await expect(answers.first()).toBeVisible();
+    await expect(page.getByTestId('notebook-tally')).toHaveCount(2);
+
+    await page.getByTestId('difficulty-medium').click();
+    await expect(answers.first()).toBeVisible();
+    await expect(page.getByTestId('notebook-tally')).toHaveCount(0);
+
+    const result = await page.getByTestId('fruit-math-pop-tray').getAttribute('data-result');
+    await page.locator(`[data-testid="fruit-math-pop-answer"]:not([data-quantity="${result}"])`).first().click();
+    await expect(page.getByTestId('notebook-tally')).toHaveCount(3);
+    // Medium stays forgiving: same sum, try again.
+    await expect(page.getByTestId('fruit-math-pop-tray')).toHaveAttribute('data-result', result!);
+  });
+
+  test('hard: a miss brings a new sum instead of a retry', async ({ page }) => {
     await page.getByTestId('difficulty-hard').click();
-    await expect(page.getByTestId('fruit-math-pop-cover')).toBeVisible();
-    await expect(page.getByTestId('fruit-math-pop-answer')).toHaveCount(0);
+    const tray = page.getByTestId('fruit-math-pop-tray');
     await expect(page.getByTestId('fruit-math-pop-answer').first()).toBeVisible();
-    await expect(page.getByTestId('fruit-math-pop-cover')).toBeVisible();
+    await expect(page.getByTestId('notebook-tally')).toHaveCount(0);
+
+    const round = await tray.getAttribute('data-round');
+    const result = await tray.getAttribute('data-result');
+    await page.locator(`[data-testid="fruit-math-pop-answer"]:not([data-quantity="${result}"])`).first().click();
+    await expect(tray).not.toHaveAttribute('data-round', round!);
+    await expect(page.getByTestId('notebook-tally')).toHaveCount(0);
   });
 });

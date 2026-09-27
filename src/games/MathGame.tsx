@@ -6,7 +6,7 @@ import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
-import { starMultiplier } from '../utils/difficulty';
+import { starMultiplier, wrongMeansNewRound } from '../utils/difficulty';
 import { NotebookChoice, NotebookOperator, NotebookSheet, type NotebookChoiceState } from '../components/Notebook';
 import { useGameFX } from '../hooks/gameFXContext';
 
@@ -139,7 +139,7 @@ export function MathGame() {
       playError();
       resetStreak();
 
-      if (challengeMode) {
+      if (wrongMeansNewRound(level, challengeMode)) {
         setTimeout(() => {
           loadNewQuestion(level);
         }, 1500);

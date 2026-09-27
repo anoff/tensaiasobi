@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import DifficultySelector from '../components/DifficultySelector';
 import GameConfetti from '../components/GameConfetti';
 import { NotebookChoice, NotebookOperator, NotebookSheet, NotebookTally } from '../components/Notebook';
@@ -7,54 +7,52 @@ import { TOWER_SORT_THEMES, type TowerSortTheme } from './towerSortThemes';
 import type { GameDifficulty } from '../types/game';
 import { generateFruitMathRound } from './fruitMathPopLogic';
 import { useGameFX } from '../hooks/gameFXContext';
+import { wrongMeansNewRound } from '../utils/difficulty';
 
 const STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
 
-/** How long the fruit stays on the tray before the answer lines appear. */
-const WATCH_MS: Record<GameDifficulty, number> = { easy: 600, medium: 600, hard: 1800 };
-/** Hard only: the fruit is covered this long before the answer lines appear. */
-const HIDE_MS = 1100;
+/** The fruit pops in before the answer lines appear. */
+const WATCH_MS = 600;
 
-type Phase = 'watching' | 'hiding' | 'choices' | 'success';
+type Phase = 'watching' | 'choices' | 'success';
 
 export default function FruitMathPop() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [themeIndex, setThemeIndex] = useState(1);
   const [round, setRound] = useState(() => generateFruitMathRound('easy', TOWER_SORT_THEMES[1]));
   const [roundNo, setRoundNo] = useState(0);
   const [phase, setPhase] = useState<Phase>('watching');
-  const [covered, setCovered] = useState(false);
+  // Dot tallies are a counting crutch: always on for easy; on medium they
+  // appear only after a miss, so the child has to count the fruit first.
+  const [tallyShown, setTallyShown] = useState(true);
   const [selected, setSelected] = useState<number | null>(null);
   const [wrongChoice, setWrongChoice] = useState<number | null>(null);
+  const timers = useRef<number[]>([]);
   const theme = TOWER_SORT_THEMES[themeIndex];
 
+  useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
+
+  const later = (fn: () => void, ms: number) => {
+    timers.current.push(window.setTimeout(fn, ms));
+  };
+
   const startRound = useCallback((value: GameDifficulty, nextTheme: TowerSortTheme) => {
+    timers.current.forEach(window.clearTimeout);
+    timers.current = [];
     setRound(generateFruitMathRound(value, nextTheme));
     setRoundNo((n) => n + 1);
     setPhase('watching');
-    setCovered(false);
+    setTallyShown(value === 'easy');
     setSelected(null);
     setWrongChoice(null);
   }, []);
 
   useEffect(() => {
-    let hidingTimer: number | undefined;
-    const watchTimer = window.setTimeout(() => {
-      if (difficulty === 'hard') {
-        setPhase('hiding');
-        setCovered(true);
-        hidingTimer = window.setTimeout(() => setPhase('choices'), HIDE_MS);
-      } else {
-        setPhase('choices');
-      }
-    }, WATCH_MS[difficulty]);
-    return () => {
-      window.clearTimeout(watchTimer);
-      if (hidingTimer !== undefined) window.clearTimeout(hidingTimer);
-    };
-  }, [round, difficulty]);
+    const watchTimer = window.setTimeout(() => setPhase('choices'), WATCH_MS);
+    return () => window.clearTimeout(watchTimer);
+  }, [round]);
 
   const changeDifficulty = (value: GameDifficulty) => {
     playPop();
@@ -67,19 +65,22 @@ export default function FruitMathPop() {
     setSelected(choice);
     if (choice === round.result) {
       setPhase('success');
-      setCovered(false);
       playSuccess();
       onStarEarned?.(STARS[difficulty]);
-      window.setTimeout(() => startRound(difficulty, theme), 1200);
+      later(() => startRound(difficulty, theme), 1200);
     } else {
       playError();
       setWrongChoice(choice);
-      // Forgiving: a miss on hard lifts the cover so they can count again.
-      setCovered(false);
-      window.setTimeout(() => {
-        setWrongChoice(null);
-        setSelected(null);
-      }, 600);
+      if (wrongMeansNewRound(difficulty, challengeMode)) {
+        // Hard: no smashing through the answers — a miss brings a new sum.
+        later(() => startRound(difficulty, theme), 900);
+      } else {
+        setTallyShown(true);
+        later(() => {
+          setWrongChoice(null);
+          setSelected(null);
+        }, 600);
+      }
     }
   };
 
@@ -129,7 +130,7 @@ export default function FruitMathPop() {
           data-testid="fruit-math-pop-tray"
           data-operation={round.operation}
           data-result={round.result}
-          data-covered={covered ? 'true' : 'false'}
+          data-round={roundNo}
           className="relative flex-1 min-h-[120px] flex items-center justify-center"
         >
           <div key={roundNo} className="flex items-center justify-center gap-3 animate-pop-in">
@@ -137,15 +138,6 @@ export default function FruitMathPop() {
             <NotebookOperator op={round.operation} />
             <div data-testid="fruit-math-pop-right">{group(round.right, round.operation === '-')}</div>
           </div>
-          {covered && (
-            <div
-              data-testid="fruit-math-pop-cover"
-              aria-hidden="true"
-              className="absolute inset-0 flex items-center justify-center rounded-3xl bg-butter border-4 border-dashed border-amber-300 text-6xl animate-pop-in"
-            >
-              🙈
-            </div>
-          )}
         </div>
         <div className="w-full flex flex-col justify-center gap-1.5" style={{ minHeight: `${round.choices.length * 78}px` }}>
           {showChoices ? (
@@ -157,14 +149,14 @@ export default function FruitMathPop() {
                 state={selected === choice && choice === round.result ? 'correct' : wrongChoice === choice ? 'wrong' : 'idle'}
                 disabled={phase === 'success'}
                 onClick={() => handleChoice(choice)}
-                aside={<NotebookTally count={choice} />}
+                aside={tallyShown ? <NotebookTally count={choice} /> : undefined}
               >
                 {choice}
               </NotebookChoice>
             ))
-          ) : phase === 'watching' ? (
+          ) : (
             <p className="text-center font-black text-ink/50">{t.fruitMathPop.watch}</p>
-          ) : null}
+          )}
         </div>
       </NotebookSheet>
     </div>

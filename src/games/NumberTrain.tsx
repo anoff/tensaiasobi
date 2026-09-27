@@ -5,6 +5,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import type { GameDifficulty } from '../types/game';
 import { useGameFX } from '../hooks/gameFXContext';
 import { OPERATION_CLASSES, operationOf } from '../utils/operatorColors';
+import { wrongMeansNewRound } from '../utils/difficulty';
 import {
   generateNumberTrainRound,
   NUMBER_TRAIN_CONFIG,
@@ -18,7 +19,7 @@ const PASSENGER_EMOJIS = ['🐻', '🐰', '🐱', '🐶', '🦊', '🐼', '🐨'
 const DEPART_MS = 1500;
 
 export default function NumberTrain() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [round, setRound] = useState<NumberTrainRound>(() => generateNumberTrainRound('easy'));
@@ -60,7 +61,11 @@ export default function NumberTrain() {
     } else {
       playError();
       setClosedStation(target);
-      later(() => setClosedStation(null), 700);
+      if (wrongMeansNewRound(difficulty, challengeMode)) {
+        later(() => startNewRound(difficulty), 900);
+      } else {
+        later(() => setClosedStation(null), 700);
+      }
     }
   };
 
@@ -85,6 +90,7 @@ export default function NumberTrain() {
       <div
         data-testid="number-train-stage"
         data-answer={round.answer}
+        data-round={roundNo}
         className="relative flex-1 w-full flex flex-col justify-between gap-4 p-4 rounded-3xl border-4 border-slate-200 bg-gradient-to-b from-sky-100 to-emerald-50 overflow-hidden"
       >
         {/* Parked train: a count display, not a drag handle */}

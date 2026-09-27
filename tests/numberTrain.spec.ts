@@ -61,4 +61,15 @@ test.describe('Number Train E2E Tests', () => {
     await expect(page.getByTestId('stars-total')).toHaveText('1');
     await expect(stations.first()).toBeEnabled({ timeout: 4000 });
   });
+
+  test('hard: a wrong station brings a new round instead of a retry', async ({ page }) => {
+    await page.getByTestId('difficulty-hard').click();
+    const stage = page.getByTestId('number-train-stage');
+    await expect(page.getByTestId('number-train-station')).toHaveCount(4);
+    const round = await stage.getAttribute('data-round');
+    const answer = await stage.getAttribute('data-answer');
+    await page.locator(`[data-testid="number-train-station"]:not([data-value="${answer}"])`).first().click();
+    await expect(stage).not.toHaveAttribute('data-round', round!);
+    await expect(page.getByTestId('stars-total')).toHaveText('0');
+  });
 });

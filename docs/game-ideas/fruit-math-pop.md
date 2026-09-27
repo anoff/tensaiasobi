@@ -5,10 +5,10 @@
 **Target age**: 4-6 years
 
 > **Update (#70, #72):** the problem fruit is static (one-shot pop-in, no
-> looping bounce/pulse/shake) and sits on the notebook answer sheet. Answers are
-> notebook lines with the numeral plus a still dot tally, so pre-readers can
-> still match by quantity. Hard covers the fruit for ~1s before the answers
-> appear and lifts the cover again after a miss.
+> looping bounce/pulse/shake), always visible, and sits on the notebook answer
+> sheet. Answers are notebook lines with the numeral plus a still dot tally.
+> Easy always shows the tally; medium hides it until the first miss; hard hides
+> it and a miss brings a new sum (no retry), so button-smashing doesn't pay.
 
 ## Goal
 

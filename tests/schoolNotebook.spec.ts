@@ -36,6 +36,20 @@ test.describe('School games use the notebook answer sheet', () => {
     expect(await page.getByTestId('math-equation').innerText()).toBe(text);
   });
 
+  test('Math hard: a wrong line brings a new sum instead of a retry', async ({ page }) => {
+    await page.getByTestId('launch-math').click();
+    await page.getByTestId('difficulty-hard').click();
+    const equation = page.getByTestId('math-equation');
+    const text = await equation.innerText();
+    const match = text.match(/(\d+)\s*([+−])\s*(\d+)/)!;
+    const answer = match[2] === '+' ? Number(match[1]) + Number(match[3]) : Number(match[1]) - Number(match[3]);
+
+    const options = page.getByTestId('math-answer-option');
+    const values = await options.evaluateAll((els) => els.map((el) => parseInt(el.textContent ?? '', 10)));
+    await options.nth(values.findIndex((v) => v !== answer)).click();
+    await expect(equation).not.toHaveText(text, { timeout: 3000 });
+  });
+
   test('First Sound offers letters as notebook lines', async ({ page }) => {
     await page.getByTestId('launch-anlaut').click();
     const options = page.getByTestId('anlaut-option');

@@ -89,7 +89,7 @@ Use these categories when describing what a game teaches:
 ## Good Game Idea Signals
 
 - The child does the *same core action* many times with increasing variety (not a story they watch)
-- Failure feedback is immediate and forgiving (shake + try again, no dead ends)
+- Failure feedback is immediate and forgiving (shake + try again, no dead ends) on easy/medium; on **hard**, select-answer games move to a fresh question after a miss (`wrongMeansNewRound` in `src/utils/difficulty.ts`) so smashing every button until one is right doesn't pay
 - Correct feedback is satisfying (pop, confetti, star flies up)
 - Content is emoji- or image-driven so it works across all 5 locales with minimal translation
 - Rule is demonstrable by watching one round

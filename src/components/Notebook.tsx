@@ -100,7 +100,7 @@ export function NotebookChoice({ children, state, disabled, onClick, testId, dat
 export function NotebookTally({ count }: { count: number }) {
   const groups = Array.from({ length: Math.ceil(count / 5) }, (_, g) => Math.min(5, count - g * 5));
   return (
-    <span className="flex flex-col gap-1">
+    <span data-testid="notebook-tally" className="flex flex-col gap-1 animate-pop-in">
       {groups.map((size, g) => (
         <span key={g} className="flex gap-1">
           {Array.from({ length: size }, (_, i) => (
