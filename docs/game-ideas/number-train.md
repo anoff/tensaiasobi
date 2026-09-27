@@ -4,6 +4,12 @@
 **Learning category**: Numeracy - quantity-to-numeral mapping and number order  
 **Target age**: 5-7 years
 
+> **Update (#72):** the shipped game is tap-to-send, not drag. The train stays
+> parked as a count display (one five-/ten-frame wagon at every tier) and the
+> child taps a station. Tiers: easy 1–5 / 3 stations, medium 1–10 / 4 stations,
+> hard 1–10 with ±1 / 4 stations. Difficulty scales the rule, never the number
+> of wagons. The drag notes below are kept for history.
+
 ## Goal
 
 Help children connect counted emoji passengers with written numerals, then extend that understanding to one more, one less, and number order.

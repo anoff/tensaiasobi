@@ -10,10 +10,10 @@ This skill helps propose and evaluate new mini-games that fit the `tensaiasobi` 
 
 ## Repo Context (Always Check)
 
-- **Existing games**: MathGame, OddOneOut, DoodlePad, MemoryMatch, MazeGame, ShapeTrace, LetterTrace, AnlautGame, EmojiMatch, Shiritori, PuzzleGame, DispatchGame, PhysicsPuzzleGame, TowerSort, TownBuilder
+- **Existing games**: see `src/games/catalog.ts` (MathGame, OddOneOut, DoodlePad, MemoryMatch, MazeGame, ShapeTrace, LetterTrace, AnlautGame, EmojiMatch, Shiritori, PuzzleGame, DispatchGame, PhysicsPuzzleGame, TowerSort, FruitMathPop, NumberTrain, ShadowFlashlight, FairSharePicnic, SnorkelPearlFinder, TownBuilder)
 - **Game interface**: `GameProps { playPop, playSuccess, playError, onStarEarned?, challengeMode? }`
 - **Difficulty**: `'easy' | 'medium' | 'hard'` — each game defines its own generator
-- **Shared UI**: `GameConfetti`, `DifficultySelector`, `AnswerBubble`, `StreakBadge`
+- **Shared UI**: `GameConfetti`, `DifficultySelector`, `StreakBadge`; school-style quizzes (sums, first sounds) use the notebook answer sheet (`NotebookSheet` / `NotebookChoice` in `src/components/Notebook.tsx`); `AnswerBubble` is only for toy-style pops
 - **Locales**: `en`, `de`, `ja`, `ko`, `fr` — all user-facing strings must go through `useTranslation`
 - **Touch-first**: use `onTouchStart`/`onTouchMove`; no mouse-only interactions
 - **Target age**: roughly 3–8 years; chunky targets (min 96px), simple rules
@@ -100,3 +100,5 @@ Use these categories when describing what a game teaches:
 - Core loop needs a keyboard
 - Only fun once (no replayability from randomized content)
 - Too close to an existing game without clear differentiation
+- Difficulty that adds more fat-finger targets (more columns, wagons, tiles) instead of harder rules — scale range / hide / ±1 / scramble, keep ≥ 96px targets on a phone stage
+- Drag where a tap would do (drag only when the drag *is* the skill: maze, trace, flashlight)

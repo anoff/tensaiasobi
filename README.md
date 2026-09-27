@@ -22,7 +22,7 @@ A modern, lightning-fast static web app designed for young children (ages 3-8). 
 
 Learning games (star challenges focus here first):
 
-1. **Math Pop 🎈** — Bubble-popping addition/subtraction.
+1. **Math Pop 🎈** — Addition/subtraction on a notebook answer sheet.
 2. **Odd One 🧐** — Categorization for pre-readers.
 3. **Animal Match 🐯** — Memory pairs.
 4. **Letters ✏️** — Stroke tracing (Latin, Hiragana, Katakana, Hangul).
@@ -33,7 +33,7 @@ Learning games (star challenges focus here first):
 9. **Balance ⚖️** — Seesaw physics.
 10. **Tower Sort 🗼** — Stack matching emojis.
 11. **Fruit Math Pop 🍎** — Count fruit, then pick the total.
-12. **Number Train 🚂** — Count passengers onto the right station.
+12. **Number Train 🚂** — Count the passengers, tap the right station.
 13. **Shadow 🔦** — Identify a silhouette with a flashlight.
 14. **Fair Share Picnic 🧺** — Equal sharing / early division.
 15. **Pearl Finder 🤿** — Sort pearls into matching clams.
