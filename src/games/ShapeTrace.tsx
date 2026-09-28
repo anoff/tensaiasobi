@@ -311,7 +311,7 @@ export function ShapeTrace() {
                 color="pink"
                 size="md"
                 onClick={nextShape}
-                className="shadow-[0_6px_0_0_#d81b60] active:translate-y-[4px] whitespace-nowrap"
+                className="whitespace-nowrap"
               >
                 🌈 {t.shapeTrace.nextShape}
               </KidButton>
@@ -329,7 +329,7 @@ export function ShapeTrace() {
           data-testid="trace-check"
           onClick={handleCheckTrace}
           disabled={isWon || drawingPoints.length < 5}
-          className={`px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${isWon || drawingPoints.length < 5 ? 'opacity-40 pointer-events-none' : ''
+          className={`px-6 py-3 min-h-12 rounded-[1.5rem] transition-all flex items-center gap-2 ${isWon || drawingPoints.length < 5 ? 'opacity-40 pointer-events-none' : ''
             }`}
         >
           ✅ {t.common.check}
@@ -341,7 +341,7 @@ export function ShapeTrace() {
           data-testid="trace-reset"
           label={`🗑️ ${t.common.reset}`}
           confirmLabel={`🗑️ ${t.common.confirmReset}`}
-          className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
+          className="px-6 py-3 min-h-12 rounded-[1.5rem] transition-all flex items-center gap-2"
         />
       </div>
 

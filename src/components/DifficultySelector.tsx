@@ -1,4 +1,5 @@
 import type { GameDifficulty } from '../types/game';
+import { BUTTER, INK, hardShadow } from '../theme/blockTable';
 
 interface DifficultySelectorProps {
   selected: GameDifficulty;
@@ -22,7 +23,10 @@ export function DifficultySelector({
   className = '',
 }: DifficultySelectorProps) {
   return (
-    <div className={`w-full flex justify-between bg-slate-200/80 p-1.5 rounded-2xl border-2 border-slate-300 gap-1.5 select-none ${className}`}>
+    <div
+      className={`w-full flex justify-between bg-[#fff8ec] p-1.5 rounded-2xl border-[3px] gap-1.5 select-none ${className}`}
+      style={{ borderColor: INK, boxShadow: hardShadow(3, 4) }}
+    >
       {options.map((opt) => {
         const isActive = selected === opt;
         return (
@@ -34,16 +38,13 @@ export function DifficultySelector({
               if (!isActive) onChange(opt);
             }}
             className={`
-              flex-1 py-2.5 text-sm font-black rounded-xl border-b-4 transition-all duration-75 outline-none cursor-pointer select-none
-              ${isActive
-                ? 'bg-candy-purple text-white border-purple-700 shadow-sm translate-y-[2px]'
-                : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 active:translate-y-[1px] disabled:opacity-50'
-              }
+              flex-1 py-2.5 text-sm font-black rounded-xl border-2 transition-all duration-75 outline-none cursor-pointer select-none
+              focus-visible:ring-4 focus-visible:ring-amber-400/70
+              ${isActive ? '' : 'border-transparent opacity-60 hover:opacity-100 disabled:opacity-40'}
             `}
+            style={isActive ? { backgroundColor: BUTTER, borderColor: INK, boxShadow: hardShadow(2, 2) } : undefined}
           >
-            <span className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]">
-              {STARS[opt]}
-            </span>
+            {STARS[opt]}
           </button>
         );
       })}

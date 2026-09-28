@@ -5,6 +5,8 @@ import { useSound } from './hooks/useSound';
 import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
 import { BlockTile } from './components/BlockTile';
+import { AgeSwitch } from './components/AgeSwitch';
+import { CORAL, LEAF, BUTTER, PLAY_MAT_STYLE } from './theme/blockTable';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
@@ -19,7 +21,7 @@ import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
 import { couponLabel, type Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
-import { GAMES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, isGameId, type AgeBandFilter, type GameId } from './games/catalog';
+import { GAMES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, isGameId, type AgeBand, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
@@ -43,7 +45,9 @@ function AppContent() {
 
   const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
   const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
-  const [ageBand, setAgeBand] = useLocalStorage<AgeBandFilter>('settings_age_band', 'all');
+  const [storedAgeBand, setAgeBand] = useLocalStorage<string>('settings_age_band', 'little');
+  // Older installs may still hold 'all'; the home switch only knows two bands.
+  const ageBand: AgeBand = storedAgeBand === 'big' ? 'big' : 'little';
   const { minutes: sessionMinutes, setMinutes: setSessionMinutes, remainingMs, locked: sessionLocked, startOrRefresh, startIfIdle, unlock } = useSessionTimer();
   const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
   const [pendingCouponRedeemConfirmId, setPendingCouponRedeemConfirmId] = useState<string | null>(null);
@@ -164,6 +168,12 @@ function AppContent() {
     handleScreenChange('menu');
   };
 
+  const visibleGames = GAMES.filter(
+    (game) =>
+      gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames }) &&
+      gameVisibleForAge(game, ageBand),
+  );
+
   const renderActiveScreen = () => {
     if (isGameId(currentScreen)) {
       const Game = GAMES.find((game) => game.id === currentScreen)?.Component;
@@ -248,28 +258,12 @@ function AppContent() {
   };
 
   return (
-    <div
-      className={`w-screen h-[100dvh] flex flex-col relative pt-safe pb-safe ${
-        currentScreen === 'menu' ? 'text-[#2a1c14]' : 'bg-sky-50 text-slate-800'
-      }`}
-      style={
-        currentScreen === 'menu'
-          ? {
-              backgroundColor: '#ffe7c2',
-              backgroundImage:
-                'radial-gradient(circle at 12px 12px, rgba(42,28,20,0.07) 1.6px, transparent 1.8px)',
-              backgroundSize: '28px 28px',
-            }
-          : undefined
-      }
-    >
-      {currentScreen === 'menu' && (
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-40 flex h-1.5">
-          <span className="flex-1" style={{ backgroundColor: '#ff4d3a' }} />
-          <span className="flex-1" style={{ backgroundColor: '#1f9a62' }} />
-          <span className="flex-1" style={{ backgroundColor: '#ffc21a' }} />
-        </div>
-      )}
+    <div className="w-screen h-[100dvh] flex flex-col relative pt-safe pb-safe text-[#2a1c14]" style={PLAY_MAT_STYLE}>
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-40 flex h-1.5">
+        <span className="flex-1" style={{ backgroundColor: CORAL }} />
+        <span className="flex-1" style={{ backgroundColor: LEAF }} />
+        <span className="flex-1" style={{ backgroundColor: BUTTER }} />
+      </div>
       <header className="flex justify-between items-center p-4 z-50">
         <div>
           {currentScreen !== 'menu' && currentScreen !== 'settings' && currentScreen !== 'session' && (
@@ -403,11 +397,17 @@ function AppContent() {
               <p className="text-[#2a1c14]/50 font-extrabold text-base">{t.menu.subtitle}</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 my-8">
-              {GAMES.map((game, i) => {
-                if (!gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames })) return null;
-                if (!gameVisibleForAge(game, ageBand)) return null;
-                return (
+            <div className="my-8 space-y-7">
+              <AgeSwitch
+                value={ageBand}
+                onChange={(band) => {
+                  playPop();
+                  setAgeBand(band);
+                }}
+              />
+
+              <div className="grid grid-cols-3 gap-3">
+                {visibleGames.map((game, i) => (
                   <BlockTile
                     key={game.id}
                     emoji={game.emoji}
@@ -417,28 +417,28 @@ function AppContent() {
                     data-testid={game.testid}
                     onClick={() => handleScreenChange(game.id)}
                   />
-                );
-              })}
-              {!challengeFocusActive && (
-                <>
-                  <BlockTile
-                    emoji="🏘️"
-                    label={t.menu.town}
-                    index={GAMES.length}
-                    tileId="town"
-                    data-testid="launch-town"
-                    onClick={() => handleScreenChange('town')}
-                  />
-                  <BlockTile
-                    emoji="🎟️"
-                    label={t.menu.coupons}
-                    index={GAMES.length + 1}
-                    tileId="coupons"
-                    data-testid="launch-coupons"
-                    onClick={() => handleScreenChange('coupons')}
-                  />
-                </>
-              )}
+                ))}
+                {!challengeFocusActive && (
+                  <>
+                    <BlockTile
+                      emoji="🏘️"
+                      label={t.menu.town}
+                      index={visibleGames.length}
+                      tileId="town"
+                      data-testid="launch-town"
+                      onClick={() => handleScreenChange('town')}
+                    />
+                    <BlockTile
+                      emoji="🎟️"
+                      label={t.menu.coupons}
+                      index={visibleGames.length + 1}
+                      tileId="coupons"
+                      data-testid="launch-coupons"
+                      onClick={() => handleScreenChange('coupons')}
+                    />
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="text-center text-xs text-[#2a1c14]/35 font-bold">

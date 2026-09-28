@@ -420,7 +420,7 @@ export function EmojiMatch() {
 
           {/* Game Over Screen Overlay */}
           {isGameOver && (
-            <div className="absolute inset-0 bg-sky-50/90 backdrop-blur-md flex flex-col justify-center items-center p-6 rounded-3xl z-40 space-y-6">
+            <div className="absolute inset-0 bg-[#ffe7c2]/90 backdrop-blur-md flex flex-col justify-center items-center p-6 rounded-3xl z-40 space-y-6">
               <div className="text-center space-y-2">
                 <h3 className="text-4xl font-black text-slate-800">{t.emojiMatch.gameOver}</h3>
                 <p className="text-slate-500 font-extrabold text-lg">

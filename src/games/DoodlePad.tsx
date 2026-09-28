@@ -271,7 +271,7 @@ export function DoodlePad() {
             size="sm"
             data-testid="doodle-download"
             onClick={downloadDrawing}
-            className="!py-1.5 !px-3 shadow-[0_4px_0_0_#059669] active:translate-y-[2px] active:shadow-[0_1px_0_0_#059669]"
+            className="!py-1.5 !px-3"
             title={t.doodlePad.download}
           >
             📥
@@ -283,7 +283,7 @@ export function DoodlePad() {
             data-testid="doodle-clear"
             label="🗑"
             confirmLabel="🗑️?"
-            className="!py-1.5 !px-3 shadow-[0_4px_0_0_#b91c1c] active:translate-y-[2px] active:shadow-[0_1px_0_0_#b91c1c]"
+            className="!py-1.5 !px-3"
           />
         </div>
       </div>

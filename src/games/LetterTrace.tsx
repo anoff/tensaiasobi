@@ -407,7 +407,7 @@ export function LetterTrace() {
                 size="md"
                 data-testid="letter-trace-next"
                 onClick={nextLetter}
-                className="shadow-[0_6px_0_0_#d81b60] active:translate-y-[4px] whitespace-nowrap"
+                className="whitespace-nowrap"
               >
                 🌈 {t.letterTrace.nextLetter}
               </KidButton>
@@ -424,7 +424,7 @@ export function LetterTrace() {
           data-testid="letter-trace-reset"
           label={`🗑️ ${t.common.reset}`}
           confirmLabel={`🗑️ ${t.common.confirmReset}`}
-          className="px-6 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2"
+          className="px-6 py-3 min-h-12 rounded-[1.5rem] transition-all flex items-center gap-2"
         />
       </div>
 

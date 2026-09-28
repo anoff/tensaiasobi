@@ -224,7 +224,6 @@ export function AnlautGame() {
               playPop();
               setHintUsed(true);
             }}
-            className="shadow-[0_4px_0_0_#d97706] active:translate-y-[3px]"
           >
             {t.anlautGame.hint}
           </KidButton>

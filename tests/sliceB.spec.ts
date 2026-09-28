@@ -31,6 +31,23 @@ test.describe('Slice B parent controls', () => {
     await expect(page.getByTestId('launch-dispatch')).toHaveCount(0);
   });
 
+  test('home age switch toggles between preschool and school games and persists', async ({ page }) => {
+    await expect(page.getByTestId('age-mode-little')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('launch-doodle')).toBeVisible();
+    await expect(page.getByTestId('launch-shiritori')).toHaveCount(0);
+
+    await page.getByTestId('age-mode-big').click();
+    await expect(page.getByTestId('age-mode-big')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('launch-shiritori')).toBeVisible();
+    await expect(page.getByTestId('launch-doodle')).toHaveCount(0);
+
+    await page.reload();
+    await expect(page.getByTestId('launch-shiritori')).toBeVisible();
+
+    await page.getByTestId('age-mode-little').click();
+    await expect(page.getByTestId('launch-doodle')).toBeVisible();
+  });
+
   test('parent can add a custom coupon', async ({ page }) => {
     await openSettings(page);
     await page.getByTestId('custom-coupon-emoji').fill('🛝');

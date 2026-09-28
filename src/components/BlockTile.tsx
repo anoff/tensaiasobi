@@ -1,8 +1,6 @@
 import React from 'react';
 import { LauncherGlyph } from './LauncherGlyph';
-
-const FILLS = ['#ff4d3a', '#1f9a62', '#ffc21a'] as const;
-const INK = '#2a1c14';
+import { FILLS, INK, hardShadow } from '../theme/blockTable';
 
 /** 4px white halo that follows the glyph outline (plain CSS, no disc). */
 const EMOJI_HALO =
@@ -46,7 +44,7 @@ export function BlockTile({ emoji, label, index, tileId, className = '', style, 
         style={{
           backgroundColor: fill,
           borderColor: INK,
-          boxShadow: `5px 6px 0 0 ${INK}`,
+          boxShadow: hardShadow(),
           ...style,
         }}
         {...props}

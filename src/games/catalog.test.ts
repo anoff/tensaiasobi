@@ -20,7 +20,8 @@ describe('game catalog', () => {
     expect(gameVisibleForAge(GAMES.find((g) => g.id === 'doodle')!, 'little')).toBe(true);
     expect(gameVisibleForAge(GAMES.find((g) => g.id === 'doodle')!, 'big')).toBe(false);
     expect(gameVisibleForAge(GAMES.find((g) => g.id === 'shiritori')!, 'little')).toBe(false);
-    expect(gameVisibleForAge(GAMES.find((g) => g.id === 'math')!, 'all')).toBe(true);
+    expect(gameVisibleForAge(GAMES.find((g) => g.id === 'math')!, 'little')).toBe(true);
+    expect(gameVisibleForAge(GAMES.find((g) => g.id === 'math')!, 'big')).toBe(true);
   });
 
   it('covers every GameId in challenge defaults', () => {
