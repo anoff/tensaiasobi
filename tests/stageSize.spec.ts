@@ -17,10 +17,12 @@ test.describe('Hard mode keeps targets tap-sized', () => {
     expect(box!.width).toBeGreaterThanOrEqual(56);
   });
 
-  test('Magic Puzzle caps hard at 3×3', async ({ page }) => {
+  test('Magic Puzzle grows 2×2 → 3×3 → 4×4', async ({ page }) => {
     await page.getByTestId('launch-puzzle').click();
-    await page.getByTestId('difficulty-hard').click();
-    await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(9);
+    for (const [diff, pieces] of [['easy', 4], ['medium', 9], ['hard', 16]] as const) {
+      await page.getByTestId(`difficulty-${diff}`).click();
+      await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(pieces);
+    }
   });
 
   test('Balance has a real difficulty ladder', async ({ page }) => {

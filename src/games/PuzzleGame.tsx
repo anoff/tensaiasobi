@@ -185,9 +185,9 @@ export function PuzzleGame() {
   const { t } = useTranslation();
 
 
-  // Capped at 3×3 so tray pieces stay tap-sized; hard drops the picture
-  // hints from the empty slots instead of adding more tiles.
-  const size = level === 'easy' ? 2 : 3;
+  // 2×2 → 3×3 → 4×4. Tray pieces stay 64px (the tray scrolls); hard also
+  // drops the picture hints from the empty slots.
+  const size = level === 'easy' ? 2 : level === 'medium' ? 3 : 4;
   const outlineOnly = level === 'hard';
 
   // Check if state is in transition/out of sync
@@ -275,7 +275,7 @@ export function PuzzleGame() {
 
         let starAward = 4;
         if (level === 'medium') starAward = 10;
-        else if (level === 'hard') starAward = 15;
+        else if (level === 'hard') starAward = 20;
 
         onStarEarned?.(starAward);
       }
@@ -394,6 +394,7 @@ export function PuzzleGame() {
     switch (size) {
       case 2: return 'grid-cols-2 max-w-[260px]';
       case 3: return 'grid-cols-3 max-w-[290px]';
+      case 4: return 'grid-cols-4 max-w-[290px]';
       default: return 'grid-cols-2 max-w-[260px]';
     }
   };

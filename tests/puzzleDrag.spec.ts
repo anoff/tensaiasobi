@@ -35,6 +35,21 @@ test.describe('Magic Puzzle drag and drop', () => {
     await expect(page.getByText(/Superb/)).toBeVisible();
   });
 
+  test('hard is a 4×4 that can be solved by dragging, with tap-sized slots', async ({ page }) => {
+    await page.getByTestId('difficulty-hard').click();
+    await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(16);
+    const slot = await page.locator('[data-puzzle-slot="0"]').boundingBox();
+    expect(slot!.width).toBeGreaterThanOrEqual(64);
+    for (let placed = 0; placed < 16; placed++) {
+      const id = await firstTrayPieceId(page);
+      const from = await center(page, `[data-testid="puzzle-tray-piece"][data-piece-id="${id}"]`);
+      const to = await center(page, `[data-puzzle-slot="${id}"]`);
+      await mouseDrag(page, from, to);
+      await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(15 - placed);
+    }
+    await expect(page.getByText(/Superb/)).toBeVisible();
+  });
+
   test('dropping outside the board keeps the piece in the tray', async ({ page }) => {
     const id = await firstTrayPieceId(page);
     const from = await center(page, `[data-testid="puzzle-tray-piece"][data-piece-id="${id}"]`);
@@ -78,7 +93,7 @@ test.describe('Magic Puzzle drag with touch', () => {
     await page.goto('/');
     await page.getByTestId('launch-puzzle').click();
     await page.getByTestId('difficulty-hard').click();
-    await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(9);
+    await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(16);
     const tray = page.getByTestId('puzzle-tray-piece').first().locator('..');
     const from = await center(page, '[data-testid="puzzle-tray-piece"]:nth-child(3)');
 
@@ -90,7 +105,7 @@ test.describe('Magic Puzzle drag with touch', () => {
     await touch('touchEnd');
 
     expect(await tray.evaluate((el) => el.scrollLeft)).toBeGreaterThan(50);
-    await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(9);
+    await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(16);
     await expect(page.locator('[data-puzzle-slot] [data-testid="puzzle-tray-piece"]')).toHaveCount(0);
   });
 });
