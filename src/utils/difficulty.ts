@@ -1,4 +1,4 @@
-import type { GameDifficulty } from '../types/game';
+import type { AgeBand, GameDifficulty } from '../types/game';
 
 export function starMultiplier(diff: GameDifficulty): number {
   return diff === 'easy' ? 1 : diff === 'medium' ? 3 : 5;
@@ -11,4 +11,13 @@ export function starMultiplier(diff: GameDifficulty): number {
  */
 export function wrongMeansNewRound(diff: GameDifficulty, challengeMode = false): boolean {
   return challengeMode || diff === 'hard';
+}
+
+/**
+ * Every game keeps all three levels; the age band picks where to start and
+ * locks the one that does not fit: Kita starts easy (hard locked), school
+ * starts medium (easy locked).
+ */
+export function difficultyForAge(band: AgeBand): { start: GameDifficulty; locked: GameDifficulty } {
+  return band === 'big' ? { start: 'medium', locked: 'easy' } : { start: 'easy', locked: 'hard' };
 }

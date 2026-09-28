@@ -14,6 +14,7 @@ import {
   type FairShareRound,
 } from '../utils/fairSharePicnic';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 const FRIEND_EMOJIS = ['🧒', '👧', '👦', '🧑'];
 
@@ -29,8 +30,8 @@ function parseDropTarget(el: Element | null): SnackLocation | null {
 export function FairSharePicnic() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
-  const [round, setRound] = useState<FairShareRound>(() => generateRound('easy'));
+  const [difficulty, setDifficulty] = useAgeDifficulty();
+  const [round, setRound] = useState<FairShareRound>(() => generateRound(difficulty));
   const [snacks, setSnacks] = useState<Snack[]>(() => createSnacks(round));
   const [isSolved, setIsSolved] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);

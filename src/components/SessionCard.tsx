@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import KidButton from './KidButton';
-import { GAMES, defaultChallengeAllowedGames, type AgeBandFilter } from '../games/catalog';
+import { GAMES, defaultChallengeAllowedGames, type AgeBand } from '../games/catalog';
 import { useTranslation } from '../hooks/useTranslation';
 import { couponLabel, REWARD_SIZE_STAR_TARGETS, type Coupon } from '../types/gamification';
 import { SESSION_MINUTE_OPTIONS, type SessionMinutes } from '../hooks/useSessionTimer';
 
 export interface SessionStartConfig {
-  ageBand: AgeBandFilter;
+  ageBand: AgeBand;
   minutes: SessionMinutes;
   mode: 'free' | 'learn';
   targetStars: number;
@@ -15,7 +15,7 @@ export interface SessionStartConfig {
 }
 
 interface SessionCardProps {
-  ageBand: AgeBandFilter;
+  ageBand: AgeBand;
   sessionMinutes: SessionMinutes;
   coupons: Coupon[];
   challengeActive: boolean;
@@ -45,7 +45,7 @@ export function SessionCard({
 }: SessionCardProps) {
   const { t } = useTranslation();
   const learnFirstDefault = Boolean(initialCouponId) || challengeActive;
-  const [age, setAge] = useState<AgeBandFilter>(ageBand);
+  const [age, setAge] = useState<AgeBand>(ageBand);
   const [minutes, setMinutes] = useState<SessionMinutes>(sessionMinutes);
   const [mode, setMode] = useState<'free' | 'learn'>(learnFirstDefault ? 'learn' : 'free');
 
@@ -111,9 +111,8 @@ export function SessionCard({
               <span className="text-lg font-bold text-slate-800 block">{t.parentDashboard.ageBand}</span>
               <span className="text-xs text-slate-500">{t.parentDashboard.ageBandDesc}</span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {([
-                ['all', t.parentDashboard.ageAll],
                 ['little', t.parentDashboard.ageLittle],
                 ['big', t.parentDashboard.ageBig],
               ] as const).map(([id, label]) => (

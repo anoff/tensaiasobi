@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import type { AgeBand } from '../types/game';
 import MathGame from './MathGame';
 import OddOneOut from './OddOneOut';
 import DoodlePad from './DoodlePad';
@@ -21,8 +22,7 @@ import SnorkelPearlFinder from './SnorkelPearlFinder';
 
 export type GameColor = 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'red';
 
-export type AgeBand = 'little' | 'big';
-export type AgeBandFilter = 'all' | AgeBand;
+export type { AgeBand };
 /** Learning games are the challenge focus; play games unlock after the star quota. */
 export type GameKind = 'learn' | 'play';
 
@@ -93,10 +93,9 @@ export function isGameId(value: string): value is GameId {
 
 export function gameVisibleForAge(
   game: { ageBands: readonly AgeBand[] },
-  filter: AgeBandFilter,
+  band: AgeBand,
 ): boolean {
-  if (filter === 'all') return true;
-  return game.ageBands.includes(filter);
+  return game.ageBands.includes(band);
 }
 
 export function defaultChallengeAllowedGames(): Record<GameId, boolean> {

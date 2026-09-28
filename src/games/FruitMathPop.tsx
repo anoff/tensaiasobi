@@ -8,6 +8,7 @@ import type { GameDifficulty } from '../types/game';
 import { generateFruitMathRound } from './fruitMathPopLogic';
 import { useGameFX } from '../hooks/gameFXContext';
 import { wrongMeansNewRound } from '../utils/difficulty';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 const STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
 
@@ -19,9 +20,9 @@ type Phase = 'watching' | 'choices' | 'success';
 export default function FruitMathPop() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [themeIndex, setThemeIndex] = useState(1);
-  const [round, setRound] = useState(() => generateFruitMathRound('easy', TOWER_SORT_THEMES[1]));
+  const [round, setRound] = useState(() => generateFruitMathRound(difficulty, TOWER_SORT_THEMES[1]));
   const [roundNo, setRoundNo] = useState(0);
   const [phase, setPhase] = useState<Phase>('watching');
   // Dot tallies are a counting crutch: always on for easy; on medium they

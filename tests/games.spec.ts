@@ -21,6 +21,17 @@ async function switchLanguage(page: Page, lang: 'en' | 'de' | 'ja' | 'fr' | 'ko'
   await option.click();
 }
 
+// Launchers are split by the home age switch; flip it when the game lives in the other band.
+async function launcherFor(page: Page, testid: string) {
+  const launcher = page.getByTestId(testid);
+  if (!(await launcher.isVisible())) {
+    const big = page.getByTestId('age-mode-big');
+    const other = (await big.getAttribute('aria-pressed')) === 'true' ? 'age-mode-little' : 'age-mode-big';
+    await page.getByTestId(other).click();
+  }
+  return launcher;
+}
+
 test.describe('tensaiasobi E2E Game Interaction Checks', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -41,7 +52,7 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
 
       for (const gameKey of gameKeys) {
         // 2. Launch Game
-        const launcher = page.getByTestId(`launch-${gameKey}`);
+        const launcher = await launcherFor(page, `launch-${gameKey}`);
         await expect(launcher).toBeVisible();
         await launcher.click();
 

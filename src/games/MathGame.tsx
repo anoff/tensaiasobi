@@ -9,6 +9,7 @@ import { shuffle } from '../utils/shuffle';
 import { starMultiplier, wrongMeansNewRound } from '../utils/difficulty';
 import { NotebookChoice, NotebookOperator, NotebookSheet, type NotebookChoiceState } from '../components/Notebook';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 
 interface Question {
@@ -100,8 +101,8 @@ const generateQuestion = (currentLevel: GameDifficulty): Question => {
 
 export function MathGame() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
-  const [level, setLevel] = useState<GameDifficulty>('easy');
-  const [question, setQuestion] = useState<Question>(() => generateQuestion('easy'));
+  const [level, setLevel] = useAgeDifficulty();
+  const [question, setQuestion] = useState<Question>(() => generateQuestion(level));
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);

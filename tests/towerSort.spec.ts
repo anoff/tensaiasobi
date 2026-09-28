@@ -7,12 +7,14 @@ const counts = (page: Page) =>
 test.describe('Tower Sort', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    await page.getByTestId('age-mode-big').click();
     await page.getByTestId('launch-tower-sort').click();
     await expect(towers(page).first()).toBeVisible();
   });
 
-  test('keeps ≤ 5 tap-sized tubes with a height cap of 4 on every difficulty', async ({ page }) => {
-    for (const diff of ['easy', 'medium', 'hard'] as const) {
+  test('keeps ≤ 5 tap-sized tubes with a height cap of 4 on every school difficulty', async ({ page }) => {
+    await expect(page.getByTestId('difficulty-easy')).toBeDisabled();
+    for (const diff of ['medium', 'hard'] as const) {
       await page.getByTestId(`difficulty-${diff}`).click();
       const count = await towers(page).count();
       expect(count).toBeLessThanOrEqual(5);

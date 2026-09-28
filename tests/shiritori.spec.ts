@@ -83,6 +83,7 @@ const areCharsCompatible = (endChar: string, startChar: string, lang: string): b
 test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    await page.getByTestId('age-mode-big').click();
   });
 
   const languages = ['en', 'de', 'ja', 'fr', 'ko'] as const;

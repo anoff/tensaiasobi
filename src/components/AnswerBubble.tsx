@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { CORAL, INK, LEAF, hardShadow } from '../theme/blockTable';
 
 interface AnswerBubbleProps {
   children: ReactNode;
@@ -25,15 +26,10 @@ export default function AnswerBubble({
 }: AnswerBubbleProps) {
   const isWrong = (selected && correct === false) || shake;
 
-  let bubbleColorClass =
-    'from-sky-300/40 via-sky-400/70 to-sky-600/90 shadow-[0_10px_20px_rgba(14,165,233,0.3),_inset_0_4px_12px_rgba(255,255,255,0.6)] border-sky-400';
-  if (selected && correct === true) {
-    bubbleColorClass =
-      'from-emerald-300 via-emerald-400 to-emerald-600 shadow-[0_4px_10px_rgba(16,185,129,0.4)] border-emerald-400 scale-95 duration-100';
-  } else if (isWrong) {
-    bubbleColorClass =
-      'from-red-300 via-red-400 to-red-600 shadow-[0_4px_10px_rgba(239,68,68,0.4)] border-red-400 scale-95 duration-100';
-  }
+  const settled = (selected && correct === true) || isWrong;
+  let fill = '#fff8ec';
+  if (selected && correct === true) fill = LEAF;
+  else if (isWrong) fill = CORAL;
 
   return (
     <button
@@ -42,13 +38,18 @@ export default function AnswerBubble({
       disabled={disabled}
       onClick={onClick}
       className={`
-        relative w-full aspect-square rounded-full flex items-center justify-center border-4
-        transition-all duration-150 bg-gradient-to-br hover:scale-105 active:scale-95
-        outline-none cursor-pointer overflow-hidden ${bubbleColorClass} ${isWrong ? 'animate-shake' : ''} ${className}
+        relative w-full aspect-square rounded-full flex items-center justify-center border-[3px]
+        transition-all duration-100 active:translate-x-[4px] active:translate-y-[5px] active:[box-shadow:none]
+        outline-none cursor-pointer overflow-hidden focus-visible:ring-4 focus-visible:ring-amber-400/70
+        ${settled ? 'translate-x-[2px] translate-y-[3px]' : ''} ${isWrong ? 'animate-shake' : ''} ${className}
       `}
+      style={{
+        backgroundColor: fill,
+        borderColor: INK,
+        color: settled ? '#fff' : INK,
+        boxShadow: settled ? hardShadow(2, 3) : hardShadow(4, 5),
+      }}
     >
-      <div className="absolute top-2.5 left-3 w-1/4 h-1/8 bg-white/60 rounded-full -rotate-12 pointer-events-none" />
-      <div className="absolute bottom-2 right-3.5 w-1/8 h-1/8 bg-white/20 rounded-full pointer-events-none" />
       {children}
     </button>
   );

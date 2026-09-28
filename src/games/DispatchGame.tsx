@@ -6,6 +6,7 @@ import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { getItemsByCategory } from '../data/townItems';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 type ServiceType = 'police' | 'fire' | 'ambulance';
 
@@ -86,7 +87,7 @@ function generateCity(size: number): Cell[][] {
 export function DispatchGame() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [grid, setGrid] = useState<Cell[][]>([]);
   const [events, setEvents] = useState<DispatchEvent[]>([]);
   const [activeVehicle, setActiveVehicle] = useState<ServiceType | null>(null);

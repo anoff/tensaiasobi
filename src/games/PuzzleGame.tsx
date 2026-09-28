@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import type { GameDifficulty } from '../types/game';
@@ -11,6 +11,7 @@ import {
   generateInitialState,
   type EdgeProfile,
 } from './puzzleLogic';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 interface JigsawPieceProps {
   pieceId: number;
@@ -151,7 +152,7 @@ export function JigsawPiece({
 
 export function PuzzleGame() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
-  const [level, setLevel] = useState<GameDifficulty>('easy');
+  const [level, setLevel] = useAgeDifficulty();
   const [selectedImage, setSelectedImage] = useState<PuzzleImage>(PUZZLE_IMAGES[0]);
 
   // Board contains pieceId or null (empty cell)
@@ -164,6 +165,20 @@ export function PuzzleGame() {
   const [edgeProfiles, setEdgeProfiles] = useState<EdgeProfile[]>([]);
 
   const [selectedTrayIdx, setSelectedTrayIdx] = useState<number | null>(null);
+
+  // Drag from the tray: pull a piece up and drop it on a slot. Tapping still works.
+  const [drag, setDrag] = useState<{ trayIdx: number; x: number; y: number; size: number; overSlot: number | null } | null>(null);
+  const dragStartRef = useRef<{
+    trayIdx: number;
+    x: number;
+    y: number;
+    pointerId: number;
+    touch: boolean;
+    scrollLeft: number;
+    scrolled: boolean;
+  } | null>(null);
+  const trayRef = useRef<HTMLDivElement>(null);
+  const suppressClickRef = useRef(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isSolved, setIsSolved] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -171,9 +186,9 @@ export function PuzzleGame() {
   const { t } = useTranslation();
 
 
-  // Capped at 3×3 so tray pieces stay tap-sized; hard drops the picture
-  // hints from the empty slots instead of adding more tiles.
-  const size = level === 'easy' ? 2 : 3;
+  // 2×2 → 3×3 → 4×4. Tray pieces stay 64px (the tray scrolls); hard also
+  // drops the picture hints from the empty slots.
+  const size = level === 'easy' ? 2 : level === 'medium' ? 3 : 4;
   const outlineOnly = level === 'hard';
 
   // Check if state is in transition/out of sync
@@ -195,6 +210,8 @@ export function PuzzleGame() {
     setTray(initialTray);
     setLocked(new Array(currentSize * currentSize).fill(false));
     setSelectedTrayIdx(null);
+    setDrag(null);
+    dragStartRef.current = null;
     setIsSolved(false);
     setShowConfetti(false);
     setShowPreview(false);
@@ -209,7 +226,11 @@ export function PuzzleGame() {
   const svgDataUrl = useMemo(() => selectedImage.src, [selectedImage]);
 
 
-  const handleTrayPieceClick = (idx: number) => {
+  const handleTrayPieceClick = (idx: number, fromPointer = false) => {
+    if (!fromPointer && suppressClickRef.current) {
+      suppressClickRef.current = false;
+      return;
+    }
     if (isSolved || showPreview) {
       playError();
       return;
@@ -218,6 +239,118 @@ export function PuzzleGame() {
     setSelectedTrayIdx(selectedTrayIdx === idx ? null : idx);
   };
 
+
+  /** Put tray piece `trayIdx` on `slotIdx`; an occupant swaps back into the tray. */
+  const placeFromTray = (trayIdx: number, slotIdx: number) => {
+    if (locked[slotIdx]) return;
+    const pieceId = tray[trayIdx];
+    const currentOccupant = board[slotIdx];
+    playPop();
+
+    const newBoard = [...board];
+    newBoard[slotIdx] = pieceId;
+
+    const newTray = [...tray];
+    if (currentOccupant !== null) {
+      // Swap: Put the previous occupant back in the tray at the same index
+      newTray[trayIdx] = currentOccupant;
+    } else {
+      newTray.splice(trayIdx, 1);
+    }
+
+    setBoard(newBoard);
+    setTray(newTray);
+    setSelectedTrayIdx(null);
+
+    if (pieceId === slotIdx) {
+      // Snap!
+      playSuccess();
+      const newLocked = [...locked];
+      newLocked[slotIdx] = true;
+      setLocked(newLocked);
+
+      const allLocked = newLocked.every((val) => val === true);
+      if (allLocked) {
+        setIsSolved(true);
+        setShowConfetti(true);
+
+        let starAward = 4;
+        if (level === 'medium') starAward = 10;
+        else if (level === 'hard') starAward = 20;
+
+        onStarEarned?.(starAward);
+      }
+    }
+  };
+
+  const slotAt = (x: number, y: number): number | null => {
+    const attr = document.elementFromPoint(x, y)?.closest('[data-puzzle-slot]')?.getAttribute('data-puzzle-slot');
+    return attr == null ? null : Number(attr);
+  };
+
+  const handleTrayPointerDown = (idx: number, e: ReactPointerEvent<HTMLDivElement>) => {
+    if (isSolved || showPreview || e.button !== 0) return;
+    // Capture right away so a fast mouse still reports moves after leaving the piece.
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragStartRef.current = {
+      trayIdx: idx,
+      x: e.clientX,
+      y: e.clientY,
+      pointerId: e.pointerId,
+      touch: e.pointerType !== 'mouse',
+      scrollLeft: trayRef.current?.scrollLeft ?? 0,
+      scrolled: false,
+    };
+  };
+
+  const handleTrayPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    if (!start || start.pointerId !== e.pointerId) return;
+    if (!drag) {
+      const tray = trayRef.current;
+      if (start.touch && tray) {
+        // A finger scrolls the tray sideways until it leaves the tray upward; then the piece comes loose.
+        if (e.clientY >= tray.getBoundingClientRect().top) {
+          const dx = e.clientX - start.x;
+          if (Math.abs(dx) >= 8) start.scrolled = true;
+          if (start.scrolled) tray.scrollLeft = start.scrollLeft - dx;
+          return;
+        }
+      } else if (Math.hypot(e.clientX - start.x, e.clientY - start.y) < 8) {
+        // Small wiggles stay a tap.
+        return;
+      }
+      const slotEl = document.querySelector('[data-puzzle-slot]');
+      const slotSize = slotEl?.getBoundingClientRect().width ?? 80;
+      setSelectedTrayIdx(null);
+      playPop();
+      setDrag({ trayIdx: start.trayIdx, x: e.clientX, y: e.clientY, size: slotSize, overSlot: null });
+      return;
+    }
+    const over = slotAt(e.clientX, e.clientY);
+    setDrag({ ...drag, x: e.clientX, y: e.clientY, overSlot: over != null && !locked[over] ? over : null });
+  };
+
+  const handleTrayPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    if (!start || start.pointerId !== e.pointerId) return;
+    dragStartRef.current = null;
+    // Pointer capture retargets the click, so handle the tap here and skip any click that follows.
+    suppressClickRef.current = true;
+    setTimeout(() => { suppressClickRef.current = false; }, 0);
+    if (!drag) {
+      if (!start.scrolled) handleTrayPieceClick(start.trayIdx, true);
+      return;
+    }
+    setDrag(null);
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot != null && !locked[slot]) placeFromTray(drag.trayIdx, slot);
+  };
+
+  const handleTrayPointerCancel = () => {
+    dragStartRef.current = null;
+    setDrag(null);
+  };
 
   const handleSlotClick = (slotIdx: number) => {
     if (isSolved || showPreview) {
@@ -232,46 +365,7 @@ export function PuzzleGame() {
 
     // Case 1: Place selected tray piece on the board
     if (selectedTrayIdx !== null) {
-      const pieceId = tray[selectedTrayIdx];
-      playPop();
-
-      const newBoard = [...board];
-      newBoard[slotIdx] = pieceId;
-
-      const newTray = [...tray];
-      if (currentOccupant !== null) {
-        // Swap: Put the previous occupant back in the tray at the same index
-        newTray[selectedTrayIdx] = currentOccupant;
-      } else {
-
-        newTray.splice(selectedTrayIdx, 1);
-      }
-
-      setBoard(newBoard);
-      setTray(newTray);
-      setSelectedTrayIdx(null);
-
-
-      if (pieceId === slotIdx) {
-        // Snap!
-        playSuccess();
-        const newLocked = [...locked];
-        newLocked[slotIdx] = true;
-        setLocked(newLocked);
-
-
-        const allLocked = newLocked.every((val) => val === true);
-        if (allLocked) {
-          setIsSolved(true);
-          setShowConfetti(true);
-
-          let starAward = 4;
-          if (level === 'medium') starAward = 10;
-          else if (level === 'hard') starAward = 15;
-
-          onStarEarned?.(starAward);
-        }
-      }
+      placeFromTray(selectedTrayIdx, slotIdx);
     }
     // Case 2: No piece selected, but slot has a piece -> Return it to tray!
     else if (currentOccupant !== null) {
@@ -301,6 +395,7 @@ export function PuzzleGame() {
     switch (size) {
       case 2: return 'grid-cols-2 max-w-[260px]';
       case 3: return 'grid-cols-3 max-w-[290px]';
+      case 4: return 'grid-cols-4 max-w-[290px]';
       default: return 'grid-cols-2 max-w-[260px]';
     }
   };
@@ -396,10 +491,12 @@ export function PuzzleGame() {
             return (
               <div
                 key={index}
+                data-puzzle-slot={index}
                 onClick={() => handleSlotClick(index)}
                 className={`
                   w-full aspect-square rounded-xl relative flex items-center justify-center transition-colors duration-150
                   ${pieceId == null ? 'cursor-pointer' : 'bg-transparent'}
+                  ${drag?.overSlot === index ? 'bg-candy-yellow/40 ring-4 ring-candy-yellow z-10' : ''}
                 `}
               >
                 {/* Silhouette jigsaw piece guide in empty slot */}
@@ -442,7 +539,7 @@ export function PuzzleGame() {
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
               {t.puzzleGame?.help || 'Select a piece and tap the board!'}
             </span>
-            <div className="w-full max-w-[350px] bg-slate-100/90 border-2 border-slate-200/80 rounded-3xl p-3 flex gap-4 overflow-x-auto min-h-[92px] shadow-inner items-center justify-start scrollbar-thin">
+            <div ref={trayRef} className="w-full max-w-[350px] bg-slate-100/90 border-2 border-slate-200/80 rounded-3xl p-3 flex gap-4 overflow-x-auto min-h-[92px] shadow-inner items-center justify-start scrollbar-thin">
               {isSyncing ? (
                 <div className="w-full text-center text-xs font-extrabold text-slate-400 py-4">
                   🔄 Loading...
@@ -455,8 +552,19 @@ export function PuzzleGame() {
                 tray.map((pieceId, idx) => {
                   if (pieceId == null || edgeProfiles[pieceId] === undefined) return null;
                   const isSelected = selectedTrayIdx === idx;
+                  const isDragged = drag?.trayIdx === idx;
                   return (
-                    <div key={pieceId} data-testid="puzzle-tray-piece" className="w-16 h-16 flex-shrink-0 relative">
+                    <div
+                      key={pieceId}
+                      data-testid="puzzle-tray-piece"
+                      data-piece-id={pieceId}
+                      // Touch is handled in the pointer handlers: sideways scrolls the tray, pulling up drags.
+                      className={`w-16 h-16 flex-shrink-0 relative touch-none ${isDragged ? 'opacity-30' : ''}`}
+                      onPointerDown={(e) => handleTrayPointerDown(idx, e)}
+                      onPointerMove={handleTrayPointerMove}
+                      onPointerUp={handleTrayPointerUp}
+                      onPointerCancel={handleTrayPointerCancel}
+                    >
                       <JigsawPiece
                         pieceId={pieceId}
                         size={size}
@@ -511,6 +619,23 @@ export function PuzzleGame() {
           </div>
         )}
       </div>
+
+      {/* Piece following the finger while dragging */}
+      {drag && edgeProfiles[tray[drag.trayIdx]] !== undefined && (
+        <div
+          className="fixed z-50 pointer-events-none -translate-x-1/2 -translate-y-1/2"
+          style={{ left: drag.x, top: drag.y, width: drag.size, height: drag.size }}
+        >
+          <JigsawPiece
+            pieceId={tray[drag.trayIdx]}
+            size={size}
+            profile={edgeProfiles[tray[drag.trayIdx]]}
+            svgDataUrl={svgDataUrl}
+            isLocked={false}
+            isSelected={true}
+          />
+        </div>
+      )}
     </div>
   );
 }

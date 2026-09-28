@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('School games use the notebook answer sheet', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    await page.getByTestId('age-mode-big').click();
   });
 
   test('Math shows full-width answer lines instead of bubbles, and no "tap the bubble" line', async ({ page }) => {

@@ -6,6 +6,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 import { useGameFX } from '../hooks/gameFXContext';
 import { wrongMeansNewRound } from '../utils/difficulty';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 // Precomputed Dobble card index decks (one shared symbol per pair of cards)
 const DECK_EASY: number[][] = [[16,17,18,19,20],[0,1,2,3,20],[4,5,6,7,20],[8,9,10,11,20],[12,13,14,15,20],[0,4,8,12,16],[1,5,9,13,16],[2,6,10,14,16],[3,7,11,15,16],[0,5,10,15,17],[1,4,11,14,17],[2,7,8,13,17],[3,6,9,12,17],[0,6,11,13,18],[1,7,10,12,18],[2,4,9,15,18],[3,5,8,14,18],[0,7,9,14,19],[1,6,8,15,19],[2,5,11,12,19],[3,4,10,13,19]];
@@ -116,7 +117,7 @@ export function EmojiMatch() {
 
 
   const [gameStarted, setGameStarted] = useState(false);
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [mode, setMode] = useState<Mode>('solo_zen');
 
 
@@ -421,7 +422,7 @@ export function EmojiMatch() {
 
           {/* Game Over Screen Overlay */}
           {isGameOver && (
-            <div className="absolute inset-0 bg-sky-50/90 backdrop-blur-md flex flex-col justify-center items-center p-6 rounded-3xl z-40 space-y-6">
+            <div className="absolute inset-0 bg-[#ffe7c2]/90 backdrop-blur-md flex flex-col justify-center items-center p-6 rounded-3xl z-40 space-y-6">
               <div className="text-center space-y-2">
                 <h3 className="text-4xl font-black text-slate-800">{t.emojiMatch.gameOver}</h3>
                 <p className="text-slate-500 font-extrabold text-lg">

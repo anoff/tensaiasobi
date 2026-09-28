@@ -8,7 +8,7 @@
     user-select: none; /* Prevents text highlighting on accidental long-press */
     -webkit-touch-callout: none; /* Disables iOS popup menu on long press */
     touch-action: pan-y; /* Allows vertical swipe scrolling, disables double-tap zoom */
-    @apply bg-sky-50 text-slate-800 overflow-hidden w-screen h-[100dvh];
+    @apply bg-[#ffe7c2] text-[#2a1c14] overflow-hidden w-screen h-[100dvh];
   }
 }
 

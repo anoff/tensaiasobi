@@ -4,7 +4,9 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useSound } from './hooks/useSound';
 import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
-import { LauncherGlyph } from './components/LauncherGlyph';
+import { BlockTile } from './components/BlockTile';
+import { AgeSwitch } from './components/AgeSwitch';
+import { CORAL, LEAF, BUTTER, PLAY_MAT_STYLE } from './theme/blockTable';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
@@ -19,7 +21,7 @@ import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
 import { couponLabel, type Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
-import { GAMES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, isGameId, type AgeBandFilter, type GameId } from './games/catalog';
+import { GAMES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, isGameId, type AgeBand, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
@@ -41,10 +43,11 @@ function AppContent() {
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
-  // Gamification state
   const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
   const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
-  const [ageBand, setAgeBand] = useLocalStorage<AgeBandFilter>('settings_age_band', 'all');
+  const [storedAgeBand, setAgeBand] = useLocalStorage<string>('settings_age_band', 'little');
+  // Older installs may still hold 'all'; the home switch only knows two bands.
+  const ageBand: AgeBand = storedAgeBand === 'big' ? 'big' : 'little';
   const { minutes: sessionMinutes, setMinutes: setSessionMinutes, remainingMs, locked: sessionLocked, startOrRefresh, startIfIdle, unlock } = useSessionTimer();
   const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
   const [pendingCouponRedeemConfirmId, setPendingCouponRedeemConfirmId] = useState<string | null>(null);
@@ -52,7 +55,6 @@ function AppContent() {
   const [pendingEarnCouponId, setPendingEarnCouponId] = useState<string | null>(null);
   const [challengeSetupCouponId, setChallengeSetupCouponId] = useState<string | undefined>(undefined);
 
-  // Challenge mode state
   const {
     challengeActive,
     challengeStarsTarget,
@@ -166,6 +168,12 @@ function AppContent() {
     handleScreenChange('menu');
   };
 
+  const visibleGames = GAMES.filter(
+    (game) =>
+      gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames }) &&
+      gameVisibleForAge(game, ageBand),
+  );
+
   const renderActiveScreen = () => {
     if (isGameId(currentScreen)) {
       const Game = GAMES.find((game) => game.id === currentScreen)?.Component;
@@ -178,6 +186,7 @@ function AppContent() {
             playError,
             onStarEarned: handleStarEarned,
             challengeMode: challengeFocusActive,
+            ageBand,
           }}
         >
           <Game key={language} />
@@ -250,8 +259,12 @@ function AppContent() {
   };
 
   return (
-    <div className="w-screen h-[100dvh] flex flex-col bg-sky-50 text-slate-800 relative pt-safe pb-safe">
-      {/* Top Navigation Bar */}
+    <div className="w-screen h-[100dvh] flex flex-col relative pt-safe pb-safe text-[#2a1c14]" style={PLAY_MAT_STYLE}>
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-40 flex h-1.5">
+        <span className="flex-1" style={{ backgroundColor: CORAL }} />
+        <span className="flex-1" style={{ backgroundColor: LEAF }} />
+        <span className="flex-1" style={{ backgroundColor: BUTTER }} />
+      </div>
       <header className="flex justify-between items-center p-4 z-50">
         <div>
           {currentScreen !== 'menu' && currentScreen !== 'settings' && currentScreen !== 'session' && (
@@ -259,7 +272,6 @@ function AppContent() {
           )}
         </div>
 
-        {/* Universal Star Counter displaying earned stars & animating fly-ups */}
         <div className="flex items-center gap-3 ml-auto">
           {sessionMinutes > 0 && remainingMs > 0 && !sessionLocked && (
             <div className="flex items-center gap-1.5 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5" data-testid="session-remaining">
@@ -279,8 +291,6 @@ function AppContent() {
                   {challengeStarsRemaining}
                 </span>
               </div>
-
-              {/* Countdown fly-down/up animations */}
               {pendingChallengeAnimations.map((anim) => (
                 <FlyUpStar key={anim.id} onDone={() => clearChallengeAnimation(anim.id)}>
                   <span className="text-sm font-black text-pink-600 whitespace-nowrap drop-shadow-sm">
@@ -311,7 +321,6 @@ function AppContent() {
 
           {currentScreen === 'menu' && (
             <div className="flex items-center gap-3">
-              {/* Language Switcher Dropdown */}
               <div className="relative" ref={langRef}>
                 {(() => {
                   const labelMap = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵', fr: '🇫🇷', ko: '🇰🇷' } as const;
@@ -379,71 +388,61 @@ function AppContent() {
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6">
         {currentScreen === 'menu' ? (
           <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
-            {/* Title Block */}
             <div className="text-center space-y-2 mt-4">
-              <h1 className="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-candy-pink via-candy-blue to-candy-purple drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)]">
+              <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">
                 tensaiasobi 🎮
               </h1>
-              <p className="text-slate-400 font-extrabold text-base">{t.menu.subtitle}</p>
+              <p className="text-[#2a1c14]/50 font-extrabold text-base">{t.menu.subtitle}</p>
             </div>
 
-            {/* Launchers Grid */}
-            <div className="grid grid-cols-3 gap-4 my-8">
-              {GAMES.map((game) => {
-                if (!gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames })) return null;
-                if (!gameVisibleForAge(game, ageBand)) return null;
-                return (
-                  <KidButton
+            <div className="my-8 space-y-7">
+              <AgeSwitch
+                value={ageBand}
+                onChange={(band) => {
+                  playPop();
+                  setAgeBand(band);
+                }}
+              />
+
+              <div className="grid grid-cols-3 gap-3">
+                {visibleGames.map((game, i) => (
+                  <BlockTile
                     key={game.id}
-                    color={game.color}
-                    size="lg"
+                    emoji={game.emoji}
+                    label={t.menu[game.labelKey]}
+                    index={i}
+                    tileId={game.id}
                     data-testid={game.testid}
                     onClick={() => handleScreenChange(game.id)}
-                    className="aspect-square flex-col gap-2 rounded-[2rem]"
-                  >
-                    <LauncherGlyph emoji={game.emoji} />
-                    <span className="text-lg font-black leading-none">{t.menu[game.labelKey]}</span>
-                  </KidButton>
-                );
-              })}
+                  />
+                ))}
+                {!challengeFocusActive && (
+                  <>
+                    <BlockTile
+                      emoji="🏘️"
+                      label={t.menu.town}
+                      index={visibleGames.length}
+                      tileId="town"
+                      data-testid="launch-town"
+                      onClick={() => handleScreenChange('town')}
+                    />
+                    <BlockTile
+                      emoji="🎟️"
+                      label={t.menu.coupons}
+                      index={visibleGames.length + 1}
+                      tileId="coupons"
+                      data-testid="launch-coupons"
+                      onClick={() => handleScreenChange('coupons')}
+                    />
+                  </>
+                )}
+              </div>
             </div>
 
-            {/* Gamification section separated by a gap and border */}
-            {!challengeFocusActive && (
-              <div className="border-t-2 border-slate-200/60 pt-6 mt-2 mb-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <KidButton
-                    color="green"
-                    size="lg"
-                    data-testid="launch-town"
-                    onClick={() => handleScreenChange('town')}
-                    className="col-span-2 flex-row gap-4 rounded-[2rem] min-h-24"
-                  >
-                    <span className="flex flex-row items-center justify-center gap-3">
-                      <LauncherGlyph emoji="🏘️" />
-                      <span className="text-lg font-black leading-none">{t.menu.town}</span>
-                    </span>
-                  </KidButton>
-
-                  <KidButton
-                    color="yellow"
-                    size="lg"
-                    data-testid="launch-coupons"
-                    onClick={() => handleScreenChange('coupons')}
-                    className="aspect-square flex-col gap-2 rounded-[2rem]"
-                  >
-                    <LauncherGlyph emoji="🎟️" />
-                    <span className="text-base font-black leading-none">{t.menu.coupons}</span>
-                  </KidButton>
-                </div>
-              </div>
-            )}
-
-            <div className="text-center text-xs text-slate-300 font-bold">
+            <div className="text-center text-xs text-[#2a1c14]/35 font-bold">
               {t.menu.footer}
               <div className="text-[10px] text-slate-400/80 font-mono mt-1" data-testid="git-hash">
                 <a href="https://github.com/anoff/tensaiasobi" target="_blank">
@@ -457,7 +456,6 @@ function AppContent() {
         )}
       </main>
 
-      {/* Parent Gate Dialog */}
       {showParentGate && (
         <ParentGate
           onSuccess={() => {
@@ -468,7 +466,6 @@ function AppContent() {
         />
       )}
 
-      {/* Parent Gate for the Coupon Shop's "Earn it!" shortcut -> opens Challenge configuration with this coupon preselected */}
       {pendingEarnCouponId && (
         <ParentGate
           onSuccess={() => {
@@ -480,7 +477,6 @@ function AppContent() {
         />
       )}
 
-      {/* Confirmation dialog for Coupon Redemption (first confirmation, triggered by the tap-and-hold gesture) */}
       {pendingCouponRedeemConfirmId && (() => {
         const coupon = coupons.find((c) => c.id === pendingCouponRedeemConfirmId);
         if (!coupon) return null;
@@ -496,7 +492,6 @@ function AppContent() {
         );
       })()}
 
-      {/* Parent Gate for Coupon Redemption (second confirmation, before the coupon is actually consumed) */}
       {pendingCouponRedeemGateId && (
         <ParentGate
           onSuccess={() => {
@@ -515,7 +510,6 @@ function AppContent() {
         />
       )}
 
-      {/* Celebration overlay shown after a coupon has been redeemed */}
       {celebratingCoupon && (
         <CouponCelebration
           coupon={celebratingCoupon}
@@ -523,7 +517,6 @@ function AppContent() {
         />
       )}
 
-      {/* Challenge Unlocked Celebration Overlay */}
       {challengeFocusActive && challengeStarsRemaining === 0 && (
         <div className="fixed inset-0 bg-slate-900/80 z-50 flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-300" data-testid="challenge-completion-modal">
           <GameConfetti pieces={200} />

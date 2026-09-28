@@ -10,6 +10,7 @@ import { useCanvasLoop } from '../hooks/useCanvasLoop';
 import { spawnParticles, drawParticles, type Particle } from '../utils/particles';
 import type { GameDifficulty } from '../types/game';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 interface Cell {
   col: number;
@@ -104,7 +105,7 @@ const THEMES: Theme[] = [
 export function MazeGame() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [themeIndex, setThemeIndex] = useState(0);
   const [grid, setGrid] = useState<Cell[][]>([]);
   const activePointerCoordsRef = useRef<{ x: number; y: number } | null>(null);
@@ -598,7 +599,6 @@ export function MazeGame() {
                 color="green"
                 size="md"
                 onClick={generateMaze}
-                className="shadow-[0_6px_0_0_#059669] active:translate-y-[4px]"
               >
                 🎉 {t.mazeGame.playAgain}!
               </KidButton>
@@ -616,7 +616,7 @@ export function MazeGame() {
           data-testid="maze-play"
           onClick={handlePlayPath}
           disabled={playBtnDisabled}
-          className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${playBtnDisabled ? 'opacity-40 pointer-events-none' : ''
+          className={`px-8 py-3 min-h-12 rounded-[1.5rem] transition-all flex items-center gap-2 ${playBtnDisabled ? 'opacity-40 pointer-events-none' : ''
             }`}
         >
           ▶️ {t.common.play}
@@ -628,7 +628,7 @@ export function MazeGame() {
           data-testid="maze-reset"
           label={`🗑️ ${t.common.reset}`}
           confirmLabel={`🗑️ ${t.common.confirmReset}`}
-          className={`px-8 py-3 min-h-12 border-b-6 shadow-md rounded-[1.5rem] transition-all flex items-center gap-2 ${isAnimating ? 'opacity-40 pointer-events-none' : ''
+          className={`px-8 py-3 min-h-12 rounded-[1.5rem] transition-all flex items-center gap-2 ${isAnimating ? 'opacity-40 pointer-events-none' : ''
             }`}
         />
       </div>

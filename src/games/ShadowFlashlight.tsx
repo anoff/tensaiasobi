@@ -7,6 +7,7 @@ import { shuffle } from '../utils/shuffle';
 import { starMultiplier, wrongMeansNewRound } from '../utils/difficulty';
 import type { GameDifficulty } from '../types/game';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 interface ShadowItem {
   emoji: string;
@@ -68,7 +69,7 @@ function generateRound(difficulty: GameDifficulty): { target: ShadowItem; choice
 export function ShadowFlashlight() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [target, setTarget] = useState<ShadowItem | null>(null);
   const [choices, setChoices] = useState<ShadowItem[]>([]);
   const [position, setPosition] = useState({ x: 50, y: 50 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { starMultiplier, wrongMeansNewRound } from './difficulty';
+import { starMultiplier, wrongMeansNewRound, difficultyForAge } from './difficulty';
 
 describe('starMultiplier', () => {
   it('scales 1 / 3 / 5 by difficulty', () => {
@@ -15,5 +15,12 @@ describe('wrongMeansNewRound', () => {
     expect(wrongMeansNewRound('medium')).toBe(false);
     expect(wrongMeansNewRound('hard')).toBe(true);
     expect(wrongMeansNewRound('easy', true)).toBe(true);
+  });
+});
+
+describe('difficultyForAge', () => {
+  it('Kita starts easy with hard locked; school starts medium with easy locked', () => {
+    expect(difficultyForAge('little')).toEqual({ start: 'easy', locked: 'hard' });
+    expect(difficultyForAge('big')).toEqual({ start: 'medium', locked: 'easy' });
   });
 });
