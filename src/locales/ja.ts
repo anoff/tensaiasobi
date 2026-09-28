@@ -360,7 +360,7 @@ export const ja: TranslationSchema = {
   puzzleGame: {
     title: "まほうパズル! 🧩",
     subtitle: "ピースを もどして、えを かんせい させよう！",
-    help: "ピースを えらんで、その ばしょを タップしてね！",
+    help: "ピースを ばしょまで ドラッグしてね！タップでも おけるよ！",
     victory: "🎉 すごい！パズルが かんせい したよ！",
     preview: "おてほんを みる 🖼️",
     selectImage: "えを えらんでね：",

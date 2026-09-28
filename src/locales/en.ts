@@ -358,7 +358,7 @@ export const en = {
   puzzleGame: {
     title: "Magic Puzzle! 🧩",
     subtitle: "Put the pieces back to fix the picture!",
-    help: "Pick a piece, then tap its spot!",
+    help: "Drag a piece to its spot, or tap it and tap the spot!",
     victory: "🎉 Superb! You completed the puzzle!",
     preview: "Show Picture 🖼️",
     selectImage: "Choose a Picture:",
