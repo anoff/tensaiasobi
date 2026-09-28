@@ -361,7 +361,7 @@ export const ko: TranslationSchema = {
   puzzleGame: {
     title: "마법 퍼즐! 🧩",
     subtitle: "조각을 제자리에 놓아 그림을 완성하세요!",
-    help: "조각을 고르고 알맞은 자리를 눌러요!",
+    help: "조각을 알맞은 자리로 끌어다 놓거나, 조각과 자리를 차례로 눌러요!",
     victory: "🎉 멋져요! 퍼즐을 완성했어요!",
     preview: "그림 보기 🖼️",
     selectImage: "그림을 선택하세요:",

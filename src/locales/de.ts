@@ -361,7 +361,7 @@ export const de: TranslationSchema = {
   puzzleGame: {
     title: "Zauberpuzzle! 🧩",
     subtitle: "Lege die Teile zurück, um das Bild zu reparieren!",
-    help: "Wähle ein Teil und tippe auf seinen Platz!",
+    help: "Zieh ein Teil an seinen Platz oder tippe erst das Teil, dann den Platz!",
     victory: "🎉 Super! Du hast das Puzzle gelöst!",
     preview: "Bild anzeigen 🖼️",
     selectImage: "Wähle ein Bild aus:",
