@@ -18,12 +18,13 @@ import {
 } from '../utils/traceGeometry';
 import { useGameFX } from '../hooks/gameFXContext';
 import { SHAPES } from './shapeTraceData';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 export function ShapeTrace() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
   const [shapeIndex, setShapeIndex] = useState(0);
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [drawingPoints, setDrawingPoints] = useState<{ x: number; y: number }[]>([]);
   const [isWon, setIsWon] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);

@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import type { AgeBand } from '../types/game';
 import MathGame from './MathGame';
 import OddOneOut from './OddOneOut';
 import DoodlePad from './DoodlePad';
@@ -21,7 +22,7 @@ import SnorkelPearlFinder from './SnorkelPearlFinder';
 
 export type GameColor = 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'red';
 
-export type AgeBand = 'little' | 'big';
+export type { AgeBand };
 /** Learning games are the challenge focus; play games unlock after the star quota. */
 export type GameKind = 'learn' | 'play';
 

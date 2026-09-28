@@ -48,6 +48,21 @@ test.describe('Slice B parent controls', () => {
     await expect(page.getByTestId('launch-doodle')).toBeVisible();
   });
 
+  test('the age switch sets the starting level and locks the one that does not fit', async ({ page }) => {
+    await page.getByTestId('age-mode-little').click();
+    await page.getByTestId('launch-math').click();
+    await expect(page.getByTestId('difficulty-easy')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('difficulty-medium')).toBeEnabled();
+    await expect(page.getByTestId('difficulty-hard')).toBeDisabled();
+
+    await page.getByTestId('home-button').click();
+    await page.getByTestId('age-mode-big').click();
+    await page.getByTestId('launch-math').click();
+    await expect(page.getByTestId('difficulty-medium')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('difficulty-easy')).toBeDisabled();
+    await expect(page.getByTestId('difficulty-hard')).toBeEnabled();
+  });
+
   test('parent can add a custom coupon', async ({ page }) => {
     await openSettings(page);
     await page.getByTestId('custom-coupon-emoji').fill('🛝');

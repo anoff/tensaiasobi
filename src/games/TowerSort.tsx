@@ -6,6 +6,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { TOWER_SORT_THEMES } from './towerSortThemes';
 import { canDrop, generateTowers, isSolved, TOWER_SORT_CONFIG } from './towerSortLogic';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 /** The piece currently lifted out of a tube and parked in the hold slot. */
 interface Held {
@@ -40,7 +41,7 @@ const TOWER_COLORS = [
 export function TowerSort() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [themeIndex, setThemeIndex] = useState(0);
   const [towers, setTowers] = useState<string[][]>([]);
   const [held, setHeld] = useState<Held | null>(null);

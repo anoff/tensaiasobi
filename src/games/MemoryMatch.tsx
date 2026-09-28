@@ -6,6 +6,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 import { starMultiplier } from '../utils/difficulty';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 
 interface Card {
@@ -19,7 +20,7 @@ const ANIMAL_POOL = ['🦁', '🐯', '🐼', '🐨', '🦊', '🐰', '🐸', '�
 
 export function MemoryMatch() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
-  const [level, setLevel] = useState<GameDifficulty>('easy');
+  const [level, setLevel] = useAgeDifficulty();
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);

@@ -12,6 +12,7 @@ import {
   wagonSeats,
   type NumberTrainRound,
 } from './numberTrainLogic';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 const PASSENGER_EMOJIS = ['🐻', '🐰', '🐱', '🐶', '🦊', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🦆', '🦉', '🐴', '🦄'];
 
@@ -21,8 +22,8 @@ const DEPART_MS = 1500;
 export default function NumberTrain() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
-  const [round, setRound] = useState<NumberTrainRound>(() => generateNumberTrainRound('easy'));
+  const [difficulty, setDifficulty] = useAgeDifficulty();
+  const [round, setRound] = useState<NumberTrainRound>(() => generateNumberTrainRound(difficulty));
   const [roundNo, setRoundNo] = useState(0);
   const [closedStation, setClosedStation] = useState<number | null>(null);
   const [correctStation, setCorrectStation] = useState<number | null>(null);

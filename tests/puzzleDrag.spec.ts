@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { openGame } from './ageLevels';
 
 async function center(page: Page, selector: string) {
   const box = await page.locator(selector).boundingBox();
@@ -36,7 +37,7 @@ test.describe('Magic Puzzle drag and drop', () => {
   });
 
   test('hard is a 4×4 that can be solved by dragging, with tap-sized slots', async ({ page }) => {
-    await page.getByTestId('difficulty-hard').click();
+    await openGame(page, 'launch-puzzle', 'big', 'hard');
     await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(16);
     const slot = await page.locator('[data-puzzle-slot="0"]').boundingBox();
     expect(slot!.width).toBeGreaterThanOrEqual(64);
@@ -90,9 +91,7 @@ test.describe('Magic Puzzle drag with touch', () => {
   });
 
   test('a sideways swipe on a piece scrolls the tray instead of grabbing it', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('launch-puzzle').click();
-    await page.getByTestId('difficulty-hard').click();
+    await openGame(page, 'launch-puzzle', 'big', 'hard');
     await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(16);
     const tray = page.getByTestId('puzzle-tray-piece').first().locator('..');
     const from = await center(page, '[data-testid="puzzle-tray-piece"]:nth-child(3)');

@@ -6,6 +6,7 @@ import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 interface PearlColor {
   id: string;
@@ -152,7 +153,7 @@ function clamp(value: number, min: number, max: number) {
 export function SnorkelPearlFinder() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [pearls, setPearls] = useState<Pearl[]>([]);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [isWon, setIsWon] = useState(false);

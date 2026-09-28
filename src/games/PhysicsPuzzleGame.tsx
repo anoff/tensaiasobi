@@ -6,6 +6,7 @@ import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 interface Weight {
   id: number;
@@ -71,8 +72,8 @@ function buildWeights(diff: GameDifficulty): Weight[] {
 export function PhysicsPuzzleGame() {
   const { playPop, playSuccess, onStarEarned } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
-  const [weights, setWeights] = useState<Weight[]>(() => buildWeights('easy'));
+  const [difficulty, setDifficulty] = useAgeDifficulty();
+  const [weights, setWeights] = useState<Weight[]>(() => buildWeights(difficulty));
   const [showConfetti, setShowConfetti] = useState(false);
   const [solved, setSolved] = useState(false);
   const [selectedWeightId, setSelectedWeightId] = useState<number | null>(null);

@@ -23,7 +23,9 @@ test.describe('Snorkel Pearl Finder E2E Tests', () => {
     const launcher = page.getByTestId('launch-snorkel-pearl-finder');
     await launcher.click();
 
-    for (const diff of ['easy', 'medium', 'hard'] as const) {
+    // Kita-only game: hard stays locked.
+    await expect(page.getByTestId('difficulty-hard')).toBeDisabled();
+    for (const diff of ['easy', 'medium'] as const) {
       await page.getByTestId(`difficulty-${diff}`).click();
 
       const pearls = page.getByTestId('snorkel-pearl');

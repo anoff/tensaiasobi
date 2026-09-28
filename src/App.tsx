@@ -186,6 +186,7 @@ function AppContent() {
             playError,
             onStarEarned: handleStarEarned,
             challengeMode: challengeFocusActive,
+            ageBand,
           }}
         >
           <Game key={language} />

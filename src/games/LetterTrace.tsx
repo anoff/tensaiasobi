@@ -26,6 +26,7 @@ import {
   COMPLETION_THRESHOLD,
   type LetterLevel,
 } from './letterTraceData';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 export function LetterTrace() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
@@ -33,7 +34,7 @@ export function LetterTrace() {
   const levels = LEVELS_BY_LANGUAGE[language];
   const [level, setLevel] = useState<LetterLevel>(levels[0]);
   const [letterIndex, setLetterIndex] = useState(0);
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [completedStrokes, setCompletedStrokes] = useState<Point[][]>([]);
   const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
   const [isWon, setIsWon] = useState(false);

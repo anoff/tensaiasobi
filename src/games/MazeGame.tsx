@@ -10,6 +10,7 @@ import { useCanvasLoop } from '../hooks/useCanvasLoop';
 import { spawnParticles, drawParticles, type Particle } from '../utils/particles';
 import type { GameDifficulty } from '../types/game';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 interface Cell {
   col: number;
@@ -104,7 +105,7 @@ const THEMES: Theme[] = [
 export function MazeGame() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const { t } = useTranslation();
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
+  const [difficulty, setDifficulty] = useAgeDifficulty();
   const [themeIndex, setThemeIndex] = useState(0);
   const [grid, setGrid] = useState<Cell[][]>([]);
   const activePointerCoordsRef = useRef<{ x: number; y: number } | null>(null);

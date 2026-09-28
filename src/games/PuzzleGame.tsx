@@ -11,6 +11,7 @@ import {
   generateInitialState,
   type EdgeProfile,
 } from './puzzleLogic';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 interface JigsawPieceProps {
   pieceId: number;
@@ -151,7 +152,7 @@ export function JigsawPiece({
 
 export function PuzzleGame() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
-  const [level, setLevel] = useState<GameDifficulty>('easy');
+  const [level, setLevel] = useAgeDifficulty();
   const [selectedImage, setSelectedImage] = useState<PuzzleImage>(PUZZLE_IMAGES[0]);
 
   // Board contains pieceId or null (empty cell)

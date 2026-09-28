@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { ALL_LEVELS, openGame } from './ageLevels';
 
 test.describe('Number Train E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -16,8 +17,8 @@ test.describe('Number Train E2E Tests', () => {
   });
 
   test('Verify stations are at least 96px, correct count per difficulty, and one wagon only', async ({ page }) => {
-    for (const diff of ['easy', 'medium', 'hard'] as const) {
-      await page.getByTestId(`difficulty-${diff}`).click();
+    for (const [band, diff] of ALL_LEVELS) {
+      await openGame(page, 'launch-number-train', band, diff);
 
       const stations = page.getByTestId('number-train-station');
       await expect(stations).toHaveCount(diff === 'easy' ? 3 : 4);
@@ -63,7 +64,7 @@ test.describe('Number Train E2E Tests', () => {
   });
 
   test('hard: a wrong station brings a new round instead of a retry', async ({ page }) => {
-    await page.getByTestId('difficulty-hard').click();
+    await openGame(page, 'launch-number-train', 'big', 'hard');
     const stage = page.getByTestId('number-train-stage');
     await expect(page.getByTestId('number-train-station')).toHaveCount(4);
     const round = await stage.getAttribute('data-round');
