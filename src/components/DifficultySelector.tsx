@@ -7,6 +7,8 @@ interface DifficultySelectorProps {
   onChange: (value: GameDifficulty) => void;
   disabled?: boolean;
   className?: string;
+  /** `paper` = ink-on-paper track that sits on a NotebookSheet (school games). */
+  variant?: 'candy' | 'paper';
 }
 
 const STARS: Record<GameDifficulty, string> = {
@@ -21,11 +23,19 @@ export function DifficultySelector({
   onChange,
   disabled = false,
   className = '',
+  variant = 'candy',
 }: DifficultySelectorProps) {
+  const paper = variant === 'paper';
+  const idleClass = paper
+    ? 'bg-transparent border-2 border-transparent opacity-45 hover:opacity-70 disabled:opacity-30'
+    : 'border-transparent opacity-60 hover:opacity-100 disabled:opacity-40';
+
   return (
     <div
-      className={`w-full flex justify-between bg-[#fff8ec] p-1.5 rounded-2xl border-[3px] gap-1.5 select-none ${className}`}
-      style={{ borderColor: INK, boxShadow: hardShadow(3, 4) }}
+      className={`w-full flex justify-between p-1.5 rounded-2xl gap-1.5 select-none ${
+        paper ? 'bg-paper border-2 border-paper-edge' : 'bg-[#fff8ec] border-[3px]'
+      } ${className}`}
+      style={paper ? undefined : { borderColor: INK, boxShadow: hardShadow(3, 4) }}
     >
       {options.map((opt) => {
         const isActive = selected === opt;
@@ -40,9 +50,9 @@ export function DifficultySelector({
             className={`
               flex-1 py-2.5 text-sm font-black rounded-xl border-2 transition-all duration-75 outline-none cursor-pointer select-none
               focus-visible:ring-4 focus-visible:ring-amber-400/70
-              ${isActive ? '' : 'border-transparent opacity-60 hover:opacity-100 disabled:opacity-40'}
+              ${isActive ? (paper ? 'bg-white text-ink border-ink/70 shadow-sm' : '') : idleClass}
             `}
-            style={isActive ? { backgroundColor: BUTTER, borderColor: INK, boxShadow: hardShadow(2, 2) } : undefined}
+            style={isActive && !paper ? { backgroundColor: BUTTER, borderColor: INK, boxShadow: hardShadow(2, 2) } : undefined}
           >
             {STARS[opt]}
           </button>

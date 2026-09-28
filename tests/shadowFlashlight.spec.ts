@@ -19,4 +19,22 @@ test.describe('Shadow Flashlight difficulty', () => {
     expect(easyScale).toContain('0.72');
     expect(hardScale).toContain('1.8');
   });
+
+  test('hard: a wrong pick brings a new shadow without the victory screen', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('launch-shadow').click();
+    await page.getByTestId('difficulty-hard').click();
+    const stage = page.getByTestId('shadow-stage');
+    await expect(page.getByTestId('shadow-choice')).toHaveCount(6);
+    const round = await stage.getAttribute('data-round');
+    const target = await stage.getAttribute('data-target');
+
+    const choices = page.getByTestId('shadow-choice');
+    const emojis = await choices.evaluateAll((els) => els.map((el) => (el.textContent ?? '').trim()));
+    await choices.nth(emojis.findIndex((e) => e !== target)).click();
+
+    await expect(page.getByTestId('shadow-play-again')).toHaveCount(0);
+    await expect(stage).not.toHaveAttribute('data-round', round!);
+    await expect(choices.first()).toBeEnabled();
+  });
 });

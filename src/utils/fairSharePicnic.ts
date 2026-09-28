@@ -54,12 +54,12 @@ export function generateRound(difficulty: GameDifficulty): FairShareRound {
     return { friends, perFriend, hasLeftover: false, leftoverCount: 0, totalSnacks: friends * perFriend, snackEmoji };
   }
 
-  // Hard: share up to 20 snacks equally between three or four friends,
-  // optionally with one explicitly labeled leftover basket.
-  const friends = randomInt(3, 4);
-  const hasLeftover = Math.random() < 0.4;
+  // Hard: share up to 18 snacks between three friends (never a fourth plate —
+  // it overflows a phone), often with a leftover side pocket.
+  const friends = 3;
+  const hasLeftover = Math.random() < 0.5;
   const leftoverCount = hasLeftover ? randomInt(1, friends - 1) : 0;
-  const maxPerFriend = Math.max(1, Math.floor((20 - leftoverCount) / friends));
+  const maxPerFriend = Math.max(1, Math.floor((18 - leftoverCount) / friends));
   const perFriend = randomInt(1, maxPerFriend);
   const totalSnacks = friends * perFriend + leftoverCount;
   return { friends, perFriend, hasLeftover, leftoverCount, totalSnacks, snackEmoji };

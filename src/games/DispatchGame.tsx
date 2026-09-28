@@ -29,18 +29,11 @@ const VEHICLE_CONFIG: Record<ServiceType, { emoji: string; stationEmoji: string;
   ambulance: { emoji: '🚑', stationEmoji: '🏥', eventEmoji: '🤕', color: 'green' },
 };
 
-function getGridSize(diff: GameDifficulty): number {
-  switch (diff) {
-    case 'easy':
-      return 5;
-    case 'medium':
-      return 7;
-    case 'hard':
-      return 9;
-    default:
-      return 7;
-  }
-}
+/**
+ * The city stays 5×5 on every tier so each house stays tap-sized; harder
+ * tiers raise spawn pressure (faster, more concurrent, shorter timers).
+ */
+const GRID_SIZE = 5;
 
 function getDifficultySettings(diff: GameDifficulty) {
   switch (diff) {
@@ -49,7 +42,7 @@ function getDifficultySettings(diff: GameDifficulty) {
     case 'medium':
       return { spawnInterval: 4500, maxEvents: 2, eventMaxAge: 13000 };
     case 'hard':
-      return { spawnInterval: 3500, maxEvents: 4, eventMaxAge: 10000 };
+      return { spawnInterval: 3000, maxEvents: 3, eventMaxAge: 10000 };
     default:
       return { spawnInterval: 4500, maxEvents: 1, eventMaxAge: 13000 };
   }
@@ -108,11 +101,10 @@ export function DispatchGame() {
   const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const gameLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const gridSize = getGridSize(difficulty);
   const settings = getDifficultySettings(difficulty);
 
   const initGame = useCallback(() => {
-    const newGrid = generateCity(gridSize);
+    const newGrid = generateCity(GRID_SIZE);
     setGrid(newGrid);
     setEvents([]);
     setActiveVehicle(null);
@@ -121,7 +113,7 @@ export function DispatchGame() {
     setShowConfetti(false);
     setShakeEventId(null);
     eventIdRef.current = 0;
-  }, [gridSize]);
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -301,7 +293,7 @@ export function DispatchGame() {
           {/* City grid */}
           <div
             className="grid gap-1 w-full rounded-2xl p-2 bg-slate-100/70 shadow-inner"
-            style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
+            style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)` }}
           >
             {grid.map((row, ri) =>
               row.map((cell, ci) => {
@@ -312,11 +304,13 @@ export function DispatchGame() {
                   <button
                     key={`${ri}-${ci}`}
                     type="button"
+                    data-testid="dispatch-cell"
                     onClick={() => event && handleEventClick(event)}
                     className={`
-                      relative aspect-square flex items-center justify-center rounded-xl text-xl sm:text-2xl
+                      relative aspect-square flex items-center justify-center rounded-xl text-3xl
                       transition-all duration-75 outline-none
-                      bg-emerald-50 border-2 border-emerald-100
+                      ${event ? 'bg-rose-50 border-2 border-rose-300' : 'bg-emerald-50 border-2 border-emerald-100'}
+                      ${event && event.id === oldestEvent?.id ? 'ring-4 ring-candy-orange' : ''}
                       ${event ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
                       ${event && shakeEventId === event.id ? 'animate-shake' : ''}
                     `}
@@ -329,9 +323,7 @@ export function DispatchGame() {
                     )}
                     {event && !isSolving && (
                       <span
-                        className={`absolute -top-1 -right-1 text-lg sm:text-xl drop-shadow-sm ${
-                          event.id === oldestEvent?.id ? 'animate-bounce' : 'animate-pulse'
-                        }`}
+                        className="absolute -top-1 -right-1 text-2xl drop-shadow-sm animate-pop-in"
                       >
                         {VEHICLE_CONFIG[event.type].eventEmoji}
                       </span>

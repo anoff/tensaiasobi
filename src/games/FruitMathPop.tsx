@@ -1,58 +1,63 @@
-import { useCallback, useEffect, useState } from 'react';
-import AnswerBubble from '../components/AnswerBubble';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import DifficultySelector from '../components/DifficultySelector';
 import GameConfetti from '../components/GameConfetti';
+import { NotebookChoice, NotebookOperator, NotebookSheet, NotebookTally } from '../components/Notebook';
 import { useTranslation } from '../hooks/useTranslation';
-import { TOWER_SORT_THEMES } from './towerSortThemes';
+import { TOWER_SORT_THEMES, type TowerSortTheme } from './towerSortThemes';
 import type { GameDifficulty } from '../types/game';
 import { generateFruitMathRound } from './fruitMathPopLogic';
 import { useGameFX } from '../hooks/gameFXContext';
+import { wrongMeansNewRound } from '../utils/difficulty';
 
 const STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
 
-type Phase = 'animating' | 'hiding' | 'choices' | 'success';
+/** The fruit pops in before the answer lines appear. */
+const WATCH_MS = 600;
+
+type Phase = 'watching' | 'choices' | 'success';
 
 export default function FruitMathPop() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
   const [themeIndex, setThemeIndex] = useState(1);
   const [round, setRound] = useState(() => generateFruitMathRound('easy', TOWER_SORT_THEMES[1]));
-  const [phase, setPhase] = useState<Phase>('animating');
+  const [roundNo, setRoundNo] = useState(0);
+  const [phase, setPhase] = useState<Phase>('watching');
+  // Dot tallies are a counting crutch: always on for easy; on medium they
+  // appear only after a miss, so the child has to count the fruit first.
+  const [tallyShown, setTallyShown] = useState(true);
   const [selected, setSelected] = useState<number | null>(null);
   const [wrongChoice, setWrongChoice] = useState<number | null>(null);
+  const timers = useRef<number[]>([]);
   const theme = TOWER_SORT_THEMES[themeIndex];
 
-  const initRound = useCallback(() => {
-    setRound(generateFruitMathRound(difficulty, theme));
-    setPhase('animating');
+  useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
+
+  const later = (fn: () => void, ms: number) => {
+    timers.current.push(window.setTimeout(fn, ms));
+  };
+
+  const startRound = useCallback((value: GameDifficulty, nextTheme: TowerSortTheme) => {
+    timers.current.forEach(window.clearTimeout);
+    timers.current = [];
+    setRound(generateFruitMathRound(value, nextTheme));
+    setRoundNo((n) => n + 1);
+    setPhase('watching');
+    setTallyShown(value === 'easy');
     setSelected(null);
     setWrongChoice(null);
-  }, [difficulty, theme]);
+  }, []);
 
   useEffect(() => {
-    let hidingTimer: number | undefined;
-    const animationTimer = window.setTimeout(() => {
-      if (difficulty === 'hard') {
-        setPhase('hiding');
-        hidingTimer = window.setTimeout(() => setPhase('choices'), 450);
-      } else {
-        setPhase('choices');
-      }
-    }, 850);
-    return () => {
-      window.clearTimeout(animationTimer);
-      if (hidingTimer !== undefined) window.clearTimeout(hidingTimer);
-    };
-  }, [round, difficulty]);
+    const watchTimer = window.setTimeout(() => setPhase('choices'), WATCH_MS);
+    return () => window.clearTimeout(watchTimer);
+  }, [round]);
 
   const changeDifficulty = (value: GameDifficulty) => {
     playPop();
     setDifficulty(value);
-    setRound(generateFruitMathRound(value, theme));
-    setPhase('animating');
-    setSelected(null);
-    setWrongChoice(null);
+    startRound(value, theme);
   };
 
   const handleChoice = (choice: number) => {
@@ -62,28 +67,40 @@ export default function FruitMathPop() {
       setPhase('success');
       playSuccess();
       onStarEarned?.(STARS[difficulty]);
-      window.setTimeout(initRound, 950);
+      later(() => startRound(difficulty, theme), 1200);
     } else {
       playError();
       setWrongChoice(choice);
-      window.setTimeout(() => setWrongChoice(null), 450);
-      window.setTimeout(() => setSelected(null), 450);
+      if (wrongMeansNewRound(difficulty, challengeMode)) {
+        // Hard: no smashing through the answers — a miss brings a new sum.
+        later(() => startRound(difficulty, theme), 900);
+      } else {
+        setTallyShown(true);
+        later(() => {
+          setWrongChoice(null);
+          setSelected(null);
+        }, 600);
+      }
     }
   };
 
   const changeTheme = () => {
     playPop();
-    const nextTheme = TOWER_SORT_THEMES[(themeIndex + 1) % TOWER_SORT_THEMES.length];
-    setThemeIndex((index) => (index + 1) % TOWER_SORT_THEMES.length);
-    setRound(generateFruitMathRound(difficulty, nextTheme));
-    setPhase('animating');
-    setSelected(null);
-    setWrongChoice(null);
+    const nextIndex = (themeIndex + 1) % TOWER_SORT_THEMES.length;
+    setThemeIndex(nextIndex);
+    startRound(difficulty, TOWER_SORT_THEMES[nextIndex]);
   };
 
-  const group = (count: number) => Array.from({ length: count }, (_, index) => (
-    <span key={index}>{round.emoji}</span>
-  ));
+  // Up to 10 fruit per group: a 3-wide grid keeps both groups side by side on a phone.
+  const group = (count: number, leaving: boolean) => (
+    <div className={`grid gap-1 text-3xl sm:text-4xl leading-none ${count > 2 ? 'grid-cols-3' : count === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+      {Array.from({ length: count }, (_, index) => (
+        <span key={index} className={leaving ? 'opacity-40 grayscale-[40%]' : ''}>{round.emoji}</span>
+      ))}
+    </div>
+  );
+
+  const showChoices = phase === 'choices' || phase === 'success';
 
   return (
     <div className={`flex-1 flex flex-col items-center gap-3 p-2 w-full max-w-lg mx-auto select-none bg-gradient-to-b ${theme.bgGradient}`}>
@@ -108,33 +125,40 @@ export default function FruitMathPop() {
         <h2 className="text-3xl font-black text-slate-800">{t.fruitMathPop.title}</h2>
         <p className="text-sm font-extrabold text-slate-500">{t.fruitMathPop.subtitle}</p>
       </div>
-      <div data-testid="fruit-math-pop-tray" data-operation={round.operation} data-result={round.result} className="flex-1 w-full min-h-[270px] flex flex-col items-center justify-center gap-6 rounded-[2.5rem] bg-white/60 border-8 border-white/80 shadow-inner">
-        <div className="flex items-center justify-center gap-3 text-4xl sm:text-5xl font-black">
-          <div data-testid="fruit-math-pop-left" className="flex flex-wrap justify-center gap-1 animate-bounce">{group(round.left)}</div>
-          <span aria-hidden="true" className="animate-pulse">{round.operation}</span>
-          <div data-testid="fruit-math-pop-right" className={`flex flex-wrap justify-center gap-1 ${round.operation === '+' ? 'animate-pulse' : 'animate-shake'}`}>{group(round.right)}</div>
+      <NotebookSheet className="flex-1 flex flex-col gap-3 p-4">
+        <div
+          data-testid="fruit-math-pop-tray"
+          data-operation={round.operation}
+          data-result={round.result}
+          data-round={roundNo}
+          className="relative flex-1 min-h-[120px] flex items-center justify-center"
+        >
+          <div key={roundNo} className="flex items-center justify-center gap-3 animate-pop-in">
+            <div data-testid="fruit-math-pop-left">{group(round.left, false)}</div>
+            <NotebookOperator op={round.operation} />
+            <div data-testid="fruit-math-pop-right">{group(round.right, round.operation === '-')}</div>
+          </div>
         </div>
-      </div>
-      {phase === 'choices' || phase === 'success' ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full pb-2">
-          {round.choices.map((choice) => (
-            <AnswerBubble
-              key={choice}
-              testId="fruit-math-pop-answer"
-              dataAttrs={{ 'data-quantity': choice.toString() }}
-              selected={selected === choice}
-              correct={selected === choice ? choice === round.result : null}
-              shake={wrongChoice === choice}
-              disabled={phase === 'success'}
-              onClick={() => handleChoice(choice)}
-            >
-              <span className="flex flex-wrap justify-center gap-1 p-3 text-3xl">{Array.from({ length: choice }, (_, index) => <span key={index}>{round.emoji}</span>)}</span>
-            </AnswerBubble>
-          ))}
+        <div className="w-full flex flex-col justify-center gap-1.5" style={{ minHeight: `${round.choices.length * 78}px` }}>
+          {showChoices ? (
+            round.choices.map((choice) => (
+              <NotebookChoice
+                key={choice}
+                testId="fruit-math-pop-answer"
+                dataAttrs={{ 'data-quantity': choice.toString() }}
+                state={selected === choice && choice === round.result ? 'correct' : wrongChoice === choice ? 'wrong' : 'idle'}
+                disabled={phase === 'success'}
+                onClick={() => handleChoice(choice)}
+                aside={tallyShown ? <NotebookTally count={choice} /> : undefined}
+              >
+                {choice}
+              </NotebookChoice>
+            ))
+          ) : (
+            <p className="text-center font-black text-ink/50">{t.fruitMathPop.watch}</p>
+          )}
         </div>
-      ) : (
-        <p className="font-black text-slate-500 pb-4">{t.fruitMathPop.watch}</p>
-      )}
+      </NotebookSheet>
     </div>
   );
 }

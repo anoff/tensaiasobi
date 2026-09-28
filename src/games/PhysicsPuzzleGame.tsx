@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
+import DifficultySelector from '../components/DifficultySelector';
 import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { shuffle } from '../utils/shuffle';
@@ -49,7 +50,9 @@ function buildWeights(diff: GameDifficulty): Weight[] {
   );
   const [baseA, baseB] = shuffle(weightedPairs)[0] ?? [WEIGHT_EMOJIS[0], WEIGHT_EMOJIS[2]];
   const [leftBase, rightBase] = Math.random() < 0.5 ? [baseA, baseB] : [baseB, baseA];
-  const trayPool = shuffle(WEIGHT_EMOJIS);
+  // Guarantee a solution: one tray weight exactly makes up the difference.
+  const bridge = shuffle(WEIGHT_EMOJIS.filter((w) => w.mass === settings.targetDifference))[0];
+  const trayPool = [bridge, ...shuffle(WEIGHT_EMOJIS.filter((w) => w !== bridge))];
 
   let nextId = 1;
   newWeights.push({ id: nextId++, emoji: leftBase.emoji, mass: leftBase.mass, side: 'left' });
@@ -61,14 +64,15 @@ function buildWeights(diff: GameDifficulty): Weight[] {
     newWeights.push({ id: nextId++, emoji: item.emoji, mass: item.mass, side: 'tray' });
   }
 
-  return newWeights;
+  // Keep the fixed base weights first, shuffle the tray so the bridge isn't always first.
+  return [...newWeights.slice(0, 2), ...shuffle(newWeights.slice(2))];
 }
 
 export function PhysicsPuzzleGame() {
   const { playPop, playSuccess, onStarEarned } = useGameFX();
   const { t } = useTranslation();
-  const difficulty: GameDifficulty = 'hard';
-  const [weights, setWeights] = useState<Weight[]>(() => buildWeights(difficulty));
+  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
+  const [weights, setWeights] = useState<Weight[]>(() => buildWeights('easy'));
   const [showConfetti, setShowConfetti] = useState(false);
   const [solved, setSolved] = useState(false);
   const [selectedWeightId, setSelectedWeightId] = useState<number | null>(null);
@@ -152,10 +156,17 @@ export function PhysicsPuzzleGame() {
         <p className="text-slate-500 font-extrabold text-xs">{t.physicsGame.subtitle}</p>
       </div>
 
+      <DifficultySelector
+        selected={difficulty}
+        options={['easy', 'medium', 'hard']}
+        onChange={(diff) => { playPop(); setDifficulty(diff); }}
+        className="mb-2"
+      />
+
       {/* Seesaw */}
-      <div className="relative w-full flex-1 flex flex-col items-center justify-center min-h-[240px]">
+      <div className="relative w-full flex-1 flex flex-col items-center justify-center min-h-[190px]">
         {/* Pivot triangle */}
-        <div className="absolute bottom-8 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[36px] border-b-amber-700" />
+        <div className="absolute bottom-4 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[36px] border-b-amber-700" />
 
         {/* Beam */}
         <div
@@ -167,7 +178,7 @@ export function PhysicsPuzzleGame() {
             type="button"
             data-testid="physics-pan-left"
             onClick={() => handleSideClick('left')}
-            className="absolute -left-2 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-amber-100 border-4 border-amber-300 grid grid-cols-3 items-center justify-items-center gap-0.5 p-2 hover:bg-amber-50 transition-colors"
+            className="absolute -left-2 top-1/2 -translate-y-1/2 w-28 h-28 rounded-full bg-amber-100 border-4 border-amber-300 grid grid-cols-3 content-center items-center justify-items-center gap-0.5 p-3 hover:bg-amber-50 transition-colors"
           >
             {leftWeights.map((w) => (
               <span key={w.id} onClick={(e) => { e.stopPropagation(); handleWeightClick(w); }} className="text-2xl cursor-pointer">
@@ -181,7 +192,7 @@ export function PhysicsPuzzleGame() {
             type="button"
             data-testid="physics-pan-right"
             onClick={() => handleSideClick('right')}
-            className="absolute -right-2 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-amber-100 border-4 border-amber-300 grid grid-cols-3 items-center justify-items-center gap-0.5 p-2 hover:bg-amber-50 transition-colors"
+            className="absolute -right-2 top-1/2 -translate-y-1/2 w-28 h-28 rounded-full bg-amber-100 border-4 border-amber-300 grid grid-cols-3 content-center items-center justify-items-center gap-0.5 p-3 hover:bg-amber-50 transition-colors"
           >
             {rightWeights.map((w) => (
               <span key={w.id} onClick={(e) => { e.stopPropagation(); handleWeightClick(w); }} className="text-2xl cursor-pointer">
@@ -197,23 +208,24 @@ export function PhysicsPuzzleGame() {
             <p className="text-lg font-black text-emerald-600">{t.physicsGame.victory}</p>
           </div>
         )}
+      </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex items-center justify-between px-2">
-          <div className="px-3 py-1 rounded-full bg-white border-2 border-slate-200 shadow-sm text-sm font-black text-slate-700">
-            <span data-testid="physics-left-mass">⬅️ {leftMass}</span>
-          </div>
-          <div className="px-3 py-1 rounded-full bg-white border-2 border-slate-200 shadow-sm text-sm font-black text-slate-700">
-            <span data-testid="physics-right-mass">➡️ {rightMass}</span>
-          </div>
+      {/* Mass readout sits below the seesaw so it never overlaps the tilted beam */}
+      <div className="w-11/12 flex items-center justify-between px-2 mb-3">
+        <div className="px-3 py-1 rounded-full bg-white border-2 border-slate-200 shadow-sm text-sm font-black text-slate-700">
+          <span data-testid="physics-left-mass">⬅️ {leftMass}</span>
+        </div>
+        <div className="px-3 py-1 rounded-full bg-white border-2 border-slate-200 shadow-sm text-sm font-black text-slate-700">
+          <span data-testid="physics-right-mass">➡️ {rightMass}</span>
         </div>
       </div>
 
       {/* Weight tray */}
-      <div className="w-full bg-slate-100 rounded-2xl p-3 mb-3">
+      <div className="w-full bg-slate-100 rounded-2xl p-2 mb-3">
         <p className="text-center text-xs font-black text-slate-400 mb-2 uppercase tracking-wider">
           {t.physicsGame.tray}
         </p>
-        <div className="flex flex-wrap justify-center gap-2 min-h-[48px]">
+        <div className="flex flex-wrap justify-center gap-1.5 min-h-[56px]">
           {trayWeights.map((w) => (
             <div key={w.id} className="flex flex-col items-center gap-1">
               {selectedWeightId === w.id && (
@@ -224,7 +236,7 @@ export function PhysicsPuzzleGame() {
                 data-testid="physics-tray-weight"
                 onClick={() => handleWeightClick(w)}
                 className={`
-                  w-12 h-12 text-2xl rounded-xl border-2 flex items-center justify-center
+                  w-14 h-14 text-3xl rounded-2xl border-2 flex items-center justify-center
                   transition-all duration-75
                   ${selectedWeightId === w.id
                     ? 'bg-yellow-100 border-yellow-400 scale-110 shadow-md'

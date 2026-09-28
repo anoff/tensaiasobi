@@ -160,6 +160,29 @@
     animation: emoji-pop 0.3s ease-out;
   }
 
+  /* One-shot entrance for a new round's content (never loops). */
+  .animate-pop-in {
+    animation: card-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* ── Tower Sort hold slot: piece lifts into the hand, then drops into a tube ── */
+  @keyframes lift-in {
+    0% { transform: translateY(24px) scale(0.8); opacity: 0.4; }
+    100% { transform: translateY(0) scale(1.1); opacity: 1; }
+  }
+  .animate-lift-in {
+    animation: lift-in 0.18s ease-out both;
+  }
+
+  @keyframes drop-in {
+    0% { transform: translateY(-48px); }
+    70% { transform: translateY(4px); }
+    100% { transform: translateY(0); }
+  }
+  .animate-drop-in {
+    animation: drop-in 0.22s ease-in both;
+  }
+
   /* ── KidButton Primary Variant Glow ── */
   @keyframes kid-btn-glow {
     0%, 100% { box-shadow: 0 0 8px 0 rgba(255,255,255,0.3); }
@@ -204,7 +227,7 @@
     0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
     100% { transform: translate(-50%, -180%) scale(1.2); opacity: 0; }
   }
-  .animate-sparkle {
+  .animate-sparkle-float {
     animation: sparkle-float 0.9s ease-out forwards;
   }
 
