@@ -167,7 +167,16 @@ export function PuzzleGame() {
 
   // Drag from the tray: pull a piece up and drop it on a slot. Tapping still works.
   const [drag, setDrag] = useState<{ trayIdx: number; x: number; y: number; size: number; overSlot: number | null } | null>(null);
-  const dragStartRef = useRef<{ trayIdx: number; x: number; y: number; pointerId: number } | null>(null);
+  const dragStartRef = useRef<{
+    trayIdx: number;
+    x: number;
+    y: number;
+    pointerId: number;
+    touch: boolean;
+    scrollLeft: number;
+    scrolled: boolean;
+  } | null>(null);
+  const trayRef = useRef<HTMLDivElement>(null);
   const suppressClickRef = useRef(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isSolved, setIsSolved] = useState(false);
@@ -282,15 +291,34 @@ export function PuzzleGame() {
     if (isSolved || showPreview || e.button !== 0) return;
     // Capture right away so a fast mouse still reports moves after leaving the piece.
     e.currentTarget.setPointerCapture(e.pointerId);
-    dragStartRef.current = { trayIdx: idx, x: e.clientX, y: e.clientY, pointerId: e.pointerId };
+    dragStartRef.current = {
+      trayIdx: idx,
+      x: e.clientX,
+      y: e.clientY,
+      pointerId: e.pointerId,
+      touch: e.pointerType !== 'mouse',
+      scrollLeft: trayRef.current?.scrollLeft ?? 0,
+      scrolled: false,
+    };
   };
 
   const handleTrayPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     const start = dragStartRef.current;
     if (!start || start.pointerId !== e.pointerId) return;
     if (!drag) {
-      // Small wiggles stay a tap.
-      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) < 8) return;
+      const tray = trayRef.current;
+      if (start.touch && tray) {
+        // A finger scrolls the tray sideways until it leaves the tray upward; then the piece comes loose.
+        if (e.clientY >= tray.getBoundingClientRect().top) {
+          const dx = e.clientX - start.x;
+          if (Math.abs(dx) >= 8) start.scrolled = true;
+          if (start.scrolled) tray.scrollLeft = start.scrollLeft - dx;
+          return;
+        }
+      } else if (Math.hypot(e.clientX - start.x, e.clientY - start.y) < 8) {
+        // Small wiggles stay a tap.
+        return;
+      }
       const slotEl = document.querySelector('[data-puzzle-slot]');
       const slotSize = slotEl?.getBoundingClientRect().width ?? 80;
       setSelectedTrayIdx(null);
@@ -310,7 +338,7 @@ export function PuzzleGame() {
     suppressClickRef.current = true;
     setTimeout(() => { suppressClickRef.current = false; }, 0);
     if (!drag) {
-      handleTrayPieceClick(start.trayIdx, true);
+      if (!start.scrolled) handleTrayPieceClick(start.trayIdx, true);
       return;
     }
     setDrag(null);
@@ -509,7 +537,7 @@ export function PuzzleGame() {
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
               {t.puzzleGame?.help || 'Select a piece and tap the board!'}
             </span>
-            <div className="w-full max-w-[350px] bg-slate-100/90 border-2 border-slate-200/80 rounded-3xl p-3 flex gap-4 overflow-x-auto min-h-[92px] shadow-inner items-center justify-start scrollbar-thin">
+            <div ref={trayRef} className="w-full max-w-[350px] bg-slate-100/90 border-2 border-slate-200/80 rounded-3xl p-3 flex gap-4 overflow-x-auto min-h-[92px] shadow-inner items-center justify-start scrollbar-thin">
               {isSyncing ? (
                 <div className="w-full text-center text-xs font-extrabold text-slate-400 py-4">
                   🔄 Loading...
@@ -528,8 +556,8 @@ export function PuzzleGame() {
                       key={pieceId}
                       data-testid="puzzle-tray-piece"
                       data-piece-id={pieceId}
-                      // pan-x keeps sideways swipes scrolling the tray; pulling up drags the piece.
-                      className={`w-16 h-16 flex-shrink-0 relative touch-pan-x ${isDragged ? 'opacity-30' : ''}`}
+                      // Touch is handled in the pointer handlers: sideways scrolls the tray, pulling up drags.
+                      className={`w-16 h-16 flex-shrink-0 relative touch-none ${isDragged ? 'opacity-30' : ''}`}
                       onPointerDown={(e) => handleTrayPointerDown(idx, e)}
                       onPointerMove={handleTrayPointerMove}
                       onPointerUp={handleTrayPointerUp}
