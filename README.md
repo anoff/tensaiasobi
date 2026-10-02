@@ -47,7 +47,7 @@ The home screen sorts games into four colour-coded shelves. The 🧸 Preschool /
 - **Tower Sort 🗼**: stack matching emojis. *(school)*
 
 **🎲 Just for fun** (chalk / pebble / coal). These unlock after a learn-first star goal.
-- **Doodle Pad 🎨**, **Trace ⭐** *(preschool)*, **Mazes 🗺️**, **Emoji Match ⚡**, **City Dispatch 🚒**
+- **Doodle Pad 🎨**, **Trace ⭐** *(preschool)*, **Mazes 🗺️**, **Emoji Match ⚡** (Time Attack or 2-player duel), **City Dispatch 🚒**
 - **My Town 🏘️**: spend stars on a 6×6 sandbox.
 - **Coupons 🎟️**: parent-approved real-world rewards.
 
