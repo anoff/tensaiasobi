@@ -38,6 +38,11 @@ export const fr: TranslationSchema = {
     shadowFlashlight: "Ombre",
     fairSharePicnic: "Pique-nique à partager",
     snorkelPearlFinder: "Chercheur de perles",
+    crocodileCompare: "Croco compare",
+    letterPairs: "Paires de lettres",
+    patternTrain: "Train des motifs",
+    syllableDrum: "Tambour syllabes",
+    missingLetter: "Lettre perdue",
     categories: {
       numbers: "Nombres",
       language: "Langage",
@@ -403,6 +408,36 @@ export const fr: TranslationSchema = {
     victory: "🎉 Trié !",
     moves: "coups",
     playAgain: "Rejouer",
+  },
+  crocodileCompare: {
+    title: "Croco compare 🐊",
+    subtitle: "Le crocodile mange toujours le plus grand !",
+    subtitleSymbols: "Quel signe va au milieu ?",
+    help: "Touche le côté qui en a le plus !",
+    helpSymbols: "Choisis <, = ou >. La bouche ouverte mange le plus grand.",
+  },
+  letterPairs: {
+    title: "Paires de lettres 🔠",
+    subtitleSame: "Trouve la même lettre !",
+    subtitlePartner: "Trouve sa lettre minuscule !",
+    subtitlePicture: "Quelle image commence par cette lettre ?",
+    help: "Touche la bonne bulle !",
+  },
+  patternTrain: {
+    title: "Train des motifs 🚃",
+    subtitle: "Quel wagon vient ensuite ?",
+    help: "Regarde le motif, puis touche le wagon qui manque !",
+  },
+  syllableDrum: {
+    title: "Tambour syllabes 🥁",
+    subtitle: "Dis le mot et tape une fois par syllabe !",
+    help: "Pa-pi-llon = 3 coups. Puis touche ✓",
+    check: "Fini",
+    drum: "Tambour",
+  },
+  missingLetter: {
+    title: "Lettre perdue ✍️",
+    subtitle: "Quelle lettre manque ?",
   },
   numberTrain: {
     title: "Train des Chiffres ! 🚂",

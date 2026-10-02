@@ -36,6 +36,11 @@ export const en = {
     shadowFlashlight: "Shadow",
     fairSharePicnic: "Fair Share Picnic",
     snorkelPearlFinder: "Pearl Finder",
+    crocodileCompare: "Croc Compare",
+    letterPairs: "Letter Pairs",
+    patternTrain: "Pattern Train",
+    syllableDrum: "Syllable Drum",
+    missingLetter: "Missing Letter",
     categories: {
       numbers: "Numbers",
       language: "Language",
@@ -401,6 +406,36 @@ export const en = {
     victory: "🎉 Sorted!",
     moves: "moves",
     playAgain: "Play Again",
+  },
+  crocodileCompare: {
+    title: "Croc Compare 🐊",
+    subtitle: "The crocodile always eats the bigger one!",
+    subtitleSymbols: "Which sign goes in the middle?",
+    help: "Tap the side with more!",
+    helpSymbols: "Pick <, = or >. The open mouth eats the bigger side.",
+  },
+  letterPairs: {
+    title: "Letter Pairs 🔠",
+    subtitleSame: "Find the same letter!",
+    subtitlePartner: "Find its partner letter!",
+    subtitlePicture: "Which picture starts with this letter?",
+    help: "Tap the matching bubble!",
+  },
+  patternTrain: {
+    title: "Pattern Train 🚃",
+    subtitle: "What wagon comes next?",
+    help: "Look at the pattern, then tap the missing wagon!",
+  },
+  syllableDrum: {
+    title: "Syllable Drum 🥁",
+    subtitle: "Say the word and drum once for every part!",
+    help: "Gi-raf-fe = 3 beats. Then tap ✓",
+    check: "Done",
+    drum: "Drum",
+  },
+  missingLetter: {
+    title: "Missing Letter ✍️",
+    subtitle: "Which letter is missing?",
   },
   numberTrain: {
     title: "Number Train! 🚂",

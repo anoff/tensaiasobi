@@ -38,6 +38,11 @@ export const ko: TranslationSchema = {
     shadowFlashlight: "그림자",
     fairSharePicnic: "공평한 소풍",
     snorkelPearlFinder: "진주 찾기",
+    crocodileCompare: "악어 비교",
+    letterPairs: "글자 짝꿍",
+    patternTrain: "규칙 기차",
+    syllableDrum: "음절 북",
+    missingLetter: "빠진 글자",
     categories: {
       numbers: "숫자",
       language: "말과 글",
@@ -403,6 +408,36 @@ export const ko: TranslationSchema = {
     victory: "🎉 정렬 완료!",
     moves: "이동",
     playAgain: "다시 하기",
+  },
+  crocodileCompare: {
+    title: "악어 비교 🐊",
+    subtitle: "악어는 언제나 더 큰 쪽을 먹어요!",
+    subtitleSymbols: "가운데에 들어갈 기호는 무엇일까요?",
+    help: "더 많은 쪽을 눌러요!",
+    helpSymbols: "<, =, > 중에서 골라요. 벌린 입이 더 큰 쪽을 먹어요.",
+  },
+  letterPairs: {
+    title: "글자 짝꿍 🔠",
+    subtitleSame: "똑같은 글자를 찾아요!",
+    subtitlePartner: "첫 자음을 찾아요!",
+    subtitlePicture: "이 글자로 시작하는 그림은?",
+    help: "맞는 방울을 눌러요!",
+  },
+  patternTrain: {
+    title: "규칙 기차 🚃",
+    subtitle: "다음에 올 칸은 무엇일까요?",
+    help: "규칙을 보고 빠진 칸을 눌러요!",
+  },
+  syllableDrum: {
+    title: "음절 북 🥁",
+    subtitle: "낱말을 말하면서 글자마다 북을 쳐요!",
+    help: "기-린 = 2번. 그다음 ✓ 를 눌러요",
+    check: "다 했어요",
+    drum: "북",
+  },
+  missingLetter: {
+    title: "빠진 글자 ✍️",
+    subtitle: "어떤 글자가 빠졌을까요?",
   },
   numberTrain: {
     title: "숫자 기차! 🚂",

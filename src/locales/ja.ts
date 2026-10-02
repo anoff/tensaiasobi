@@ -38,6 +38,11 @@ export const ja: TranslationSchema = {
     shadowFlashlight: "かげ",
     fairSharePicnic: "ピクニックわけっこ",
     snorkelPearlFinder: "しんじゅさがし",
+    crocodileCompare: "わにのくらべっこ",
+    letterPairs: "もじのペア",
+    patternTrain: "もようれっしゃ",
+    syllableDrum: "おとのたいこ",
+    missingLetter: "きえたもじ",
     categories: {
       numbers: "かず",
       language: "ことば",
@@ -403,6 +408,36 @@ export const ja: TranslationSchema = {
     victory: "🎉 そろったよ！",
     moves: "てすう",
     playAgain: "もういちどあそぶ",
+  },
+  crocodileCompare: {
+    title: "わにのくらべっこ 🐊",
+    subtitle: "わには いつも おおきいほうを たべるよ！",
+    subtitleSymbols: "まんなかに はいる きごうは どれ？",
+    help: "おおいほうを タップしてね！",
+    helpSymbols: "<、=、> から えらんでね。ひらいた くちが おおきいほう。",
+  },
+  letterPairs: {
+    title: "もじのペア 🔠",
+    subtitleSame: "おなじ もじを さがそう！",
+    subtitlePartner: "おなじ おとの カタカナを さがそう！",
+    subtitlePicture: "この もじで はじまる えは どれ？",
+    help: "あう バブルを タップしてね！",
+  },
+  patternTrain: {
+    title: "もようれっしゃ 🚃",
+    subtitle: "つぎに くる しゃりょうは どれ？",
+    help: "もようを みて、たりない しゃりょうを タップしてね！",
+  },
+  syllableDrum: {
+    title: "おとのたいこ 🥁",
+    subtitle: "ことばを いいながら おとの かずだけ たたこう！",
+    help: "き・り・ん = 3かい。それから ✓ を タップ",
+    check: "できた",
+    drum: "たいこ",
+  },
+  missingLetter: {
+    title: "きえたもじ ✍️",
+    subtitle: "どの もじが きえたかな？",
   },
   numberTrain: {
     title: "かずのれっしゃ！ 🚂",

@@ -18,6 +18,11 @@ import NumberTrain from './NumberTrain';
 import ShadowFlashlight from './ShadowFlashlight';
 import FairSharePicnic from './FairSharePicnic';
 import SnorkelPearlFinder from './SnorkelPearlFinder';
+import CrocodileCompare from './CrocodileCompare';
+import LetterPairs from './LetterPairs';
+import PatternTrain from './PatternTrain';
+import SyllableDrum from './SyllableDrum';
+import MissingLetter from './MissingLetter';
 
 export type { AgeBand };
 /** Learning games are the challenge focus; play games unlock after the star quota. */
@@ -50,7 +55,12 @@ export type GameLabelKey =
   | 'numberTrain'
   | 'shadowFlashlight'
   | 'fairSharePicnic'
-  | 'snorkelPearlFinder';
+  | 'snorkelPearlFinder'
+  | 'crocodileCompare'
+  | 'letterPairs'
+  | 'patternTrain'
+  | 'syllableDrum'
+  | 'missingLetter';
 
 export interface GameCatalogEntry {
   id: string;
@@ -68,15 +78,20 @@ export interface GameCatalogEntry {
 export const GAMES = [
   // Numbers
   { id: 'math', category: 'numbers', testid: 'launch-math', emoji: '🎈', labelKey: 'math', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['math_streak', 'math_highscore'], Component: MathGame },
+  { id: 'crocodileCompare', category: 'numbers', testid: 'launch-crocodile-compare', emoji: '🐊', labelKey: 'crocodileCompare', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: CrocodileCompare },
   { id: 'numberTrain', category: 'numbers', testid: 'launch-number-train', emoji: '🚂', labelKey: 'numberTrain', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: NumberTrain },
   { id: 'fairSharePicnic', category: 'numbers', testid: 'launch-fair-share-picnic', emoji: '🧺', labelKey: 'fairSharePicnic', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: FairSharePicnic },
   { id: 'physics', category: 'numbers', testid: 'launch-physics', emoji: '⚖️', labelKey: 'physics', ageBands: ['big'], kind: 'learn', storageKeys: [], Component: PhysicsPuzzleGame },
   // Language
+  { id: 'letterPairs', category: 'language', testid: 'launch-letter-pairs', emoji: '🔠', labelKey: 'letterPairs', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: LetterPairs },
   { id: 'letterTrace', category: 'language', testid: 'launch-letterTrace', emoji: '✏️', labelKey: 'letterTrace', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: LetterTrace },
+  { id: 'syllableDrum', category: 'language', testid: 'launch-syllable-drum', emoji: '🥁', labelKey: 'syllableDrum', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: SyllableDrum },
   { id: 'anlaut', category: 'language', testid: 'launch-anlaut', emoji: '🔤', labelKey: 'anlaut', ageBands: ['big'], kind: 'learn', storageKeys: ['anlaut_streak', 'anlaut_highscore'], Component: AnlautGame },
+  { id: 'missingLetter', category: 'language', testid: 'launch-missing-letter', emoji: '✍️', labelKey: 'missingLetter', ageBands: ['big'], kind: 'learn', storageKeys: [], Component: MissingLetter },
   { id: 'shiritori', category: 'language', testid: 'launch-shiritori', emoji: '🔗', labelKey: 'shiritori', ageBands: ['big'], kind: 'learn', storageKeys: ['shiritori_streak', 'shiritori_highscore'], Component: Shiritori },
   // Logic
   { id: 'odd', category: 'logic', testid: 'launch-odd', emoji: '🧐', labelKey: 'odd', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['odd_streak', 'odd_highscore'], Component: OddOneOut },
+  { id: 'patternTrain', category: 'logic', testid: 'launch-pattern-train', emoji: '🚃', labelKey: 'patternTrain', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: PatternTrain },
   { id: 'memory', category: 'logic', testid: 'launch-memory', emoji: '🐯', labelKey: 'match', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: MemoryMatch },
   { id: 'shadowFlashlight', category: 'logic', testid: 'launch-shadow', emoji: '🔦', labelKey: 'shadowFlashlight', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: ShadowFlashlight },
   { id: 'snorkelPearlFinder', category: 'logic', testid: 'launch-snorkel-pearl-finder', emoji: '🤿', labelKey: 'snorkelPearlFinder', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: SnorkelPearlFinder },

@@ -24,17 +24,22 @@ The home screen sorts games into four colour-coded shelves. The 🧸 Preschool /
 
 **🔢 Numbers** (butter)
 - **Math Pop 🎈**: add and subtract on a notebook sheet. Easy has fruit pictures and works within 5, medium within 10, hard within 20.
+- **Croc Compare 🐊**: the crocodile eats the bigger side. Fruit groups, then numbers, then <, =, > on hard.
 - **Number Train 🚂**: count the passengers, then tap the right station.
 - **Fair Share Picnic 🧺**: share snacks equally (early division).
 - **Balance ⚖️**: level the seesaw. Weights show dots on easy and medium. *(school)*
 
 **🔤 Language** (coral)
+- **Letter Pairs 🔠**: find the same letter, then its partner (B → b, あ → ア, 가 → ㄱ), then a picture that starts with it.
 - **Letters ✏️**: trace letters (Latin, Hiragana, Katakana, Hangul).
+- **Syllable Drum 🥁**: drum once per syllable (Gi-raf-fe = 3). Japanese counts morae.
 - **First Sound 🔤**: find the starting letter. *(school)*
+- **Missing Letter ✍️**: fill the gap in M_USE. *(school)*
 - **Word Chain 🔗**: shiritori, matching the last letter to the next word's first letter. Easy and medium show the words. *(school)*
 
 **🧠 Logic** (leaf)
 - **Odd One 🧐**: pick the one that doesn't belong.
+- **Pattern Train 🚃**: what wagon comes next? AB, then AAB/ABC, then a gap in the middle on hard.
 - **Match 🐯**: memory pairs.
 - **Shadow 🔦**: identify a silhouette with a flashlight. *(preschool)*
 - **Pearl Finder 🤿**: sort pearls into matching clams. *(preschool)*

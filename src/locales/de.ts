@@ -38,6 +38,11 @@ export const de: TranslationSchema = {
     shadowFlashlight: "Schatten",
     fairSharePicnic: "Picknick teilen",
     snorkelPearlFinder: "Perlen-Taucher",
+    crocodileCompare: "Kroko-Vergleich",
+    letterPairs: "Buchstabenpaare",
+    patternTrain: "Musterzug",
+    syllableDrum: "Silbentrommel",
+    missingLetter: "Lückenwort",
     categories: {
       numbers: "Zahlen",
       language: "Sprache",
@@ -403,6 +408,36 @@ export const de: TranslationSchema = {
     victory: "🎉 Sortiert!",
     moves: "Züge",
     playAgain: "Nochmal spielen",
+  },
+  crocodileCompare: {
+    title: "Kroko-Vergleich 🐊",
+    subtitle: "Das Krokodil frisst immer die größere Seite!",
+    subtitleSymbols: "Welches Zeichen gehört in die Mitte?",
+    help: "Tippe auf die Seite mit mehr!",
+    helpSymbols: "Wähle <, = oder >. Das offene Maul frisst die größere Seite.",
+  },
+  letterPairs: {
+    title: "Buchstabenpaare 🔠",
+    subtitleSame: "Finde den gleichen Buchstaben!",
+    subtitlePartner: "Finde den kleinen Partner!",
+    subtitlePicture: "Welches Bild fängt mit diesem Buchstaben an?",
+    help: "Tippe auf die passende Blase!",
+  },
+  patternTrain: {
+    title: "Musterzug 🚃",
+    subtitle: "Welcher Wagen kommt als Nächstes?",
+    help: "Schau dir das Muster an und tippe auf den fehlenden Wagen!",
+  },
+  syllableDrum: {
+    title: "Silbentrommel 🥁",
+    subtitle: "Sprich das Wort und trommle für jede Silbe!",
+    help: "Gi-raf-fe = 3 Schläge. Dann tippe auf ✓",
+    check: "Fertig",
+    drum: "Trommel",
+  },
+  missingLetter: {
+    title: "Lückenwort ✍️",
+    subtitle: "Welcher Buchstabe fehlt?",
   },
   numberTrain: {
     title: "Zahlenzug! 🚂",

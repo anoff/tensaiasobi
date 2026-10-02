@@ -44,33 +44,30 @@ games use chalk, pebble and coal (white, grey, black). Only the fun shelf is
 | **Letters** | Preschool had no language game | Now available to preschool. Easy has the widest tracing tolerance. |
 | **City Dispatch** | Timed arcade game listed as "learn" and school-only, although police / fire / ambulance suits age 4 too | Moved to Just for fun and opened to preschool. Easy is 1 event with 24 s. |
 
-## Suggested new games
+## New games (added after the review)
 
-Ordered by how much they would fill a gap. The biggest gap is **preschool language**:
-it only has Letters.
+These five fill the gaps the review found. After adding them, preschool has at least
+two games in every learning category, and school has three or more.
 
-### 🔤 Language
-1. **Letter Pairs** (preschool): match pairs of `A` ↔ `a`, or `A` ↔ 🍎. Reuses the Match grid and teaches letter shapes before First Sound.
-2. **Syllable Drum** (preschool/school): a picture appears and the child taps the drum once per syllable (🦒 *Gi-raf-fe* = 3). Works without sound, which keeps it restaurant-safe.
-3. **Missing Letter** (school): `M_USE` with three letter lines on the notebook sheet. It's the natural step after First Sound.
-4. **Word Builder** (school): drag 3–4 letter tiles to spell a short word under a picture.
+| Game | Category | Who | Fills | Levels |
+|---|---|---|---|---|
+| **Croc Compare 🐊** | Numbers | both | more / less | fruit groups up to 5 → numbers up to 20 (dots appear after a miss) → <, =, > with numbers up to 100 and small sums |
+| **Letter Pairs 🔠** | Language | both | letter recognition | same letter → partner form (B→b, あ→ア, 가→ㄱ) → picture that starts with it |
+| **Syllable Drum 🥁** | Language | both | hearing syllables | 1–2 → 1–3 → 2–4 syllables; the word shows from medium. Japanese counts morae, Korean counts blocks |
+| **Missing Letter ✍️** | Language | school | spelling | first letter → any letter in short words → longer words with 4 choices (vowel against vowel) |
+| **Pattern Train 🚃** | Logic | both | sequences | AB → AAB/ABB/ABC → AABB/ABCD with the gap anywhere |
 
-### 🔢 Numbers
-1. **Dice Flash** (preschool): a dice face shows for one second, then the child taps the number. Teaches recognising small amounts at a glance.
-2. **Crocodile Compare** (preschool/school): two groups or numbers, and the crocodile eats the bigger one (`<`, `>`).
-3. **Clock Shop** (school): set a clock to whole and half hours.
-4. **Coin Café** (school): pay for a snack with coins (€, ¥, $ per locale).
+They are all muted-friendly: the child names the picture, nothing has to be heard.
+English, German and French syllables are split by hand in `syllableDrumLogic.ts`.
+The French list skips words ending in a silent *e*, where spoken and written counts
+disagree.
 
-### 🧠 Logic
-1. **Pattern Train** (both): 🔴🔵🔴🔵❓, so the child picks the next wagon. Reuses Number Train.
-2. **Sink or Float** (#44) and **Magnet Fishing** (#41): cause and effect, with specs ready.
-3. **Mini Sudoku** (school): 4×4 grid with emojis instead of numbers.
-4. **Robot Path** (school): plan ⬆️➡️ arrows ahead, then press play. A first step into coding.
+## Still-open ideas
 
-### 🎲 Just for fun
-1. **Bodyboard Wave Rider** (#64): a timing game, which suits this shelf.
-2. **Wave Surfer** (#60): it quizzes math under time pressure. That's better as a fun game than a learning one, since learning games should stay calm.
-3. **Bubble Pop**: pop bubbles and nothing else, as a reward after a challenge.
+- **Numbers:** Dice Flash (recognising small amounts at a glance), Clock Shop, Coin Café (school)
+- **Language:** Word Builder (drag letters to spell)
+- **Logic:** Sink or Float (#44), Magnet Fishing (#41), Mini Sudoku, Robot Path
+- **Just for fun:** Bodyboard Wave Rider (#64), Wave Surfer (#60), Bubble Pop
 
 ## Not changed (yet)
 
