@@ -416,7 +416,7 @@ export const en = {
   },
   letterPairs: {
     title: "Letter Pairs 🔠",
-    subtitleEasy: "Find the same letter!",
+    subtitleEasy: "Which letter does it start with?",
     subtitleMedium: "Find its partner letter!",
     subtitleHard: "Which picture starts with this letter?",
     help: "Tap the matching bubble!",

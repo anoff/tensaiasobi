@@ -6,7 +6,7 @@ import { fr } from '../locales/fr';
 import { ja } from '../locales/ja';
 import { ko } from '../locales/ko';
 import { COMPARE_MAX, generateCompareRound, symbolFor } from './crocodileCompareLogic';
-import { JA_EASY_PICTURES, generateLetterPairsRound, startLetter, toKatakana, toRomaji } from './letterPairsLogic';
+import { EASY_PICTURES, easyPictures, generateLetterPairsRound, startLetter, toKatakana, toRomaji } from './letterPairsLogic';
 import { generatePatternRound } from './patternTrainLogic';
 import { generateMissingLetterRound, missingLetterCandidates } from './missingLetterLogic';
 import { SYLLABLE_RANGE, SYLLABLE_WORDS, generateSyllableRound, splitMorae, syllableWords } from './syllableDrumLogic';
@@ -58,7 +58,12 @@ describe('Letter Pairs', () => {
           expect(r.options).toHaveLength(3);
           expect(new Set(r.options).size).toBe(3);
           expect(r.options).toContain(r.answer);
-          if (level === 'easy') expect(r.answer).toBe(r.prompt);
+          if (level === 'easy' && lang === 'ko') expect(r.answer).toBe(r.prompt);
+          if (level === 'easy' && lang !== 'ko') {
+            expect(r.promptKind).toBe('picture');
+            expect(r.answer).toBe(items(lang)[r.prompt][0].toUpperCase());
+            expect(r.word?.toLowerCase()).toBe(items(lang)[r.prompt].toLowerCase());
+          }
           if (level === 'hard') {
             expect(r.kind).toBe('picture');
             expect(startLetter(items(lang)[r.answer], lang)).toBe(r.prompt);
@@ -72,13 +77,11 @@ describe('Letter Pairs', () => {
   });
 
   it('Japanese: picture → first hiragana, hiragana → katakana, hiragana → romaji', () => {
-    for (const emoji of JA_EASY_PICTURES) {
-      expect(items('ja')[emoji], emoji).toMatch(/^[あ-わ]/);
-    }
+    expect(easyPictures('ja', items('ja'))).toEqual(EASY_PICTURES);
     for (let i = 0; i < 100; i++) {
       const easy = generateLetterPairsRound('easy', 'ja', items('ja'));
       expect(easy.promptKind).toBe('picture');
-      expect(JA_EASY_PICTURES).toContain(easy.prompt);
+      expect(EASY_PICTURES).toContain(easy.prompt);
       expect(easy.answer).toBe(items('ja')[easy.prompt][0]);
       expect(easy.word).toBe(items('ja')[easy.prompt]);
 
@@ -96,6 +99,17 @@ describe('Letter Pairs', () => {
       }
     }
     expect(toRomaji('し')).toBe('shi');
+  });
+
+  it('Latin easy pictures are plentiful and never start with a misleading spelling', () => {
+    for (const lang of ['en', 'de', 'fr'] as const) {
+      const pictures = easyPictures(lang, items(lang));
+      expect(pictures.length, lang).toBeGreaterThan(20);
+      for (const emoji of pictures) {
+        expect(items(lang)[emoji], `${lang} ${emoji}`).not.toMatch(/^(ch|sh|sch|ph|th|kn|wh)/i);
+        expect(items(lang)[emoji][0].toUpperCase(), `${lang} ${emoji}`).toMatch(/^[A-Z]$/);
+      }
+    }
     expect(toRomaji('つ')).toBe('tsu');
   });
 });

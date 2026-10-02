@@ -27,12 +27,14 @@ test.describe('Crocodile Compare', () => {
 });
 
 test.describe('Letter Pairs', () => {
-  test('easy finds the same letter, medium the partner, hard a picture', async ({ page }) => {
+  test('easy names the first letter of a picture, medium the partner, hard a picture', async ({ page }) => {
     await openGame(page, 'launch-letter-pairs', 'little', 'easy');
     const prompt = page.getByTestId('letter-pairs-prompt');
+    await expect(prompt).toHaveAttribute('data-prompt-kind', 'picture');
     const answer = await prompt.getAttribute('data-answer');
-    expect(answer).toBe((await prompt.innerText()).trim());
+    expect(answer).toMatch(/^[A-Z]$/);
     await page.locator(`[data-testid="letter-pairs-option"][data-value="${answer}"]`).click();
+    await expect(page.getByTestId('letter-pairs-word')).toContainText(answer!);
 
     await page.getByTestId('difficulty-medium').click();
     const partner = await page.getByTestId('letter-pairs-prompt').getAttribute('data-answer');

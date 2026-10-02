@@ -418,7 +418,7 @@ export const fr: TranslationSchema = {
   },
   letterPairs: {
     title: "Paires de lettres 🔠",
-    subtitleEasy: "Trouve la même lettre !",
+    subtitleEasy: "Par quelle lettre ça commence ?",
     subtitleMedium: "Trouve sa lettre minuscule !",
     subtitleHard: "Quelle image commence par cette lettre ?",
     help: "Touche la bonne bulle !",
