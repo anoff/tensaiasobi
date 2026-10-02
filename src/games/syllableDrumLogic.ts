@@ -3,8 +3,9 @@ import type { GameDifficulty } from '../types/game';
 /**
  * Syllable Drum: drum once per syllable, then check.
  * Latin-script words are split by hand (automatic hyphenation is wrong too
- * often for a child to trust). French avoids words ending in a silent "e",
- * where spoken and written syllable counts disagree. Japanese counts morae
+ * often for a child to trust). French counts spoken syllables the way
+ * maternelle claps them: a silent final "e" is not a beat (pomme = 1,
+ * gi·rafe = 2). Multi-word names are left out. Japanese counts morae
  * (けーき = 3, ちょうちょ = 3) and Korean counts blocks, both derived from
  * the shared picture dictionary.
  */
@@ -22,6 +23,7 @@ export const SYLLABLE_WORDS: Record<'en' | 'de' | 'fr', Record<string, string>> 
     '🐙': 'oc·to·pus', '🦋': 'but·ter·fly', '🐞': 'la·dy·bug', '🍍': 'pine·ap·ple', '🍓': 'straw·ber·ry',
     '🚲': 'bi·cy·cle', '🐨': 'ko·a·la', '🦖': 'di·no·saur', '🦄': 'u·ni·corn', '🍔': 'ham·bur·ger',
     '🍉': 'wa·ter·mel·on', '🚁': 'hel·i·cop·ter',
+    '🦉': 'owl', '🍐': 'pear', '🛥️': 'boat', '✈️': 'air·plane', '🔔': 'bell', '🧀': 'cheese', '🦀': 'crab', '👑': 'crown', '🥚': 'egg', '🌷': 'flow·er', '🍇': 'grapes', '👒': 'hat', '🍈': 'mel·on', '🧅': 'on·ion', '🍑': 'peach', '🐌': 'snail', '🐺': 'wolf', '🚢': 'ship', '☁️': 'cloud', '👻': 'ghost', '🎁': 'gift', '🍄': 'mush·room', '❄️': 'snow·flake', '🎸': 'gui·tar', '🍩': 'do·nut', '🍬': 'can·dy', '🍊': 'or·ange', '⛵': 'yacht', '🧥': 'jack·et', '🥜': 'nut', '📓': 'note·book', '🎺': 'trum·pet', '🧱': 'brick', '🧣': 'scarf', '👓': 'glass·es', '🥛': 'milk', '🦈': 'shark', '🐍': 'snake', '🌽': 'corn', '🍯': 'hon·ey', '🛸': 'U·F·O', '🎒': 'back·pack',
   },
   de: {
     '🐕': 'Hund', '🐟': 'Fisch', '🏠': 'Haus', '🍦': 'Eis', '🐸': 'Frosch', '🌲': 'Baum', '📘': 'Buch',
@@ -37,6 +39,7 @@ export const SYLLABLE_WORDS: Record<'en' | 'de' | 'fr', Record<string, string>> 
     '🎸': 'Gi·tar·re', '🤖': 'Ro·bo·ter', '🐢': 'Schild·krö·te', '🍍': 'A·na·nas', '🐧': 'Pin·gu·in',
     '🦋': 'Schmet·ter·ling', '🧸': 'Ted·dy·bär',
     '🌈': 'Re·gen·bo·gen',
+    '🔑': 'Schlüs·sel', '🍉': 'Was·ser·me·lo·ne', '🛥️': 'Boot', '✈️': 'Flug·zeug', '🎈': 'Bal·lon', '🦀': 'Krab·be', '🍇': 'Trau·be', '🧅': 'Zwie·bel', '🍑': 'Pfir·sich', '🐌': 'Schne·cke', '☂️': 'Re·gen·schirm', '🐺': 'Wolf', '🚁': 'Hub·schrau·ber', '🚲': 'Fahr·rad', '🐙': 'Kra·ke', '🐨': 'Ko·a·la', '🐷': 'Schwein', '🐔': 'Huhn', '🐬': 'Del·fin', '🐞': 'Ma·ri·en·kä·fer', '👻': 'Geist', '🎁': 'Ge·schenk', '❄️': 'Schnee·flo·cke', '🍩': 'Do·nut', '🍪': 'Keks', '🍬': 'Bon·bon', '🍊': 'O·ran·ge', '⛵': 'Yacht', '🥜': 'Nuss', '📓': 'Heft', '🔍': 'Lu·pe', '🧱': 'Zie·gel', '✏️': 'Blei·stift', '🧣': 'Schal', '🦖': 'Di·no·sau·ri·er', '🦄': 'Ein·horn', '🐍': 'Schlan·ge', '🍟': 'Pom·mes', '🍔': 'Bur·ger', '🌽': 'Mais', '🛸': 'U·F·O', '🎒': 'Ruck·sack', '🧩': 'Puz·zle',
   },
   fr: {
     '🐈': 'chat', '🐕': 'chien', '🔑': 'clé', '🐺': 'loup', '🚂': 'train', '🐻': 'ours', '🥛': 'lait',
@@ -48,6 +51,7 @@ export const SYLLABLE_WORDS: Record<'en' | 'de' | 'fr', Record<string, string>> 
     '🦈': 're·quin', '🐍': 'ser·pent', '🐧': 'pin·gouin', '🚜': 'trac·teur', '🍪': 'bis·cuit',
     '🐨': 'ko·a·la', '🎻': 'vi·o·lon', '🐌': 'es·car·got', '🍍': 'a·na·nas', '🐘': 'é·lé·phant',
     '🍄': 'cham·pi·gnon', '🦋': 'pa·pi·llon',
+    '🦁': 'li·on', '🍎': 'pomme', '🍌': 'ba·nane', '🦒': 'gi·rafe', '🍦': 'glace', '🐸': 'gre·nouille', '🍐': 'poire', '🍉': 'pas·tèque', '🦓': 'zèbre', '🚗': 'voi·ture', '🔔': 'cloche', '📘': 'livre', '🕯️': 'bou·gie', '🧀': 'fro·mage', '🍒': 'ce·rise', '🐄': 'vache', '🦀': 'crabe', '👑': 'cou·ronne', '🥚': 'œuf', '🌷': 'tu·lipe', '🧅': 'oi·gnon', '🍑': 'pêche', '🍓': 'fraise', '🍅': 'to·mate', '🐢': 'tor·tue', '☂️': 'pa·ra·pluie', '🚢': 'na·vire', '🚁': 'hé·li·cop·tère', '🚀': 'fu·sée', '🌟': 'é·toile', '☁️': 'nu·age', '🌙': 'lune', '🐯': 'tigre', '🐒': 'singe', '🐙': 'poulpe', '🐔': 'poule', '🐳': 'ba·leine', '🐝': 'a·beille', '🐞': 'coc·ci·nelle', '👻': 'fan·tôme', '❄️': 'flo·con', '🎸': 'gui·tare', '🍕': 'piz·za', '🍩': 'do·nut', '🍊': 'o·range', '🥕': 'ca·rotte', '⛵': 'voi·lier', '🧥': 'veste', '🥜': 'ca·ca·huète', '📓': 'car·net', '🎺': 'trom·pette', '🐪': 'cha·meau', '🔍': 'loupe', '🧱': 'brique', '🧸': 'our·son', '🧣': 'é·charpe', '👓': 'lu·nettes', '🦖': 'di·no·saure', '🦄': 'li·corne', '🍟': 'frites', '🍔': 'bur·ger', '🌽': 'ma·ïs', '🛸': 'ov·ni', '🧩': 'puz·zle',
   },
 };
 

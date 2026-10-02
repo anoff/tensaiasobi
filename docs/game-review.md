@@ -58,9 +58,9 @@ two games in every learning category, and school has three or more.
 | **Pattern Train 🚃** | Logic | both | sequences | AB → AAB/ABB/ABC → AABB/ABCD with the gap anywhere |
 
 They are all muted-friendly: the child names the picture, nothing has to be heard.
-English, German and French syllables are split by hand in `syllableDrumLogic.ts`.
-The French list skips words ending in a silent *e*, where spoken and written counts
-disagree.
+English, German and French syllables are split by hand in `syllableDrumLogic.ts` and
+cover every single-word picture. French counts spoken syllables the way preschools
+clap them, so a silent final *e* is not a beat (*pomme* = 1).
 
 ## Still-open ideas
 
