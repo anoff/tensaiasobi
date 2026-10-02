@@ -20,35 +20,31 @@ A modern, lightning-fast static web app designed for young children (ages 3-8). 
 
 ## 🕹️ The Games
 
-Learning games (star challenges focus here first):
+The home screen sorts games into four colour-coded shelves. The 🧸 Preschool / 🎒 School switch hides games that don't fit the age, sets the starting level, and locks the level that doesn't fit. See [docs/game-review.md](docs/game-review.md) for the reasoning and ideas for new games.
 
-1. **Math Pop 🎈** — Addition/subtraction on a notebook answer sheet.
-2. **Odd One 🧐** — Categorization for pre-readers.
-3. **Animal Match 🐯** — Memory pairs.
-4. **Letters ✏️** — Stroke tracing (Latin, Hiragana, Katakana, Hangul).
-5. **First Sound 🔤** — Starting-letter / phonics.
-6. **Word Chain 🔗** — Shiritori-style last-character matching.
-7. **Magic Puzzle 🧩** — Interlocking SVG jigsaw.
-8. **City Dispatch 🚒** — Send the right emergency vehicle.
-9. **Balance ⚖️** — Seesaw physics.
-10. **Tower Sort 🗼** — Stack matching emojis.
-11. **Fruit Math Pop 🍎** — Count fruit, then pick the total.
-12. **Number Train 🚂** — Count the passengers, tap the right station.
-13. **Shadow 🔦** — Identify a silhouette with a flashlight.
-14. **Fair Share Picnic 🧺** — Equal sharing / early division.
-15. **Pearl Finder 🤿** — Sort pearls into matching clams.
+**🔢 Numbers** (butter)
+- **Math Pop 🎈**: add and subtract on a notebook sheet. Easy has fruit pictures and works within 5, medium within 10, hard within 20.
+- **Number Train 🚂**: count the passengers, then tap the right station.
+- **Fair Share Picnic 🧺**: share snacks equally (early division).
+- **Balance ⚖️**: level the seesaw. Weights show dots on easy and medium. *(school)*
 
-Play games (unlock after a learn-first star goal):
+**🔤 Language** (coral)
+- **Letters ✏️**: trace letters (Latin, Hiragana, Katakana, Hangul).
+- **First Sound 🔤**: find the starting letter. *(school)*
+- **Word Chain 🔗**: shiritori, matching the last letter to the next word's first letter. Easy and medium show the words. *(school)*
 
-16. **Doodle Pad 🎨** — Finger painting.
-17. **Mazes 🗺️** — Path tracing through a generated maze.
-18. **Trace ⭐** — Shape outlines.
-19. **Emoji Match ⚡** — Dobble-style speed match.
+**🧠 Logic** (leaf)
+- **Odd One 🧐**: pick the one that doesn't belong.
+- **Match 🐯**: memory pairs.
+- **Shadow 🔦**: identify a silhouette with a flashlight. *(preschool)*
+- **Pearl Finder 🤿**: sort pearls into matching clams. *(preschool)*
+- **Magic Puzzle 🧩**: interlocking SVG jigsaw.
+- **Tower Sort 🗼**: stack matching emojis. *(school)*
 
-Always available after a goal (and whenever learn-first is off):
-
-- **My Town 🏘️** — Spend stars on a 6×6 sandbox.
-- **Coupons 🎟️** — Parent-approved real-world rewards.
+**🎲 Just for fun** (chalk / pebble / coal). These unlock after a learn-first star goal.
+- **Doodle Pad 🎨**, **Trace ⭐** *(preschool)*, **Mazes 🗺️**, **Emoji Match ⚡**, **City Dispatch 🚒**
+- **My Town 🏘️**: spend stars on a 6×6 sandbox.
+- **Coupons 🎟️**: parent-approved real-world rewards.
 
 
 ## 🚀 Local Development

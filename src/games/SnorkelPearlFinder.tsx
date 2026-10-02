@@ -115,7 +115,7 @@ function generateBubbles(difficulty: GameDifficulty, width: number, height: numb
       x: Math.random() * width,
       y: Math.random() * height,
       radius: BUBBLE_RADIUS + Math.random() * 20,
-      opacity: 0.35 + Math.random() * 0.35,
+      opacity: 0.85 + Math.random() * 0.15,
       speedX: (Math.random() - 0.5) * 0.6,
       speedY: config.bubblesMove ? -0.3 - Math.random() * 0.5 : 0,
       phase: Math.random() * Math.PI * 2,
@@ -486,7 +486,7 @@ export function SnorkelPearlFinder() {
             <div
               key={bubble.id}
               data-testid="snorkel-bubble"
-              className="absolute rounded-full border-2 border-white/60 bg-white/30 backdrop-blur-sm pointer-events-none"
+              className="absolute rounded-full border-4 border-white bg-gradient-to-br from-white via-sky-50 to-sky-200 shadow-md pointer-events-none"
               style={{
                 left: bubble.x - bubble.radius,
                 top: bubble.y - bubble.radius,

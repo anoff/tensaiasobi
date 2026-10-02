@@ -34,11 +34,16 @@ export const fr: TranslationSchema = {
     dispatch: "Interventions",
     physics: "Balance",
     towerSort: "Tri des Tours",
-    fruitMathPop: "Calcul des Fruits",
     numberTrain: "Train des Chiffres",
     shadowFlashlight: "Ombre",
     fairSharePicnic: "Pique-nique à partager",
     snorkelPearlFinder: "Chercheur de perles",
+    categories: {
+      numbers: "Nombres",
+      language: "Langage",
+      logic: "Logique",
+      play: "Pour jouer",
+    },
   },
   parentGate: {
     title: "Espace Parents 🔒",
@@ -398,12 +403,6 @@ export const fr: TranslationSchema = {
     victory: "🎉 Trié !",
     moves: "coups",
     playAgain: "Rejouer",
-  },
-  fruitMathPop: {
-    title: "Calcul des Fruits ! 🍎",
-    subtitle: "Compte les fruits, puis touche la réponse !",
-    watch: "Regarde les fruits !",
-    theme: "Changer de thème",
   },
   numberTrain: {
     title: "Train des Chiffres ! 🚂",

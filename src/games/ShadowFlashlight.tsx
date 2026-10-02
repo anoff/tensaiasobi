@@ -45,7 +45,6 @@ const SHADOW_ITEMS: ShadowItem[] = [
   { emoji: '✈️', name: 'airplane' },
   { emoji: '🚀', name: 'rocket' },
   { emoji: '⭐', name: 'star' },
-  { emoji: '🌙', name: 'moon' },
   { emoji: '☀️', name: 'sun' },
   { emoji: '☁️', name: 'cloud' },
   { emoji: '❤️', name: 'heart' },
@@ -53,8 +52,8 @@ const SHADOW_ITEMS: ShadowItem[] = [
 
 const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
   easy: { choices: 3, radius: 64, shadowScale: 0.72, baseStars: 2 },
-  medium: { choices: 5, radius: 64, shadowScale: 1.15, baseStars: 2 },
-  hard: { choices: 6, radius: 64, shadowScale: 1.8, baseStars: 2 },
+  medium: { choices: 4, radius: 64, shadowScale: 1, baseStars: 2 },
+  hard: { choices: 5, radius: 64, shadowScale: 1.4, baseStars: 2 },
 };
 
 function generateRound(difficulty: GameDifficulty): { target: ShadowItem; choices: ShadowItem[] } {

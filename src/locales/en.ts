@@ -32,11 +32,16 @@ export const en = {
     dispatch: "City Dispatch",
     physics: "Balance",
     towerSort: "Tower Sort",
-    fruitMathPop: "Fruit Math Pop",
     numberTrain: "Number Train",
     shadowFlashlight: "Shadow",
     fairSharePicnic: "Fair Share Picnic",
     snorkelPearlFinder: "Pearl Finder",
+    categories: {
+      numbers: "Numbers",
+      language: "Language",
+      logic: "Logic",
+      play: "Just for fun",
+    },
   },
   parentGate: {
     title: "Parents Only 🔒",
@@ -396,12 +401,6 @@ export const en = {
     victory: "🎉 Sorted!",
     moves: "moves",
     playAgain: "Play Again",
-  },
-  fruitMathPop: {
-    title: "Fruit Math Pop! 🍎",
-    subtitle: "Count the fruit, then tap the answer!",
-    watch: "Watch the fruit!",
-    theme: "Change theme",
   },
   numberTrain: {
     title: "Number Train! 🚂",

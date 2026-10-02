@@ -34,11 +34,16 @@ export const ja: TranslationSchema = {
     dispatch: "きんきゅう",
     physics: "てんびん",
     towerSort: "タワーソート",
-    fruitMathPop: "くだもの さんすう",
     numberTrain: "かずのれっしゃ",
     shadowFlashlight: "かげ",
     fairSharePicnic: "ピクニックわけっこ",
     snorkelPearlFinder: "しんじゅさがし",
+    categories: {
+      numbers: "かず",
+      language: "ことば",
+      logic: "かんがえる",
+      play: "あそぶ",
+    },
   },
   parentGate: {
     title: "ほごしゃせんよう 🔒",
@@ -398,12 +403,6 @@ export const ja: TranslationSchema = {
     victory: "🎉 そろったよ！",
     moves: "てすう",
     playAgain: "もういちどあそぶ",
-  },
-  fruitMathPop: {
-    title: "くだもの さんすう！ 🍎",
-    subtitle: "くだものを かぞえて、こたえを タップしてね！",
-    watch: "くだものを みてね！",
-    theme: "テーマを かえる",
   },
   numberTrain: {
     title: "かずのれっしゃ！ 🚂",

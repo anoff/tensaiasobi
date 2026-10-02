@@ -34,11 +34,16 @@ export const ko: TranslationSchema = {
     dispatch: "출동",
     physics: "저울",
     towerSort: "타워 정렬",
-    fruitMathPop: "과일 수학 팝",
     numberTrain: "숫자 기차",
     shadowFlashlight: "그림자",
     fairSharePicnic: "공평한 소풍",
     snorkelPearlFinder: "진주 찾기",
+    categories: {
+      numbers: "숫자",
+      language: "말과 글",
+      logic: "생각하기",
+      play: "놀이",
+    },
   },
   parentGate: {
     title: "부모님 전용 🔒",
@@ -398,12 +403,6 @@ export const ko: TranslationSchema = {
     victory: "🎉 정렬 완료!",
     moves: "이동",
     playAgain: "다시 하기",
-  },
-  fruitMathPop: {
-    title: "과일 수학 팝! 🍎",
-    subtitle: "과일을 세고 답을 눌러요!",
-    watch: "과일을 지켜봐요!",
-    theme: "테마 바꾸기",
   },
   numberTrain: {
     title: "숫자 기차! 🚂",

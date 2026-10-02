@@ -7,11 +7,16 @@ export const CORAL = '#ff4d3a';
 export const LEAF = '#1f9a62';
 export const BUTTER = '#ffc21a';
 export const FILLS = [CORAL, LEAF, BUTTER] as const;
+/** Just-for-fun shelf: no learning colour, only chalk, pebble and ink. */
+export const CHALK = '#fffaf0';
+export const PEBBLE = '#b8aea3';
+export const COAL = '#3a2e27';
+export const PLAY_FILLS = [CHALK, PEBBLE, COAL] as const;
 
 export const hardShadow = (x = 5, y = 6) => `${x}px ${y}px 0 0 ${INK}`;
 
-/** Glyph/text color that reads on a given fill: ink on butter, paper on coral/leaf. */
-export const onFill = (fill: string) => (fill === BUTTER ? INK : '#fff');
+/** Glyph/text color that reads on a given fill: ink on light fills, paper on coral/leaf/coal. */
+export const onFill = (fill: string) => (fill === BUTTER || fill === CHALK || fill === PEBBLE ? INK : '#fff');
 
 export const PLAY_MAT_STYLE: CSSProperties = {
   backgroundColor: PAPER,

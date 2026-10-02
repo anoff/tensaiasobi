@@ -34,11 +34,16 @@ export const de: TranslationSchema = {
     dispatch: "Einsatz",
     physics: "Waage",
     towerSort: "Turm-Sortierung",
-    fruitMathPop: "Früchte-Rechnen",
     numberTrain: "Zahlenzug",
     shadowFlashlight: "Schatten",
     fairSharePicnic: "Picknick teilen",
     snorkelPearlFinder: "Perlen-Taucher",
+    categories: {
+      numbers: "Zahlen",
+      language: "Sprache",
+      logic: "Logik",
+      play: "Einfach Spaß",
+    },
   },
   parentGate: {
     title: "Nur für Eltern 🔒",
@@ -398,12 +403,6 @@ export const de: TranslationSchema = {
     victory: "🎉 Sortiert!",
     moves: "Züge",
     playAgain: "Nochmal spielen",
-  },
-  fruitMathPop: {
-    title: "Früchte-Rechnen! 🍎",
-    subtitle: "Zähle die Früchte und tippe auf die Antwort!",
-    watch: "Schau die Früchte an!",
-    theme: "Thema wechseln",
   },
   numberTrain: {
     title: "Zahlenzug! 🚂",

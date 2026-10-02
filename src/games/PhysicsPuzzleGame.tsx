@@ -69,6 +69,17 @@ function buildWeights(diff: GameDifficulty): Weight[] {
   return [...newWeights.slice(0, 2), ...shuffle(newWeights.slice(2))];
 }
 
+/** Weight as dots so a pre-reader can see "heavy" without guessing what a book weighs. */
+function MassDots({ mass }: { mass: number }) {
+  return (
+    <span data-testid="physics-mass-dots" data-mass={mass} className="flex gap-0.5" aria-label={String(mass)}>
+      {Array.from({ length: mass }, (_, i) => (
+        <span key={i} className="w-2 h-2 rounded-full bg-slate-600" />
+      ))}
+    </span>
+  );
+}
+
 export function PhysicsPuzzleGame() {
   const { playPop, playSuccess, onStarEarned } = useGameFX();
   const { t } = useTranslation();
@@ -78,6 +89,8 @@ export function PhysicsPuzzleGame() {
   const [solved, setSolved] = useState(false);
   const [selectedWeightId, setSelectedWeightId] = useState<number | null>(null);
   const settings = getDifficultySettings(difficulty);
+  // Easy/medium always show each weight; hard makes the child find out by trying.
+  const showMass = difficulty !== 'hard';
 
   const leftMass = weights.filter((w) => w.side === 'left').reduce((sum, w) => sum + w.mass, 0);
   const rightMass = weights.filter((w) => w.side === 'right').reduce((sum, w) => sum + w.mass, 0);
@@ -229,7 +242,9 @@ export function PhysicsPuzzleGame() {
         <div className="flex flex-wrap justify-center gap-1.5 min-h-[56px]">
           {trayWeights.map((w) => (
             <div key={w.id} className="flex flex-col items-center gap-1">
-              {selectedWeightId === w.id && (
+              {showMass ? (
+                <MassDots mass={w.mass} />
+              ) : selectedWeightId === w.id && (
                 <span className="text-xs font-black text-slate-600 leading-none">{w.mass}</span>
               )}
               <button

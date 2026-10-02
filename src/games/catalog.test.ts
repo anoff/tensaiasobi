@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { APP_PROGRESS_KEYS, GAMES, clearPersistedProgress, defaultChallengeAllowedGames, gameVisibleForAge, gameVisibleInChallenge, isGameId } from './catalog';
+import { APP_PROGRESS_KEYS, GAMES, GAME_CATEGORIES, gamesInCategory, clearPersistedProgress, defaultChallengeAllowedGames, gameVisibleForAge, gameVisibleInChallenge, isGameId } from './catalog';
 
 describe('game catalog', () => {
   afterEach(() => {
@@ -11,6 +11,24 @@ describe('game catalog', () => {
     const testids = GAMES.map((game) => game.testid);
     expect(new Set(ids).size).toBe(ids.length);
     expect(new Set(testids).size).toBe(testids.length);
+  });
+
+  it('puts every game in a category, and only the play shelf holds play games', () => {
+    for (const game of GAMES) {
+      expect(GAME_CATEGORIES).toContain(game.category);
+      expect(game.kind === 'play').toBe(game.category === 'play');
+    }
+    for (const category of GAME_CATEGORIES) {
+      expect(gamesInCategory(GAMES, category).length).toBeGreaterThan(0);
+    }
+  });
+
+  it('gives each age band at least one game in every learning category', () => {
+    for (const band of ['little', 'big'] as const) {
+      for (const category of GAME_CATEGORIES) {
+        expect(gamesInCategory(GAMES, category).some((g) => gameVisibleForAge(g, band))).toBe(true);
+      }
+    }
   });
 
   it('assigns every game at least one age band', () => {

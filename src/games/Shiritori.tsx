@@ -2,6 +2,9 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
 import AnswerBubble from '../components/AnswerBubble';
+import DifficultySelector from '../components/DifficultySelector';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
+import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { useGameFX } from '../hooks/gameFXContext';
@@ -13,6 +16,7 @@ import {
   generateOptionsForWord,
   getPandaPlayChoice,
   cleanWesternWord,
+  SHIRITORI_LEVELS,
 } from './shiritoriLogic';
 
 export function Shiritori() {
@@ -24,12 +28,16 @@ export function Shiritori() {
     return (t.anlautGame.items || {}) as Record<string, string>;
   }, [t.anlautGame.items]);
 
+  const [level, setLevel] = useAgeDifficulty();
+  const levelConfig = SHIRITORI_LEVELS[level];
+  const optionCount = levelConfig.options;
+
   // Initial values computed once on mount; App remounts on language change via key={language}
   const [seed] = useState(() => {
     const startEmoji = getStartWord(language, itemsDict);
     return {
       startEmoji,
-      options: generateOptionsForWord(startEmoji, [startEmoji], language, itemsDict).options,
+      options: generateOptionsForWord(startEmoji, [startEmoji], language, itemsDict, optionCount).options,
     };
   });
 
@@ -59,7 +67,7 @@ export function Shiritori() {
   const chainEndRef = useRef<HTMLDivElement>(null);
 
 
-  const initGame = useCallback((selectedMode: 'solo' | 'panda') => {
+  const initGame = useCallback((selectedMode: 'solo' | 'panda', count: number = optionCount) => {
     const startEmoji = getStartWord(language, itemsDict);
     setChain([startEmoji]);
     resetStreak();
@@ -80,13 +88,19 @@ export function Shiritori() {
       setPandaSpeech('');
     }
 
-    const result = generateOptionsForWord(startEmoji, [startEmoji], language, itemsDict);
+    const result = generateOptionsForWord(startEmoji, [startEmoji], language, itemsDict, count);
     if (result.isGameOver) {
       setIsGameOver(true);
     } else {
       setOptions(result.options);
     }
-  }, [language, itemsDict, t.shiritori.yourTurn, resetStreak]);
+  }, [language, itemsDict, t.shiritori.yourTurn, resetStreak, optionCount]);
+
+  const handleLevelChange = (next: GameDifficulty) => {
+    playPop();
+    setLevel(next);
+    initGame(mode, SHIRITORI_LEVELS[next].options);
+  };
 
   // Auto-scroll the chain view as new cards are added
   useEffect(() => {
@@ -119,7 +133,7 @@ export function Shiritori() {
         return;
       }
 
-      const result = generateOptionsForWord(pandaChoice, nextChain, language, itemsDict);
+      const result = generateOptionsForWord(pandaChoice, nextChain, language, itemsDict, optionCount);
       if (result.isGameOver) {
         setIsGameOver(true);
       } else {
@@ -132,7 +146,7 @@ export function Shiritori() {
       setPandaState('talking');
       setPandaSpeech("Oh! I'm stuck! You win! 🏆");
     }
-  }, [language, itemsDict, t.shiritori.pandaPlayed, playPop]);
+  }, [language, itemsDict, t.shiritori.pandaPlayed, playPop, optionCount]);
 
 
   const handleOptionSelect = (emoji: string) => {
@@ -186,7 +200,7 @@ export function Shiritori() {
         setTimeout(() => {
           setSelectedOption(null);
           setIsCorrect(null);
-          const result = generateOptionsForWord(emoji, newChain, language, itemsDict);
+          const result = generateOptionsForWord(emoji, newChain, language, itemsDict, optionCount);
           if (result.isGameOver) {
             setIsGameOver(true);
           } else {
@@ -316,6 +330,12 @@ export function Shiritori() {
           </button>
         </div>
 
+        <DifficultySelector
+          selected={level}
+          options={['easy', 'medium', 'hard']}
+          onChange={handleLevelChange}
+        />
+
         {/* Counters */}
         <div className="flex gap-4 items-center justify-center pt-1">
           <span className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1 rounded-full border-2 border-amber-300 text-xs shadow-sm flex items-center gap-1.5 animate-pulse">
@@ -441,7 +461,7 @@ export function Shiritori() {
       {/* Bubble Options */}
       {!isGameOver && (
         <div className="w-full flex flex-col items-center gap-4 pb-4">
-          <div className="w-full grid grid-cols-3 gap-4 max-w-sm">
+          <div className={`w-full grid gap-4 ${optionCount === 4 ? 'grid-cols-2 max-w-[15rem]' : 'grid-cols-3 max-w-sm'}`}>
             {options.map((opt) => {
               const isThisSelected = selectedOption === opt;
               const isShaking = shakeOption === opt;
@@ -460,7 +480,14 @@ export function Shiritori() {
                     'data-emoji': opt,
                   }}
                 >
-                  <span className="text-5xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)]">{opt}</span>
+                  <span className="flex flex-col items-center gap-1">
+                    <span className="text-5xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)]">{opt}</span>
+                    {levelConfig.labels && (
+                      <span data-testid="shiritori-option-label" className="text-xs font-black leading-none text-slate-600 max-w-[90px] truncate">
+                        {itemsDict[opt]}
+                      </span>
+                    )}
+                  </span>
                 </AnswerBubble>
               );
             })}
