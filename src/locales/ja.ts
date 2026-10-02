@@ -418,9 +418,9 @@ export const ja: TranslationSchema = {
   },
   letterPairs: {
     title: "もじのペア 🔠",
-    subtitleSame: "おなじ もじを さがそう！",
-    subtitlePartner: "おなじ おとの カタカナを さがそう！",
-    subtitlePicture: "この もじで はじまる えは どれ？",
+    subtitleEasy: "なんの もじで はじまるかな？",
+    subtitleMedium: "おなじ おとの カタカナは どれ？",
+    subtitleHard: "ローマじで かくと どれ？",
     help: "あう バブルを タップしてね！",
   },
   patternTrain: {

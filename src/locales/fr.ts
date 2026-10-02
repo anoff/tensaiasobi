@@ -418,9 +418,9 @@ export const fr: TranslationSchema = {
   },
   letterPairs: {
     title: "Paires de lettres 🔠",
-    subtitleSame: "Trouve la même lettre !",
-    subtitlePartner: "Trouve sa lettre minuscule !",
-    subtitlePicture: "Quelle image commence par cette lettre ?",
+    subtitleEasy: "Trouve la même lettre !",
+    subtitleMedium: "Trouve sa lettre minuscule !",
+    subtitleHard: "Quelle image commence par cette lettre ?",
     help: "Touche la bonne bulle !",
   },
   patternTrain: {

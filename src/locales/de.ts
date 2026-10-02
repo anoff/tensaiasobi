@@ -418,9 +418,9 @@ export const de: TranslationSchema = {
   },
   letterPairs: {
     title: "Buchstabenpaare 🔠",
-    subtitleSame: "Finde den gleichen Buchstaben!",
-    subtitlePartner: "Finde den kleinen Partner!",
-    subtitlePicture: "Welches Bild fängt mit diesem Buchstaben an?",
+    subtitleEasy: "Finde den gleichen Buchstaben!",
+    subtitleMedium: "Finde den kleinen Partner!",
+    subtitleHard: "Welches Bild fängt mit diesem Buchstaben an?",
     help: "Tippe auf die passende Blase!",
   },
   patternTrain: {

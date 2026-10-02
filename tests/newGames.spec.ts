@@ -45,6 +45,23 @@ test.describe('Letter Pairs', () => {
   });
 });
 
+test.describe('Letter Pairs in Japanese', () => {
+  test('easy shows a picture and reveals its word; hard asks for romaji', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('lang-dropdown-trigger').click();
+    await page.getByTestId('lang-select-ja').click();
+    await openGame(page, 'launch-letter-pairs', 'little', 'easy');
+    const prompt = page.getByTestId('letter-pairs-prompt');
+    await expect(prompt).toHaveAttribute('data-prompt-kind', 'picture');
+    const answer = await prompt.getAttribute('data-answer');
+    await page.locator(`[data-testid="letter-pairs-option"][data-value="${answer}"]`).click();
+    await expect(page.getByTestId('letter-pairs-word')).toContainText(answer!);
+
+    await openGame(page, 'launch-letter-pairs', 'big', 'hard');
+    expect(await page.getByTestId('letter-pairs-prompt').getAttribute('data-answer')).toMatch(/^[a-z]+$/);
+  });
+});
+
 test.describe('Pattern Train', () => {
   test('tapping the missing wagon fills the gap', async ({ page }) => {
     await openGame(page, 'launch-pattern-train', 'little', 'easy');

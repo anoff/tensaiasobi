@@ -6,7 +6,7 @@ import { fr } from '../locales/fr';
 import { ja } from '../locales/ja';
 import { ko } from '../locales/ko';
 import { COMPARE_MAX, generateCompareRound, symbolFor } from './crocodileCompareLogic';
-import { generateLetterPairsRound, startLetter, toKatakana } from './letterPairsLogic';
+import { JA_EASY_PICTURES, generateLetterPairsRound, startLetter, toKatakana, toRomaji } from './letterPairsLogic';
 import { generatePatternRound } from './patternTrainLogic';
 import { generateMissingLetterRound, missingLetterCandidates } from './missingLetterLogic';
 import { SYLLABLE_RANGE, SYLLABLE_WORDS, generateSyllableRound, splitMorae, syllableWords } from './syllableDrumLogic';
@@ -51,7 +51,7 @@ describe('Letter Pairs', () => {
   });
 
   it('always offers three distinct options containing the answer', () => {
-    for (const lang of Object.keys(DICTS) as Array<keyof typeof DICTS>) {
+    for (const lang of ['en', 'de', 'fr', 'ko'] as const) {
       for (const level of LEVELS) {
         for (let i = 0; i < 50; i++) {
           const r = generateLetterPairsRound(level, lang, items(lang));
@@ -69,6 +69,34 @@ describe('Letter Pairs', () => {
         }
       }
     }
+  });
+
+  it('Japanese: picture → first hiragana, hiragana → katakana, hiragana → romaji', () => {
+    for (const emoji of JA_EASY_PICTURES) {
+      expect(items('ja')[emoji], emoji).toMatch(/^[あ-わ]/);
+    }
+    for (let i = 0; i < 100; i++) {
+      const easy = generateLetterPairsRound('easy', 'ja', items('ja'));
+      expect(easy.promptKind).toBe('picture');
+      expect(JA_EASY_PICTURES).toContain(easy.prompt);
+      expect(easy.answer).toBe(items('ja')[easy.prompt][0]);
+      expect(easy.word).toBe(items('ja')[easy.prompt]);
+
+      const medium = generateLetterPairsRound('medium', 'ja', items('ja'));
+      expect(medium.answer).toBe(toKatakana(medium.prompt));
+
+      const hard = generateLetterPairsRound('hard', 'ja', items('ja'));
+      expect(hard.answer).toBe(toRomaji(hard.prompt));
+      expect(hard.answer).toMatch(/^[a-z]+$/);
+
+      for (const r of [easy, medium, hard]) {
+        expect(r.options).toHaveLength(3);
+        expect(new Set(r.options).size).toBe(3);
+        expect(r.options).toContain(r.answer);
+      }
+    }
+    expect(toRomaji('し')).toBe('shi');
+    expect(toRomaji('つ')).toBe('tsu');
   });
 });
 

@@ -7,6 +7,11 @@ import { LETTER_PAIRS_STARS, generateLetterPairsRound } from './letterPairsLogic
 import type { GameDifficulty } from '../types/game';
 import { INK, hardShadow } from '../theme/blockTable';
 
+/** Romaji runs up to three letters (shi, tsu); keep it inside the bubble. */
+function optionSize(option: string): string {
+  return option.length >= 3 ? 'text-3xl' : option.length === 2 ? 'text-4xl' : 'text-5xl';
+}
+
 export default function LetterPairs() {
   const { language, t } = useTranslation();
   const items = t.anlautGame.items as Record<string, string>;
@@ -16,7 +21,7 @@ export default function LetterPairs() {
   );
 
   const subtitle =
-    level === 'easy' ? t.letterPairs.subtitleSame : level === 'medium' ? t.letterPairs.subtitlePartner : t.letterPairs.subtitlePicture;
+    level === 'easy' ? t.letterPairs.subtitleEasy : level === 'medium' ? t.letterPairs.subtitleMedium : t.letterPairs.subtitleHard;
 
   return (
     <div className="flex-1 flex flex-col items-center gap-4 p-4 w-full select-none max-w-lg mx-auto">
@@ -28,16 +33,28 @@ export default function LetterPairs() {
 
       <DifficultySelector selected={level} options={['easy', 'medium', 'hard']} onChange={changeLevel} />
 
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center gap-3">
         <div
           key={roundNo}
           data-testid="letter-pairs-prompt"
           data-answer={round.answer}
-          className="w-40 h-40 flex items-center justify-center rounded-[2.5rem] border-[3px] bg-white text-8xl font-black text-ink animate-pop-in"
+          data-prompt-kind={round.promptKind}
+          className={`w-40 h-40 flex items-center justify-center rounded-[2.5rem] border-[3px] bg-white text-8xl text-ink animate-pop-in ${
+            round.promptKind === 'letter' ? 'font-black' : ''
+          }`}
           style={{ borderColor: INK, boxShadow: hardShadow() }}
         >
           {round.prompt}
         </div>
+        {/* Picture prompts reveal their word once solved, first letter highlighted. */}
+        <p data-testid="letter-pairs-word" className="min-h-[2.5rem] text-3xl font-black text-ink">
+          {solved && round.word && (
+            <>
+              <span className="text-emerald-600">{round.word[0]}</span>
+              {round.word.slice(1)}
+            </>
+          )}
+        </p>
       </div>
 
       <div className="grid grid-cols-3 gap-4 w-full max-w-sm pb-2">
@@ -51,7 +68,7 @@ export default function LetterPairs() {
             testId="letter-pairs-option"
             dataAttrs={{ 'data-value': option }}
           >
-            <span className={round.kind === 'picture' ? 'text-5xl' : 'text-5xl font-black'}>{option}</span>
+            <span className={round.kind === 'picture' ? 'text-5xl' : `font-black ${optionSize(option)}`}>{option}</span>
           </AnswerBubble>
         ))}
       </div>

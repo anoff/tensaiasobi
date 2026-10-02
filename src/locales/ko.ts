@@ -418,9 +418,9 @@ export const ko: TranslationSchema = {
   },
   letterPairs: {
     title: "글자 짝꿍 🔠",
-    subtitleSame: "똑같은 글자를 찾아요!",
-    subtitlePartner: "첫 자음을 찾아요!",
-    subtitlePicture: "이 글자로 시작하는 그림은?",
+    subtitleEasy: "똑같은 글자를 찾아요!",
+    subtitleMedium: "첫 자음을 찾아요!",
+    subtitleHard: "이 글자로 시작하는 그림은?",
     help: "맞는 방울을 눌러요!",
   },
   patternTrain: {
