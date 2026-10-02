@@ -27,7 +27,14 @@ export function MathGame() {
   const { streak, highScore, registerCorrect, resetStreak } = useStreak('math');
 
   const loadNewQuestion = (currentLevel: GameDifficulty) => {
-    setQuestion(generateQuestion(currentLevel));
+    // Easy has only ~10 sums; never hand back the one the child just saw.
+    setQuestion((prev) => {
+      let next = generateQuestion(currentLevel);
+      for (let i = 0; i < 10 && next.num1 === prev.num1 && next.num2 === prev.num2 && next.operator === prev.operator; i++) {
+        next = generateQuestion(currentLevel);
+      }
+      return next;
+    });
     setSelectedAnswer(null);
     setIsCorrect(null);
     setMissed(false);
