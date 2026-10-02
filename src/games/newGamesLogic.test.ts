@@ -120,6 +120,25 @@ describe('Syllable Drum', () => {
     }
   });
 
+  it('never repeats a word twice in a row, and a lone short word stays rare (Japanese き)', () => {
+    for (const lang of Object.keys(DICTS) as Array<keyof typeof DICTS>) {
+      let previous: string | undefined;
+      for (let i = 0; i < 300; i++) {
+        const r = generateSyllableRound('easy', lang, items(lang), previous);
+        expect(r.emoji).not.toBe(previous);
+        previous = r.emoji;
+      }
+    }
+    let tree = 0;
+    let previous: string | undefined;
+    for (let i = 0; i < 1000; i++) {
+      const r = generateSyllableRound('easy', 'ja', items('ja'), previous);
+      if (r.emoji === '🌲') tree++;
+      previous = r.emoji;
+    }
+    expect(tree).toBeLessThan(200);
+  });
+
   it('every level has words in every language and respects its range', () => {
     for (const lang of Object.keys(DICTS) as Array<keyof typeof DICTS>) {
       expect(syllableWords(lang, items(lang)).length).toBeGreaterThan(20);

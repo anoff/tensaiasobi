@@ -75,8 +75,10 @@ export default function SyllableDrum() {
     }
   };
 
-  // Preschool can't read yet: the word only shows on medium/hard, split once solved.
-  const showWord = level !== 'easy' || solved;
+  // Help shrinks with the level: easy shows the word already split into beats,
+  // medium shows it whole, hard only the picture (the child has to name it).
+  const showWord = level !== 'hard' || solved;
+  const showSplit = level === 'easy' || solved;
   const slots = hint || solved ? round.parts.length : beats;
 
   return (
@@ -98,9 +100,9 @@ export default function SyllableDrum() {
         <span aria-hidden="true" className="text-8xl leading-none">{round.emoji}</span>
         {showWord && (
           <div data-testid="syllable-word" className="flex gap-1 text-3xl font-black text-ink">
-            {solved
+            {showSplit
               ? round.parts.map((part, i) => (
-                  <span key={i} className={i % 2 === 0 ? 'text-emerald-600' : 'text-sky-600'}>
+                  <span key={i} data-testid="syllable-part" className={i % 2 === 0 ? 'text-emerald-600' : 'text-sky-600'}>
                     {part}
                     {i < round.parts.length - 1 && <span className="text-ink/30">·</span>}
                   </span>

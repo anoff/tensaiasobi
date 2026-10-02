@@ -72,6 +72,19 @@ test.describe('Syllable Drum', () => {
     await expect.poll(() => stars(page)).toBeGreaterThan(before);
   });
 
+  test('help shrinks with the level: split word, whole word, picture only', async ({ page }) => {
+    await openGame(page, 'launch-syllable-drum', 'little', 'easy');
+    const count = Number(await page.getByTestId('syllable-stage').getAttribute('data-syllables'));
+    await expect(page.getByTestId('syllable-part')).toHaveCount(count);
+
+    await page.getByTestId('difficulty-medium').click();
+    await expect(page.getByTestId('syllable-word')).toBeVisible();
+    await expect(page.getByTestId('syllable-part')).toHaveCount(0);
+
+    await openGame(page, 'launch-syllable-drum', 'big', 'hard');
+    await expect(page.getByTestId('syllable-word')).toHaveCount(0);
+  });
+
   test('a wrong count on medium clears the beats and shows the hint', async ({ page }) => {
     await openGame(page, 'launch-syllable-drum', 'little', 'medium');
     const count = Number(await page.getByTestId('syllable-stage').getAttribute('data-syllables'));

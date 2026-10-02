@@ -78,6 +78,9 @@ export function splitSyllables(word: string, lang: string): string[] {
   return word.split('·');
 }
 
+/** A syllable count with N words is picked with weight min(N, cap). */
+const COUNT_WEIGHT_CAP = 8;
+
 export interface SyllableRound {
   emoji: string;
   /** Syllables in order, e.g. ['gi', 'raffe']. */
@@ -103,10 +106,16 @@ export function generateSyllableRound(
 ): SyllableRound {
   const [min, max] = SYLLABLE_RANGE[level];
   const words = syllableWords(lang, items).filter((w) => w.parts.length >= min && w.parts.length <= max);
-  // Pick the count first so long words aren't drowned out by the many short ones.
-  const counts = [...new Set(words.map((w) => w.parts.length))];
-  const count = counts[Math.floor(rand() * counts.length)];
-  const pool = words.filter((w) => w.parts.length === count && w.emoji !== previous);
-  const choices = pool.length > 0 ? pool : words;
-  return choices[Math.floor(rand() * choices.length)];
+  const fresh = words.filter((w) => w.emoji !== previous);
+  const pool = fresh.length > 0 ? fresh : words;
+  // Weight each syllable count by how many words it has, capped, so long words
+  // aren't drowned out by short ones, yet a count with a single word (Japanese
+  // き) doesn't come up every other round.
+  const byCount = new Map<number, SyllableRound[]>();
+  for (const w of pool) byCount.set(w.parts.length, [...(byCount.get(w.parts.length) ?? []), w]);
+  const groups = [...byCount.values()];
+  const weights = groups.map((g) => Math.min(g.length, COUNT_WEIGHT_CAP));
+  let roll = rand() * weights.reduce((a, b) => a + b, 0);
+  const group = groups.find((_, i) => (roll -= weights[i]) < 0) ?? groups[groups.length - 1];
+  return group[Math.floor(rand() * group.length)];
 }
