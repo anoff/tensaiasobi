@@ -7,6 +7,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { getItemsByCategory } from '../data/townItems';
 import { useGameFX } from '../hooks/gameFXContext';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
+import { useLater } from '../hooks/useLater';
 
 type ServiceType = 'police' | 'fire' | 'ambulance';
 
@@ -95,6 +96,9 @@ export function DispatchGame() {
   const [score, setScore] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [shakeEventId, setShakeEventId] = useState<number | null>(null);
+  /** Brief wiggle of the vehicle row when an emergency is tapped before picking a vehicle. */
+  const [nudgeVehicles, setNudgeVehicles] = useState(false);
+  const { later } = useLater();
   const [gameStarted, setGameStarted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
@@ -210,8 +214,15 @@ export function DispatchGame() {
   };
 
   const handleEventClick = (event: DispatchEvent) => {
-    // The city only listens once a vehicle is picked.
-    if (!activeVehicle || solvingEventId === event.id || event.solved) return;
+    if (solvingEventId === event.id || event.solved) return;
+
+    // No vehicle yet: point the child at the vehicle row instead of doing nothing.
+    if (!activeVehicle) {
+      playPop();
+      setNudgeVehicles(true);
+      later(() => setNudgeVehicles(false), 500);
+      return;
+    }
 
     if (activeVehicle !== event.type) {
       playError();
@@ -303,14 +314,15 @@ export function DispatchGame() {
                     type="button"
                     data-testid="dispatch-cell"
                     data-event={event ? event.type : undefined}
-                    disabled={!activeVehicle || !event}
+                    disabled={!event}
                     onClick={() => event && handleEventClick(event)}
                     className={`
                       relative aspect-square flex items-center justify-center rounded-xl text-3xl
                       transition-all duration-75 outline-none
                       ${event ? 'bg-rose-50 border-2 border-rose-300' : 'bg-emerald-50 border-2 border-emerald-100'}
                       ${event && event.id === oldestEvent?.id ? 'ring-4 ring-candy-orange' : ''}
-                      ${event && activeVehicle ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
+                      ${event ? 'cursor-pointer' : 'cursor-default'}
+                      ${event && activeVehicle ? 'hover:scale-105' : ''}
                       ${event && shakeEventId === event.id ? 'animate-shake' : ''}
                     `}
                   >
@@ -334,7 +346,11 @@ export function DispatchGame() {
           </div>
 
           {/* Vehicle dispatch buttons */}
-          <div className="grid grid-cols-3 gap-3 w-full mt-4">
+          <div
+            data-testid="dispatch-vehicles"
+            data-nudge={nudgeVehicles ? 'true' : undefined}
+            className={`grid grid-cols-3 gap-3 w-full mt-4 ${nudgeVehicles ? 'animate-shake' : ''}`}
+          >
             {(Object.keys(VEHICLE_CONFIG) as ServiceType[]).map((type) => {
               const config = VEHICLE_CONFIG[type];
               const isActive = activeVehicle === type;
@@ -351,7 +367,7 @@ export function DispatchGame() {
                     isActive
                       ? 'outline outline-[5px] outline-offset-4 outline-amber-400 -translate-y-1 scale-105'
                       : activeVehicle
-                        ? 'opacity-50'
+                        ? 'opacity-70'
                         : ''
                   }`}
                 >
