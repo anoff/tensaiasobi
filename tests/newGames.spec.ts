@@ -21,26 +21,33 @@ test.describe('Crocodile Compare', () => {
     await openGame(page, 'launch-crocodile-compare', 'big', 'hard');
     await expect(page.getByTestId('compare-symbol-option')).toHaveCount(3);
     const symbol = await page.getByTestId('compare-stage').getAttribute('data-symbol');
+    // The crocodile points up (no hint) until the round is solved.
+    const croc = page.getByTestId('compare-croc');
+    await expect(croc).toHaveAttribute('style', /rotate\(90deg\)/);
     await page.locator(`[data-testid="compare-symbol-option"][data-symbol="${symbol}"]`).click();
     await expect(page.getByTestId('compare-symbol')).toHaveText(symbol!);
+    // Then it turns to the bigger side, or keeps pointing up on "=".
+    if (symbol === '=') await expect(croc).toHaveAttribute('style', /rotate\(90deg\)/);
+    else await expect(croc).not.toHaveAttribute('style', /rotate/);
   });
 });
 
 test.describe('Letter Pairs', () => {
-  test('easy names the first letter of a picture, medium the partner, hard a picture', async ({ page }) => {
+  test('easy finds the partner letter, medium the first letter of a picture, hard a picture', async ({ page }) => {
     await openGame(page, 'launch-letter-pairs', 'little', 'easy');
     const prompt = page.getByTestId('letter-pairs-prompt');
+    await expect(prompt).toHaveAttribute('data-prompt-kind', 'letter');
+    const partner = await prompt.getAttribute('data-answer');
+    expect(partner).toMatch(/^[a-z]$/);
+    await page.locator(`[data-testid="letter-pairs-option"][data-value="${partner}"]`).click();
+    await expect(page.locator(`[data-testid="letter-pairs-option"][data-value="${partner}"]`)).toBeDisabled();
+
+    await page.getByTestId('difficulty-medium').click();
     await expect(prompt).toHaveAttribute('data-prompt-kind', 'picture');
     const answer = await prompt.getAttribute('data-answer');
     expect(answer).toMatch(/^[A-Z]$/);
     await page.locator(`[data-testid="letter-pairs-option"][data-value="${answer}"]`).click();
     await expect(page.getByTestId('letter-pairs-word')).toContainText(answer!);
-
-    await page.getByTestId('difficulty-medium').click();
-    const partner = await page.getByTestId('letter-pairs-prompt').getAttribute('data-answer');
-    expect(partner).toBe(partner!.toLowerCase());
-    await page.locator(`[data-testid="letter-pairs-option"][data-value="${partner}"]`).click();
-    await expect(page.locator(`[data-testid="letter-pairs-option"][data-value="${partner}"]`)).toBeDisabled();
 
     await openGame(page, 'launch-letter-pairs', 'big', 'hard');
     await expect(page.getByTestId('letter-pairs-option')).toHaveCount(3);

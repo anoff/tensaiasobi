@@ -1,4 +1,6 @@
 import type { GameDifficulty } from '../types/game';
+import { CHOICE_STARS } from '../utils/difficulty';
+import { pick, randomInt, type Rand } from '../utils/random';
 
 export type CompareSymbol = '<' | '=' | '>';
 
@@ -28,15 +30,9 @@ export interface CompareRound {
  * the one rule the child is learning.
  */
 export const COMPARE_MAX: Record<GameDifficulty, number> = { easy: 5, medium: 20, hard: 100 };
-export const COMPARE_STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
+export const COMPARE_STARS = CHOICE_STARS;
 
 const FRUIT = ['🍎', '🍓', '🍊', '🍇', '🍒', '🍐'];
-
-type Rand = () => number;
-
-function randomInt(min: number, max: number, rand: Rand): number {
-  return min + Math.floor(rand() * (max - min + 1));
-}
 
 export function symbolFor(left: number, right: number): CompareSymbol {
   return left < right ? '<' : left > right ? '>' : '=';
@@ -61,11 +57,12 @@ function hardRound(rand: Rand): [CompareSide, CompareSide] {
     const sumSide: CompareSide = { value: sum, addends: [a, b] };
     return rand() < 0.5 ? [sumSide, { value: other }] : [{ value: other }, sumSide];
   }
-  // Two-digit numbers, often sharing a digit so place value matters (47 ○ 74).
+  // The same number on both sides, so "=" comes up regularly.
   if (kind < 0.55) {
     const n = randomInt(10, 99, rand);
     return [{ value: n }, { value: n }];
   }
+  // Two-digit numbers, often with swapped digits so place value matters (47 ○ 74).
   const tens = randomInt(1, 9, rand);
   const ones = randomInt(0, 9, rand);
   const a = tens * 10 + ones;
@@ -75,7 +72,7 @@ function hardRound(rand: Rand): [CompareSide, CompareSide] {
 }
 
 export function generateCompareRound(level: GameDifficulty, rand: Rand = Math.random): CompareRound {
-  const emoji = FRUIT[randomInt(0, FRUIT.length - 1, rand)];
+  const emoji = pick(FRUIT, rand);
   if (level === 'hard') {
     const [left, right] = hardRound(rand);
     return { left, right, bigger: null, symbol: symbolFor(left.value, right.value), emoji };

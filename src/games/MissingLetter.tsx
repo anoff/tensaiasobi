@@ -13,6 +13,7 @@ export default function MissingLetter() {
     // Every locale dictionary has plenty of fitting words (unit-tested), so null never reaches the UI.
     (lvl: GameDifficulty) => generateMissingLetterRound(lvl, language, items)!,
     MISSING_LETTER_STARS,
+    (r) => `${r.word}|${r.gapIndex}`,
   );
 
   const chars = [...round.word];

@@ -18,6 +18,7 @@ export default function LetterPairs() {
   const { level, round, roundNo, solved, wrong, changeLevel, choose } = useChoiceRound(
     (lvl: GameDifficulty) => generateLetterPairsRound(lvl, language, items),
     LETTER_PAIRS_STARS,
+    (r) => r.prompt,
   );
 
   const subtitle =

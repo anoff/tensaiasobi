@@ -32,6 +32,21 @@ test.describe('Math Pop (merged with Fruit Math Pop)', () => {
     expect(await equation.innerText()).toBe(text);
   });
 
+  test('switching level right after a correct answer keeps the new level\'s sum', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('age-mode-little').click();
+    await page.getByTestId('launch-math').click();
+    const equation = page.getByTestId('math-equation');
+    const [a, b] = ((await equation.innerText()).match(/\d+/g) ?? []).map(Number);
+    await page.locator('[data-testid="math-answer-option"]', { hasText: new RegExp(`^${a + b}`) }).first().click();
+
+    // Before the 1.8 s "next question" pause runs out, pick medium.
+    await page.getByTestId('difficulty-medium').click();
+    const mediumSum = await equation.innerText();
+    await page.waitForTimeout(2500);
+    expect(await equation.innerText()).toBe(mediumSum);
+  });
+
   test('there is no separate Fruit Math Pop tile any more', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('launch-fruit-math-pop')).toHaveCount(0);

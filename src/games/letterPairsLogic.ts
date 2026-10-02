@@ -1,11 +1,14 @@
 import { shuffle } from '../utils/shuffle';
 import type { GameDifficulty } from '../types/game';
+import { CHOICE_STARS } from '../utils/difficulty';
+import { pick, type Rand } from '../utils/random';
+import { HIRAGANA } from '../utils/kana';
 
 /**
  * Letter Pairs: find the partner of the big prompt.
- * English, German, French:
- * - easy: a simple picture → the letter it starts with (🍎 → A)
- * - medium: upper → lower case (B → b)
+ * English, German, French (shape first, then sound):
+ * - easy: upper → lower case (B → b)
+ * - medium: a simple picture → the letter it starts with (🍎 → A)
  * - hard: a letter → a picture whose word starts with it (B → 🐻)
  * Japanese:
  * - easy: a simple picture → the hiragana it starts with (🍎 → り)
@@ -25,10 +28,9 @@ export interface LetterPairsRound {
   word?: string;
 }
 
-export const LETTER_PAIRS_STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
+export const LETTER_PAIRS_STARS = CHOICE_STARS;
 
 const LATIN = 'ABCDEFGHIJKLMNOPRSTUVWZ'.split(''); // no Q/X/Y: rare first letters
-const HIRAGANA = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわ'.split('');
 /** Korean: a basic syllable and the consonant it starts with. */
 const HANGUL: Array<[string, string]> = [
   ['가', 'ㄱ'], ['나', 'ㄴ'], ['다', 'ㄷ'], ['라', 'ㄹ'], ['마', 'ㅁ'], ['바', 'ㅂ'], ['사', 'ㅅ'],
@@ -44,7 +46,7 @@ const ROMAJI: Record<string, string> = {
   ら: 'ra', り: 'ri', る: 'ru', れ: 're', ろ: 'ro', わ: 'wa',
 };
 
-/** Pictures a preschooler names without hesitation (easy picture → first letter). */
+/** Pictures a preschooler names without hesitation (picture → first letter). */
 export const EASY_PICTURES = [
   '🍎', '🐈', '🐕', '🐟', '🦒', '🐸', '🍉', '🚗', '🐄', '🦀', '🥚', '🌷', '🍑', '🐇', '🍓', '🍅',
   '🐢', '☂️', '🌈', '🌟', '☁️', '🌙', '🐯', '🐒', '🐙', '🐻', '🐬', '🐝', '🍄', '❄️', '🍊', '🥕',
@@ -52,12 +54,6 @@ export const EASY_PICTURES = [
 ];
 
 const OPTION_COUNT = 3;
-
-type Rand = () => number;
-
-function pick<T>(items: readonly T[], rand: Rand): T {
-  return items[Math.floor(rand() * items.length)];
-}
 
 /** Katakana sits exactly 0x60 above hiragana. */
 export function toKatakana(kana: string): string {
@@ -87,50 +83,59 @@ function partner(letter: string, lang: string): string {
   return letter.toLowerCase();
 }
 
-function letterRound(level: 'easy' | 'medium', lang: string): LetterPairsRound {
-  const pool = letterPool(lang);
-  const letters = shuffle([...pool]).slice(0, OPTION_COUNT);
+/** Same letter (Korean easy) or its partner form (B → b, あ → ア, 가 → ㄱ). */
+function letterRound(mode: 'same' | 'partner', lang: string, rand: Rand): LetterPairsRound {
+  const letters = shuffle(letterPool(lang), rand).slice(0, OPTION_COUNT);
   const prompt = letters[0];
-  const show = level === 'easy' ? (l: string) => l : (l: string) => partner(l, lang);
+  const show = mode === 'same' ? (l: string) => l : (l: string) => partner(l, lang);
   return {
     prompt,
     promptKind: 'letter',
     kind: 'letter',
     answer: show(prompt),
-    options: shuffle(letters.map(show)),
+    options: shuffle(letters.map(show), rand),
   };
 }
 
-/** Spellings whose first letter isn't the first sound (cherry, ship, Schnecke, chat, phone, thumb, knee). */
-const MISLEADING_START = /^(ch|sh|sch|ph|th|kn|wh)/i;
+/**
+ * Spellings whose first letter isn't the first sound a child hears:
+ * cherry, ship, phone, thumb, knee, wrist; Ei, Eule, Stern, Pfirsich;
+ * chat, hibou (silent h), ours, oiseau, auto.
+ */
+const MISLEADING_START: Record<string, RegExp> = {
+  en: /^(ch|sh|ph|th|kn|wh|wr)/i,
+  de: /^(sch|ch|ph|ei|eu|äu|st|sp|pf)/i,
+  fr: /^(ch|ph|h|ou|oi|au|eau)/i,
+};
 
-/** Pictures usable on easy: the word starts with a plain letter of the pool and sounds like it. */
+/** Pictures usable for picture → first letter: the word starts with a plain letter of the pool and sounds like it. */
 export function easyPictures(lang: string, items: Record<string, string>): string[] {
   const pool = letterPool(lang);
+  const misleading = MISLEADING_START[lang];
   return EASY_PICTURES.filter((emoji) => {
     const word = items[emoji];
     if (!word) return false;
     // Accented starts (éléphant) are left out on purpose: É is not on the letter bubbles.
     const first = lang === 'ja' ? word[0] : word[0].toUpperCase();
-    return pool.includes(first) && (lang === 'ja' || !MISLEADING_START.test(word));
+    return pool.includes(first) && !misleading?.test(word);
   });
 }
 
-/** Easy: 🍎 → which letter does the word start with? (A, or り in Japanese) */
+/** 🍎 → which letter does the word start with? (A, or り in Japanese) */
 function pictureToLetterRound(lang: string, items: Record<string, string>, rand: Rand): LetterPairsRound {
   const emoji = pick(easyPictures(lang, items), rand);
   const raw = items[emoji];
   const answer = startLetter(raw, lang);
   // Show the word the way it is written in a picture book: capitalised in Latin script.
   const word = lang === 'ja' ? raw : answer + raw.slice(1);
-  const distractors = shuffle(letterPool(lang).filter((k) => k !== answer)).slice(0, OPTION_COUNT - 1);
-  return { prompt: emoji, promptKind: 'picture', kind: 'letter', answer, options: shuffle([answer, ...distractors]), word };
+  const distractors = shuffle(letterPool(lang).filter((k) => k !== answer), rand).slice(0, OPTION_COUNT - 1);
+  return { prompt: emoji, promptKind: 'picture', kind: 'letter', answer, options: shuffle([answer, ...distractors], rand), word };
 }
 
 /** Japanese hard: し → shi. */
-function romajiRound(): LetterPairsRound {
-  const kana = shuffle([...HIRAGANA]).slice(0, OPTION_COUNT);
-  return { prompt: kana[0], promptKind: 'letter', kind: 'letter', answer: toRomaji(kana[0]), options: shuffle(kana.map(toRomaji)) };
+function romajiRound(rand: Rand): LetterPairsRound {
+  const kana = shuffle(HIRAGANA, rand).slice(0, OPTION_COUNT);
+  return { prompt: kana[0], promptKind: 'letter', kind: 'letter', answer: toRomaji(kana[0]), options: shuffle(kana.map(toRomaji), rand) };
 }
 
 function pictureRound(lang: string, items: Record<string, string>, rand: Rand): LetterPairsRound | null {
@@ -143,14 +148,14 @@ function pictureRound(lang: string, items: Record<string, string>, rand: Rand): 
   }
   const letters = [...byLetter.keys()];
   if (letters.length < OPTION_COUNT) return null;
-  const chosen = shuffle(letters).slice(0, OPTION_COUNT);
+  const chosen = shuffle(letters, rand).slice(0, OPTION_COUNT);
   const pictures = chosen.map((letter) => pick(byLetter.get(letter)!, rand));
   return {
     prompt: chosen[0],
     promptKind: 'letter',
     kind: 'picture',
     answer: pictures[0],
-    options: shuffle(pictures),
+    options: shuffle(pictures, rand),
   };
 }
 
@@ -160,13 +165,16 @@ export function generateLetterPairsRound(
   items: Record<string, string>,
   rand: Rand = Math.random,
 ): LetterPairsRound {
-  if (level === 'easy' && lang !== 'ko') return pictureToLetterRound(lang, items, rand);
   if (lang === 'ja') {
-    return level === 'hard' ? romajiRound() : letterRound('medium', lang);
+    if (level === 'easy') return pictureToLetterRound(lang, items, rand);
+    return level === 'hard' ? romajiRound(rand) : letterRound('partner', lang, rand);
   }
-  if (level === 'hard') {
-    const round = pictureRound(lang, items, rand);
-    if (round) return round;
+  if (lang === 'ko') {
+    if (level === 'easy') return letterRound('same', lang, rand);
+    if (level === 'medium') return letterRound('partner', lang, rand);
+  } else {
+    if (level === 'easy') return letterRound('partner', lang, rand);
+    if (level === 'medium') return pictureToLetterRound(lang, items, rand);
   }
-  return letterRound(level === 'easy' ? 'easy' : 'medium', lang);
+  return pictureRound(lang, items, rand) ?? letterRound('partner', lang, rand);
 }

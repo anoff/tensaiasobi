@@ -3,6 +3,7 @@ import { useGameFX } from './gameFXContext';
 import { useAgeDifficulty } from './useAgeDifficulty';
 import { useLater } from './useLater';
 import { wrongMeansNewRound } from '../utils/difficulty';
+import { freshRound } from '../utils/freshRound';
 import type { GameDifficulty } from '../types/game';
 
 /** Pause on a solved round before the next one, in ms. */
@@ -11,9 +12,14 @@ const NEXT_MS = 1400;
 /**
  * Shared flow for "pick the right one" games: age-based level, one round at
  * a time, stars on a hit, and on a miss either a retry (easy/medium) or a
- * fresh round (hard and parent challenges).
+ * fresh round (hard and parent challenges). `roundKey` names what the child
+ * sees (not the option order), so a new round never repeats the last one.
  */
-export function useChoiceRound<R>(generate: (level: GameDifficulty) => R, stars: Record<GameDifficulty, number>) {
+export function useChoiceRound<R>(
+  generate: (level: GameDifficulty) => R,
+  stars: Record<GameDifficulty, number>,
+  roundKey: (round: R) => string,
+) {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const [level, setLevel] = useAgeDifficulty();
   const [round, setRound] = useState<R>(() => generate(level));
@@ -26,7 +32,7 @@ export function useChoiceRound<R>(generate: (level: GameDifficulty) => R, stars:
 
   const nextRound = (lvl: GameDifficulty = level) => {
     cancelAll();
-    setRound(generate(lvl));
+    setRound((prev) => freshRound(() => generate(lvl), prev, roundKey));
     setRoundNo((n) => n + 1);
     setSolved(false);
     setWrong(null);

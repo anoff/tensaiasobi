@@ -1,11 +1,14 @@
 import type { GameDifficulty } from '../types/game';
+import { CHOICE_STARS } from '../utils/difficulty';
+import { SMALL_YOON } from '../utils/kana';
 
 /**
  * Syllable Drum: drum once per syllable, then check.
  * Latin-script words are split by hand (automatic hyphenation is wrong too
  * often for a child to trust). French counts spoken syllables the way
  * maternelle claps them: a silent final "e" is not a beat (pomme = 1,
- * gi·rafe = 2). Multi-word names are left out. Japanese counts morae
+ * gi·rafe = 2). Multi-word names, and words longer than the hard range
+ * (Wassermelone, Marienkäfer), are left out. Japanese counts morae
  * (けーき = 3, ちょうちょ = 3) and Korean counts blocks, both derived from
  * the shared picture dictionary.
  */
@@ -39,7 +42,7 @@ export const SYLLABLE_WORDS: Record<'en' | 'de' | 'fr', Record<string, string>> 
     '🎸': 'Gi·tar·re', '🤖': 'Ro·bo·ter', '🐢': 'Schild·krö·te', '🍍': 'A·na·nas', '🐧': 'Pin·gu·in',
     '🦋': 'Schmet·ter·ling', '🧸': 'Ted·dy·bär',
     '🌈': 'Re·gen·bo·gen',
-    '🔑': 'Schlüs·sel', '🍉': 'Was·ser·me·lo·ne', '🛥️': 'Boot', '✈️': 'Flug·zeug', '🎈': 'Bal·lon', '🦀': 'Krab·be', '🍇': 'Trau·be', '🧅': 'Zwie·bel', '🍑': 'Pfir·sich', '🐌': 'Schne·cke', '☂️': 'Re·gen·schirm', '🐺': 'Wolf', '🚁': 'Hub·schrau·ber', '🚲': 'Fahr·rad', '🐙': 'Kra·ke', '🐨': 'Ko·a·la', '🐷': 'Schwein', '🐔': 'Huhn', '🐬': 'Del·fin', '🐞': 'Ma·ri·en·kä·fer', '👻': 'Geist', '🎁': 'Ge·schenk', '❄️': 'Schnee·flo·cke', '🍩': 'Do·nut', '🍪': 'Keks', '🍬': 'Bon·bon', '🍊': 'O·ran·ge', '⛵': 'Yacht', '🥜': 'Nuss', '📓': 'Heft', '🔍': 'Lu·pe', '🧱': 'Zie·gel', '✏️': 'Blei·stift', '🧣': 'Schal', '🦖': 'Di·no·sau·ri·er', '🦄': 'Ein·horn', '🐍': 'Schlan·ge', '🍟': 'Pom·mes', '🍔': 'Bur·ger', '🌽': 'Mais', '🛸': 'U·F·O', '🎒': 'Ruck·sack', '🧩': 'Puz·zle',
+    '🔑': 'Schlüs·sel', '🛥️': 'Boot', '✈️': 'Flug·zeug', '🎈': 'Bal·lon', '🦀': 'Krab·be', '🍇': 'Trau·be', '🧅': 'Zwie·bel', '🍑': 'Pfir·sich', '🐌': 'Schne·cke', '☂️': 'Re·gen·schirm', '🐺': 'Wolf', '🚁': 'Hub·schrau·ber', '🚲': 'Fahr·rad', '🐙': 'Kra·ke', '🐨': 'Ko·a·la', '🐷': 'Schwein', '🐔': 'Huhn', '🐬': 'Del·fin', '👻': 'Geist', '🎁': 'Ge·schenk', '❄️': 'Schnee·flo·cke', '🍩': 'Do·nut', '🍪': 'Keks', '🍬': 'Bon·bon', '🍊': 'O·ran·ge', '⛵': 'Yacht', '🥜': 'Nuss', '📓': 'Heft', '🔍': 'Lu·pe', '🧱': 'Zie·gel', '✏️': 'Blei·stift', '🧣': 'Schal', '🦄': 'Ein·horn', '🐍': 'Schlan·ge', '🍟': 'Pom·mes', '🍔': 'Bur·ger', '🌽': 'Mais', '🛸': 'U·F·O', '🎒': 'Ruck·sack', '🧩': 'Puz·zle',
   },
   fr: {
     '🐈': 'chat', '🐕': 'chien', '🔑': 'clé', '🐺': 'loup', '🚂': 'train', '🐻': 'ours', '🥛': 'lait',
@@ -55,7 +58,7 @@ export const SYLLABLE_WORDS: Record<'en' | 'de' | 'fr', Record<string, string>> 
   },
 };
 
-export const SYLLABLE_STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
+export const SYLLABLE_STARS = CHOICE_STARS;
 
 /** Allowed syllable counts per level. */
 export const SYLLABLE_RANGE: Record<GameDifficulty, [number, number]> = {
@@ -64,13 +67,11 @@ export const SYLLABLE_RANGE: Record<GameDifficulty, [number, number]> = {
   hard: [2, 4],
 };
 
-const SMALL_KANA = 'ぁぃぅぇぉゃゅょゎ';
-
 /** Japanese morae: every kana and ー/っ/ん count; small ゃゅょ join the previous kana. */
 export function splitMorae(word: string): string[] {
   const parts: string[] = [];
   for (const char of word) {
-    if (SMALL_KANA.includes(char) && parts.length > 0) parts[parts.length - 1] += char;
+    if (SMALL_YOON.includes(char) && parts.length > 0) parts[parts.length - 1] += char;
     else parts.push(char);
   }
   return parts;

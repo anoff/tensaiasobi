@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { GameDifficulty } from '../types/game';
+import { seededRand } from '../utils/random';
 import { en } from '../locales/en';
 import { de } from '../locales/de';
 import { fr } from '../locales/fr';
@@ -60,6 +61,10 @@ describe('Letter Pairs', () => {
           expect(r.options).toContain(r.answer);
           if (level === 'easy' && lang === 'ko') expect(r.answer).toBe(r.prompt);
           if (level === 'easy' && lang !== 'ko') {
+            expect(r.promptKind).toBe('letter');
+            expect(r.answer).toBe(r.prompt.toLowerCase());
+          }
+          if (level === 'medium' && lang !== 'ko') {
             expect(r.promptKind).toBe('picture');
             expect(r.answer).toBe(items(lang)[r.prompt][0].toUpperCase());
             expect(r.word?.toLowerCase()).toBe(items(lang)[r.prompt].toLowerCase());
@@ -111,6 +116,35 @@ describe('Letter Pairs', () => {
       }
     }
     expect(toRomaji('つ')).toBe('tsu');
+  });
+
+  it('skips pictures whose first letter is not the first sound (Ei, Eule, Stern, hibou, ours)', () => {
+    const words = (lang: 'de' | 'fr') => easyPictures(lang, items(lang)).map((e) => items(lang)[e]);
+    for (const w of ['Ei', 'Eule', 'Stern', 'Pfirsich']) expect(words('de')).not.toContain(w);
+    for (const w of ['hibou', 'ours']) expect(words('fr')).not.toContain(w);
+    expect(words('de')).toContain('Apfel');
+  });
+
+  it('is reproducible with a seed', () => {
+    for (const level of LEVELS) {
+      expect(generateLetterPairsRound(level, 'en', items('en'), seededRand(7))).toEqual(
+        generateLetterPairsRound(level, 'en', items('en'), seededRand(7)),
+      );
+    }
+  });
+});
+
+describe('Missing Letter gaps', () => {
+  it('the gap is always a plain letter the choices can show (no ŒUF on easy)', () => {
+    for (const lang of Object.keys(DICTS) as Array<keyof typeof DICTS>) {
+      for (const level of LEVELS) {
+        for (let i = 0; i < 300; i++) {
+          const r = generateMissingLetterRound(level, lang, items(lang))!;
+          if (lang === 'en' || lang === 'de' || lang === 'fr') expect(r.answer, `${lang} ${r.word}`).toMatch(/^[A-Z]$/);
+          if (level === 'easy') expect(r.gapIndex).toBe(0);
+        }
+      }
+    }
   });
 });
 
@@ -179,6 +213,13 @@ describe('Syllable Drum', () => {
       previous = r.emoji;
     }
     expect(tree).toBeLessThan(200);
+  });
+
+  it('every hand-split word fits some level', () => {
+    const longest = Math.max(...Object.values(SYLLABLE_RANGE).map(([, max]) => max));
+    for (const words of Object.values(SYLLABLE_WORDS)) {
+      for (const word of Object.values(words)) expect(word.split('·').length, word).toBeLessThanOrEqual(longest);
+    }
   });
 
   it('every level has words in every language and respects its range', () => {

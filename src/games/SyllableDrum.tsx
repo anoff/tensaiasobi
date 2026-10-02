@@ -147,7 +147,7 @@ export default function SyllableDrum() {
           color="orange"
           size="md"
           data-testid="syllable-reset"
-          disabled={solved || beats === 0}
+          disabled={solved || shaking || beats === 0}
           onClick={() => {
             playPop();
             setBeats(0);

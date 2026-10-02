@@ -11,12 +11,17 @@ const SYMBOLS: CompareSymbol[] = ['<', '=', '>'];
 
 export default function CrocodileCompare() {
   const { t } = useTranslation();
-  const { level, round, roundNo, solved, wrong, missed, changeLevel, choose } = useChoiceRound(generateCompareRound, COMPARE_STARS);
+  const { level, round, roundNo, solved, wrong, missed, changeLevel, choose } = useChoiceRound(
+    generateCompareRound,
+    COMPARE_STARS,
+    (r) => `${r.left.addends ?? r.left.value}|${r.right.addends ?? r.right.value}`,
+  );
 
   const showDots = level === 'medium' && missed;
-  const symbolShown = level === 'hard' ? (solved ? round.symbol : '?') : solved ? round.symbol : '';
-  // 🐊 faces left; once solved it turns its mouth toward the bigger side.
-  const faceRight = solved && round.symbol === '<';
+  const symbolShown = solved ? round.symbol : level === 'hard' ? '?' : '';
+  // 🐊 faces left in the font. It points up (no hint) until the round is solved,
+  // then opens its mouth toward the bigger side; on "=" it keeps pointing up.
+  const crocTransform = !solved || round.symbol === '=' ? 'rotate(90deg)' : round.symbol === '<' ? 'scaleX(-1)' : 'none';
 
   const sideContent = (side: CompareSide) => {
     if (level === 'easy') {
@@ -85,7 +90,8 @@ export default function CrocodileCompare() {
           <span
             aria-hidden="true"
             className="text-5xl leading-none transition-transform duration-300"
-            style={{ transform: faceRight ? 'scaleX(-1)' : undefined }}
+            data-testid="compare-croc"
+            style={{ transform: crocTransform }}
           >
             🐊
           </span>

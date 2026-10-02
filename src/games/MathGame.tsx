@@ -5,11 +5,13 @@ import StreakBadge from '../components/StreakBadge';
 import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
-import { starMultiplier, wrongMeansNewRound } from '../utils/difficulty';
+import { CHOICE_STARS, wrongMeansNewRound } from '../utils/difficulty';
+import { freshRound } from '../utils/freshRound';
 import { NotebookChoice, NotebookOperator, NotebookSheet, NotebookTally, type NotebookChoiceState } from '../components/Notebook';
 import { generateMathQuestion as generateQuestion, type MathQuestion } from './mathPopLogic';
 import { useGameFX } from '../hooks/gameFXContext';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
+import { useLater } from '../hooks/useLater';
 
 
 export function MathGame() {
@@ -23,18 +25,17 @@ export function MathGame() {
   // on medium only after a miss, never on hard.
   const [missed, setMissed] = useState(false);
   const { t } = useTranslation();
+  // Pending "next question" timers; dropped whenever a new question loads so a
+  // level change can't be overwritten by a question from the old level.
+  const { later, cancelAll } = useLater();
 
   const { streak, highScore, registerCorrect, resetStreak } = useStreak('math');
 
   const loadNewQuestion = (currentLevel: GameDifficulty) => {
+    cancelAll();
     // Easy has only ~10 sums; never hand back the one the child just saw.
-    setQuestion((prev) => {
-      let next = generateQuestion(currentLevel);
-      for (let i = 0; i < 10 && next.num1 === prev.num1 && next.num2 === prev.num2 && next.operator === prev.operator; i++) {
-        next = generateQuestion(currentLevel);
-      }
-      return next;
-    });
+    setQuestion((prev) => freshRound(() => generateQuestion(currentLevel), prev, (q) => `${q.num1}${q.operator}${q.num2}`));
+    setShowConfetti(false);
     setSelectedAnswer(null);
     setIsCorrect(null);
     setMissed(false);
@@ -51,14 +52,9 @@ export function MathGame() {
       
       registerCorrect();
 
-      // Award stars: base 2 × level multiplier
-      const multiplier = starMultiplier(level);
-      onStarEarned?.(2 * multiplier);
+      onStarEarned?.(CHOICE_STARS[level]);
 
-      setTimeout(() => {
-        setShowConfetti(false);
-        loadNewQuestion(level);
-      }, 1800);
+      later(() => loadNewQuestion(level), 1800);
     } else {
       setIsCorrect(false);
       setMissed(true);
@@ -66,11 +62,9 @@ export function MathGame() {
       resetStreak();
 
       if (wrongMeansNewRound(level, challengeMode)) {
-        setTimeout(() => {
-          loadNewQuestion(level);
-        }, 1500);
+        later(() => loadNewQuestion(level), 1500);
       } else {
-        setTimeout(() => {
+        later(() => {
           setSelectedAnswer(null);
           setIsCorrect(null);
         }, 1000);

@@ -1,5 +1,7 @@
 import { shuffle } from '../utils/shuffle';
 import type { GameDifficulty } from '../types/game';
+import { CHOICE_STARS } from '../utils/difficulty';
+import { pick, type Rand } from '../utils/random';
 
 /**
  * Pattern Train: wagons repeat a core pattern, one wagon is a "?".
@@ -14,7 +16,7 @@ export interface PatternRound {
   options: string[];
 }
 
-export const PATTERN_STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
+export const PATTERN_STARS = CHOICE_STARS;
 
 /** Cores as index strings into the round's symbol set. */
 const CORES: Record<GameDifficulty, string[]> = {
@@ -31,15 +33,9 @@ const THEMES = [
   ['🚗', '🚲', '🚂', '✈️', '🚀'],
 ];
 
-type Rand = () => number;
-
-function pick<T>(items: readonly T[], rand: Rand): T {
-  return items[Math.floor(rand() * items.length)];
-}
-
 export function generatePatternRound(level: GameDifficulty, rand: Rand = Math.random): PatternRound {
   const core = pick(CORES[level], rand).split('').map(Number);
-  const symbols = shuffle([...pick(THEMES, rand)]);
+  const symbols = shuffle(pick(THEMES, rand), rand);
   const repeats = level === 'easy' ? 3 : 2;
   const length = core.length * repeats + 1;
   const wagons = Array.from({ length }, (_, i) => symbols[core[i % core.length]]);
@@ -54,8 +50,8 @@ export function generatePatternRound(level: GameDifficulty, rand: Rand = Math.ra
   const used = [...new Set(core)].map((i) => symbols[i]);
   const optionCount = level === 'hard' ? 4 : 3;
   // Distractors: the pattern's own symbols first (the real trap), then a stranger.
-  const distractors = [...shuffle(used.filter((s) => s !== answer)), ...symbols.filter((s) => !used.includes(s))];
-  const options = shuffle([answer, ...distractors.slice(0, optionCount - 1)]);
+  const distractors = [...shuffle(used.filter((s) => s !== answer), rand), ...symbols.filter((s) => !used.includes(s))];
+  const options = shuffle([answer, ...distractors.slice(0, optionCount - 1)], rand);
 
   return { wagons, gapIndex, answer, options };
 }

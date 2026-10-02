@@ -7,7 +7,11 @@ import { PATTERN_STARS, generatePatternRound } from './patternTrainLogic';
 
 export default function PatternTrain() {
   const { t } = useTranslation();
-  const { level, round, roundNo, solved, wrong, changeLevel, choose } = useChoiceRound(generatePatternRound, PATTERN_STARS);
+  const { level, round, roundNo, solved, wrong, changeLevel, choose } = useChoiceRound(
+    generatePatternRound,
+    PATTERN_STARS,
+    (r) => `${r.wagons.join('')}|${r.gapIndex}`,
+  );
 
   return (
     <div className="flex-1 flex flex-col items-center gap-4 p-4 w-full select-none max-w-lg mx-auto">

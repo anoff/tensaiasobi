@@ -418,8 +418,8 @@ export const fr: TranslationSchema = {
   },
   letterPairs: {
     title: "Paires de lettres 🔠",
-    subtitleEasy: "Par quelle lettre ça commence ?",
-    subtitleMedium: "Trouve sa lettre minuscule !",
+    subtitleEasy: "Trouve sa lettre minuscule !",
+    subtitleMedium: "Par quelle lettre ça commence ?",
     subtitleHard: "Quelle image commence par cette lettre ?",
     help: "Touche la bonne bulle !",
   },

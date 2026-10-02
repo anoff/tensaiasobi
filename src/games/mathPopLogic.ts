@@ -1,5 +1,6 @@
 import { shuffle } from '../utils/shuffle';
 import type { GameDifficulty } from '../types/game';
+import { pick, randomInt, type Rand } from '../utils/random';
 
 export type MathOperator = '+' | '-';
 
@@ -26,12 +27,6 @@ export const MATH_POP_MAX: Record<GameDifficulty, number> = { easy: 5, medium: 1
 export const MATH_POP_FRUIT = ['🍎', '🍌', '🍇', '🍉', '🍓', '🍍'];
 
 const OPTION_COUNT = 3;
-
-type Rand = () => number;
-
-function randomInt(min: number, max: number, rand: Rand): number {
-  return min + Math.floor(rand() * (max - min + 1));
-}
 
 function operands(level: GameDifficulty, operator: MathOperator, rand: Rand): [number, number] {
   const max = MATH_POP_MAX[level];
@@ -61,7 +56,7 @@ export function generateMathQuestion(level: GameDifficulty, rand: Rand = Math.ra
   // Distractors sit right next to the answer so the child has to work it out.
   const options = new Set<number>([answer]);
   for (let spread = 1; options.size < OPTION_COUNT; spread++) {
-    for (const candidate of shuffle([answer - spread, answer + spread])) {
+    for (const candidate of shuffle([answer - spread, answer + spread], rand)) {
       if (options.size < OPTION_COUNT && candidate >= 0 && candidate <= max) options.add(candidate);
     }
   }
@@ -71,7 +66,7 @@ export function generateMathQuestion(level: GameDifficulty, rand: Rand = Math.ra
     num2,
     operator,
     answer,
-    options: shuffle([...options]),
-    emoji: MATH_POP_FRUIT[randomInt(0, MATH_POP_FRUIT.length - 1, rand)],
+    options: shuffle([...options], rand),
+    emoji: pick(MATH_POP_FRUIT, rand),
   };
 }

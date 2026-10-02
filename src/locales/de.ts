@@ -418,8 +418,8 @@ export const de: TranslationSchema = {
   },
   letterPairs: {
     title: "Buchstabenpaare 🔠",
-    subtitleEasy: "Mit welchem Buchstaben fängt es an?",
-    subtitleMedium: "Finde den kleinen Partner!",
+    subtitleEasy: "Finde den kleinen Partner!",
+    subtitleMedium: "Mit welchem Buchstaben fängt es an?",
     subtitleHard: "Welches Bild fängt mit diesem Buchstaben an?",
     help: "Tippe auf die passende Blase!",
   },
