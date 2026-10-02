@@ -6,7 +6,8 @@ import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
 import { BlockTile } from './components/BlockTile';
 import { AgeSwitch } from './components/AgeSwitch';
-import { CORAL, LEAF, BUTTER, INK, PLAY_FILLS, PLAY_MAT_STYLE } from './theme/blockTable';
+import { CORAL, LEAF, BUTTER, INK, PLAY_MAT_STYLE } from './theme/blockTable';
+import { CATEGORY_EMOJI, categoryFill } from './theme/categories';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
@@ -21,29 +22,11 @@ import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
 import { couponLabel, type Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
-import { GAMES, GAME_CATEGORIES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, gamesInCategory, isGameId, type AgeBand, type GameCategory, type GameId } from './games/catalog';
+import { GAMES, GAME_CATEGORIES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, gamesInCategory, isGameId, type AgeBand, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 import { formatRemaining, useSessionTimer } from './hooks/useSessionTimer';
-
-const CATEGORY_FILL: Record<Exclude<GameCategory, 'play'>, string> = {
-  numbers: BUTTER,
-  language: CORAL,
-  logic: LEAF,
-};
-
-const CATEGORY_EMOJI: Record<GameCategory, string> = {
-  numbers: '🔢',
-  language: '🔤',
-  logic: '🧠',
-  play: '🎲',
-};
-
-/** Learning categories keep one fill; the play shelf cycles chalk, pebble, coal. */
-function categoryFill(category: GameCategory, indexInSection: number): string {
-  return category === 'play' ? PLAY_FILLS[indexInSection % PLAY_FILLS.length] : CATEGORY_FILL[category];
-}
 
 type Screen = 'menu' | 'town' | 'coupons' | 'settings' | 'session' | GameId;
 type ParentGateNext = 'settings' | 'session';
