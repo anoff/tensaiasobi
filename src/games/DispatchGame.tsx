@@ -210,12 +210,8 @@ export function DispatchGame() {
   };
 
   const handleEventClick = (event: DispatchEvent) => {
-    if (solvingEventId === event.id || event.solved) return;
-
-    if (!activeVehicle) {
-      playPop();
-      return;
-    }
+    // The city only listens once a vehicle is picked.
+    if (!activeVehicle || solvingEventId === event.id || event.solved) return;
 
     if (activeVehicle !== event.type) {
       playError();
@@ -306,13 +302,15 @@ export function DispatchGame() {
                     key={`${ri}-${ci}`}
                     type="button"
                     data-testid="dispatch-cell"
+                    data-event={event ? event.type : undefined}
+                    disabled={!activeVehicle || !event}
                     onClick={() => event && handleEventClick(event)}
                     className={`
                       relative aspect-square flex items-center justify-center rounded-xl text-3xl
                       transition-all duration-75 outline-none
                       ${event ? 'bg-rose-50 border-2 border-rose-300' : 'bg-emerald-50 border-2 border-emerald-100'}
                       ${event && event.id === oldestEvent?.id ? 'ring-4 ring-candy-orange' : ''}
-                      ${event ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
+                      ${event && activeVehicle ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
                       ${event && shakeEventId === event.id ? 'animate-shake' : ''}
                     `}
                   >
@@ -346,8 +344,16 @@ export function DispatchGame() {
                   color={config.color}
                   size="md"
                   data-testid={`dispatch-vehicle-${type}`}
+                  aria-pressed={isActive}
                   onClick={() => handleVehicleSelect(type)}
-                  className={`flex-col gap-1 rounded-2xl ${isActive ? 'ring-4 ring-offset-2 ring-yellow-300 scale-105' : ''}`}
+                  // An outline, not a ring: KidButton's own box-shadow would hide a ring.
+                  className={`flex-col gap-1 rounded-2xl transition-[opacity,transform] ${
+                    isActive
+                      ? 'outline outline-[5px] outline-offset-4 outline-amber-400 -translate-y-1 scale-105'
+                      : activeVehicle
+                        ? 'opacity-50'
+                        : ''
+                  }`}
                 >
                   <span className="text-3xl">{config.emoji}</span>
                   <span className="text-xs font-black">{t.dispatchGame.vehicles[type]}</span>
