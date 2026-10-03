@@ -26,7 +26,7 @@ When picking this up, start at Slice C if two kids share a phone. Product beats 
 ## Slice E — engineering hygiene
 
 - [x] **`GameFX` context.** Stop drilling `playPop` / `playSuccess` / `playError` / `onStarEarned` / `challengeMode` into every game. Catalog render in `App.tsx` is the seam.
-- [x] **Split logic out of huge game files.** Pure generators + unit tests, same pattern as `fruitMathPopLogic.ts` / `fairSharePicnic.ts`. Priority: `LetterTrace.tsx`, `ShapeTrace.tsx`, `Shiritori.tsx`, `PuzzleGame.tsx` (all 600–1000 lines).
+- [x] **Split logic out of huge game files.** Pure generators + unit tests, same pattern as `mathPopLogic.ts` / `fairSharePicnic.ts`. Priority: `LetterTrace.tsx`, `ShapeTrace.tsx`, `Shiritori.tsx`, `PuzzleGame.tsx` (all 600–1000 lines).
 
 ## Slice F — art direction (gradual)
 

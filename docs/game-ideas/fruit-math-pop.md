@@ -1,5 +1,7 @@
 # Add new mini-game - Fruit Math Pop
 
+> **Status: merged into Math Pop.** Fruit Math Pop shipped and was later folded into Math Pop's easy level (fruit pictures + dot tallies, sums within 5); see `src/games/mathPopLogic.ts`. The plan below is kept for history.
+
 **Type**: Feature  
 **Learning category**: Numeracy - concrete addition and subtraction  
 **Target age**: 4-6 years

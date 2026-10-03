@@ -11,3 +11,11 @@ describe('shuffle', () => {
     expect(input).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
   });
 });
+
+describe('shuffle with a seed', () => {
+  it('is reproducible', async () => {
+    const { seededRand } = await import('./random');
+    const input = [1, 2, 3, 4, 5, 6, 7, 8];
+    expect(shuffle(input, seededRand(42))).toEqual(shuffle(input, seededRand(42)));
+  });
+});

@@ -7,6 +7,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { getItemsByCategory } from '../data/townItems';
 import { useGameFX } from '../hooks/gameFXContext';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
+import { useLater } from '../hooks/useLater';
 
 type ServiceType = 'police' | 'fire' | 'ambulance';
 
@@ -95,6 +96,9 @@ export function DispatchGame() {
   const [score, setScore] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [shakeEventId, setShakeEventId] = useState<number | null>(null);
+  /** Brief wiggle of the vehicle row when an emergency is tapped before picking a vehicle. */
+  const [nudgeVehicles, setNudgeVehicles] = useState(false);
+  const { later } = useLater();
   const [gameStarted, setGameStarted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
@@ -212,8 +216,11 @@ export function DispatchGame() {
   const handleEventClick = (event: DispatchEvent) => {
     if (solvingEventId === event.id || event.solved) return;
 
+    // No vehicle yet: point the child at the vehicle row instead of doing nothing.
     if (!activeVehicle) {
       playPop();
+      setNudgeVehicles(true);
+      later(() => setNudgeVehicles(false), 500);
       return;
     }
 
@@ -306,13 +313,16 @@ export function DispatchGame() {
                     key={`${ri}-${ci}`}
                     type="button"
                     data-testid="dispatch-cell"
+                    data-event={event ? event.type : undefined}
+                    disabled={!event}
                     onClick={() => event && handleEventClick(event)}
                     className={`
                       relative aspect-square flex items-center justify-center rounded-xl text-3xl
                       transition-all duration-75 outline-none
                       ${event ? 'bg-rose-50 border-2 border-rose-300' : 'bg-emerald-50 border-2 border-emerald-100'}
                       ${event && event.id === oldestEvent?.id ? 'ring-4 ring-candy-orange' : ''}
-                      ${event ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
+                      ${event ? 'cursor-pointer' : 'cursor-default'}
+                      ${event && activeVehicle ? 'hover:scale-105' : ''}
                       ${event && shakeEventId === event.id ? 'animate-shake' : ''}
                     `}
                   >
@@ -336,7 +346,11 @@ export function DispatchGame() {
           </div>
 
           {/* Vehicle dispatch buttons */}
-          <div className="grid grid-cols-3 gap-3 w-full mt-4">
+          <div
+            data-testid="dispatch-vehicles"
+            data-nudge={nudgeVehicles ? 'true' : undefined}
+            className={`grid grid-cols-3 gap-3 w-full mt-4 ${nudgeVehicles ? 'animate-shake' : ''}`}
+          >
             {(Object.keys(VEHICLE_CONFIG) as ServiceType[]).map((type) => {
               const config = VEHICLE_CONFIG[type];
               const isActive = activeVehicle === type;
@@ -346,8 +360,16 @@ export function DispatchGame() {
                   color={config.color}
                   size="md"
                   data-testid={`dispatch-vehicle-${type}`}
+                  aria-pressed={isActive}
                   onClick={() => handleVehicleSelect(type)}
-                  className={`flex-col gap-1 rounded-2xl ${isActive ? 'ring-4 ring-offset-2 ring-yellow-300 scale-105' : ''}`}
+                  // An outline, not a ring: KidButton's own box-shadow would hide a ring.
+                  className={`flex-col gap-1 rounded-2xl transition-[opacity,transform] ${
+                    isActive
+                      ? 'outline outline-[5px] outline-offset-4 outline-amber-400 -translate-y-1 scale-105'
+                      : activeVehicle
+                        ? 'opacity-70'
+                        : ''
+                  }`}
                 >
                   <span className="text-3xl">{config.emoji}</span>
                   <span className="text-xs font-black">{t.dispatchGame.vehicles[type]}</span>

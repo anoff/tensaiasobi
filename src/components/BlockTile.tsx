@@ -1,6 +1,6 @@
 import React from 'react';
 import { LauncherGlyph } from './LauncherGlyph';
-import { FILLS, INK, hardShadow } from '../theme/blockTable';
+import { FILLS, INK, hardShadow, tileLabelOn } from '../theme/blockTable';
 
 /** 4px white halo that follows the glyph outline (plain CSS, no disc). */
 const EMOJI_HALO =
@@ -19,14 +19,16 @@ function tileFill(index: number): string {
 interface BlockTileProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   emoji: string;
   label: string;
-  /** Catalog / grid index — cycles coral, leaf, butter. */
+  /** Grid index — cycles coral, leaf, butter when no `fill` is given. */
   index: number;
+  /** Explicit tile colour (the home grid colours tiles by category). */
+  fill?: string;
   /** Stable id used for the slight tile tilt. */
   tileId: string;
 }
 
-export function BlockTile({ emoji, label, index, tileId, className = '', style, ...props }: BlockTileProps) {
-  const fill = tileFill(index);
+export function BlockTile({ emoji, label, index, fill: fillProp, tileId, className = '', style, ...props }: BlockTileProps) {
+  const fill = fillProp ?? tileFill(index);
   const tilt = tileTilt(tileId);
 
   return (
@@ -54,7 +56,7 @@ export function BlockTile({ emoji, label, index, tileId, className = '', style, 
         </span>
         <span
           className="w-full truncate px-0.5 text-center text-[13px] font-black leading-tight tracking-tight sm:text-sm"
-          style={{ color: INK }}
+          style={{ color: tileLabelOn(fill) }}
         >
           {label}
         </span>

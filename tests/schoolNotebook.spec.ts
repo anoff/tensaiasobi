@@ -23,8 +23,8 @@ test.describe('School games use the notebook answer sheet', () => {
   test('Math: a wrong line shakes and clears so the child can try again', async ({ page }) => {
     await page.getByTestId('launch-math').click();
     const text = await page.getByTestId('math-equation').innerText();
-    const match = text.match(/(\d+)\s*\+\s*(\d+)/)!;
-    const answer = Number(match[1]) + Number(match[2]);
+    const match = text.match(/(\d+)\s*([+−])\s*(\d+)/)!;
+    const answer = match[2] === '+' ? Number(match[1]) + Number(match[3]) : Number(match[1]) - Number(match[3]);
 
     const options = page.getByTestId('math-answer-option');
     const values = await options.evaluateAll((els) => els.map((el) => parseInt(el.textContent ?? '', 10)));
@@ -49,6 +49,15 @@ test.describe('School games use the notebook answer sheet', () => {
     const values = await options.evaluateAll((els) => els.map((el) => parseInt(el.textContent ?? '', 10)));
     await options.nth(values.findIndex((v) => v !== answer)).click();
     await expect(equation).not.toHaveText(text, { timeout: 3000 });
+  });
+
+  test('Math hard stays within 20 and shows no picture crutch', async ({ page }) => {
+    await page.getByTestId('launch-math').click();
+    await page.getByTestId('difficulty-hard').click();
+    const text = await page.getByTestId('math-equation').innerText();
+    const [a, b] = (text.match(/\d+/g) ?? []).map(Number);
+    expect(Math.max(a, b)).toBeLessThanOrEqual(20);
+    await expect(page.getByTestId('math-pictures')).toHaveCount(0);
   });
 
   test('First Sound offers letters as notebook lines', async ({ page }) => {

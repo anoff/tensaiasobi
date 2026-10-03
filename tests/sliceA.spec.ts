@@ -45,14 +45,14 @@ test.describe('Slice A catalog, motion, a11y', () => {
     await page.getByTestId('session-mode-learn').click();
 
     await expect(page.getByTestId('challenge-game-math')).toBeVisible();
-    await expect(page.getByTestId('challenge-game-fruitMathPop')).toBeVisible();
     await expect(page.getByTestId('challenge-game-shadowFlashlight')).toBeVisible();
     await expect(page.getByTestId('challenge-game-fairSharePicnic')).toBeVisible();
-    await expect(page.getByTestId('challenge-game-dispatch')).toBeVisible();
     await expect(page.getByTestId('challenge-game-snorkelPearlFinder')).toBeVisible();
 
     const toggles = page.locator('[data-testid^="challenge-game-"]');
-    await expect(toggles).toHaveCount(15);
+    await expect(toggles).toHaveCount(18);
+    // Just-for-fun games (incl. City Dispatch) are never part of a learn-first goal.
     await expect(page.getByTestId('challenge-game-doodle')).toHaveCount(0);
+    await expect(page.getByTestId('challenge-game-dispatch')).toHaveCount(0);
   });
 });

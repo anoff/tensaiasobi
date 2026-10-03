@@ -28,7 +28,7 @@ export function MemoryMatch() {
   const { t } = useTranslation();
 
   const initGame = (currentLevel: GameDifficulty) => {
-    let numPairs = 2; // easy (2x2)
+    let numPairs = 3; // easy (2x3)
     if (currentLevel === 'medium') numPairs = 6; // (3x4)
     if (currentLevel === 'hard') numPairs = 8; // (4x4)
 
@@ -90,7 +90,7 @@ export function MemoryMatch() {
           setMatches(newMatches);
 
 
-          const totalPairs = level === 'easy' ? 2 : level === 'medium' ? 6 : 8;
+          const totalPairs = level === 'easy' ? 3 : level === 'medium' ? 6 : 8;
           if (newMatches === totalPairs) {
             setShowConfetti(true);
             // Award 4 stars × level multiplier
@@ -121,7 +121,7 @@ export function MemoryMatch() {
   };
 
   const getGridLayout = () => {
-    if (level === 'easy') return { columns: 2, maxWidth: 'max-w-[240px]' };
+    if (level === 'easy') return { columns: 3, maxWidth: 'max-w-[320px]' };
     if (level === 'medium') return { columns: 3, maxWidth: 'max-w-[320px]' };
     return { columns: 4, maxWidth: 'max-w-[360px]' };
   };

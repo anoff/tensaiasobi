@@ -149,7 +149,7 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     expect(newEquationText).not.toBe(originalEquation);
 
     // Now answer correctly to earn stars and complete target
-    // We need 5 stars. Easy math gives 2 stars * 1 level multiplier = 2 stars per correct answer.
+    // We need 5 stars. Easy math gives 2 stars per correct answer (CHOICE_STARS).
     // So we need 3 correct answers to reach >= 5 stars (which gives 6 stars).
     for (let round = 0; round < 3; round++) {
       const currentEqText = await equationElement.innerText();

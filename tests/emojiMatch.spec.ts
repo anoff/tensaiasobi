@@ -20,19 +20,16 @@ test.describe('Emoji Match Game E2E Tests', () => {
     await expect(mediumDiff).toBeVisible();
     await expect(hardDiff).toBeVisible();
 
-    const startSoloZen = page.getByTestId('start-solo-zen');
+    // Zen is gone; Time Attack and 2 players are open on every level.
+    await expect(page.getByTestId('start-solo-zen')).toHaveCount(0);
+    for (const diff of [easyDiff, mediumDiff]) {
+      await diff.click();
+      await expect(page.getByTestId('start-solo-time')).toBeVisible();
+      await expect(page.getByTestId('start-duel')).toBeVisible();
+    }
 
-    await expect(startSoloZen).toBeVisible();
-
-    // Easy mode should lock out Time Attack
-    await easyDiff.click();
-    const startSoloTime = page.getByTestId('start-solo-time');
-    await expect(startSoloTime).not.toBeVisible(); // Not present because it's replaced with text locked block
-
-    // 3. Start Solo Zen on Medium difficulty
-    await mediumDiff.click();
-    await expect(startSoloTime).toBeVisible(); // Available now on Medium
-    await startSoloZen.click();
+    // 3. Start Time Attack on Medium difficulty
+    await page.getByTestId('start-solo-time').click();
 
     // 4. Verify game screen cards and stats
     const card1 = page.getByTestId('emoji-match-card-1');
@@ -60,7 +57,7 @@ test.describe('Emoji Match Game E2E Tests', () => {
     await exitBtn.click();
 
     // Verify setup screen is visible again
-    await expect(page.getByTestId('start-solo-zen')).toBeVisible();
+    await expect(page.getByTestId('start-solo-time')).toBeVisible();
 
     // 7. Return to main dashboard menu via HomeButton
     const homeBtn = page.getByTestId('home-button');
@@ -69,5 +66,30 @@ test.describe('Emoji Match Game E2E Tests', () => {
 
     // Verify launcher is visible on home screen again
     await expect(page.getByTestId('launch-emojimatch')).toBeVisible();
+  });
+
+  test('2 players: wrong tap freezes only that player, right tap scores and swaps the middle card', async ({ page }) => {
+    await page.getByTestId('launch-emojimatch').click();
+    await page.getByTestId('difficulty-easy').click();
+    await page.getByTestId('start-duel').click();
+
+    const emojis = (testId: string) =>
+      page.getByTestId(testId).locator('button').evaluateAll((els) => els.map((el) => (el.textContent ?? '').trim()));
+    const center = await emojis('duel-center');
+    const p1 = await emojis('duel-card-1');
+    const p2 = await emojis('duel-card-2');
+    const p1Match = p1.find((e) => center.includes(e))!;
+    const p2Wrong = p2.find((e) => !center.includes(e))!;
+
+    await page.getByTestId('duel-card-2').getByRole('button', { name: p2Wrong, exact: true }).click();
+    await expect(page.getByTestId('duel-card-2')).toHaveAttribute('data-frozen', 'true');
+    await expect(page.getByTestId('duel-card-1')).toHaveAttribute('data-frozen', 'false');
+
+    await page.getByTestId('duel-card-1').getByRole('button', { name: p1Match, exact: true }).click();
+    await expect(page.getByTestId('duel-score-1')).toContainText('1 / 10');
+    await expect(page.getByTestId('duel-score-2')).toContainText('0 / 10');
+    // Player 1's old card is now the middle card.
+    await expect.poll(async () => (await emojis('duel-center')).sort().join()).toBe([...p1].sort().join());
+    await expect(page.getByTestId('duel-card-2')).toHaveAttribute('data-frozen', 'false');
   });
 });

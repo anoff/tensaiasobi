@@ -6,7 +6,8 @@ import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
 import { BlockTile } from './components/BlockTile';
 import { AgeSwitch } from './components/AgeSwitch';
-import { CORAL, LEAF, BUTTER, PLAY_MAT_STYLE } from './theme/blockTable';
+import { CORAL, LEAF, BUTTER, INK, PLAY_MAT_STYLE } from './theme/blockTable';
+import { CATEGORY_EMOJI, categoryFill } from './theme/categories';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
@@ -21,7 +22,7 @@ import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
 import { couponLabel, type Coupon } from './types/gamification';
 import { TownBuilder } from './games/TownBuilder';
-import { GAMES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, isGameId, type AgeBand, type GameId } from './games/catalog';
+import { GAMES, GAME_CATEGORIES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, gamesInCategory, isGameId, type AgeBand, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
@@ -407,39 +408,56 @@ function AppContent() {
                 }}
               />
 
-              <div className="grid grid-cols-3 gap-3">
-                {visibleGames.map((game, i) => (
-                  <BlockTile
-                    key={game.id}
-                    emoji={game.emoji}
-                    label={t.menu[game.labelKey]}
-                    index={i}
-                    tileId={game.id}
-                    data-testid={game.testid}
-                    onClick={() => handleScreenChange(game.id)}
-                  />
-                ))}
-                {!challengeFocusActive && (
-                  <>
-                    <BlockTile
-                      emoji="🏘️"
-                      label={t.menu.town}
-                      index={visibleGames.length}
-                      tileId="town"
-                      data-testid="launch-town"
-                      onClick={() => handleScreenChange('town')}
-                    />
-                    <BlockTile
-                      emoji="🎟️"
-                      label={t.menu.coupons}
-                      index={visibleGames.length + 1}
-                      tileId="coupons"
-                      data-testid="launch-coupons"
-                      onClick={() => handleScreenChange('coupons')}
-                    />
-                  </>
-                )}
-              </div>
+              {GAME_CATEGORIES.map((category) => {
+                const games = gamesInCategory(visibleGames, category);
+                const rewards = category === 'play' && !challengeFocusActive
+                  ? [
+                      { id: 'town', emoji: '🏘️', label: t.menu.town, testid: 'launch-town', screen: 'town' as const },
+                      { id: 'coupons', emoji: '🎟️', label: t.menu.coupons, testid: 'launch-coupons', screen: 'coupons' as const },
+                    ]
+                  : [];
+                if (games.length === 0 && rewards.length === 0) return null;
+                return (
+                  <section key={category} data-testid={`category-${category}`} className="space-y-3">
+                    <h2 className="flex items-center gap-2 text-lg font-black tracking-tight" style={{ color: INK }}>
+                      <span
+                        aria-hidden
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-xl border-[3px] text-lg leading-none"
+                        style={{ backgroundColor: categoryFill(category, 0), borderColor: INK }}
+                      >
+                        {CATEGORY_EMOJI[category]}
+                      </span>
+                      {t.menu.categories[category]}
+                    </h2>
+                    <div className="grid grid-cols-3 gap-3">
+                      {games.map((game, i) => (
+                        <BlockTile
+                          key={game.id}
+                          emoji={game.emoji}
+                          label={t.menu[game.labelKey]}
+                          index={i}
+                          fill={categoryFill(category, i)}
+                          tileId={game.id}
+                          data-testid={game.testid}
+                          onClick={() => handleScreenChange(game.id)}
+                        />
+                      ))}
+                      {rewards.map((reward, i) => (
+                        <BlockTile
+                          key={reward.id}
+                          emoji={reward.emoji}
+                          label={reward.label}
+                          index={games.length + i}
+                          fill={categoryFill(category, games.length + i)}
+                          tileId={reward.id}
+                          data-testid={reward.testid}
+                          onClick={() => handleScreenChange(reward.screen)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
             </div>
 
             <div className="text-center text-xs text-[#2a1c14]/35 font-bold">

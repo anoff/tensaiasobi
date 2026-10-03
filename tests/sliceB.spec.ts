@@ -28,7 +28,7 @@ test.describe('Slice B parent controls', () => {
 
     await expect(page.getByTestId('launch-doodle')).toBeVisible();
     await expect(page.getByTestId('launch-shiritori')).toHaveCount(0);
-    await expect(page.getByTestId('launch-dispatch')).toHaveCount(0);
+    await expect(page.getByTestId('launch-tower-sort')).toHaveCount(0);
   });
 
   test('home age switch toggles between preschool and school games and persists', async ({ page }) => {

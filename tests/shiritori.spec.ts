@@ -109,12 +109,14 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
 
       // 3. Locate options
       const options = page.getByTestId('shiritori-option');
-      await expect(options).toHaveCount(9);
+      // School starts on medium: four labeled pictures.
+      await expect(options).toHaveCount(4);
+      await expect(page.getByTestId('shiritori-option-label')).toHaveCount(4);
 
       // Find the correct matching option based on start/end letter compatibility
       let correctOptionLocator = null;
 
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 4; i++) {
         const option = options.nth(i);
         const word = await option.getAttribute('data-word');
         const startChar = getStartChar(word || '', lang);
@@ -153,7 +155,7 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
     const options = page.getByTestId('shiritori-option');
     let wrongOptionLocator = null;
 
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < 4; i++) {
       const option = options.nth(i);
       const word = await option.getAttribute('data-word');
       const startChar = getStartChar(word || '', 'en');
@@ -173,6 +175,8 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
   test('Verify Japanese "ん" rule triggers game over', async ({ page }) => {
     await switchLanguage(page, 'ja');
     await page.getByTestId('launch-shiritori').click();
+    // The ん trap only appears on the six-picture hard board.
+    await page.getByTestId('difficulty-hard').click();
 
     const activeCard = page.getByTestId('active-card');
     const activeWord = await activeCard.getAttribute('data-word');
@@ -180,8 +184,10 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
 
     const options = page.getByTestId('shiritori-option');
     let nOptionLocator = null;
+    await expect(options).toHaveCount(6);
+    await expect(page.getByTestId('shiritori-option-label')).toHaveCount(0);
 
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < 6; i++) {
       const option = options.nth(i);
       const word = await option.getAttribute('data-word');
       const startChar = getStartChar(word || '', 'ja');

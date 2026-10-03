@@ -112,6 +112,17 @@ export const getStartWord = (lang: string, itemsDict: Record<string, string>): s
   return EMOJI_ITEMS[Math.floor(Math.random() * EMOJI_ITEMS.length)];
 };
 
+/**
+ * Word Chain levels. The old board was always nine unlabeled pictures, so the
+ * child had to name nine emojis *and* spell their first letters. Now the
+ * school start (medium) is four labeled pictures; only hard drops the words.
+ */
+export const SHIRITORI_LEVELS: Record<'easy' | 'medium' | 'hard', { options: number; labels: boolean }> = {
+  easy: { options: 3, labels: true },
+  medium: { options: 4, labels: true },
+  hard: { options: 6, labels: false },
+};
+
 interface GeneratedOptions {
   options: string[];
   isGameOver?: boolean;
@@ -122,7 +133,8 @@ export const generateOptionsForWord = (
   currentEmoji: string,
   currentChain: string[],
   lang: string,
-  itemsDict: Record<string, string>
+  itemsDict: Record<string, string>,
+  optionCount = 9
 ): GeneratedOptions => {
   const word = itemsDict[currentEmoji] || '';
   const endChar = getEndChar(word, lang);
@@ -159,16 +171,16 @@ export const generateOptionsForWord = (
     return !areCharsCompatible(endChar, getStartChar(val, lang), lang);
   });
 
-  // 3. Select 8 distinct distractors
-  const selectedDistractors = shuffle(distractorCandidates).slice(0, 8);
+  // 3. Fill the remaining slots with distinct distractors
+  const selectedDistractors = shuffle(distractorCandidates).slice(0, optionCount - 1);
 
-  // Japanese specific: If in Japanese mode, sometimes include a 'ん' ending word as a distractor/trap if possible
-  if (lang === 'ja' && Math.random() < 0.25) {
+  // Japanese specific: on the bigger boards, sometimes include a 'ん' ending word as a trap
+  if (lang === 'ja' && optionCount >= 6 && Math.random() < 0.25) {
     const nEndingCandidates = matchingCandidates.filter(emoji => getEndChar(itemsDict[emoji] || '', 'ja') === 'ん');
     if (nEndingCandidates.length > 0) {
       const trapEmoji = nEndingCandidates[Math.floor(Math.random() * nEndingCandidates.length)];
 
-      const optsList = shuffle([correctEmoji, trapEmoji, ...selectedDistractors.slice(0, 7)]);
+      const optsList = shuffle([correctEmoji, trapEmoji, ...selectedDistractors.slice(0, optionCount - 2)]);
       return { options: optsList };
     }
   }
