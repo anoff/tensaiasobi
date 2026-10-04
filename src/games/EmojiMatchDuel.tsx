@@ -27,7 +27,7 @@ function dealDuel(diff: GameDifficulty): DuelState {
 }
 
 const EMOJI_SIZE: Record<GameDifficulty, string> = {
-  easy: 'text-5xl',
+  easy: 'text-4xl',
   medium: 'text-4xl',
   hard: 'text-3xl',
 };
