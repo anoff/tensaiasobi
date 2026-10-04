@@ -23,6 +23,7 @@ import LetterPairs from './LetterPairs';
 import PatternTrain from './PatternTrain';
 import SyllableDrum from './SyllableDrum';
 import MissingLetter from './MissingLetter';
+import AnimalGenie from './AnimalGenie';
 
 export type { AgeBand };
 /** Learning games are the challenge focus; play games unlock after the star quota. */
@@ -60,7 +61,8 @@ export type GameLabelKey =
   | 'letterPairs'
   | 'patternTrain'
   | 'syllableDrum'
-  | 'missingLetter';
+  | 'missingLetter'
+  | 'animalGenie';
 
 export interface GameCatalogEntry {
   id: string;
@@ -92,6 +94,7 @@ export const GAMES = [
   // Logic
   { id: 'odd', category: 'logic', testid: 'launch-odd', emoji: '🧐', labelKey: 'odd', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['odd_streak', 'odd_highscore'], Component: OddOneOut },
   { id: 'patternTrain', category: 'logic', testid: 'launch-pattern-train', emoji: '🚃', labelKey: 'patternTrain', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: PatternTrain },
+  { id: 'animalGenie', category: 'logic', testid: 'launch-animal-genie', emoji: '🧞', labelKey: 'animalGenie', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: AnimalGenie },
   { id: 'memory', category: 'logic', testid: 'launch-memory', emoji: '🐯', labelKey: 'match', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: MemoryMatch },
   { id: 'shadowFlashlight', category: 'logic', testid: 'launch-shadow', emoji: '🔦', labelKey: 'shadowFlashlight', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: ShadowFlashlight },
   { id: 'snorkelPearlFinder', category: 'logic', testid: 'launch-snorkel-pearl-finder', emoji: '🤿', labelKey: 'snorkelPearlFinder', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: SnorkelPearlFinder },

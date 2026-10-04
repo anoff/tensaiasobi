@@ -57,6 +57,7 @@ two games in every learning category, and school has three or more.
 | **Syllable Drum 🥁** | Language | both | hearing syllables | 1–2 syllables with the word split into beats → 1–3 with the whole word → 2–4 with the picture only. Japanese counts morae, Korean counts blocks |
 | **Missing Letter ✍️** | Language | school | spelling | first letter → any letter in short words → longer words with 4 choices (vowel against vowel) |
 | **Pattern Train 🚃** | Logic | both | sequences | AB → AAB/ABB/ABC → AABB/ABCD with the gap anywhere |
+| **Animal Genie 🧞** | Logic | both | yes/no deduction | 10 → 20 → 33 animals. Offline Akinator: picks the question that splits the remaining animals most evenly. Easy/medium fade out animals that no longer fit; hard keeps them hidden. Tolerates a wrong answer; after 3 wrong guesses the child wins |
 
 They are all muted-friendly: the child names the picture, nothing has to be heard.
 English, German and French syllables are split by hand in `syllableDrumLogic.ts` and
