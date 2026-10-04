@@ -17,13 +17,20 @@ type Player = 0 | 1;
 interface DuelState {
   fullDeck: DobbleCard[];
   pile: DobbleCard[];
-  center: DobbleCard;
+  /** [player 1's card, player 2's card]; any two cards of a deck share exactly one emoji. */
   cards: [DobbleCard, DobbleCard];
 }
 
 function dealDuel(diff: GameDifficulty): DuelState {
   const deck = buildShuffledDeck(deckOrder(diff));
-  return { fullDeck: deck, center: deck[0], cards: [deck[1], deck[2]], pile: deck.slice(3) };
+  return { fullDeck: deck, cards: [deck[0], deck[1]], pile: deck.slice(2) };
+}
+
+/** Both players get a fresh card; the two new cards are always different. */
+function dealNextPair(prev: DuelState): DuelState {
+  const first = drawFromPile(prev.pile, prev.fullDeck, []);
+  const second = drawFromPile(first.pile, prev.fullDeck, [first.card]);
+  return { ...prev, cards: [first.card, second.card], pile: second.pile };
 }
 
 interface EmojiMatchDuelProps {
@@ -32,10 +39,10 @@ interface EmojiMatchDuelProps {
 }
 
 /**
- * Two players, one phone lying between them. Each player owns the card at
- * their end (player 2's is upside down); whoever first taps the emoji their
- * card shares with the middle card scores, and their card becomes the new
- * middle card. First to DUEL_GOAL wins.
+ * Two players, one phone lying between them. The screen is split in half and
+ * each player owns the card on their half (player 2's is upside down). The two
+ * cards share exactly one emoji: whoever taps it first on their own card
+ * scores, then both players get a new card. First to DUEL_GOAL wins.
  */
 export function EmojiMatchDuel({ difficulty, onExit }: EmojiMatchDuelProps) {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
@@ -45,7 +52,7 @@ export function EmojiMatchDuel({ difficulty, onExit }: EmojiMatchDuelProps) {
   const [frozen, setFrozen] = useState<[boolean, boolean]>([false, false]);
   const [matched, setMatched] = useState<{ player: Player; emoji: string } | null>(null);
   const [winner, setWinner] = useState<Player | null>(null);
-  const [cardKeys, setCardKeys] = useState<[number, number, number]>([0, 0, 0]);
+  const [dealNo, setDealNo] = useState(0);
   const { later, cancelAll } = useLater();
 
   const restart = () => {
@@ -61,7 +68,7 @@ export function EmojiMatchDuel({ difficulty, onExit }: EmojiMatchDuelProps) {
   const tap = (player: Player, emoji: string) => {
     if (winner !== null || frozen[player] || matched) return;
 
-    if (emoji !== findMatch(state.cards[player], state.center)) {
+    if (emoji !== findMatch(state.cards[0], state.cards[1])) {
       playError();
       setFrozen((f) => (player === 0 ? [true, f[1]] : [f[0], true]));
       later(() => setFrozen((f) => (player === 0 ? [false, f[1]] : [f[0], false])), FREEZE_MS);
@@ -80,19 +87,13 @@ export function EmojiMatchDuel({ difficulty, onExit }: EmojiMatchDuelProps) {
         setWinner(player);
         return;
       }
-      // The winner's card goes to the middle; they draw a fresh one.
-      setState((prev) => {
-        const onTable = [prev.center, ...prev.cards];
-        const { card, pile } = drawFromPile(prev.pile, prev.fullDeck, onTable);
-        const cards: [DobbleCard, DobbleCard] = player === 0 ? [card, prev.cards[1]] : [prev.cards[0], card];
-        return { ...prev, center: prev.cards[player], cards, pile };
-      });
-      setCardKeys(([c, a, b]) => [c + 1, player === 0 ? a + 1 : a, player === 1 ? b + 1 : b]);
-    }, 500);
+      setState(dealNextPair);
+      setDealNo((n) => n + 1);
+    }, 700);
   };
 
-  // Three cards stack vertically: size them by screen height so player 1's card never ends up below the fold.
-  const sizeClass = 'w-[min(14rem,24dvh)] h-[min(14rem,24dvh)]';
+  // Each card gets half the screen: as big as fits both the width and half the height.
+  const sizeClass = 'w-[min(20rem,82vw,34dvh)] h-[min(20rem,82vw,34dvh)]';
   const emojiClass = CARD_EMOJI_SIZE[difficulty];
 
   const scoreChip = (player: Player) => (
@@ -106,28 +107,39 @@ export function EmojiMatchDuel({ difficulty, onExit }: EmojiMatchDuelProps) {
     </div>
   );
 
+  /** One player's half: their card, then their score at the edge nearest them. */
+  const half = (player: Player) => (
+    <div
+      data-testid={`duel-half-${player + 1}`}
+      className={`flex-1 w-full flex flex-col items-center justify-center gap-3 rounded-3xl ${
+        player === 0 ? 'bg-sky-50/70' : 'bg-rose-50/70 rotate-180'
+      }`}
+    >
+      <div key={`p${player + 1}-${dealNo}`}>
+        <DobbleCardView
+          card={state.cards[player]}
+          testId={`duel-card-${player + 1}`}
+          sizeClass={`${sizeClass} ${player === 0 ? '!border-sky-300' : '!border-rose-300'}`}
+          emojiClass={emojiClass}
+          matchedEmoji={matched?.emoji ?? null}
+          shake={frozen[player]}
+          frozen={frozen[player]}
+          onTap={(emoji) => tap(player, emoji)}
+        />
+      </div>
+      {scoreChip(player)}
+    </div>
+  );
+
   return (
-    <div className="flex-1 flex flex-col items-center justify-between w-full p-2 relative" data-testid="duel-board">
+    <div className="flex-1 flex flex-col items-center w-full p-2 gap-1 relative" data-testid="duel-board">
       {winner !== null && <GameConfetti pieces={160} />}
 
-      {/* Player 2 sits across the table: everything on their side is upside down. */}
-      <div className="flex flex-col items-center gap-2 rotate-180">
-        <div key={`p2-${cardKeys[2]}`}>
-          <DobbleCardView
-            card={state.cards[1]}
-            testId="duel-card-2"
-            sizeClass={`${sizeClass} !border-rose-300`}
-            emojiClass={emojiClass}
-            matchedEmoji={matched?.player === 1 ? matched.emoji : null}
-            shake={frozen[1]}
-            frozen={frozen[1]}
-            onTap={(emoji) => tap(1, emoji)}
-          />
-        </div>
-        {scoreChip(1)}
-      </div>
+      {/* Player 2 sits across the table, so their half is upside down. */}
+      {half(1)}
 
-      <div className="flex items-center gap-3">
+      <div className="w-full flex items-center gap-2">
+        <span className="flex-1 border-t-2 border-dashed border-slate-300" aria-hidden="true" />
         <button
           type="button"
           onClick={() => { playPop(); onExit(); }}
@@ -135,36 +147,10 @@ export function EmojiMatchDuel({ difficulty, onExit }: EmojiMatchDuelProps) {
         >
           ⬅️
         </button>
-        <div key={`center-${cardKeys[0]}`}>
-          <DobbleCardView
-            card={state.center}
-            testId="duel-center"
-            sizeClass={`${sizeClass} !border-amber-400 !bg-amber-50`}
-            emojiClass={emojiClass}
-            matchedEmoji={matched?.emoji ?? null}
-            shake={false}
-            readOnly
-            onTap={() => undefined}
-          />
-        </div>
-        <span className="w-8" aria-hidden="true" />
+        <span className="flex-1 border-t-2 border-dashed border-slate-300" aria-hidden="true" />
       </div>
 
-      <div className="flex flex-col items-center gap-2">
-        <div key={`p1-${cardKeys[1]}`}>
-          <DobbleCardView
-            card={state.cards[0]}
-            testId="duel-card-1"
-            sizeClass={`${sizeClass} !border-sky-300`}
-            emojiClass={emojiClass}
-            matchedEmoji={matched?.player === 0 ? matched.emoji : null}
-            shake={frozen[0]}
-            frozen={frozen[0]}
-            onTap={(emoji) => tap(0, emoji)}
-          />
-        </div>
-        {scoreChip(0)}
-      </div>
+      {half(0)}
 
       {winner !== null && (
         <div

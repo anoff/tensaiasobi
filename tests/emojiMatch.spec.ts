@@ -85,29 +85,34 @@ test.describe('Emoji Match Game E2E Tests', () => {
     await expect(page.getByTestId('launch-emojimatch')).toBeVisible();
   });
 
-  test('2 players: wrong tap freezes only that player, right tap scores and swaps the middle card', async ({ page }) => {
+  test('2 players: wrong tap freezes only that player, the shared emoji scores and deals both new cards', async ({ page }) => {
     await page.getByTestId('launch-emojimatch').click();
     await page.getByTestId('difficulty-easy').click();
     await page.getByTestId('start-duel').click();
 
+    // Two cards only, one per half.
+    await expect(page.getByTestId('duel-center')).toHaveCount(0);
     const emojis = (testId: string) =>
       page.getByTestId(testId).locator('button').evaluateAll((els) => els.map((el) => (el.textContent ?? '').trim()));
-    const center = await emojis('duel-center');
     const p1 = await emojis('duel-card-1');
     const p2 = await emojis('duel-card-2');
-    const p1Match = p1.find((e) => center.includes(e))!;
-    const p2Wrong = p2.find((e) => !center.includes(e))!;
+    const shared = p1.filter((e) => p2.includes(e));
+    expect(shared).toHaveLength(1);
+    const p2Wrong = p2.find((e) => e !== shared[0])!;
 
     await page.getByTestId('duel-card-2').getByRole('button', { name: p2Wrong, exact: true }).click();
     await expect(page.getByTestId('duel-card-2')).toHaveAttribute('data-frozen', 'true');
     await expect(page.getByTestId('duel-card-1')).toHaveAttribute('data-frozen', 'false');
 
-    await page.getByTestId('duel-card-1').getByRole('button', { name: p1Match, exact: true }).click();
+    await page.getByTestId('duel-card-1').getByRole('button', { name: shared[0], exact: true }).click();
     await expect(page.getByTestId('duel-score-1')).toContainText('1 / 10');
     await expect(page.getByTestId('duel-score-2')).toContainText('0 / 10');
-    // Player 1's old card is now the middle card.
-    await expect.poll(async () => (await emojis('duel-center')).sort().join()).toBe([...p1].sort().join());
-    await expect(page.getByTestId('duel-card-2')).toHaveAttribute('data-frozen', 'false');
+    // Both players get a fresh pair, which again shares exactly one emoji.
+    await expect.poll(async () => (await emojis('duel-card-1')).sort().join()).not.toBe([...p1].sort().join());
+    await expect.poll(async () => (await emojis('duel-card-2')).sort().join()).not.toBe([...p2].sort().join());
+    const n1 = await emojis('duel-card-1');
+    const n2 = await emojis('duel-card-2');
+    expect(n1.filter((e) => n2.includes(e))).toHaveLength(1);
   });
 
   test('easy cards never let one emoji cover the middle of another', async ({ page }) => {

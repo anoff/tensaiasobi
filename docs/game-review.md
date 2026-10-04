@@ -42,7 +42,7 @@ games use chalk, pebble and coal (white, grey, black). Only the fun shelf is
 | **Match** | Easy (2 pairs) to medium (6 pairs) was too big a jump | Easy now has 3 pairs. |
 | **Odd One** | 👑 👜 🕶️ were "clothing", 🔔 was an "instrument", and 🎱 🏹 were "sports". Grown-ups argue about these. | Removed those emojis. |
 | **Letters** | Preschool had no language game | Now available to preschool. Easy has the widest tracing tolerance. |
-| **Emoji Match** | Zen mode added little; easy had nothing else | Zen removed; Time Attack opens on easy (60 s). New 2-player duel: phone between two kids, each owns a card at their end, first to 10 matches with the middle card wins. Running out of cards no longer deals an unsolvable card. |
+| **Emoji Match** | Zen mode added little; easy had nothing else | Zen removed; Time Attack opens on easy (60 s). New 2-player duel: phone between two kids, the screen split in half with one card each (player 2's upside down); the two cards share one emoji, whoever taps it first scores and both get new cards. First to 10 wins. Running out of cards no longer deals an unsolvable card. |
 | **City Dispatch** | Timed arcade game listed as "learn" and school-only, although police / fire / ambulance suits age 4 too | Moved to Just for fun and opened to preschool. Easy is 1 event with 24 s. |
 
 ## New games (added after the review)
