@@ -5,7 +5,7 @@ import { useGameFX } from '../hooks/gameFXContext';
 import { useLater } from '../hooks/useLater';
 import type { GameDifficulty } from '../types/game';
 import { DobbleCardView } from './DobbleCardView';
-import { buildShuffledDeck, deckOrder, drawFromPile, findMatch, type DobbleCard } from './emojiMatchDeck';
+import { CARD_EMOJI_SIZE, buildShuffledDeck, deckOrder, drawFromPile, findMatch, type DobbleCard } from './emojiMatchDeck';
 
 /** Points needed to win a duel. */
 export const DUEL_GOAL = 10;
@@ -25,12 +25,6 @@ function dealDuel(diff: GameDifficulty): DuelState {
   const deck = buildShuffledDeck(deckOrder(diff));
   return { fullDeck: deck, center: deck[0], cards: [deck[1], deck[2]], pile: deck.slice(3) };
 }
-
-const EMOJI_SIZE: Record<GameDifficulty, string> = {
-  easy: 'text-4xl',
-  medium: 'text-4xl',
-  hard: 'text-3xl',
-};
 
 interface EmojiMatchDuelProps {
   difficulty: GameDifficulty;
@@ -97,8 +91,9 @@ export function EmojiMatchDuel({ difficulty, onExit }: EmojiMatchDuelProps) {
     }, 500);
   };
 
-  const sizeClass = 'w-44 h-44 sm:w-56 sm:h-56';
-  const emojiClass = EMOJI_SIZE[difficulty];
+  // Three cards stack vertically: size them by screen height so player 1's card never ends up below the fold.
+  const sizeClass = 'w-[min(14rem,24dvh)] h-[min(14rem,24dvh)]';
+  const emojiClass = CARD_EMOJI_SIZE[difficulty];
 
   const scoreChip = (player: Player) => (
     <div

@@ -102,6 +102,16 @@ export function findMatch(cardA: DobbleCard, cardB: DobbleCard): string {
   return '';
 }
 
+/**
+ * Emoji size as a share of the card's width (container query units), so the
+ * spacing between emojis stays the same whatever size the card is drawn at.
+ */
+export const CARD_EMOJI_SIZE: Record<GameDifficulty, string> = {
+  easy: 'text-[22cqw]',
+  medium: 'text-[19cqw]',
+  hard: 'text-[15cqw]',
+};
+
 /** Card size per level: q + 1 emojis per card, q² + q + 1 cards in a deck. */
 export function deckOrder(diff: GameDifficulty): number {
   if (diff === 'easy') return 4; // 5 emojis
