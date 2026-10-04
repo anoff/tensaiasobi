@@ -15,7 +15,9 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      // Chromium engine, but a phone-shaped screen: the device preset would
+      // otherwise override the viewport above with a 1280×720 desktop window.
+      use: { ...devices['Desktop Chrome'], viewport: { width: 375, height: 812 } },
     },
   ],
   webServer: {
