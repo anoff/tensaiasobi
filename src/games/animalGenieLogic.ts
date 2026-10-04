@@ -1,4 +1,6 @@
 import type { GameDifficulty } from '../types/game';
+import { CHOICE_STARS } from '../utils/difficulty';
+import { pick, type Rand } from '../utils/random';
 
 /**
  * Animal Genie: the child thinks of an animal, the genie asks yes/no questions
@@ -70,7 +72,7 @@ const POOLS: Record<GameDifficulty, string[]> = {
   hard: Object.keys(ANIMALS),
 };
 
-export const GENIE_STARS: Record<GameDifficulty, number> = { easy: 1, medium: 2, hard: 3 };
+export const GENIE_STARS = CHOICE_STARS;
 /** After this many wrong guesses the child wins. */
 export const MAX_WRONG_GUESSES = 3;
 /** The genie guesses at the latest after this many questions. */
@@ -111,7 +113,7 @@ export function plausible(state: GenieState): string[] {
 }
 
 /** The unasked trait that splits the plausible animals most evenly, or null if none splits them. */
-export function nextQuestion(state: GenieState, rand: () => number = Math.random): Trait | null {
+export function nextQuestion(state: GenieState, rand: Rand = Math.random): Trait | null {
   const candidates = plausible(state);
   if (candidates.length <= 1 || state.asked.length >= MAX_QUESTIONS) return null;
   let best: Trait[] = [];
@@ -129,7 +131,7 @@ export function nextQuestion(state: GenieState, rand: () => number = Math.random
     }
   }
   // Ties are broken randomly so the same animal isn't found by the same questions every time.
-  return best.length > 0 ? best[Math.floor(rand() * best.length)] : null;
+  return best.length > 0 ? pick(best, rand) : null;
 }
 
 export function answer(state: GenieState, trait: Trait, reply: boolean | null): GenieState {
@@ -141,9 +143,9 @@ export function answer(state: GenieState, trait: Trait, reply: boolean | null): 
 }
 
 /** The genie's guess: a random animal among the most plausible ones. */
-export function guess(state: GenieState, rand: () => number = Math.random): string | null {
+export function guess(state: GenieState, rand: Rand = Math.random): string | null {
   const candidates = plausible(state);
-  return candidates.length > 0 ? candidates[Math.floor(rand() * candidates.length)] : null;
+  return candidates.length > 0 ? pick(candidates, rand) : null;
 }
 
 export function reject(state: GenieState, animal: string): GenieState {
