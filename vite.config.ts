@@ -22,8 +22,8 @@ export default defineConfig({
         name: 'tensaiasobi Kids Games',
         short_name: 'tensaiasobi',
         description: 'Fun and educational tracing and mini-games for kids',
-        theme_color: '#f0f9ff',
-        background_color: '#f0f9ff',
+        theme_color: '#ffe7c2',
+        background_color: '#ffe7c2',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
