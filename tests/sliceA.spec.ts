@@ -50,7 +50,7 @@ test.describe('Slice A catalog, motion, a11y', () => {
     await expect(page.getByTestId('challenge-game-snorkelPearlFinder')).toBeVisible();
 
     const toggles = page.locator('[data-testid^="challenge-game-"]');
-    await expect(toggles).toHaveCount(18);
+    await expect(toggles).toHaveCount(19);
     // Just-for-fun games (incl. City Dispatch) are never part of a learn-first goal.
     await expect(page.getByTestId('challenge-game-doodle')).toHaveCount(0);
     await expect(page.getByTestId('challenge-game-dispatch')).toHaveCount(0);

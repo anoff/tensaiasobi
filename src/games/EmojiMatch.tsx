@@ -8,7 +8,7 @@ import { wrongMeansNewRound } from '../utils/difficulty';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 import { DobbleCardView } from './DobbleCardView';
 import { DUEL_GOAL, EmojiMatchDuel } from './EmojiMatchDuel';
-import { buildShuffledDeck, deckOrder, drawFromPile, findMatch, type DobbleCard } from './emojiMatchDeck';
+import { CARD_EMOJI_SIZE, buildShuffledDeck, deckOrder, drawFromPile, findMatch, type DobbleCard } from './emojiMatchDeck';
 
 /** Time Attack clock per level: start seconds, + per hit, − per miss. Easy got its own (Zen is gone). */
 const TIME_ATTACK: Record<GameDifficulty, { start: number; bonus: number; penalty: number }> = {
@@ -18,6 +18,9 @@ const TIME_ATTACK: Record<GameDifficulty, { start: number; bonus: number; penalt
 };
 
 type Mode = 'solo_time' | 'duel';
+
+/** Both cards must fit on screen without scrolling, so they scale with the screen height. */
+const SOLO_CARD_SIZE = 'w-[min(18rem,32dvh)] h-[min(18rem,32dvh)]';
 
 export function EmojiMatch() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
@@ -189,8 +192,7 @@ export function EmojiMatch() {
     }
   };
 
-  const emojiClass =
-    difficulty === 'easy' ? 'text-6xl sm:text-7xl' : difficulty === 'medium' ? 'text-5xl sm:text-6xl' : 'text-4xl sm:text-5xl';
+  const emojiClass = CARD_EMOJI_SIZE[difficulty];
 
   return (
     <div className="flex-1 flex flex-col items-center justify-between w-full h-full select-none max-w-lg mx-auto relative">
@@ -324,7 +326,7 @@ export function EmojiMatch() {
               <DobbleCardView
                 card={cardA}
                 testId="emoji-match-card-1"
-                sizeClass="w-60 h-60 sm:w-72 sm:h-72"
+                sizeClass={SOLO_CARD_SIZE}
                 emojiClass={emojiClass}
                 matchedEmoji={matchedEmoji}
                 shake={shakeCard === 'A'}
@@ -338,7 +340,7 @@ export function EmojiMatch() {
               <DobbleCardView
                 card={cardB}
                 testId="emoji-match-card-2"
-                sizeClass="w-60 h-60 sm:w-72 sm:h-72"
+                sizeClass={SOLO_CARD_SIZE}
                 emojiClass={emojiClass}
                 matchedEmoji={matchedEmoji}
                 shake={shakeCard === 'B'}

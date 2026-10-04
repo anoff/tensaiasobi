@@ -43,12 +43,12 @@ function getCardLayout(emojis: string[], q: number): CardEmoji[] {
     x: (Math.random() - 0.5) * 6, // slight center jitter (+/- 3%)
     y: (Math.random() - 0.5) * 6,
     rotation: Math.floor(Math.random() * 360),
-    scale: q === 4 ? 1.05 + Math.random() * 0.2 : 0.85 + Math.random() * 0.35 // larger for easy
+    scale: q === 4 ? 0.95 + Math.random() * 0.15 : 0.85 + Math.random() * 0.35 // big glyphs on easy, capped so neighbours never cover each other
   });
 
 
   const numOuter = numEmojis - 1;
-  const radius = q === 4 ? 26 : q === 5 ? 31 : 33; // base radius in % to prevent overflow
+  const radius = q === 4 ? 30 : q === 5 ? 31 : 33; // base radius in %: room around the centre emoji, no overflow
 
   for (let i = 0; i < numOuter; i++) {
     const baseAngle = (2 * Math.PI * i) / numOuter;
@@ -67,7 +67,7 @@ function getCardLayout(emojis: string[], q: number): CardEmoji[] {
       x,
       y,
       rotation: Math.floor(Math.random() * 360),
-      scale: q === 4 ? 1.05 + Math.random() * 0.2 : 0.85 + Math.random() * 0.35 // larger for easy
+      scale: q === 4 ? 0.95 + Math.random() * 0.15 : 0.85 + Math.random() * 0.35 // big glyphs on easy, capped so neighbours never cover each other
     });
   }
 
@@ -101,6 +101,16 @@ export function findMatch(cardA: DobbleCard, cardB: DobbleCard): string {
   }
   return '';
 }
+
+/**
+ * Emoji size as a share of the card's width (container query units), so the
+ * spacing between emojis stays the same whatever size the card is drawn at.
+ */
+export const CARD_EMOJI_SIZE: Record<GameDifficulty, string> = {
+  easy: 'text-[22cqw]',
+  medium: 'text-[19cqw]',
+  hard: 'text-[15cqw]',
+};
 
 /** Card size per level: q + 1 emojis per card, q² + q + 1 cards in a deck. */
 export function deckOrder(diff: GameDifficulty): number {

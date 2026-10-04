@@ -5,7 +5,7 @@ interface DobbleCardViewProps {
   testId: string;
   /** Tailwind size classes for the round card. */
   sizeClass: string;
-  /** Tailwind text size for the emojis. */
+  /** Tailwind text size for the emojis (see CARD_EMOJI_SIZE). */
   emojiClass: string;
   matchedEmoji: string | null;
   shake: boolean;
@@ -22,6 +22,7 @@ export function DobbleCardView({ card, testId, sizeClass, emojiClass, matchedEmo
     <div
       data-testid={testId}
       data-frozen={frozen ? 'true' : 'false'}
+      style={{ containerType: 'size' }}
       className={`${sizeClass} rounded-full bg-white border-4 border-slate-300 shadow-md relative overflow-hidden flex items-center justify-center transition-opacity duration-200 ${
         shake ? 'animate-shake' : 'animate-card-in'
       } ${frozen ? 'opacity-50' : ''}`}
