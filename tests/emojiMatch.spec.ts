@@ -1,4 +1,21 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+/** Emojis whose centre is covered by another emoji (a child tapping it would hit the neighbour). */
+async function coveredEmojis(page: Page, testIds: string[]) {
+  const bad: string[] = [];
+  for (const id of testIds) {
+    bad.push(...(await page.getByTestId(id).locator('button').evaluateAll((buttons) =>
+      buttons
+        .filter((btn) => {
+          const r = btn.getBoundingClientRect();
+          const hit = btn.ownerDocument.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+          return !hit || !btn.contains(hit);
+        })
+        .map((btn) => btn.textContent ?? ''),
+    )).map((emoji) => `${id} ${emoji}`));
+  }
+  return bad;
+}
 
 test.describe('Emoji Match Game E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -91,5 +108,21 @@ test.describe('Emoji Match Game E2E Tests', () => {
     // Player 1's old card is now the middle card.
     await expect.poll(async () => (await emojis('duel-center')).sort().join()).toBe([...p1].sort().join());
     await expect(page.getByTestId('duel-card-2')).toHaveAttribute('data-frozen', 'false');
+  });
+
+  test('easy cards never let one emoji cover the middle of another', async ({ page }) => {
+    for (let deal = 0; deal < 5; deal++) {
+      await page.goto('/');
+      await page.getByTestId('launch-emojimatch').click();
+      await page.getByTestId('start-duel').click();
+      await page.waitForTimeout(450);
+      expect(await coveredEmojis(page, ['duel-card-1', 'duel-card-2'])).toEqual([]);
+
+      await page.goto('/');
+      await page.getByTestId('launch-emojimatch').click();
+      await page.getByTestId('start-solo-time').click();
+      await page.waitForTimeout(450);
+      expect(await coveredEmojis(page, ['emoji-match-card-1', 'emoji-match-card-2'])).toEqual([]);
+    }
   });
 });
