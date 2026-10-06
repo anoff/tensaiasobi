@@ -1,5 +1,8 @@
 # plan-ios.md — tensaiasobi iOS Distribution (Capacitor 8)
 
+> **Status:** phases 1–4.5 are in place. To build, install and keep the app signed on
+> your own devices with a free Apple ID, see [AppStore.md](AppStore.md).
+
 ## Goal
 Ship the existing Vite + React + Tailwind webapp as a native iOS application via
 App Store + TestFlight, keeping the web codebase as the single source of truth.

@@ -1,0 +1,95 @@
+name: iOS Build
+
+# Builds the Capacitor iOS app on a macOS runner. Needs no Apple account or
+# secrets: the result is an unsigned .ipa for sideloading tools (see AppStore.md).
+# Every push to master also replaces the `ios-latest` pre-release with the new .ipa.
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths:
+      - 'ios/**'
+      - 'capacitor.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'scripts/ios/**'
+      - '.github/workflows/ios.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build unsigned IPA
+    # Capacitor 8 needs Xcode 26, the default on this image.
+    runs-on: macos-26
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.ipa.outputs.version }}
+      build: ${{ steps.ipa.outputs.build }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the build number is the commit count
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build IPA
+        id: ipa
+        run: bash scripts/ios/build-ipa.sh
+        env:
+          GIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: tensaiasobi-ios
+          path: ios/App/output/tensaiasobi-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Publish ios-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: ios-latest-release
+    steps:
+      - name: Download IPA
+        uses: actions/download-artifact@v4
+        with:
+          name: tensaiasobi-ios
+
+      - name: Replace the ios-latest pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.build.outputs.version }}
+          BUILD: ${{ needs.build.outputs.build }}
+        run: |
+          gh release delete ios-latest --cleanup-tag --yes || true
+          gh api -X DELETE "repos/$GH_REPO/git/refs/tags/ios-latest" >/dev/null 2>&1 || true
+          gh release create ios-latest tensaiasobi-unsigned.ipa \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "iOS $VERSION ($BUILD), unsigned" \
+            --notes "Unsigned iOS build of master at ${GITHUB_SHA::7}. iPhones only run signed apps: install it with SideStore, AltStore or Sideloadly and your own Apple ID, or build and sign it on a Mac with \`npm run ios:device\`. See [AppStore.md](https://github.com/$GH_REPO/blob/master/AppStore.md)."
