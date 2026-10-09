@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { verifyParentIdentity } from '../utils/nativeParentAuth';
+import { hasParentPasskey, verifyParentPasskey } from '../utils/webParentAuth';
 
 interface ParentGateProps {
   onSuccess: () => void;
@@ -51,6 +52,11 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
   const [error, setError] = useState(false);
   const [showMath, setShowMath] = useState(() => !Capacitor.isNativePlatform());
   const [biometricFailed, setBiometricFailed] = useState(false);
+  // Web/PWA: a passkey set up under Settings → Parent lock (always false in the native app).
+  const [passkeyReady] = useState(hasParentPasskey);
+  const [passkeyPending, setPasskeyPending] = useState(false);
+  const [passkeyFailed, setPasskeyFailed] = useState(false);
+  const passkeyAbort = useRef<AbortController | null>(null);
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = 'parent-gate-title';
@@ -75,6 +81,23 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
       cancelled = true;
     };
   }, [showMath, t.parentGate.biometricReason]);
+
+  useEffect(() => () => passkeyAbort.current?.abort(), []);
+
+  // Runs from the button's click: Safari only shows the passkey prompt for a tap.
+  const unlockWithPasskey = () => {
+    passkeyAbort.current?.abort();
+    const controller = new AbortController();
+    passkeyAbort.current = controller;
+    setPasskeyPending(true);
+    setPasskeyFailed(false);
+    void verifyParentPasskey(controller.signal).then((result) => {
+      if (controller.signal.aborted) return;
+      setPasskeyPending(false);
+      if (result === 'success') onSuccessRef.current();
+      else setPasskeyFailed(true);
+    });
+  };
 
   useEffect(() => {
     const focusables = () =>
@@ -142,8 +165,27 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
           </div>
         ) : (
           <>
+        {passkeyReady && (
+          <div className="mb-5">
+            <button
+              type="button"
+              data-testid="parent-gate-passkey"
+              onClick={unlockWithPasskey}
+              disabled={passkeyPending}
+              className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white font-bold py-3 rounded-2xl transition-colors cursor-pointer text-base outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
+            >
+              {t.parentGate.passkeyUnlock}
+            </button>
+            <p className="text-slate-500 text-xs mt-1">{t.parentGate.passkeyHint}</p>
+          </div>
+        )}
+
         <p className="text-slate-600 mb-6 text-sm">
-          {biometricFailed ? t.parentGate.biometricFallback : t.parentGate.instruction}
+          {biometricFailed || passkeyFailed
+            ? t.parentGate.biometricFallback
+            : passkeyReady
+              ? t.parentGate.passkeyOr
+              : t.parentGate.instruction}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -160,7 +202,8 @@ export function ParentGate({ onSuccess, onClose }: ParentGateProps) {
             }}
             placeholder={t.parentGate.placeholder}
             className="w-full text-center text-3xl font-bold py-3 px-4 border-4 border-slate-200 focus:border-indigo-400 rounded-2xl outline-none focus-visible:ring-4 focus-visible:ring-indigo-300 transition-colors"
-            autoFocus
+            // With a passkey the parent most likely taps the button; don't pop up the keyboard.
+            autoFocus={!passkeyReady}
           />
 
           {error && (

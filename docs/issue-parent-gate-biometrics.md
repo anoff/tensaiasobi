@@ -52,3 +52,15 @@ To invoke Apple's `LocalAuthentication` framework system, append the biometrics 
 3. **With Biometrics Active:** Confirm that the standard FaceID circle pops up immediately. Authenticate and verify it navigates cleanly to Settings.
 4. **With Biometrics Cancelled:** Press target "Cancel" on the native scanner window. Verify that the UI drops back to the mathematical equation input box without errors or app crashes.
 5. **No Password Set (Web Fallback):** Access the web deployment (Vite standard index). Confirm it ignores native prompts entirely and presents the math box immediately.
+6. **Web / PWA:** with no passkey set up, the gate is the plain math box (as in step 5).
+
+---
+
+## 6. Web / PWA: passkey parent lock
+
+The web build can't call LocalAuthentication, but WebAuthn passkeys reach the same device lock (Face ID, Touch ID, fingerprint, device passcode) in Safari, home-screen web apps, Chrome and Edge.
+
+- **Setup:** Settings → *Parent lock 🔐* → *Set up* ([src/components/ParentLockSetting.tsx](../src/components/ParentLockSetting.tsx)). It creates a platform passkey with user verification required and keeps its ID in `localStorage` (`settings_parent_passkey_id`). A progress reset doesn't clear it. The row only shows when `PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()` is true, and never in the native app.
+- **Gate:** with a passkey set up, the gate shows *Unlock with device lock* above the math box. Safari only shows passkey prompts for a tap, so the passkey can't open by itself the way the native prompt does. Success needs the stored credential and the authenticator's *user verified* flag. Cancelling or failing leaves the math box as the way in ([src/utils/webParentAuth.ts](../src/utils/webParentAuth.ts)).
+- **Limits:** the check stays on the device (no server), which keeps children out but is no account security. On iPhone and iPad, passkeys need iCloud Keychain. iOS always lets the device passcode stand in for Face ID. The passkey is tied to the site's domain (asobi.anoff.io, including PR previews), so it doesn't work in the Capacitor app.
+- **Tests:** `src/utils/webParentAuth.test.ts` (unit) and `tests/parentLock.spec.ts`, which drives the real WebAuthn flow through a Chromium virtual authenticator.
