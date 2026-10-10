@@ -6,12 +6,21 @@
   "scripts": {
     "dev": "vite --force",
     "build": "npm run lint && vite build",
+    "build:ios": "npm run lint && vite build --mode ios",
     "lint:eslint": "eslint .",
     "lint:ts": "tsc --build",
     "lint": "npm run lint:eslint && npm run lint:ts",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "ios:doctor": "bash scripts/ios/doctor.sh",
+    "ios:sync": "bash scripts/ios/sync.sh",
+    "ios:open": "bash scripts/ios/sync.sh && cap open ios",
+    "ios:sim": "bash scripts/ios/run-simulator.sh",
+    "ios:device": "bash scripts/ios/deploy-device.sh",
+    "ios:ipa": "bash scripts/ios/build-ipa.sh",
+    "ios:auto-refresh": "bash scripts/ios/auto-refresh.sh",
+    "ios:assets": "capacitor-assets generate --ios"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",

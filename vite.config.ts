@@ -6,13 +6,16 @@ const rawHash = process.env.GIT_HASH || 'UNKNOWN'
 const gitHash = rawHash !== 'UNKNOWN' ? rawHash.slice(0, 7) : 'UNKNOWN'
 
 // https://vite.dev/config/
-export default defineConfig({
+// `vite build --mode ios` builds the bundle for the Capacitor iOS shell (see AppStore.md).
+export default defineConfig(({ mode }) => ({
   define: {
     __GIT_HASH__: JSON.stringify(gitHash),
   },
   plugins: [
     react(),
     VitePWA({
+      // WKWebView can't register service workers on capacitor://, and the app ships its files anyway.
+      disable: mode === 'ios',
       registerType: 'autoUpdate',
       injectRegister: 'inline',
       workbox: {
@@ -51,4 +54,4 @@ export default defineConfig({
   server: {
     host: true,
   },
-})
+}))

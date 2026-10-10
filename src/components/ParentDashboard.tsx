@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import KidButton from './KidButton';
+import ParentLockSetting from './ParentLockSetting';
 import { useTranslation } from '../hooks/useTranslation';
 import { couponLabel, type Coupon, type CouponRewardSize } from '../types/gamification';
 
@@ -85,6 +86,8 @@ export function ParentDashboard({
               />
             </button>
           </div>
+
+          <ParentLockSetting />
 
           {/* Coupons section */}
           <div className="p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 space-y-4">

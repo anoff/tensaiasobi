@@ -77,5 +77,13 @@ The home screen sorts games into four colour-coded shelves. The 🧸 Preschool /
    npm run preview
    
    ```
+## 📱 iOS App
+The same app ships as a native iPhone/iPad app via Capacitor (`ios/`). With a Mac and a free Apple ID:
+```bash
+npm run ios:doctor   # check Xcode, find your signing team
+npm run ios:device   # build, sign and install on your iPhone
+```
+See [AppStore.md](AppStore.md) for setup, keeping the 7-day free signing fresh automatically, sideloading the CI build, and the App Store path.
+
 ## 🤝 Contributing
 Feel free to fork this project and add your own mini-games using React components. Just keep the dependencies light and the UI chunky!
