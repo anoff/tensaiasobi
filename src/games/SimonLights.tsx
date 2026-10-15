@@ -8,7 +8,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { INK, hardShadow } from '../theme/blockTable';
 import type { GameDifficulty } from '../types/game';
 import {
-  ANIMALS, hintAnimal, playbackDuration, playbackFor, press, simonStars, startRun, type SimonState,
+  ANIMALS, endGlow, hintAnimal, playbackDuration, playbackFor, press, simonStars, startRun, type Glow, type SimonState,
 } from './simonLogic';
 
 /**
@@ -42,7 +42,9 @@ export default function SimonLights() {
   const [game, setGame] = useState<SimonState>(() => startRun(level));
   const [phase, setPhase] = useState<Phase>('ready');
   const [lit, setLit] = useState<number | null>(null);
-  const [pressed, setPressed] = useState<number | null>(null);
+  const [pressed, setPressed] = useState<Glow | null>(null);
+  /** Counts every tap, so tapping the same animal twice restarts its bounce and glow. */
+  const tapId = useRef(0);
   const [wrongTap, setWrongTap] = useState<number | null>(null);
   /** After a miss on easy/medium the sequence replays slowly. */
   const [replay, setReplay] = useState(false);
@@ -123,8 +125,9 @@ export default function SimonLights() {
     setGame(state);
     if (outcome === 'next') {
       playPop();
-      setPressed(animal);
-      later(() => setPressed(null), PRESS_GLOW_MS);
+      const id = ++tapId.current;
+      setPressed({ animal, id });
+      later(() => setPressed((current) => endGlow(current, id)), PRESS_GLOW_MS);
     } else if (outcome === 'grow') {
       playSuccess();
       setReplay(false);
@@ -208,11 +211,12 @@ export default function SimonLights() {
         >
           {ANIMALS.map((emoji, i) => {
             const color = TILE_COLORS[i];
-            const isLit = (phase === 'watch' && lit === i) || (yourTurn && pressed === i) || phase === 'right' || phase === 'complete';
+            const isLit = (phase === 'watch' && lit === i) || (yourTurn && pressed?.animal === i) || phase === 'right' || phase === 'complete';
             const isHint = hint === i;
             return (
               <button
-                key={emoji}
+                // A new key per tap re-mounts the tile, so the bounce restarts on a repeat tap.
+                key={pressed?.animal === i ? `${emoji}-${pressed.id}` : emoji}
                 data-testid="simon-animal"
                 data-animal={i}
                 data-lit={String(isLit)}

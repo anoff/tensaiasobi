@@ -3,7 +3,7 @@ import type { GameDifficulty } from '../types/game';
 import { seededRand } from '../utils/random';
 import { starMultiplier } from '../utils/difficulty';
 import {
-  ANIMALS, HINT_AFTER_MISSES, REPLAY_CONFIG, SIMON_CONFIG, extendSequence, freshSequence, generateSequence, hintAnimal, playbackDuration,
+  ANIMALS, HINT_AFTER_MISSES, endGlow, REPLAY_CONFIG, SIMON_CONFIG, extendSequence, freshSequence, generateSequence, hintAnimal, playbackDuration,
   playbackFor, press, simonStars, startRun, type SimonState,
 } from './simonLogic';
 
@@ -207,5 +207,25 @@ describe('whole runs', () => {
         expect(done).toBe(true);
       }
     }
+  });
+});
+
+describe('tap glow', () => {
+  it('an older timer cannot cut a newer glow short (same animal tapped twice quickly)', () => {
+    const first = { animal: 2, id: 1 };
+    const second = { animal: 2, id: 2 };
+    // First timer fires while the second glow is showing: nothing changes.
+    expect(endGlow(second, first.id)).toBe(second);
+    // The second timer ends it.
+    expect(endGlow(second, second.id)).toBeNull();
+    expect(endGlow(first, first.id)).toBeNull();
+    expect(endGlow(null, 1)).toBeNull();
+  });
+
+  it('a repeat tap on the same animal gets a new id, so its tile can restart the bounce', () => {
+    const ids = [1, 2, 3].map((id) => ({ animal: 1, id }));
+    expect(new Set(ids.map((g) => g.id)).size).toBe(3);
+    // Ending the first glow never touches the later ones.
+    for (const g of ids.slice(1)) expect(endGlow(g, 1)).toBe(g);
   });
 });

@@ -143,3 +143,14 @@ export function playbackFor(level: GameDifficulty, replay: boolean): Pick<SimonC
 export function playbackDuration(length: number, speed: Pick<SimonConfig, 'stepMs' | 'gapMs'>): number {
   return length * (speed.stepMs + speed.gapMs);
 }
+
+/** The glow of a tapped animal; `id` counts up per tap so a repeat tap on the same animal is a new glow. */
+export interface Glow {
+  animal: number;
+  id: number;
+}
+
+/** Ends a glow only if it is still the one that armed the timer, so an older timer cannot cut a newer glow short. */
+export function endGlow(current: Glow | null, id: number): Glow | null {
+  return current !== null && current.id === id ? null : current;
+}

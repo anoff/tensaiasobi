@@ -129,4 +129,27 @@ test.describe('Simon Lights', () => {
     await expect(stage(page)).toHaveAttribute('data-phase', 'complete');
     await expect.poll(() => stars(page)).toBe(before + 10);
   });
+
+  test('tapping the same animal twice quickly restarts its glow instead of reusing the first one', async ({ page }) => {
+    await openGame(page, 'launch-simon-lights', 'big', 'medium');
+    // Switch levels until the sequence starts with the same animal twice (only the data attribute is needed). Medium and hard have 3+ steps, so two taps do not finish the run.
+    for (let i = 0; i < 40; i++) {
+      const seq = await sequence(page);
+      if (seq[0] === seq[1]) break;
+      await page.getByTestId(i % 2 === 0 ? 'difficulty-hard' : 'difficulty-medium').click();
+    }
+    const seq = await sequence(page);
+    test.skip(seq[0] !== seq[1], 'no sequence with a leading double came up');
+    await waitForTurn(page);
+
+    const tile = animal(page, seq[0]);
+    await tile.click();
+    await expect(tile).toHaveAttribute('data-lit', 'true');
+    const firstTile = await tile.elementHandle();
+    await tile.click();
+    // The second tap counted, and the tile was re-mounted, so the bounce animation starts over.
+    await expect(stage(page)).toHaveAttribute('data-input', '2');
+    expect(await firstTile!.evaluate((el) => el.isConnected)).toBe(false);
+    await expect(tile).toHaveAttribute('data-lit', 'true');
+  });
 });
