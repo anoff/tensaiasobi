@@ -98,4 +98,26 @@ test.describe('Sink or Float', () => {
     await expect(stage).toHaveAttribute('data-phase', 'playing');
     expect(await stars(page)).toBe(before);
   });
+
+  test('every drop restarts the animation: two misses in a row, then a right answer right after a miss', async ({ page }) => {
+    await openGame(page, 'launch-sink-or-float', 'little', 'easy');
+    const stage = page.getByTestId('sof-stage');
+    const dropId = async () => Number(await page.getByTestId('sof-drop-object').getAttribute('data-drop-id'));
+    const [first] = await shelf(page);
+
+    await predict(page, first.emoji, !first.floats);
+    const miss1 = await dropId();
+    await expect(stage).toHaveAttribute('data-phase', 'playing');
+
+    await predict(page, first.emoji, !first.floats);
+    const miss2 = await dropId();
+    expect(miss2).toBeGreaterThan(miss1);
+    await expect(stage).toHaveAttribute('data-phase', 'playing');
+
+    // A right answer straight after a miss also gets its own drop.
+    await predict(page, first.emoji, first.floats);
+    const right = await dropId();
+    expect(right).toBeGreaterThan(miss2);
+    await expect(page.getByTestId('sof-result')).toHaveAttribute('data-correct', 'true');
+  });
 });

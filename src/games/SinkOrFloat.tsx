@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
@@ -22,7 +22,7 @@ const NEXT_MS = 1600;
 const ZONE_EMOJI: Record<Prediction, string> = { float: '🌊', sink: '⬇️' };
 
 interface Drop extends DropResult {
-  /** Bumps for every drop so the animation restarts. */
+  /** Counts up for every drop in this game, so the fall, splash and shake restart each time. */
   step: number;
 }
 
@@ -41,6 +41,7 @@ export default function SinkOrFloat() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const { later, cancelAll } = useLater();
+  const dropCount = useRef(0);
 
   const flow = flowFor(level);
   const phase = done ? 'success' : busy ? 'dropping' : 'playing';
@@ -77,7 +78,7 @@ export default function SinkOrFloat() {
     const correct = isCorrectPrediction(object, prediction);
     setBusy(true);
     setSelected(null);
-    setDrop({ emoji: object.emoji, result: trueResult(object), correct, step: roundNo * 100 + solved.size });
+    setDrop({ emoji: object.emoji, result: trueResult(object), correct, step: ++dropCount.current });
     later(() => {
       if (correct) {
         const next = new Set(solved).add(object.emoji);
@@ -100,7 +101,7 @@ export default function SinkOrFloat() {
     setSelected(null);
     const run = (i: number) => {
       const r = results[i];
-      setDrop({ ...r, step: roundNo * 100 + i });
+      setDrop({ ...r, step: ++dropCount.current });
       setMarks((m) => ({ ...m, [r.emoji]: r.correct }));
       later(() => {
         if (i + 1 < results.length) run(i + 1);
@@ -205,6 +206,7 @@ export default function SinkOrFloat() {
             <span
               key={drop.step}
               data-testid="sof-drop-object"
+              data-drop-id={drop.step}
               data-result={drop.result}
               className={`absolute left-1/2 -ml-8 top-8 w-16 h-16 ${drop.correct ? '' : 'sof-shake-late'}`}
             >
