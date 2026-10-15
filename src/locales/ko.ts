@@ -35,6 +35,7 @@ export const ko: TranslationSchema = {
     physics: "저울",
     towerSort: "타워 정렬",
     numberTrain: "숫자 기차",
+    diceFlash: "주사위 번쩍",
     shadowFlashlight: "그림자",
     fairSharePicnic: "공평한 소풍",
     snorkelPearlFinder: "진주 찾기",
@@ -446,6 +447,15 @@ export const ko: TranslationSchema = {
     newRound: "새로운 물건이에요!",
     dropLabel: "물에 넣기",
     victory: "모두 맞혔어요! 🎉",
+  },
+  diceFlash: {
+    title: "주사위 번쩍 🎲",
+    subtitle: "점이 몇 개였을까요?",
+    help: "점을 보고 숫자를 눌러 보세요!",
+    howMany: "몇 개?",
+    lookAgain: "다시 봐요!",
+    newFlash: "새로운 번쩍!",
+    victory: "해냈어요! 🎉",
   },
   patternTrain: {
     title: "규칙 기차 🚃",
