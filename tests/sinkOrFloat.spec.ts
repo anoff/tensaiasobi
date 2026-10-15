@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 import { openGame } from './ageLevels';
 
 async function stars(page: Page) {
@@ -120,4 +120,83 @@ test.describe('Sink or Float', () => {
     expect(right).toBeGreaterThan(miss2);
     await expect(page.getByTestId('sof-result')).toHaveAttribute('data-correct', 'true');
   });
+
+  // Small phones: every control must be on screen at once (nothing to scroll to), and the
+  // picked-up object must stay visible while the child chooses Float or Sink.
+  const PHONES = [
+    { name: 'smallest phone', width: 320, height: 568, minTarget: 72 },
+    { name: 'short phone', width: 375, height: 667, minTarget: 96 },
+    { name: 'standard phone', width: 390, height: 844, minTarget: 96 },
+  ] as const;
+
+  for (const phone of PHONES) {
+    test.describe(`${phone.name} (${phone.width}x${phone.height})`, () => {
+      test.use({ viewport: { width: phone.width, height: phone.height } });
+
+      async function expectOnScreen(locator: Locator, what: string) {
+        const box = await locator.boundingBox();
+        expect(box, `${what} is rendered`).not.toBeNull();
+        expect(box!.y, `${what} top`).toBeGreaterThanOrEqual(0);
+        expect(box!.y + box!.height, `${what} bottom`).toBeLessThanOrEqual(phone.height);
+        expect(box!.x, `${what} left`).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width, `${what} right`).toBeLessThanOrEqual(phone.width);
+        return box!;
+      }
+
+      /** The play area must not need scrolling, and all controls must be big enough. */
+      async function expectFits(page: Page, withDrop: boolean) {
+        await page.waitForTimeout(700); // let the pop-in animation settle
+        const objects = page.getByTestId('sof-object');
+        for (let i = 0; i < (await objects.count()); i++) {
+          const box = await expectOnScreen(objects.nth(i), `object ${i}`);
+          expect(box.width, `object ${i} width`).toBeGreaterThanOrEqual(phone.minTarget);
+          expect(box.height, `object ${i} height`).toBeGreaterThanOrEqual(phone.minTarget);
+        }
+        await expectOnScreen(page.getByTestId('sof-tank'), 'tank');
+        for (const id of ['sof-float', 'sof-sink']) {
+          const box = await expectOnScreen(page.getByTestId(id), id);
+          expect(box.width, `${id} width`).toBeGreaterThanOrEqual(phone.minTarget);
+          expect(box.height, `${id} height`).toBeGreaterThanOrEqual(phone.minTarget);
+        }
+        if (withDrop) await expectOnScreen(page.getByTestId('sof-drop'), 'drop button');
+        const scrolls = await page.locator('main').evaluate((el) => el.scrollHeight - el.clientHeight);
+        expect(scrolls, 'main does not scroll').toBeLessThanOrEqual(1);
+      }
+
+      for (const [band, level] of [['little', 'easy'], ['big', 'medium'], ['big', 'hard']] as const) {
+        test(`${level}: shelf, tank and both zones fit together, also with an object picked up`, async ({ page }) => {
+          await openGame(page, 'launch-sink-or-float', band, level);
+          if (level === 'hard') {
+            // Worst case: five objects on the shelf.
+            for (let i = 0; i < 30 && (await page.getByTestId('sof-object').count()) < 5; i++) {
+              await page.getByTestId(i % 2 === 0 ? 'difficulty-medium' : 'difficulty-hard').click();
+              await page.getByTestId('difficulty-hard').click();
+            }
+          }
+          await expectFits(page, false);
+
+          // Pick one up: it stays on screen next to the zones it is going to.
+          const items = await shelf(page);
+          const first = page.locator(`[data-testid="sof-object"][data-emoji="${items[0].emoji}"]`);
+          await first.click();
+          await expect(first).toHaveAttribute('data-selected', 'true');
+          await page.waitForTimeout(300);
+          await expectOnScreen(first, 'picked-up object');
+          await expect(page.getByTestId('sof-float')).toBeEnabled();
+          await expectFits(page, false);
+
+          if (level === 'hard') {
+            // Predict everything: the big drop button is on screen too, and so is the result.
+            await page.getByTestId(items[0].floats ? 'sof-float' : 'sof-sink').click();
+            for (const item of items.slice(1)) await predict(page, item.emoji, item.floats);
+            await expect(page.getByTestId('sof-drop')).toBeVisible();
+            await expectFits(page, true);
+            await page.getByTestId('sof-drop').click();
+            await expect(page.getByTestId('sof-victory')).toBeVisible({ timeout: 15_000 });
+            await expectOnScreen(page.getByTestId('sof-victory'), 'victory text');
+          }
+        });
+      }
+    });
+  }
 });

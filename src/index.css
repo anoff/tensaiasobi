@@ -3,6 +3,25 @@
 @tailwind utilities;
 
 @layer base {
+  /*
+   * Shared game fit rules, one place for every game:
+   *   --game-tile   size of tap targets: shelf objects, answer buttons, animals, zones
+   *   --game-scale  scale of the big visual stage (tank, dice card, ...)
+   * 390x844 and 375x667 keep full 96px tap targets; only 320x568 (tiny) trades tile
+   * size for fit. Keep these two media queries in sync with `short` / `tiny` in
+   * tailwind.config.js.
+   */
+  :root {
+    --game-tile: 6rem;
+    --game-scale: 1;
+  }
+  @media (max-height: 700px) {
+    :root { --game-scale: 0.75; }
+  }
+  @media (max-height: 600px) {
+    :root { --game-tile: 4.5rem; --game-scale: 0.6; }
+  }
+
   body {
     overscroll-behavior-y: contain; /* Prevents pull-to-refresh */
     user-select: none; /* Prevents text highlighting on accidental long-press */
@@ -167,20 +186,20 @@
 
   /* ── Sink or Float: fall into the tank, then bob on the surface or sink to the bottom ── */
   @keyframes sof-fall-float {
-    0% { transform: translateY(-64px); }
-    40% { transform: translateY(18px); }
-    55% { transform: translateY(2px); }
-    70% { transform: translateY(14px); }
-    100% { transform: translateY(8px); }
+    0% { transform: translateY(calc(-64px * var(--game-scale))); }
+    40% { transform: translateY(calc(18px * var(--game-scale))); }
+    55% { transform: translateY(calc(2px * var(--game-scale))); }
+    70% { transform: translateY(calc(14px * var(--game-scale))); }
+    100% { transform: translateY(calc(8px * var(--game-scale))); }
   }
   .sof-fall-float {
     animation: sof-fall-float 1.2s ease-in both;
   }
 
   @keyframes sof-fall-sink {
-    0% { transform: translateY(-64px); }
-    35% { transform: translateY(18px); }
-    100% { transform: translateY(60px); }
+    0% { transform: translateY(calc(-64px * var(--game-scale))); }
+    35% { transform: translateY(calc(18px * var(--game-scale))); }
+    100% { transform: translateY(calc(60px * var(--game-scale))); }
   }
   .sof-fall-sink {
     animation: sof-fall-sink 1.2s ease-in both;

@@ -19,6 +19,9 @@ const DROP_MS = 1600;
 /** Pause on a finished round before the next one, in ms. */
 const NEXT_MS = 1600;
 
+/** Big buttons follow the shared tap-target size (96px, 72px on the smallest phones). */
+const FIT_BUTTON = '!min-h-[var(--game-tile)] !min-w-[var(--game-tile)] short:!py-2';
+
 const ZONE_EMOJI: Record<Prediction, string> = { float: '🌊', sink: '⬇️' };
 
 interface Drop extends DropResult {
@@ -139,11 +142,11 @@ export default function SinkOrFloat() {
   const zonesOff = busy || done || !selected;
 
   return (
-    <div className="flex-1 flex flex-col items-center gap-2 p-3 w-full select-none max-w-lg mx-auto">
+    <div className="flex-1 flex flex-col items-center gap-2 p-3 short:py-1 w-full select-none max-w-lg mx-auto">
       {done && <GameConfetti pieces={110} />}
       <div className="text-center space-y-1">
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight">{t.sinkOrFloat.title}</h2>
-        <p className="text-slate-500 font-extrabold text-sm">{t.sinkOrFloat.subtitle}</p>
+        <h2 className="text-3xl short:text-2xl font-black text-slate-800 tracking-tight">{t.sinkOrFloat.title}</h2>
+        <p className="text-slate-500 font-extrabold text-sm short:hidden">{t.sinkOrFloat.subtitle}</p>
       </div>
 
       <DifficultySelector selected={level} options={['easy', 'medium', 'hard']} onChange={changeLevel} />
@@ -153,10 +156,10 @@ export default function SinkOrFloat() {
         data-flow={flow}
         data-phase={phase}
         data-count={round.objects.length}
-        className="w-full flex flex-col items-center gap-2"
+        className="w-full flex flex-col items-center gap-2 tiny:gap-1.5"
       >
         {/* Shelf: tap an object to pick it up. */}
-        <div key={roundNo} className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 min-h-24 animate-pop-in">
+        <div key={roundNo} className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 tiny:gap-x-2 tiny:gap-y-1.5 min-h-[var(--game-tile)] animate-pop-in">
           {shelf.map((o) => {
             const isSelected = selected === o.emoji;
             const predicted = predictions[o.emoji];
@@ -171,7 +174,7 @@ export default function SinkOrFloat() {
                 data-prediction={predicted ?? ''}
                 disabled={busy || done}
                 onClick={() => tapObject(o.emoji)}
-                className={`relative w-24 h-24 rounded-3xl border-[3px] flex items-center justify-center text-5xl leading-none touch-manipulation cursor-pointer outline-none transition-transform duration-100 focus-visible:ring-4 focus-visible:ring-amber-400/70 ${
+                className={`relative w-[var(--game-tile)] h-[var(--game-tile)] rounded-3xl border-[3px] flex items-center justify-center text-5xl tiny:text-4xl leading-none touch-manipulation cursor-pointer outline-none transition-transform duration-100 focus-visible:ring-4 focus-visible:ring-amber-400/70 ${
                   isSelected ? 'scale-110 ring-4 ring-amber-400' : 'active:translate-x-[3px] active:translate-y-[4px]'
                 }`}
                 style={{
@@ -182,12 +185,12 @@ export default function SinkOrFloat() {
               >
                 {o.emoji}
                 {predicted && (
-                  <span aria-hidden="true" className="absolute -top-2 -right-2 w-9 h-9 rounded-full bg-white border-[3px] flex items-center justify-center text-lg" style={{ borderColor: INK }}>
+                  <span aria-hidden="true" className="absolute -top-2 -right-2 w-9 h-9 tiny:w-7 tiny:h-7 rounded-full bg-white border-[3px] flex items-center justify-center text-lg tiny:text-sm" style={{ borderColor: INK }}>
                     {ZONE_EMOJI[predicted]}
                   </span>
                 )}
                 {mark !== undefined && (
-                  <span aria-hidden="true" className="absolute -bottom-2 -left-2 w-9 h-9 rounded-full bg-white border-[3px] flex items-center justify-center text-lg" style={{ borderColor: INK }}>
+                  <span aria-hidden="true" className="absolute -bottom-2 -left-2 w-9 h-9 tiny:w-7 tiny:h-7 rounded-full bg-white border-[3px] flex items-center justify-center text-lg tiny:text-sm" style={{ borderColor: INK }}>
                     {mark ? '✅' : '💡'}
                   </span>
                 )}
@@ -198,8 +201,9 @@ export default function SinkOrFloat() {
 
         {/* Tank: the object falls in and bobs on the surface or drops to the bottom. */}
         <div
-          className="relative w-full h-40 rounded-3xl border-4 overflow-hidden bg-gradient-to-b from-sky-100 to-sky-50"
-          style={{ borderColor: INK }}
+          data-testid="sof-tank"
+          className="relative w-full rounded-3xl border-4 overflow-hidden bg-gradient-to-b from-sky-100 to-sky-50"
+          style={{ borderColor: INK, height: 'calc(10rem * var(--game-scale))' }}
         >
           <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[58%] bg-sky-400/80 border-t-4 border-sky-500" />
           {drop && (
@@ -208,20 +212,22 @@ export default function SinkOrFloat() {
               data-testid="sof-drop-object"
               data-drop-id={drop.step}
               data-result={drop.result}
-              className={`absolute left-1/2 -ml-8 top-8 w-16 h-16 ${drop.correct ? '' : 'sof-shake-late'}`}
+              className={`absolute left-1/2 ${drop.correct ? '' : 'sof-shake-late'}`}
+              style={{ width: 'calc(4rem * var(--game-scale))', height: 'calc(4rem * var(--game-scale))', marginLeft: 'calc(-2rem * var(--game-scale))', top: 'calc(2rem * var(--game-scale))' }}
             >
               <span
-                className={`block text-5xl leading-none text-center ${drop.result === 'float' ? 'sof-fall-float' : 'sof-fall-sink'}`}
+                style={{ fontSize: 'calc(3rem * var(--game-scale))' }}
+                className={`block leading-none text-center ${drop.result === 'float' ? 'sof-fall-float' : 'sof-fall-sink'}`}
               >
                 {drop.emoji}
               </span>
-              <span aria-hidden="true" className="sof-splash absolute left-1/2 -ml-4 top-6 text-3xl leading-none">💦</span>
+              <span aria-hidden="true" className="sof-splash absolute left-1/2 -ml-4 top-6 tiny:top-4 text-3xl tiny:text-2xl leading-none">💦</span>
             </span>
           )}
           {canDrop && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <KidButton data-testid="sof-drop" color="yellow" size="lg" variant="primary" aria-label={t.sinkOrFloat.dropLabel} onClick={dropAll}>
-                <span className="text-4xl">💦</span>
+              <KidButton data-testid="sof-drop" color="yellow" size="lg" variant="primary" aria-label={t.sinkOrFloat.dropLabel} className={FIT_BUTTON} onClick={dropAll}>
+                <span className="text-4xl tiny:text-3xl">💦</span>
               </KidButton>
             </div>
           )}
@@ -240,19 +246,19 @@ export default function SinkOrFloat() {
 
         {/* Predict: water = float, down arrow = sink. */}
         <div className="grid grid-cols-2 gap-3 w-full max-w-sm pb-1">
-          <KidButton data-testid="sof-float" color="blue" size="lg" disabled={zonesOff} className={zonesOff ? 'opacity-60' : ''} onClick={() => tapZone('float')}>
-            <span className="text-4xl">{ZONE_EMOJI.float}</span>
-            <span className="text-lg">{t.sinkOrFloat.floatLabel}</span>
+          <KidButton data-testid="sof-float" color="blue" size="lg" disabled={zonesOff} className={`${FIT_BUTTON} ${zonesOff ? 'opacity-60' : ''}`} onClick={() => tapZone('float')}>
+            <span className="text-4xl tiny:text-3xl">{ZONE_EMOJI.float}</span>
+            <span className="text-lg tiny:text-base">{t.sinkOrFloat.floatLabel}</span>
           </KidButton>
-          <KidButton data-testid="sof-sink" color="yellow" size="lg" disabled={zonesOff} className={zonesOff ? 'opacity-60' : ''} onClick={() => tapZone('sink')}>
-            <span className="text-4xl">{ZONE_EMOJI.sink}</span>
-            <span className="text-lg">{t.sinkOrFloat.sinkLabel}</span>
+          <KidButton data-testid="sof-sink" color="yellow" size="lg" disabled={zonesOff} className={`${FIT_BUTTON} ${zonesOff ? 'opacity-60' : ''}`} onClick={() => tapZone('sink')}>
+            <span className="text-4xl tiny:text-3xl">{ZONE_EMOJI.sink}</span>
+            <span className="text-lg tiny:text-base">{t.sinkOrFloat.sinkLabel}</span>
           </KidButton>
         </div>
       </div>
 
       {done && <p data-testid="sof-victory" className="text-slate-800 font-black text-xl text-center">{t.sinkOrFloat.victory}</p>}
-      <p className="text-slate-400 font-extrabold text-xs text-center">{t.sinkOrFloat.help}</p>
+      <p className="text-slate-400 font-extrabold text-xs text-center short:hidden">{t.sinkOrFloat.help}</p>
     </div>
   );
 }

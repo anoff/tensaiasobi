@@ -266,7 +266,7 @@ function AppContent() {
         <span className="flex-1" style={{ backgroundColor: LEAF }} />
         <span className="flex-1" style={{ backgroundColor: BUTTER }} />
       </div>
-      <header className="flex justify-between items-center p-4 z-50">
+      <header className="flex justify-between items-center p-4 short:p-2 tiny:p-1.5 z-50">
         <div>
           {currentScreen !== 'menu' && currentScreen !== 'settings' && currentScreen !== 'session' && (
             <HomeButton data-testid="home-button" onClick={() => handleScreenChange('menu')} />
@@ -389,7 +389,7 @@ function AppContent() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6">
+      <main className="flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6 short:pb-2">
         {currentScreen === 'menu' ? (
           <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
             <div className="text-center space-y-2 mt-4">

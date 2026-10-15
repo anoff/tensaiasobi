@@ -55,7 +55,7 @@ export function DifficultySelector({
               if (!isActive) onChange(opt);
             }}
             className={`
-              flex-1 py-2.5 text-sm font-black rounded-xl border-2 transition-all duration-75 outline-none cursor-pointer select-none
+              flex-1 py-2.5 short:py-1.5 text-sm font-black rounded-xl border-2 transition-all duration-75 outline-none cursor-pointer select-none
               focus-visible:ring-4 focus-visible:ring-amber-400/70
               ${opt === locked ? 'cursor-not-allowed' : ''}
               ${isActive ? (paper ? 'bg-white text-ink border-ink/70 shadow-sm' : '') : idleClass}
