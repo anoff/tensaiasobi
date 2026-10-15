@@ -159,11 +159,11 @@ export default function SimonLights() {
   const stepsDone = yourTurn ? game.input : phase === 'right' || phase === 'complete' ? game.sequence.length : 0;
 
   return (
-    <div className="flex-1 flex flex-col items-center gap-3 p-3 w-full select-none max-w-lg mx-auto">
+    <div className="flex-1 flex flex-col items-center gap-3 tiny:gap-2 p-3 short:py-1 w-full select-none max-w-lg mx-auto">
       {phase === 'complete' && <GameConfetti pieces={140} />}
       <div className="text-center space-y-1">
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight">{t.simonLights.title}</h2>
-        <p className="text-slate-500 font-extrabold text-sm">{t.simonLights.subtitle}</p>
+        <h2 className="text-3xl short:text-2xl font-black text-slate-800 tracking-tight">{t.simonLights.title}</h2>
+        <p className="text-slate-500 font-extrabold text-sm short:hidden">{t.simonLights.subtitle}</p>
       </div>
 
       <DifficultySelector selected={level} options={['easy', 'medium', 'hard']} onChange={changeLevel} />
@@ -176,7 +176,7 @@ export default function SimonLights() {
         data-sequence={game.sequence.join(',')}
         data-misses={game.missCount}
         data-speed={replay ? 'replay' : level}
-        className="w-full flex flex-col items-center gap-3"
+        className="w-full flex flex-col items-center gap-3 tiny:gap-2"
       >
         {/* Watch and your-turn look different: colour, icon and words. */}
         <div
@@ -184,7 +184,7 @@ export default function SimonLights() {
           data-testid="simon-banner"
           data-state={yourTurn ? 'turn' : 'watch'}
           aria-live="polite"
-          className={`animate-pop-in flex items-center gap-2 px-5 py-2 rounded-full border-[3px] text-xl font-black ${
+          className={`animate-pop-in flex items-center gap-2 px-5 py-2 tiny:py-1 rounded-full border-[3px] text-xl tiny:text-lg font-black ${
             yourTurn ? 'bg-amber-200 text-slate-900' : 'bg-sky-100 text-slate-700 border-dashed'
           }`}
           style={{ borderColor: INK }}
@@ -204,7 +204,7 @@ export default function SimonLights() {
         </div>
 
         <div
-          className={`grid grid-cols-2 gap-4 w-full max-w-sm p-4 rounded-[2rem] border-4 transition-colors ${
+          className={`grid grid-cols-2 gap-4 tiny:gap-2 w-full max-w-sm p-4 tiny:p-2 rounded-[2rem] border-4 transition-colors ${
             yourTurn ? 'bg-amber-50 border-solid' : 'bg-sky-50 border-dashed'
           }`}
           style={{ borderColor: INK }}
@@ -224,7 +224,7 @@ export default function SimonLights() {
                 disabled={!yourTurn}
                 aria-label={emoji}
                 onClick={() => tap(i)}
-                className={`h-32 min-w-24 rounded-3xl border-[3px] flex items-center justify-center text-6xl leading-none touch-manipulation outline-none transition-[background-color,box-shadow] duration-150 focus-visible:ring-4 focus-visible:ring-amber-400/70 ${
+                className={`h-[calc(var(--game-tile)*4/3)] min-w-[var(--game-tile)] rounded-3xl border-[3px] flex items-center justify-center text-6xl tiny:text-5xl leading-none touch-manipulation outline-none transition-[background-color,box-shadow] duration-150 focus-visible:ring-4 focus-visible:ring-amber-400/70 ${
                   isLit ? 'simon-lit' : ''
                 } ${isHint ? 'ring-4 ring-amber-400 animate-pulse' : ''} ${wrongTap === i ? 'animate-shake' : ''} ${
                   yourTurn ? 'cursor-pointer active:translate-x-[3px] active:translate-y-[4px]' : 'cursor-default'
@@ -243,7 +243,7 @@ export default function SimonLights() {
         </div>
       </div>
 
-      <p className="text-slate-400 font-extrabold text-xs text-center">{t.simonLights.help}</p>
+      <p className="text-slate-400 font-extrabold text-xs text-center short:hidden">{t.simonLights.help}</p>
     </div>
   );
 }

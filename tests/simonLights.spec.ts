@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 import { openGame } from './ageLevels';
 
 async function stars(page: Page) {
@@ -152,4 +152,70 @@ test.describe('Simon Lights', () => {
     expect(await firstTile!.evaluate((el) => el.isConnected)).toBe(false);
     await expect(tile).toHaveAttribute('data-lit', 'true');
   });
+
+  // Small phones: all four animals (and the banner) are on screen in every state, the play
+  // area does not scroll, and the tap targets stay big enough.
+  const PHONES = [
+    { name: 'smallest phone', width: 320, height: 568, minTarget: 72 },
+    { name: 'short phone', width: 375, height: 667, minTarget: 96 },
+    { name: 'standard phone', width: 390, height: 844, minTarget: 96 },
+  ] as const;
+
+  for (const phone of PHONES) {
+    test.describe(`${phone.name} (${phone.width}x${phone.height})`, () => {
+      test.use({ viewport: { width: phone.width, height: phone.height } });
+
+      async function expectOnScreen(locator: Locator, what: string) {
+        const box = await locator.boundingBox();
+        expect(box, `${what} is rendered`).not.toBeNull();
+        expect(box!.y, `${what} top`).toBeGreaterThanOrEqual(0);
+        expect(box!.y + box!.height, `${what} bottom`).toBeLessThanOrEqual(phone.height);
+        expect(box!.x, `${what} left`).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width, `${what} right`).toBeLessThanOrEqual(phone.width);
+        return box!;
+      }
+
+      async function expectFits(page: Page) {
+        await page.waitForTimeout(500); // let the pop-in animation settle
+        for (let i = 0; i < 4; i++) {
+          const box = await expectOnScreen(animal(page, i), `animal ${i}`);
+          expect(box.width, `animal ${i} width`).toBeGreaterThanOrEqual(phone.minTarget);
+          expect(box.height, `animal ${i} height`).toBeGreaterThanOrEqual(phone.minTarget);
+        }
+        await expectOnScreen(page.getByTestId('simon-banner'), 'banner');
+        const scrolls = await page.locator('main').evaluate((el) => el.scrollHeight - el.clientHeight);
+        expect(scrolls, 'main does not scroll').toBeLessThanOrEqual(1);
+      }
+
+      for (const [band, level] of [['little', 'easy'], ['big', 'medium'], ['big', 'hard']] as const) {
+        test(`${level}: all four animals fit while watching, on your turn and after a miss`, async ({ page }) => {
+          await openGame(page, 'launch-simon-lights', band, level);
+          await expect(stage(page)).toHaveAttribute('data-phase', 'watch');
+          await expectFits(page);
+
+          await waitForTurn(page);
+          await expectFits(page);
+
+          // A miss: the wobble and the replay banner still fit.
+          await animal(page, await wrongAnimal(page)).click();
+          await expect(stage(page)).toHaveAttribute('data-phase', 'miss');
+          await expectFits(page);
+        });
+      }
+
+      if (phone.width === 320) {
+        test('easy: the finished run (confetti, victory banner) fits too', async ({ page }) => {
+          test.setTimeout(60_000);
+          await openGame(page, 'launch-simon-lights', 'little', 'easy');
+          for (const length of [2, 3, 4]) {
+            await waitForTurn(page);
+            await expect(stage(page)).toHaveAttribute('data-length', String(length));
+            await repeat(page);
+          }
+          await expect(stage(page)).toHaveAttribute('data-phase', 'complete');
+          await expectFits(page);
+        });
+      }
+    });
+  }
 });
