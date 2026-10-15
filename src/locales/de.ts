@@ -44,6 +44,7 @@ export const de: TranslationSchema = {
     syllableDrum: "Silbentrommel",
     missingLetter: "Lückenwort",
     animalGenie: "Tier-Geist",
+    sinkOrFloat: "Schwimmen oder Sinken",
     categories: {
       numbers: "Zahlen",
       language: "Sprache",
@@ -432,6 +433,19 @@ export const de: TranslationSchema = {
     subtitleMedium: "Mit welchem Buchstaben fängt es an?",
     subtitleHard: "Welches Bild fängt mit diesem Buchstaben an?",
     help: "Tippe auf die passende Blase!",
+  },
+  sinkOrFloat: {
+    title: "Schwimmen oder Sinken 🛁",
+    subtitle: "Schwimmt es oder geht es unter?",
+    help: "Tippe auf einen Gegenstand und dann dorthin, wo du glaubst, dass er hingehört!",
+    floatLabel: "Schwimmt",
+    sinkLabel: "Sinkt",
+    floated: "Es schwimmt!",
+    sank: "Es sinkt!",
+    tryAgain: "Versuch es nochmal!",
+    newRound: "Neue Gegenstände!",
+    dropLabel: "Ins Wasser werfen",
+    victory: "Alle richtig! 🎉",
   },
   patternTrain: {
     title: "Musterzug 🚃",

@@ -44,6 +44,7 @@ export const ja: TranslationSchema = {
     syllableDrum: "おとのたいこ",
     missingLetter: "きえたもじ",
     animalGenie: "どうぶつまじん",
+    sinkOrFloat: "うく？しずむ？",
     categories: {
       numbers: "かず",
       language: "ことば",
@@ -432,6 +433,19 @@ export const ja: TranslationSchema = {
     subtitleMedium: "おなじ おとの カタカナは どれ？",
     subtitleHard: "ローマじで かくと どれ？",
     help: "あう バブルを タップしてね！",
+  },
+  sinkOrFloat: {
+    title: "うく？しずむ？ 🛁",
+    subtitle: "みずに いれたら うくかな、しずむかな？",
+    help: "ものを タップして、どっちか えらんでね！",
+    floatLabel: "うく",
+    sinkLabel: "しずむ",
+    floated: "うかんだ！",
+    sank: "しずんだ！",
+    tryAgain: "もういちど！",
+    newRound: "あたらしい ものだよ！",
+    dropLabel: "みずに いれる",
+    victory: "ぜんぶ あたり！ 🎉",
   },
   patternTrain: {
     title: "もようれっしゃ 🚃",

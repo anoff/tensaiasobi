@@ -44,6 +44,7 @@ export const ko: TranslationSchema = {
     syllableDrum: "음절 북",
     missingLetter: "빠진 글자",
     animalGenie: "동물 지니",
+    sinkOrFloat: "뜰까 가라앉을까",
     categories: {
       numbers: "숫자",
       language: "말과 글",
@@ -432,6 +433,19 @@ export const ko: TranslationSchema = {
     subtitleMedium: "첫 자음을 찾아요!",
     subtitleHard: "이 글자로 시작하는 그림은?",
     help: "맞는 방울을 눌러요!",
+  },
+  sinkOrFloat: {
+    title: "뜰까 가라앉을까 🛁",
+    subtitle: "물에 뜰까요, 가라앉을까요?",
+    help: "물건을 누르고, 어디로 갈지 골라 보세요!",
+    floatLabel: "뜬다",
+    sinkLabel: "가라앉는다",
+    floated: "물에 떠요!",
+    sank: "가라앉아요!",
+    tryAgain: "다시 해 봐요!",
+    newRound: "새로운 물건이에요!",
+    dropLabel: "물에 넣기",
+    victory: "모두 맞혔어요! 🎉",
   },
   patternTrain: {
     title: "규칙 기차 🚃",

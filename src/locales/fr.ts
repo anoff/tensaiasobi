@@ -44,6 +44,7 @@ export const fr: TranslationSchema = {
     syllableDrum: "Tambour syllabes",
     missingLetter: "Lettre perdue",
     animalGenie: "Génie animal",
+    sinkOrFloat: "Flotte ou coule",
     categories: {
       numbers: "Nombres",
       language: "Langage",
@@ -432,6 +433,19 @@ export const fr: TranslationSchema = {
     subtitleMedium: "Par quelle lettre ça commence ?",
     subtitleHard: "Quelle image commence par cette lettre ?",
     help: "Touche la bonne bulle !",
+  },
+  sinkOrFloat: {
+    title: "Flotte ou coule 🛁",
+    subtitle: "Est-ce que ça flotte ou ça coule ?",
+    help: "Touche un objet, puis touche où tu penses qu'il va !",
+    floatLabel: "Flotte",
+    sinkLabel: "Coule",
+    floated: "Ça flotte !",
+    sank: "Ça coule !",
+    tryAgain: "Essaie encore !",
+    newRound: "Nouveaux objets !",
+    dropLabel: "Lancer dans l'eau",
+    victory: "Tout est juste ! 🎉",
   },
   patternTrain: {
     title: "Train des motifs 🚃",
