@@ -44,6 +44,7 @@ export const ja: TranslationSchema = {
     syllableDrum: "おとのたいこ",
     missingLetter: "きえたもじ",
     animalGenie: "どうぶつまじん",
+    simonLights: "どうぶつライト",
     categories: {
       numbers: "かず",
       language: "ことば",
@@ -432,6 +433,17 @@ export const ja: TranslationSchema = {
     subtitleMedium: "おなじ おとの カタカナは どれ？",
     subtitleHard: "ローマじで かくと どれ？",
     help: "あう バブルを タップしてね！",
+  },
+  simonLights: {
+    title: "どうぶつライト 🐵",
+    subtitle: "どうぶつを みて、おなじ じゅんに タップ！",
+    help: "よく みて、おなじ じゅんばんで タップしてね！",
+    watch: "みてて！",
+    yourTurn: "あなたの ばん！",
+    watchAgain: "もういちど みてね！",
+    newSequence: "あたらしい じゅんばん！",
+    great: "すごい！",
+    victory: "ぜんぶ おぼえたね！ 🎉",
   },
   patternTrain: {
     title: "もようれっしゃ 🚃",

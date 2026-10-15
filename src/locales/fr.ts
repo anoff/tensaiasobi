@@ -44,6 +44,7 @@ export const fr: TranslationSchema = {
     syllableDrum: "Tambour syllabes",
     missingLetter: "Lettre perdue",
     animalGenie: "Génie animal",
+    simonLights: "Lumières des animaux",
     categories: {
       numbers: "Nombres",
       language: "Langage",
@@ -432,6 +433,17 @@ export const fr: TranslationSchema = {
     subtitleMedium: "Par quelle lettre ça commence ?",
     subtitleHard: "Quelle image commence par cette lettre ?",
     help: "Touche la bonne bulle !",
+  },
+  simonLights: {
+    title: "Lumières des animaux 🐵",
+    subtitle: "Regarde les animaux, puis recopie !",
+    help: "Regarde bien, puis touche les animaux dans le même ordre !",
+    watch: "Regarde !",
+    yourTurn: "À toi !",
+    watchAgain: "Regarde encore !",
+    newSequence: "Nouvelle suite !",
+    great: "Bravo !",
+    victory: "Tu t'es tout rappelé ! 🎉",
   },
   patternTrain: {
     title: "Train des motifs 🚃",

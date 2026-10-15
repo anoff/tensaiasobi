@@ -58,6 +58,7 @@ two games in every learning category, and school has three or more.
 | **Missing Letter ✍️** | Language | school | spelling | first letter → any letter in short words → longer words with 4 choices (vowel against vowel) |
 | **Pattern Train 🚃** | Logic | both | sequences | AB → AAB/ABB/ABC → AABB/ABCD with the gap anywhere |
 | **Animal Genie 🧞** | Logic | both | yes/no deduction | 10 → 20 → 33 animals. Offline Akinator: picks the question that splits the remaining animals most evenly. Easy/medium fade out animals that no longer fit; hard keeps them hidden. Tolerates a wrong answer; after 3 wrong guesses the child wins |
+| **Simon Lights 🐵** | Logic | both | working memory | 4 animals on every level. The sequence starts short and gains a step per repeat: 2 → 4 (slow) → 3 → 6 (medium) → 4 → 8 (fast). Watch and your-turn are separate states and taps are ignored while watching. A miss replays the same sequence slowly (easy/medium; after 2 misses on a step the right animal is highlighted); on hard (and in parent challenges) it starts a new sequence of the same length. 2 / 6 / 10 stars per finished run |
 
 They are all muted-friendly: the child names the picture, nothing has to be heard.
 English, German and French syllables are split by hand in `syllableDrumLogic.ts` and

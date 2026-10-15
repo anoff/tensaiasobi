@@ -44,6 +44,7 @@ export const ko: TranslationSchema = {
     syllableDrum: "음절 북",
     missingLetter: "빠진 글자",
     animalGenie: "동물 지니",
+    simonLights: "동물 불빛",
     categories: {
       numbers: "숫자",
       language: "말과 글",
@@ -432,6 +433,17 @@ export const ko: TranslationSchema = {
     subtitleMedium: "첫 자음을 찾아요!",
     subtitleHard: "이 글자로 시작하는 그림은?",
     help: "맞는 방울을 눌러요!",
+  },
+  simonLights: {
+    title: "동물 불빛 🐵",
+    subtitle: "동물을 보고 똑같이 따라 해요!",
+    help: "잘 보고 같은 순서로 동물을 눌러 보세요!",
+    watch: "잘 보세요!",
+    yourTurn: "내 차례!",
+    watchAgain: "다시 보세요!",
+    newSequence: "새로운 순서!",
+    great: "잘했어요!",
+    victory: "모두 기억했어요! 🎉",
   },
   patternTrain: {
     title: "규칙 기차 🚃",

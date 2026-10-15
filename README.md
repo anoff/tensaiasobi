@@ -41,6 +41,7 @@ The home screen sorts games into four colour-coded shelves. The 🧸 Preschool /
 - **Odd One 🧐**: pick the one that doesn't belong.
 - **Pattern Train 🚃**: what wagon comes next? AB, then AAB/ABC, then a gap in the middle on hard.
 - **Animal Genie 🧞**: think of an animal, the genie asks yes/no questions and guesses it. On easy and medium the animals that no longer fit fade out.
+- **Simon Lights 🐵**: four animals light up one at a time, then tap them back in order. Each repeat adds a step: 2 to 4 slowly on easy, 3 to 6 on medium, 4 to 8 fast on hard. A miss replays the sequence (easy/medium, with a hint after two misses on a step) or starts a new one (hard).
 - **Match 🐯**: memory pairs.
 - **Shadow 🔦**: identify a silhouette with a flashlight. *(preschool)*
 - **Pearl Finder 🤿**: sort pearls into matching clams. *(preschool)*
