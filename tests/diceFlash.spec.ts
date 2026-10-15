@@ -134,6 +134,47 @@ test.describe('Dice Flash', () => {
     }
   });
 
+  // The whole play area (die card, prompt and every answer) fits without scrolling on small phones.
+  for (const phone of [
+    { name: 'smallest phone', width: 320, height: 568, minTarget: 72 },
+    { name: 'short phone', width: 375, height: 667, minTarget: 96 },
+    { name: 'standard phone', width: 390, height: 844, minTarget: 96 },
+  ] as const) {
+    test.describe(`fit: ${phone.name} (${phone.width}x${phone.height})`, () => {
+      test.use({ viewport: { width: phone.width, height: phone.height } });
+
+      for (const [band, level, answers] of [['little', 'easy', 3], ['big', 'medium', 4], ['big', 'hard', 4]] as const) {
+        test(`${level}: die card and all ${answers} answers are inside the viewport, no scrolling`, async ({ page }) => {
+          await openGame(page, 'launch-dice-flash', band, level);
+          // While the dots flash, the card is already fully visible.
+          await expect(stage(page)).toHaveAttribute('data-phase', 'flash');
+          const inside = async (testId: string, minSize = 0) => {
+            const boxes = await page.getByTestId(testId).evaluateAll((els) => els.map((e) => {
+              const r = e.getBoundingClientRect();
+              return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
+            }));
+            for (const b of boxes) {
+              expect(b.top).toBeGreaterThanOrEqual(0);
+              expect(b.bottom).toBeLessThanOrEqual(phone.height);
+              expect(b.left).toBeGreaterThanOrEqual(0);
+              expect(b.right).toBeLessThanOrEqual(phone.width);
+              expect(b.width).toBeGreaterThanOrEqual(minSize);
+              expect(b.height).toBeGreaterThanOrEqual(minSize);
+            }
+            return boxes.length;
+          };
+          await inside('dice-card');
+          await waitForAnswer(page);
+          await page.waitForTimeout(600); // let the pop-in animation settle
+          await inside('dice-card');
+          expect(await inside('dice-option', phone.minTarget)).toBe(answers);
+          const overflow = await page.locator('main').evaluate((el) => el.scrollHeight - el.clientHeight);
+          expect(overflow).toBeLessThanOrEqual(1);
+        });
+      }
+    });
+  }
+
   test('five right answers finish a set and pay 5 x 2 stars on easy', async ({ page }) => {
     test.setTimeout(60_000);
     await openGame(page, 'launch-dice-flash', 'little', 'easy');
