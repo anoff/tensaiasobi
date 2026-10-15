@@ -59,6 +59,7 @@ two games in every learning category, and school has three or more.
 | **Pattern Train 🚃** | Logic | both | sequences | AB → AAB/ABB/ABC → AABB/ABCD with the gap anywhere |
 | **Animal Genie 🧞** | Logic | both | yes/no deduction | 10 → 20 → 33 animals. Offline Akinator: picks the question that splits the remaining animals most evenly. Easy/medium fade out animals that no longer fit; hard keeps them hidden. Tolerates a wrong answer; after 3 wrong guesses the child wins |
 | **Simon Lights 🐵** | Logic | both | working memory | 4 animals on every level. The sequence starts short and gains a step per repeat: 2 → 4 (slow) → 3 → 6 (medium) → 4 → 8 (fast). Watch and your-turn are separate states and taps are ignored while watching. A miss replays the same sequence slowly (easy/medium; after 2 misses on a step the right animal is highlighted); on hard (and in parent challenges) it starts a new sequence of the same length. 2 / 6 / 10 stars per finished run |
+| **Sink or Float 🛁** | Logic | both | cause and effect (buoyancy) | 2 obvious objects one at a time → 3–4 objects in any order → 4–5 objects with surprises (🚢 floats, 🥚 sinks), all predicted before the drops. A miss shows the true result, then a retry; on hard (and in parent challenges) a miss ends the round with no stars |
 
 They are all muted-friendly: the child names the picture, nothing has to be heard.
 English, German and French syllables are split by hand in `syllableDrumLogic.ts` and
@@ -69,7 +70,7 @@ clap them, so a silent final *e* is not a beat (*pomme* = 1).
 
 - **Numbers:** Dice Flash (recognising small amounts at a glance), Clock Shop, Coin Café (school)
 - **Language:** Word Builder (drag letters to spell)
-- **Logic:** Sink or Float (#44), Magnet Fishing (#41), Mini Sudoku, Robot Path
+- **Logic:** Magnet Fishing (#41), Mini Sudoku, Robot Path
 - **Just for fun:** Bodyboard Wave Rider (#64), Wave Surfer (#60), Bubble Pop
 
 ## Not changed (yet)

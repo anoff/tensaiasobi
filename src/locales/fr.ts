@@ -45,6 +45,7 @@ export const fr: TranslationSchema = {
     missingLetter: "Lettre perdue",
     animalGenie: "Génie animal",
     simonLights: "Lumières des animaux",
+    sinkOrFloat: "Flotte ou coule",
     categories: {
       numbers: "Nombres",
       language: "Langage",
@@ -444,6 +445,19 @@ export const fr: TranslationSchema = {
     newSequence: "Nouvelle suite !",
     great: "Bravo !",
     victory: "Tu t'es tout rappelé ! 🎉",
+  },
+  sinkOrFloat: {
+    title: "Flotte ou coule 🛁",
+    subtitle: "Est-ce que ça flotte ou ça coule ?",
+    help: "Touche un objet, puis touche où tu penses qu'il va !",
+    floatLabel: "Flotte",
+    sinkLabel: "Coule",
+    floated: "Ça flotte !",
+    sank: "Ça coule !",
+    tryAgain: "Essaie encore !",
+    newRound: "Nouveaux objets !",
+    dropLabel: "Lancer dans l'eau",
+    victory: "Tout est juste ! 🎉",
   },
   patternTrain: {
     title: "Train des motifs 🚃",

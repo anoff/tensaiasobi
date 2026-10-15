@@ -43,6 +43,7 @@ export const en = {
     missingLetter: "Missing Letter",
     animalGenie: "Animal Genie",
     simonLights: "Simon Lights",
+    sinkOrFloat: "Sink or Float",
     categories: {
       numbers: "Numbers",
       language: "Language",
@@ -442,6 +443,19 @@ export const en = {
     newSequence: "New sequence!",
     great: "Great!",
     victory: "You remembered them all! 🎉",
+  },
+  sinkOrFloat: {
+    title: "Sink or Float 🛁",
+    subtitle: "Will it sink or float?",
+    help: "Tap an object, then tap where you think it goes!",
+    floatLabel: "Float",
+    sinkLabel: "Sink",
+    floated: "It floats!",
+    sank: "It sinks!",
+    tryAgain: "Try again!",
+    newRound: "New objects!",
+    dropLabel: "Drop them in the water",
+    victory: "You got them all! 🎉",
   },
   patternTrain: {
     title: "Pattern Train 🚃",

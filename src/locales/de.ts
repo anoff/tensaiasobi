@@ -45,6 +45,7 @@ export const de: TranslationSchema = {
     missingLetter: "Lückenwort",
     animalGenie: "Tier-Geist",
     simonLights: "Tier-Lichter",
+    sinkOrFloat: "Schwimmen oder Sinken",
     categories: {
       numbers: "Zahlen",
       language: "Sprache",
@@ -444,6 +445,19 @@ export const de: TranslationSchema = {
     newSequence: "Neue Reihenfolge!",
     great: "Super!",
     victory: "Du hast dir alle gemerkt! 🎉",
+  },
+  sinkOrFloat: {
+    title: "Schwimmen oder Sinken 🛁",
+    subtitle: "Schwimmt es oder geht es unter?",
+    help: "Tippe auf einen Gegenstand und dann dorthin, wo du glaubst, dass er hingehört!",
+    floatLabel: "Schwimmt",
+    sinkLabel: "Sinkt",
+    floated: "Es schwimmt!",
+    sank: "Es sinkt!",
+    tryAgain: "Versuch es nochmal!",
+    newRound: "Neue Gegenstände!",
+    dropLabel: "Ins Wasser werfen",
+    victory: "Alle richtig! 🎉",
   },
   patternTrain: {
     title: "Musterzug 🚃",

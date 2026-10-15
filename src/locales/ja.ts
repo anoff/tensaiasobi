@@ -45,6 +45,7 @@ export const ja: TranslationSchema = {
     missingLetter: "きえたもじ",
     animalGenie: "どうぶつまじん",
     simonLights: "どうぶつライト",
+    sinkOrFloat: "うく？しずむ？",
     categories: {
       numbers: "かず",
       language: "ことば",
@@ -444,6 +445,19 @@ export const ja: TranslationSchema = {
     newSequence: "あたらしい じゅんばん！",
     great: "すごい！",
     victory: "ぜんぶ おぼえたね！ 🎉",
+  },
+  sinkOrFloat: {
+    title: "うく？しずむ？ 🛁",
+    subtitle: "みずに いれたら うくかな、しずむかな？",
+    help: "ものを タップして、どっちか えらんでね！",
+    floatLabel: "うく",
+    sinkLabel: "しずむ",
+    floated: "うかんだ！",
+    sank: "しずんだ！",
+    tryAgain: "もういちど！",
+    newRound: "あたらしい ものだよ！",
+    dropLabel: "みずに いれる",
+    victory: "ぜんぶ あたり！ 🎉",
   },
   patternTrain: {
     title: "もようれっしゃ 🚃",
