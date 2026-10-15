@@ -99,12 +99,12 @@ export default function DiceFlash() {
         : '';
 
   return (
-    <div className="flex-1 flex flex-col items-center gap-3 p-3 w-full select-none max-w-lg mx-auto">
+    <div className="flex-1 flex flex-col items-center gap-3 max-[700px]:gap-2 p-3 max-[700px]:py-1 w-full select-none max-w-lg mx-auto">
       {phase === 'right' && <GameConfetti key={`right-${flashNo}`} pieces={45} />}
       {phase === 'complete' && <GameConfetti pieces={140} />}
       <div className="text-center space-y-1">
         <h2 className="text-3xl font-black text-slate-800 tracking-tight">{t.diceFlash.title}</h2>
-        <p className="text-slate-500 font-extrabold text-sm">{t.diceFlash.subtitle}</p>
+        <p className="text-slate-500 font-extrabold text-sm max-[700px]:hidden">{t.diceFlash.subtitle}</p>
       </div>
 
       <DifficultySelector selected={level} options={['easy', 'medium', 'hard']} onChange={changeLevel} />
@@ -116,7 +116,7 @@ export default function DiceFlash() {
         data-flash-ms={round.flashMs}
         data-layout={diceRoundKey(round)}
         data-progress={progress}
-        className="w-full flex flex-col items-center gap-3"
+        className="w-full flex flex-col items-center gap-3 max-[700px]:gap-1.5"
       >
         <div data-testid="dice-progress" aria-hidden="true" className="flex gap-2 text-2xl leading-none">
           {Array.from({ length: FLASHES_PER_ROUND }, (_, i) => (
@@ -126,7 +126,7 @@ export default function DiceFlash() {
 
         <div
           data-testid="dice-card"
-          className={`relative w-52 h-52 rounded-[2rem] border-[4px] bg-white ${phase === 'right' ? 'animate-pop-in' : ''}`}
+          className={`relative w-52 h-52 max-[700px]:w-36 max-[700px]:h-36 rounded-[2rem] border-[4px] bg-white ${phase === 'right' ? 'animate-pop-in' : ''}`}
           style={{ borderColor: INK, boxShadow: hardShadow() }}
         >
           {showDots ? (
@@ -146,9 +146,9 @@ export default function DiceFlash() {
         <p aria-live="polite" className="min-h-6 text-slate-700 font-black text-lg text-center">{prompt}</p>
 
         {/* Buttons only exist once the flash is over; the space is kept so nothing jumps. */}
-        <div className="min-h-[13rem] w-full max-w-sm">
+        <div className="min-h-[13rem] max-[700px]:min-h-[12.5rem] w-full max-w-sm">
           {phase === 'answer' && (
-            <div className={`grid gap-3 ${round.options.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            <div className={`grid gap-3 max-[700px]:gap-2 ${round.options.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
               {round.options.map((option) => (
                 <button
                   key={`${flashNo}-${option}`}
@@ -169,7 +169,7 @@ export default function DiceFlash() {
         </div>
       </div>
 
-      <p className="text-slate-400 font-extrabold text-xs text-center">{t.diceFlash.help}</p>
+      <p className="text-slate-400 font-extrabold text-xs text-center max-[700px]:hidden">{t.diceFlash.help}</p>
     </div>
   );
 }

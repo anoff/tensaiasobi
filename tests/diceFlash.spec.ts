@@ -81,19 +81,57 @@ test.describe('Dice Flash', () => {
     expect(count).toBeLessThanOrEqual(6);
   });
 
-  test('hard: a miss gives a fresh flash with a different layout and no stars', async ({ page }) => {
+  test('hard: a miss gives a fresh flash with a different layout, no stars, and keeps the set progress', async ({ page }) => {
     await openGame(page, 'launch-dice-flash', 'big', 'hard');
     await expect(stage(page)).toHaveAttribute('data-flash-ms', '1000');
     await waitForAnswer(page);
     await expect(page.getByTestId('dice-option')).toHaveCount(4);
+
+    // One right answer first: progress 1 of 5.
+    const start = await stars(page);
+    await tap(page, Number(await stage(page).getAttribute('data-count')));
+    await expect(stage(page)).toHaveAttribute('data-progress', '1');
+    await expect.poll(() => stars(page)).toBe(start + 4);
+    await waitForAnswer(page);
+
     const layout = await stage(page).getAttribute('data-layout');
     const before = await stars(page);
-
     await tap(page, await wrongValue(page));
     await expect(stage(page)).toHaveAttribute('data-phase', 'reveal');
     await waitForAnswer(page);
     expect(await stage(page).getAttribute('data-layout')).not.toBe(layout);
+    // No stars for the missed flash, and the set is not started over.
     expect(await stars(page)).toBe(before);
+    await expect(stage(page)).toHaveAttribute('data-progress', '1');
+  });
+
+  test.describe('short phone (375x667)', () => {
+    test.use({ viewport: { width: 375, height: 667 } });
+
+    for (const [band, level] of [['big', 'medium'], ['big', 'hard']] as const) {
+      test(`${level}: all four answers are fully on screen and at least 96px`, async ({ page }) => {
+        await openGame(page, 'launch-dice-flash', band, level);
+        await waitForAnswer(page);
+        const options = page.getByTestId('dice-option');
+        await expect(options).toHaveCount(4);
+        // Let the pop-in animation settle so the boxes are measured at full size.
+        await page.waitForTimeout(600);
+        const boxes = await options.evaluateAll((els) => els.map((e) => {
+          const r = e.getBoundingClientRect();
+          return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
+        }));
+        for (const b of boxes) {
+          expect(b.top).toBeGreaterThanOrEqual(0);
+          expect(b.bottom).toBeLessThanOrEqual(667);
+          expect(b.left).toBeGreaterThanOrEqual(0);
+          expect(b.right).toBeLessThanOrEqual(375);
+          expect(b.height).toBeGreaterThanOrEqual(96);
+          expect(b.width).toBeGreaterThanOrEqual(96);
+        }
+        // Nothing to scroll to: the page itself does not need scrolling to reach row 2.
+        await options.last().click({ trial: true });
+      });
+    }
   });
 
   test('five right answers finish a set and pay 5 x 2 stars on easy', async ({ page }) => {
