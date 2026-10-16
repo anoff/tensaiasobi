@@ -26,6 +26,7 @@ The home screen sorts games into four colour-coded shelves. The 🧸 Preschool /
 - **Math Pop 🎈**: add and subtract on a notebook sheet. Easy has fruit pictures and works within 5, medium within 10, hard within 20.
 - **Croc Compare 🐊**: the crocodile eats the bigger side. Fruit groups, then numbers, then <, =, > on hard.
 - **Number Train 🚂**: count the passengers, then tap the right station.
+- **Dice Flash 🎲**: a dot pattern flashes, then hides; tap how many you saw. Die faces up to 3, then up to 6, then up to 10 scattered dots with a shorter flash.
 - **Fair Share Picnic 🧺**: share snacks equally (early division).
 - **Balance ⚖️**: level the seesaw. Weights show dots on easy and medium. *(school)*
 
