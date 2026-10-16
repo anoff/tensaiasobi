@@ -43,6 +43,7 @@ export const en = {
     syllableDrum: "Syllable Drum",
     missingLetter: "Missing Letter",
     animalGenie: "Animal Genie",
+    simonLights: "Simon Lights",
     sinkOrFloat: "Sink or Float",
     categories: {
       numbers: "Numbers",
@@ -432,6 +433,17 @@ export const en = {
     subtitleMedium: "Which letter does it start with?",
     subtitleHard: "Which picture starts with this letter?",
     help: "Tap the matching bubble!",
+  },
+  simonLights: {
+    title: "Simon Lights 🐵",
+    subtitle: "Watch the animals, then copy them!",
+    help: "Watch carefully, then tap the animals in the same order!",
+    watch: "Watch!",
+    yourTurn: "Your turn!",
+    watchAgain: "Watch again!",
+    newSequence: "New sequence!",
+    great: "Great!",
+    victory: "You remembered them all! 🎉",
   },
   sinkOrFloat: {
     title: "Sink or Float 🛁",

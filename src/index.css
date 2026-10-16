@@ -184,6 +184,18 @@
     animation: card-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
 
+  /* ── Simon Lights: a lit animal bounces and glows (the glow colour is set inline) ── */
+  @keyframes simon-bounce {
+    0% { transform: scale(1) translateY(0); }
+    35% { transform: scale(1.12) translateY(-10px); }
+    70% { transform: scale(1.06) translateY(2px); }
+    100% { transform: scale(1.08) translateY(0); }
+  }
+  .simon-lit {
+    animation: simon-bounce 0.4s ease-out both;
+    z-index: 1;
+  }
+
   /* ── Sink or Float: fall into the tank, then bob on the surface or sink to the bottom ── */
   @keyframes sof-fall-float {
     0% { transform: translateY(calc(-64px * var(--game-scale))); }
@@ -308,4 +320,3 @@
     scrollbar-width: none;  /* Firefox */
   }
 }
-

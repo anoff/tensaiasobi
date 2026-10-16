@@ -45,6 +45,7 @@ export const de: TranslationSchema = {
     syllableDrum: "Silbentrommel",
     missingLetter: "Lückenwort",
     animalGenie: "Tier-Geist",
+    simonLights: "Tier-Lichter",
     sinkOrFloat: "Schwimmen oder Sinken",
     categories: {
       numbers: "Zahlen",
@@ -434,6 +435,17 @@ export const de: TranslationSchema = {
     subtitleMedium: "Mit welchem Buchstaben fängt es an?",
     subtitleHard: "Welches Bild fängt mit diesem Buchstaben an?",
     help: "Tippe auf die passende Blase!",
+  },
+  simonLights: {
+    title: "Tier-Lichter 🐵",
+    subtitle: "Schau den Tieren zu und mach sie nach!",
+    help: "Schau genau hin und tippe die Tiere in derselben Reihenfolge!",
+    watch: "Schau zu!",
+    yourTurn: "Du bist dran!",
+    watchAgain: "Nochmal anschauen!",
+    newSequence: "Neue Reihenfolge!",
+    great: "Super!",
+    victory: "Du hast dir alle gemerkt! 🎉",
   },
   sinkOrFloat: {
     title: "Schwimmen oder Sinken 🛁",

@@ -24,6 +24,7 @@ import PatternTrain from './PatternTrain';
 import SyllableDrum from './SyllableDrum';
 import MissingLetter from './MissingLetter';
 import AnimalGenie from './AnimalGenie';
+import SimonLights from './SimonLights';
 import SinkOrFloat from './SinkOrFloat';
 import DiceFlash from './DiceFlash';
 
@@ -65,6 +66,7 @@ export type GameLabelKey =
   | 'syllableDrum'
   | 'missingLetter'
   | 'animalGenie'
+  | 'simonLights'
   | 'sinkOrFloat'
   | 'diceFlash';
 
@@ -100,6 +102,7 @@ export const GAMES = [
   { id: 'odd', category: 'logic', testid: 'launch-odd', emoji: '🧐', labelKey: 'odd', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['odd_streak', 'odd_highscore'], Component: OddOneOut },
   { id: 'patternTrain', category: 'logic', testid: 'launch-pattern-train', emoji: '🚃', labelKey: 'patternTrain', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: PatternTrain },
   { id: 'animalGenie', category: 'logic', testid: 'launch-animal-genie', emoji: '🧞', labelKey: 'animalGenie', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: AnimalGenie },
+  { id: 'simonLights', category: 'logic', testid: 'launch-simon-lights', emoji: '🐵', labelKey: 'simonLights', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: SimonLights },
   { id: 'sinkOrFloat', category: 'logic', testid: 'launch-sink-or-float', emoji: '🛁', labelKey: 'sinkOrFloat', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: SinkOrFloat },
   { id: 'memory', category: 'logic', testid: 'launch-memory', emoji: '🐯', labelKey: 'match', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: MemoryMatch },
   { id: 'shadowFlashlight', category: 'logic', testid: 'launch-shadow', emoji: '🔦', labelKey: 'shadowFlashlight', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: ShadowFlashlight },
