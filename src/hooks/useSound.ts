@@ -255,5 +255,34 @@ export function useSound(soundEnabled: boolean, vibrationEnabled: boolean) {
     }
   };
 
-  return { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze };
+  // Classic Simon-style tones (approx. full-size original: G#3, B3, D#4, G#4).
+  // Triangle is softer than the original square but still distinct and "electronic".
+  // Short duration so sequences stay clear.
+  const SIMON_FREQUENCIES = [209, 252, 310, 415] as const;
+
+  const playSimonTone = (index: number) => {
+    if (!soundEnabled) return;
+    const freq = SIMON_FREQUENCIES[index] ?? 440;
+    try {
+      const ctx = getAudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+      const now = ctx.currentTime;
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.32);
+
+      osc.start(now);
+      osc.stop(now + 0.32);
+    } catch (e) {
+      console.error('Failed to play Simon tone:', e);
+    }
+  };
+
+  return { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze, playSimonTone };
 }

@@ -38,7 +38,7 @@ function AppContent() {
   const [showParentGate, setShowParentGate] = useState(false);
   const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
 
-  const { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze } =
+  const { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze, playSimonTone } =
     useSound(soundEnabled, vibrationEnabled);
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
@@ -185,6 +185,7 @@ function AppContent() {
             playPop,
             playSuccess,
             playError,
+            playSimonTone,
             onStarEarned: handleStarEarned,
             challengeMode: challengeFocusActive,
             ageBand,
