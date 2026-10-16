@@ -35,6 +35,7 @@ export const ja: TranslationSchema = {
     physics: "てんびん",
     towerSort: "タワーソート",
     numberTrain: "かずのれっしゃ",
+    diceFlash: "サイコロフラッシュ",
     shadowFlashlight: "かげ",
     fairSharePicnic: "ピクニックわけっこ",
     snorkelPearlFinder: "しんじゅさがし",
@@ -458,6 +459,15 @@ export const ja: TranslationSchema = {
     newRound: "あたらしい ものだよ！",
     dropLabel: "みずに いれる",
     victory: "ぜんぶ あたり！ 🎉",
+  },
+  diceFlash: {
+    title: "サイコロフラッシュ 🎲",
+    subtitle: "いくつ ひかったかな？",
+    help: "てんを みて、かずを タップしてね！",
+    howMany: "いくつ？",
+    lookAgain: "もういちど みてね！",
+    newFlash: "あたらしい フラッシュ！",
+    victory: "できたね！ 🎉",
   },
   patternTrain: {
     title: "もようれっしゃ 🚃",

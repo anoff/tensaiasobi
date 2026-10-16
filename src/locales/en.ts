@@ -33,6 +33,7 @@ export const en = {
     physics: "Balance",
     towerSort: "Tower Sort",
     numberTrain: "Number Train",
+    diceFlash: "Dice Flash",
     shadowFlashlight: "Shadow",
     fairSharePicnic: "Fair Share Picnic",
     snorkelPearlFinder: "Pearl Finder",
@@ -456,6 +457,15 @@ export const en = {
     newRound: "New objects!",
     dropLabel: "Drop them in the water",
     victory: "You got them all! 🎉",
+  },
+  diceFlash: {
+    title: "Dice Flash 🎲",
+    subtitle: "How many dots did you see?",
+    help: "Watch the dots, then tap the number!",
+    howMany: "How many dots?",
+    lookAgain: "Look again!",
+    newFlash: "New flash!",
+    victory: "You did it! 🎉",
   },
   patternTrain: {
     title: "Pattern Train 🚃",

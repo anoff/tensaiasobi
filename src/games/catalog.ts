@@ -26,6 +26,7 @@ import MissingLetter from './MissingLetter';
 import AnimalGenie from './AnimalGenie';
 import SimonLights from './SimonLights';
 import SinkOrFloat from './SinkOrFloat';
+import DiceFlash from './DiceFlash';
 
 export type { AgeBand };
 /** Learning games are the challenge focus; play games unlock after the star quota. */
@@ -66,7 +67,8 @@ export type GameLabelKey =
   | 'missingLetter'
   | 'animalGenie'
   | 'simonLights'
-  | 'sinkOrFloat';
+  | 'sinkOrFloat'
+  | 'diceFlash';
 
 export interface GameCatalogEntry {
   id: string;
@@ -86,6 +88,7 @@ export const GAMES = [
   { id: 'math', category: 'numbers', testid: 'launch-math', emoji: '🎈', labelKey: 'math', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['math_streak', 'math_highscore'], Component: MathGame },
   { id: 'crocodileCompare', category: 'numbers', testid: 'launch-crocodile-compare', emoji: '🐊', labelKey: 'crocodileCompare', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: CrocodileCompare },
   { id: 'numberTrain', category: 'numbers', testid: 'launch-number-train', emoji: '🚂', labelKey: 'numberTrain', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: NumberTrain },
+  { id: 'diceFlash', category: 'numbers', testid: 'launch-dice-flash', emoji: '🎲', labelKey: 'diceFlash', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: DiceFlash },
   { id: 'fairSharePicnic', category: 'numbers', testid: 'launch-fair-share-picnic', emoji: '🧺', labelKey: 'fairSharePicnic', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: FairSharePicnic },
   { id: 'physics', category: 'numbers', testid: 'launch-physics', emoji: '⚖️', labelKey: 'physics', ageBands: ['big'], kind: 'learn', storageKeys: [], Component: PhysicsPuzzleGame },
   // Language

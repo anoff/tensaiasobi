@@ -35,6 +35,7 @@ export const fr: TranslationSchema = {
     physics: "Balance",
     towerSort: "Tri des Tours",
     numberTrain: "Train des Chiffres",
+    diceFlash: "Flash des dés",
     shadowFlashlight: "Ombre",
     fairSharePicnic: "Pique-nique à partager",
     snorkelPearlFinder: "Chercheur de perles",
@@ -458,6 +459,15 @@ export const fr: TranslationSchema = {
     newRound: "Nouveaux objets !",
     dropLabel: "Lancer dans l'eau",
     victory: "Tout est juste ! 🎉",
+  },
+  diceFlash: {
+    title: "Flash des dés 🎲",
+    subtitle: "Combien de points as-tu vus ?",
+    help: "Regarde les points, puis touche le nombre !",
+    howMany: "Combien de points ?",
+    lookAgain: "Regarde encore !",
+    newFlash: "Nouveau flash !",
+    victory: "Bravo ! 🎉",
   },
   patternTrain: {
     title: "Train des motifs 🚃",

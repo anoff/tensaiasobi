@@ -35,6 +35,7 @@ export const de: TranslationSchema = {
     physics: "Waage",
     towerSort: "Turm-Sortierung",
     numberTrain: "Zahlenzug",
+    diceFlash: "Würfelblitz",
     shadowFlashlight: "Schatten",
     fairSharePicnic: "Picknick teilen",
     snorkelPearlFinder: "Perlen-Taucher",
@@ -458,6 +459,15 @@ export const de: TranslationSchema = {
     newRound: "Neue Gegenstände!",
     dropLabel: "Ins Wasser werfen",
     victory: "Alle richtig! 🎉",
+  },
+  diceFlash: {
+    title: "Würfelblitz 🎲",
+    subtitle: "Wie viele Punkte hast du gesehen?",
+    help: "Schau dir die Punkte an und tippe dann auf die Zahl!",
+    howMany: "Wie viele Punkte?",
+    lookAgain: "Schau nochmal!",
+    newFlash: "Neuer Blitz!",
+    victory: "Geschafft! 🎉",
   },
   patternTrain: {
     title: "Musterzug 🚃",
