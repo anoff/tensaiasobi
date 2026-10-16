@@ -1,0 +1,285 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Wall & Sky Gradients -->
+    <linearGradient id="wallSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdba74" />
+      <stop offset="50%" stop-color="#f472b6" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+
+    <!-- Wood Texture Gradient -->
+    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+
+    <!-- Character Gradients -->
+    <linearGradient id="bearBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="bearBelly" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef3c7" />
+      <stop offset="100%" stop-color="#fde68a" />
+    </linearGradient>
+
+    <linearGradient id="owlBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+    <linearGradient id="owlWings" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#0891b2" />
+    </linearGradient>
+
+    <linearGradient id="penguinBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="penguinPinkBelly" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6" />
+      <stop offset="100%" stop-color="#db2777" />
+    </linearGradient>
+
+    <linearGradient id="rainbowMane" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="33%" stop-color="#8b5cf6" />
+      <stop offset="66%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+
+    <linearGradient id="hornGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+  </defs>
+
+  <!-- 1. WALLPAPER BACKGROUND (Stripes) -->
+  <rect x="0" y="0" width="400" height="260" fill="#fbcfe8" />
+  <g fill="#bae6fd" opacity="0.8">
+    <rect x="0" y="0" width="25" height="260" />
+    <rect x="50" y="0" width="25" height="260" />
+    <rect x="100" y="0" width="25" height="260" />
+    <rect x="150" y="0" width="25" height="260" />
+    <rect x="200" y="0" width="25" height="260" />
+    <rect x="250" y="0" width="25" height="260" />
+    <rect x="300" y="0" width="25" height="260" />
+    <rect x="350" y="0" width="25" height="260" />
+  </g>
+
+  <!-- 2. BEDROOM FLOOR -->
+  <rect x="0" y="260" width="400" height="140" fill="#fed7aa" />
+  <line x1="0" y1="260" x2="400" y2="260" stroke="#c2410c" stroke-width="4" />
+
+  <!-- 3. ROUND WINDOW (Top Left) -->
+  <g id="window" transform="translate(20, 15)">
+    <circle cx="45" cy="45" r="40" fill="url(#wallSky)" stroke="#475569" stroke-width="4" />
+    <path d="M 55,20 A 20,20 0 1,0 68,55 A 16,16 0 1,1 55,20 Z" fill="#fef08a" />
+    <circle cx="30" cy="25" r="2" fill="#ffffff" />
+    <circle cx="40" cy="60" r="1.5" fill="#ffffff" />
+    <line x1="5" y1="45" x2="85" y2="45" stroke="#475569" stroke-width="3" />
+    <line x1="45" y1="5" x2="45" y2="85" stroke="#475569" stroke-width="3" />
+  </g>
+
+  <!-- 4. FAIRY LIGHTS STRINGS -->
+  <path d="M 130,15 Q 190,40 250,15 T 370,20" fill="none" stroke="#475569" stroke-width="2" />
+  <g fill="#fde047" stroke="#ca8a04" stroke-width="1.5">
+    <path d="M 150,26 L 152,20 L 158,20 L 153,24 L 155,30 L 150,26 L 145,30 L 147,24 L 142,20 L 148,20 Z" />
+    <path d="M 190,28 L 192,22 L 198,22 L 193,26 L 195,32 L 190,28 L 185,32 L 187,26 L 182,22 L 188,22 Z" />
+    <path d="M 230,24 L 232,18 L 238,18 L 233,22 L 235,28 L 230,24 L 225,28 L 227,22 L 222,18 L 228,18 Z" />
+    <path d="M 280,20 L 282,14 L 288,14 L 283,18 L 285,24 L 280,20 L 275,24 L 277,18 L 272,14 L 278,14 Z" />
+    <path d="M 330,22 L 332,16 L 338,16 L 333,20 L 335,26 L 330,22 L 325,26 L 327,20 L 322,16 L 328,16 Z" />
+  </g>
+
+  <!-- 5. GEOMETRIC FLOOR RUG (Cleanly placed on floor) -->
+  <g id="rug" transform="translate(40, 290)">
+    <ellipse cx="160" cy="50" rx="150" ry="40" fill="#a5f3fc" stroke="#0891b2" stroke-width="4" />
+    <ellipse cx="160" cy="50" rx="115" ry="30" fill="#fbcfe8" stroke="#db2777" stroke-width="3" />
+    <ellipse cx="160" cy="50" rx="70" ry="18" fill="#fef08a" stroke="#ca8a04" stroke-width="2" />
+  </g>
+
+  <!-- 6. REDESIGNED BED STRUCTURE -->
+  <g id="bed" transform="translate(60, 120)">
+    <!-- Back Wooden Headboard -->
+    <rect x="20" y="0" width="280" height="120" rx="10" fill="url(#woodGrad)" stroke="#854d0e" stroke-width="4" />
+    <line x1="90" y1="0" x2="90" y2="120" stroke="#a16207" stroke-width="2" />
+    <line x1="160" y1="0" x2="160" y2="120" stroke="#a16207" stroke-width="2" />
+    <line x1="230" y1="0" x2="230" y2="120" stroke="#a16207" stroke-width="2" />
+
+    <!-- Bed Back Legs -->
+    <rect x="25" y="115" width="16" height="50" rx="3" fill="#854d0e" />
+    <rect x="279" y="115" width="16" height="50" rx="3" fill="#854d0e" />
+
+    <!-- Pillows -->
+    <rect x="40" y="55" width="100" height="45" rx="12" fill="#ccfbf1" stroke="#0d9488" stroke-width="3" />
+    <rect x="180" y="55" width="100" height="45" rx="12" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+
+    <!-- Main Mattress Base -->
+    <rect x="15" y="90" width="290" height="75" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="4" />
+
+    <!-- Patchwork Quilt / Duvet Layer -->
+    <rect x="10" y="110" width="300" height="70" rx="10" fill="#a7f3d0" stroke="#047857" stroke-width="4" />
+    <!-- Quilt Patchwork Grid -->
+    <path d="M 85,110 L 85,180 M 160,110 L 160,180 M 235,110 L 235,180" stroke="#047857" stroke-width="3" />
+    <path d="M 10,145 L 310,145" stroke="#047857" stroke-width="3" />
+
+    <!-- Color fills for Patches -->
+    <rect x="11" y="111" width="73" height="33" fill="#f472b6" opacity="0.8" />
+    <rect x="161" y="111" width="73" height="33" fill="#fde047" opacity="0.8" />
+    <rect x="86" y="146" width="73" height="33" fill="#fb923c" opacity="0.8" />
+    <rect x="236" y="146" width="73" height="33" fill="#c4b5fd" opacity="0.8" />
+
+    <!-- Front Wooden Bed Frame Rail & Front Legs -->
+    <rect x="5" y="170" width="310" height="18" rx="4" fill="url(#woodGrad)" stroke="#854d0e" stroke-width="3" />
+    <rect x="10" y="185" width="22" height="45" rx="4" fill="url(#woodGrad)" stroke="#854d0e" stroke-width="3" />
+    <rect x="288" y="185" width="22" height="45" rx="4" fill="url(#woodGrad)" stroke="#854d0e" stroke-width="3" />
+  </g>
+
+  <!-- 7. PLUSHIE CHARACTERS (ON BED) -->
+
+  <!-- BARNABY BEAR (Left on Bed) -->
+  <g id="barnaby-bear" transform="translate(65, 120) scale(0.65)">
+    <circle cx="45" cy="45" r="22" fill="url(#bearBody)" stroke="#92400e" stroke-width="3" />
+    <circle cx="45" cy="45" r="12" fill="#fde68a" stroke="#92400e" stroke-width="2" />
+    <circle cx="135" cy="45" r="22" fill="url(#bearBody)" stroke="#92400e" stroke-width="3" />
+    <circle cx="135" cy="45" r="12" fill="#fde68a" stroke="#92400e" stroke-width="2" />
+    
+    <rect x="40" y="140" width="100" height="110" rx="40" fill="url(#bearBody)" stroke="#92400e" stroke-width="4" />
+    <rect x="55" y="160" width="70" height="75" rx="30" fill="url(#bearBelly)" />
+    <ellipse cx="45" cy="245" rx="20" ry="15" fill="#b45309" stroke="#92400e" stroke-width="3" />
+    <ellipse cx="135" cy="245" rx="20" ry="15" fill="#b45309" stroke="#92400e" stroke-width="3" />
+    
+    <rect x="15" y="145" width="30" height="60" rx="15" fill="url(#bearBody)" stroke="#92400e" stroke-width="3" transform="rotate(20, 30, 145)" />
+    <rect x="135" y="145" width="30" height="60" rx="15" fill="url(#bearBody)" stroke="#92400e" stroke-width="3" transform="rotate(-20, 150, 145)" />
+
+    <circle cx="90" cy="85" r="50" fill="url(#bearBody)" stroke="#92400e" stroke-width="4" />
+    <ellipse cx="90" cy="100" rx="26" ry="18" fill="url(#bearBelly)" stroke="#92400e" stroke-width="2" />
+    <ellipse cx="90" cy="92" rx="10" ry="7" fill="#451a03" />
+    <circle cx="70" cy="75" r="7" fill="#1e1b4b" />
+    <circle cx="72" cy="73" r="2.5" fill="#ffffff" />
+    <circle cx="110" cy="75" r="7" fill="#1e1b4b" />
+    <circle cx="112" cy="73" r="2.5" fill="#ffffff" />
+
+    <path d="M 50,125 Q 90,140 130,125 L 135,145 Q 90,160 45,145 Z" fill="#0d9488" stroke="#115e59" stroke-width="3" />
+    <rect x="105" y="140" width="20" height="45" rx="4" fill="#0d9488" stroke="#115e59" stroke-width="3" />
+    <line x1="105" y1="152" x2="125" y2="152" stroke="#facc15" stroke-width="5" />
+    <line x1="105" y1="168" x2="125" y2="168" stroke="#facc15" stroke-width="5" />
+  </g>
+
+  <!-- OLIVER OWL (Back Center on Bed) -->
+  <g id="oliver-owl" transform="translate(195, 95) scale(0.6)">
+    <ellipse cx="80" cy="110" rx="55" ry="65" fill="url(#owlBody)" stroke="#4c1d95" stroke-width="4" />
+    <path d="M 25,90 Q 5,120 30,150 Q 40,120 35,90 Z" fill="url(#owlWings)" stroke="#155e75" stroke-width="3" />
+    <path d="M 135,90 Q 155,120 130,150 Q 120,120 125,90 Z" fill="url(#owlWings)" stroke="#155e75" stroke-width="3" />
+    
+    <path d="M 55,110 Q 80,125 105,110 M 60,128 Q 80,143 100,128 M 65,145 Q 80,158 95,145" fill="none" stroke="#a7f3d0" stroke-width="4" stroke-linecap="round" />
+
+    <path d="M 40,55 L 25,25 L 60,48 Z" fill="url(#owlBody)" stroke="#4c1d95" stroke-width="3" />
+    <path d="M 120,55 L 135,25 L 100,48 Z" fill="url(#owlBody)" stroke="#4c1d95" stroke-width="3" />
+
+    <circle cx="55" cy="75" r="22" fill="#ffffff" stroke="#4c1d95" stroke-width="3" />
+    <circle cx="105" cy="75" r="22" fill="#ffffff" stroke="#4c1d95" stroke-width="3" />
+    <circle cx="55" cy="75" r="10" fill="#06b6d4" />
+    <circle cx="55" cy="75" r="5" fill="#0f172a" />
+    <circle cx="57" cy="72" r="2" fill="#ffffff" />
+    <circle cx="105" cy="75" r="10" fill="#06b6d4" />
+    <circle cx="105" cy="75" r="5" fill="#0f172a" />
+    <circle cx="107" cy="72" r="2" fill="#ffffff" />
+
+    <circle cx="55" cy="75" r="24" fill="none" stroke="#facc15" stroke-width="4" />
+    <circle cx="105" cy="75" r="24" fill="none" stroke="#facc15" stroke-width="4" />
+    <line x1="79" y1="75" x2="81" y2="75" stroke="#facc15" stroke-width="5" />
+
+    <path d="M 72,88 L 88,88 L 80,105 Z" fill="#f97316" stroke="#c2410c" stroke-width="2" />
+  </g>
+
+  <!-- PENELOPE PENGUIN (Front Center on Bed) -->
+  <g id="penelope-penguin" transform="translate(145, 140) scale(0.65)">
+    <ellipse cx="65" cy="100" rx="50" ry="60" fill="url(#penguinBody)" stroke="#0284c7" stroke-width="3" />
+    <ellipse cx="65" cy="110" rx="36" ry="46" fill="url(#penguinPinkBelly)" stroke="#9d174d" stroke-width="2" />
+    <ellipse cx="65" cy="110" rx="26" ry="34" fill="#fbcfe8" opacity="0.6" />
+
+    <path d="M 18,90 Q -5,115 15,130 Q 25,115 25,95 Z" fill="url(#penguinBody)" stroke="#0284c7" stroke-width="3" />
+    <path d="M 112,90 Q 135,115 115,130 Q 105,115 105,95 Z" fill="url(#penguinBody)" stroke="#0284c7" stroke-width="3" />
+
+    <ellipse cx="45" cy="158" rx="16" ry="9" fill="#f97316" stroke="#c2410c" stroke-width="2" />
+    <ellipse cx="85" cy="158" rx="16" ry="9" fill="#f97316" stroke="#c2410c" stroke-width="2" />
+
+    <ellipse cx="50" cy="65" rx="16" ry="20" fill="#ffffff" />
+    <ellipse cx="80" cy="65" rx="16" ry="20" fill="#ffffff" />
+    
+    <circle cx="53" cy="65" r="7" fill="#0f172a" />
+    <circle cx="55" cy="62" r="2.5" fill="#ffffff" />
+    <circle cx="77" cy="65" r="7" fill="#0f172a" />
+    <circle cx="79" cy="62" r="2.5" fill="#ffffff" />
+
+    <circle cx="38" cy="75" r="6" fill="#f43f5e" opacity="0.5" />
+    <circle cx="92" cy="75" r="6" fill="#f43f5e" opacity="0.5" />
+
+    <path d="M 58,72 Q 65,68 72,72 Q 65,85 58,72 Z" fill="#fb923c" stroke="#ea580c" stroke-width="2" />
+  </g>
+
+  <!-- UNI-CORN (Right Side on Bed) -->
+  <g id="uni-corn" transform="translate(225, 130) scale(0.65)">
+    <ellipse cx="75" cy="120" rx="42" ry="30" fill="#ffffff" stroke="#cbd5e1" stroke-width="3" />
+    
+    <rect x="45" y="135" width="14" height="22" rx="7" fill="#ec4899" stroke="#be185d" stroke-width="2" />
+    <rect x="90" y="135" width="14" height="22" rx="7" fill="#ec4899" stroke="#be185d" stroke-width="2" />
+
+    <path d="M 40,115 Q 32,80 28,62 Q 52,55 68,90 Q 75,115 40,115 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="3" stroke-linejoin="round" />
+
+    <circle cx="32" cy="55" r="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="3" />
+
+    <path d="M 48,35 C 35,15 65,0 60,25 C 75,10 82,35 65,48 C 80,40 78,65 58,72 Z" fill="url(#rainbowMane)" stroke="#be185d" stroke-width="2" />
+
+    <path d="M 22,35 L 5,5 L 32,25 Z" fill="url(#hornGold)" stroke="#a16207" stroke-width="2" />
+    <line x1="18" y1="26" x2="22" y2="20" stroke="#ffffff" stroke-width="2" />
+    <line x1="12" y1="16" x2="16" y2="10" stroke="#ffffff" stroke-width="2" />
+
+    <ellipse cx="16" cy="62" rx="14" ry="11" fill="#fbcfe8" stroke="#f43f5e" stroke-width="2" />
+    <circle cx="12" cy="60" r="2" fill="#be185d" />
+    
+    <path d="M 26,48 Q 33,55 40,48" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+    <line x1="28" y1="51" x2="26" y2="56" stroke="#0f172a" stroke-width="2" />
+    <line x1="33" y1="52" x2="33" y2="58" stroke="#0f172a" stroke-width="2" />
+    <line x1="38" y1="51" x2="40" y2="56" stroke="#0f172a" stroke-width="2" />
+
+    <path d="M 42,38 Q 48,22 54,36 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" />
+
+    <path d="M 12,12 L 14,5 L 16,12 L 23,14 L 16,16 L 14,23 L 12,16 L 5,14 Z" fill="#facc15" />
+    <path d="M 98,75 L 99,70 L 100,75 L 105,76 L 100,77 L 99,82 L 98,77 L 93,76 Z" fill="#38bdf8" />
+  </g>
+
+  <!-- 8. FOREGROUND TOYS & ACCESSORIES -->
+
+  <!-- Toy Nightstand (Left) -->
+  <g id="nightstand" transform="translate(8, 220)">
+    <rect x="0" y="0" width="45" height="65" fill="#fdba74" stroke="#c2410c" stroke-width="3" rx="4" />
+    <rect x="5" y="10" width="35" height="20" fill="#fed7aa" stroke="#c2410c" stroke-width="2" rx="2" />
+    <circle cx="22" cy="20" r="3" fill="#ea580c" />
+    <!-- Table Lamp -->
+    <path d="M 15,-5 L 30,-5 L 35,-25 L 10,-25 Z" fill="#f43f5e" stroke="#be185d" stroke-width="2" />
+    <rect x="20" y="-5" width="5" height="10" fill="#94a3b8" />
+  </g>
+
+  <!-- Toy Alphabet Blocks (Floor Left) -->
+  <g transform="translate(25, 345) rotate(-10)">
+    <rect x="0" y="0" width="28" height="28" rx="4" fill="#f43f5e" stroke="#9f1239" stroke-width="2.5" />
+    <text x="7" y="21" font-family="sans-serif" font-weight="bold" font-size="20" fill="#ffffff">A</text>
+  </g>
+  <g transform="translate(58, 340) rotate(12)">
+    <rect x="0" y="0" width="26" height="26" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2.5" />
+    <text x="6" y="20" font-family="sans-serif" font-weight="bold" font-size="18" fill="#ffffff">B</text>
+  </g>
+
+  <!-- Picture Book on Floor (Bottom Right) -->
+  <g transform="translate(325, 345) rotate(10)">
+    <rect x="0" y="0" width="45" height="35" rx="3" fill="#38bdf8" stroke="#0284c7" stroke-width="2.5" />
+    <path d="M 0,0 L 45,0 L 45,6 L 0,6 Z" fill="#0284c7" />
+    <path d="M 22,18 C 22,12 15,12 15,18 C 15,22 22,26 22,26 C 22,26 29,22 29,18 C 29,12 22,12 22,18 Z" fill="#f43f5e" />
+    <rect x="42" y="3" width="5" height="29" fill="#ffffff" stroke="#0284c7" stroke-width="1" />
+  </g>
+
+</svg>
