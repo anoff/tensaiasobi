@@ -282,20 +282,19 @@ export default function SinkOrFloat() {
               </KidButton>
             </div>
           )}
-          {/* Result badge: what happened (🌊 / ⬇️) next to the guess (✅ / 💡). Icons only, after the animation. */}
+          {/* Result badge: what happened (🌊 / ⬇️) next to the guess (✅ / 💡). Icons only, after the animation.
+              It sits in the top-right corner: the objects fall, float and sink in the middle column, so it never covers them. */}
           {drop && shownStep === drop.step && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div
-                data-testid="sof-badge"
-                data-result={drop.result}
-                data-correct={String(drop.correct)}
-                aria-hidden="true"
-                className="animate-pop-in flex items-center justify-center gap-1 rounded-full bg-white border-[3px] px-3 leading-none"
-                style={{ borderColor: INK, boxShadow: hardShadow(2, 3), height: 'calc(3.5rem * var(--game-scale))', minHeight: '2.5rem', fontSize: 'calc(1.75rem * var(--game-scale))' }}
-              >
-                <span style={{ fontSize: 'max(1.25rem, calc(1.75rem * var(--game-scale)))' }}>{ZONE_EMOJI[drop.result]}</span>
-                <span style={{ fontSize: 'max(1.25rem, calc(1.75rem * var(--game-scale)))' }}>{drop.correct ? GUESS_EMOJI.right : GUESS_EMOJI.wrong}</span>
-              </div>
+            <div
+              data-testid="sof-badge"
+              data-result={drop.result}
+              data-correct={String(drop.correct)}
+              aria-hidden="true"
+              className="animate-pop-in absolute top-2 right-2 tiny:top-1.5 tiny:right-1.5 pointer-events-none flex items-center justify-center gap-1 rounded-full bg-white border-[3px] px-3 leading-none"
+              style={{ borderColor: INK, boxShadow: hardShadow(2, 3), height: 'calc(3.5rem * var(--game-scale))', minHeight: '2.5rem' }}
+            >
+              <span style={{ fontSize: 'max(1.25rem, calc(1.75rem * var(--game-scale)))' }}>{ZONE_EMOJI[drop.result]}</span>
+              <span style={{ fontSize: 'max(1.25rem, calc(1.75rem * var(--game-scale)))' }}>{drop.correct ? GUESS_EMOJI.right : GUESS_EMOJI.wrong}</span>
             </div>
           )}
           {/* The spoken result for screen readers: visually hidden, announced only once the badge shows. */}
