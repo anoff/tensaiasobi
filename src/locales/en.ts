@@ -42,6 +42,7 @@ export const en = {
     syllableDrum: "Syllable Drum",
     missingLetter: "Missing Letter",
     animalGenie: "Animal Genie",
+    sinkOrFloat: "Sink or Float",
     categories: {
       numbers: "Numbers",
       language: "Language",
@@ -430,6 +431,19 @@ export const en = {
     subtitleMedium: "Which letter does it start with?",
     subtitleHard: "Which picture starts with this letter?",
     help: "Tap the matching bubble!",
+  },
+  sinkOrFloat: {
+    title: "Sink or Float 🛁",
+    subtitle: "Will it sink or float?",
+    help: "Tap an object, then tap where you think it goes!",
+    floatLabel: "Float",
+    sinkLabel: "Sink",
+    floated: "It floats!",
+    sank: "It sinks!",
+    tryAgain: "Try again!",
+    newRound: "New objects!",
+    dropLabel: "Drop them in the water",
+    victory: "You got them all! 🎉",
   },
   patternTrain: {
     title: "Pattern Train 🚃",

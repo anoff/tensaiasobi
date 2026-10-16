@@ -1,4 +1,15 @@
 import { test, expect, Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+/**
+ * Learning games listed in the catalog. Read from the source instead of importing
+ * it, so the e2e project does not pull the React game components into its types.
+ */
+function learnGameCount(): number {
+  const source = readFileSync(resolve(process.cwd(), 'src/games/catalog.ts'), 'utf8');
+  return (source.match(/kind: 'learn'/g) ?? []).length;
+}
 
 async function solveParentGate(page: Page) {
   const gateTextElement = page.locator('form div.text-4xl');
@@ -50,7 +61,8 @@ test.describe('Slice A catalog, motion, a11y', () => {
     await expect(page.getByTestId('challenge-game-snorkelPearlFinder')).toBeVisible();
 
     const toggles = page.locator('[data-testid^="challenge-game-"]');
-    await expect(toggles).toHaveCount(19);
+    // Every learning game gets a toggle; the count follows the catalog, not a hard-coded number.
+    await expect(toggles).toHaveCount(learnGameCount());
     // Just-for-fun games (incl. City Dispatch) are never part of a learn-first goal.
     await expect(page.getByTestId('challenge-game-doodle')).toHaveCount(0);
     await expect(page.getByTestId('challenge-game-dispatch')).toHaveCount(0);

@@ -3,6 +3,25 @@
 @tailwind utilities;
 
 @layer base {
+  /*
+   * Shared game fit rules, one place for every game:
+   *   --game-tile   size of tap targets: shelf objects, answer buttons, animals, zones
+   *   --game-scale  scale of the big visual stage (tank, dice card, ...)
+   * 390x844 and 375x667 keep full 96px tap targets; only 320x568 (tiny) trades tile
+   * size for fit. Keep these two media queries in sync with `short` / `tiny` in
+   * tailwind.config.js.
+   */
+  :root {
+    --game-tile: 6rem;
+    --game-scale: 1;
+  }
+  @media (max-height: 700px) {
+    :root { --game-scale: 0.75; }
+  }
+  @media (max-height: 600px) {
+    :root { --game-tile: 4.5rem; --game-scale: 0.6; }
+  }
+
   body {
     overscroll-behavior-y: contain; /* Prevents pull-to-refresh */
     user-select: none; /* Prevents text highlighting on accidental long-press */
@@ -163,6 +182,41 @@
   /* One-shot entrance for a new round's content (never loops). */
   .animate-pop-in {
     animation: card-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* ── Sink or Float: fall into the tank, then bob on the surface or sink to the bottom ── */
+  @keyframes sof-fall-float {
+    0% { transform: translateY(calc(-64px * var(--game-scale))); }
+    40% { transform: translateY(calc(18px * var(--game-scale))); }
+    55% { transform: translateY(calc(2px * var(--game-scale))); }
+    70% { transform: translateY(calc(14px * var(--game-scale))); }
+    100% { transform: translateY(calc(8px * var(--game-scale))); }
+  }
+  .sof-fall-float {
+    animation: sof-fall-float 1.2s ease-in both;
+  }
+
+  @keyframes sof-fall-sink {
+    0% { transform: translateY(calc(-64px * var(--game-scale))); }
+    35% { transform: translateY(calc(18px * var(--game-scale))); }
+    100% { transform: translateY(calc(60px * var(--game-scale))); }
+  }
+  .sof-fall-sink {
+    animation: sof-fall-sink 1.2s ease-in both;
+  }
+
+  /* A wrong guess gets a gentle shake once the object has landed. */
+  .sof-shake-late {
+    animation: shake 0.2s ease-in-out 1.2s 2;
+  }
+
+  @keyframes sof-splash {
+    0%, 30% { opacity: 0; transform: scale(0.4); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(1.5); }
+  }
+  .sof-splash {
+    animation: sof-splash 0.9s ease-out 0.4s both;
   }
 
   /* ── Tower Sort hold slot: piece lifts into the hand, then drops into a tube ── */
