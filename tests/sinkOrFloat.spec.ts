@@ -31,6 +31,15 @@ async function expectResultTextHidden(page: Page) {
   expect(box === null || (box.width <= 1 && box.height <= 1), 'result text is visually hidden').toBe(true);
 }
 
+/** Two boxes must not touch. */
+async function expectNoOverlap(a: Locator, b: Locator) {
+  const boxA = (await a.boundingBox())!;
+  const boxB = (await b.boundingBox())!;
+  const apart =
+    boxA.x + boxA.width <= boxB.x || boxB.x + boxB.width <= boxA.x || boxA.y + boxA.height <= boxB.y || boxB.y + boxB.height <= boxA.y;
+  expect(apart, `badge ${JSON.stringify(boxA)} does not overlap ${JSON.stringify(boxB)}`).toBe(true);
+}
+
 test.describe('Sink or Float', () => {
   test('easy: one object at a time, a miss shows the result and lets the child retry', async ({ page }) => {
     await openGame(page, 'launch-sink-or-float', 'little', 'easy');
@@ -137,11 +146,16 @@ test.describe('Sink or Float', () => {
       el.getAnimations({ subtree: true }).filter((a: { playState: string }) => a.playState === 'running').map((a: { playState: string }) => a.playState));
     expect(running).toEqual([]);
     await expectResultTextHidden(page);
-    // The badge is centred in the tank.
+    // The badge sits in the top-right corner of the tank, away from the object's column.
     const tank = (await page.getByTestId('sof-tank').boundingBox())!;
     const badge = (await page.getByTestId('sof-badge').boundingBox())!;
-    expect(Math.abs(badge.x + badge.width / 2 - (tank.x + tank.width / 2))).toBeLessThan(3);
-    expect(Math.abs(badge.y + badge.height / 2 - (tank.y + tank.height / 2))).toBeLessThan(3);
+    expect(badge.x).toBeGreaterThanOrEqual(tank.x);
+    expect(badge.x + badge.width).toBeLessThanOrEqual(tank.x + tank.width);
+    expect(badge.y).toBeGreaterThanOrEqual(tank.y);
+    expect(badge.y + badge.height).toBeLessThanOrEqual(tank.y + tank.height);
+    expect(badge.x).toBeGreaterThan(tank.x + tank.width / 2); // right half
+    expect(badge.y + badge.height / 2).toBeLessThan(tank.y + tank.height / 2); // top half
+    await expectNoOverlap(page.getByTestId('sof-badge'), page.getByTestId('sof-drop-object'));
     // Held for ~1.2 s: still there a moment later, gone with the next step.
     await expect(page.getByTestId('sof-badge')).toBeVisible();
     await expect(page.getByTestId('sof-badge')).toHaveCount(0);
@@ -238,6 +252,38 @@ test.describe('Sink or Float', () => {
         const scrolls = await page.locator('main').evaluate((el) => el.scrollHeight - el.clientHeight);
         expect(scrolls, 'main does not scroll').toBeLessThanOrEqual(1);
       }
+
+      test('the result badge is fully on screen and never covers the falling, floating or sunk object', async ({ page }) => {
+        test.setTimeout(60_000);
+        await openGame(page, 'launch-sink-or-float', 'little', 'easy');
+        const results = new Set<string>();
+        for (let i = 0; i < 4 && results.size < 2; i++) {
+          const [item] = await shelf(page);
+          // Every other drop is a wrong guess, so the 💡 badge is checked as well.
+          await predict(page, item.emoji, i % 2 === 0 ? item.floats : !item.floats);
+          await expect(page.getByTestId('sof-badge')).toBeVisible();
+          await page.waitForTimeout(400); // the pop-in and the wrong-guess shake are over
+          results.add((await page.getByTestId('sof-badge').getAttribute('data-result'))!);
+          const badge = await expectOnScreen(page.getByTestId('sof-badge'), 'result badge');
+          const tank = (await page.getByTestId('sof-tank').boundingBox())!;
+          expect(badge.x).toBeGreaterThanOrEqual(tank.x);
+          expect(badge.x + badge.width).toBeLessThanOrEqual(tank.x + tank.width);
+          expect(badge.y).toBeGreaterThanOrEqual(tank.y);
+          expect(badge.y + badge.height).toBeLessThanOrEqual(tank.y + tank.height);
+          expect(badge.width, 'badge is large').toBeGreaterThanOrEqual(60);
+          expect(badge.height, 'badge is large').toBeGreaterThanOrEqual(40);
+          await expectNoOverlap(page.getByTestId('sof-badge'), page.getByTestId('sof-drop-object'));
+          // Not over the shelf or the Float / Sink buttons either.
+          for (const id of ['sof-object', 'sof-float', 'sof-sink']) {
+            const others = page.getByTestId(id);
+            for (let k = 0; k < (await others.count()); k++) await expectNoOverlap(page.getByTestId('sof-badge'), others.nth(k));
+          }
+          // Wait for the drop to finish: the badge goes, and the right guess brings the next object.
+          await expect(page.getByTestId('sof-badge')).toHaveCount(0);
+          await expect(page.getByTestId('sof-stage')).toHaveAttribute('data-phase', /playing|success/);
+          if (i % 2 === 0 && (await page.getByTestId('sof-victory').count())) break;
+        }
+      });
 
       for (const [band, level] of [['little', 'easy'], ['big', 'medium'], ['big', 'hard']] as const) {
         test(`${level}: shelf, tank and both zones fit together, also with an object picked up`, async ({ page }) => {
