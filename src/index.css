@@ -196,6 +196,27 @@
     z-index: 1;
   }
 
+  /* ── Dice Flash: the blank card is tossed while 'ready', landing as the flash starts (800 ms = READY_MS) ── */
+  @keyframes dice-toss {
+    0% { transform: translateY(0) rotate(0deg) scale(1, 1); animation-timing-function: ease-out; }
+    55% { transform: translateY(calc(-32px * var(--game-scale))) rotate(-14deg) scale(1, 1); animation-timing-function: ease-in; }
+    75% { transform: translateY(calc(-12px * var(--game-scale))) rotate(10deg) scale(1, 1); animation-timing-function: ease-in; }
+    90% { transform: translateY(0) rotate(-4deg) scale(1.04, 0.94); animation-timing-function: ease-out; }
+    100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  }
+  .dice-toss {
+    animation: dice-toss 800ms both;
+  }
+
+  /* Dots appear on landing with a short fade only; the card and the dots never move while counting. */
+  @keyframes dice-dot-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .dice-dot-in {
+    animation: dice-dot-fade 80ms ease-out both;
+  }
+
   /* ── Sink or Float: fall into the tank, then bob on the surface or sink to the bottom ── */
   @keyframes sof-fall-float {
     0% { transform: translateY(calc(-64px * var(--game-scale))); }
@@ -285,6 +306,16 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+  }
+
+  /* Dice Flash with reduced motion: no toss, and the dots still fade in over 150 ms. */
+  @media (prefers-reduced-motion: reduce) {
+    .dice-toss {
+      animation: none !important;
+    }
+    .dice-dot-in {
+      animation-duration: 150ms !important;
     }
   }
 

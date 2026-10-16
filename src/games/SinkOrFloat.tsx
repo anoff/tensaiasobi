@@ -14,8 +14,17 @@ import {
   trueResult, type DropResult, type Prediction, type SinkFloatObject,
 } from './sinkOrFloatLogic';
 
-/** One drop: the fall and bob take 1.2 s, the rest is time to see the result. */
-const DROP_MS = 1600;
+/**
+ * One drop: the fall and bob take 1.2 s and the splash ends at 1.3 s (the CSS in index.css). The result
+ * badge appears only then, on the splash's `animationend`, and is held before the next step.
+ */
+const ANIM_MS = 1300;
+/** The badge stays this long on a single or medium drop: 1300 + 1200 = 2500 ms per drop. */
+const HOLD_MS = 1200;
+/** Hard: shorter hold between the batch drops, the full hold after the last one. */
+const HOLD_BETWEEN_MS = 700;
+/** If an `animationend` never arrives (animations switched off), the badge still shows after this. */
+const SETTLE_FALLBACK_MS = ANIM_MS + 600;
 /** Pause on a finished round before the next one, in ms. */
 const NEXT_MS = 1600;
 
@@ -23,6 +32,8 @@ const NEXT_MS = 1600;
 const FIT_BUTTON = '!min-h-[var(--game-tile)] !min-w-[var(--game-tile)] short:!py-2';
 
 const ZONE_EMOJI: Record<Prediction, string> = { float: '🌊', sink: '⬇️' };
+/** The guess was right / not this time (a hint, never red). */
+const GUESS_EMOJI = { right: '✅', wrong: '💡' } as const;
 
 interface Drop extends DropResult {
   /** Counts up for every drop in this game, so the fall, splash and shake restart each time. */
@@ -41,10 +52,14 @@ export default function SinkOrFloat() {
   /** Batch drops that have been shown so far: emoji -> was the prediction right. */
   const [marks, setMarks] = useState<Record<string, boolean>>({});
   const [drop, setDrop] = useState<Drop | null>(null);
+  /** Step of the drop whose result badge is showing (the badge waits for the animation to finish). */
+  const [shownStep, setShownStep] = useState(0);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const { later, cancelAll } = useLater();
   const dropCount = useRef(0);
+  /** The running drop: what to do once its animation is over (badge, marks, then the next step). */
+  const running = useRef<{ step: number; settled: boolean; reveal?: () => void; hold: number; after: () => void } | null>(null);
 
   const flow = flowFor(level);
   const phase = done ? 'success' : busy ? 'dropping' : 'playing';
@@ -58,6 +73,8 @@ export default function SinkOrFloat() {
     setPredictions({});
     setMarks({});
     setDrop(null);
+    setShownStep(0);
+    running.current = null;
     setBusy(false);
     setDone(false);
   };
@@ -76,13 +93,35 @@ export default function SinkOrFloat() {
     later(() => nextRound(level), NEXT_MS);
   };
 
+  /** The animation is over: show the badge (and shelf mark), hold it, then carry on. Runs once per drop. */
+  const settle = (step: number) => {
+    const cur = running.current;
+    if (!cur || cur.step !== step || cur.settled) return;
+    cur.settled = true;
+    setShownStep(step);
+    cur.reveal?.();
+    later(() => {
+      setShownStep(0);
+      cur.after();
+    }, cur.hold);
+  };
+
+  /** Start one drop; its result shows when the splash animation ends, with a timer only as a safety net. */
+  const startDrop = (result: DropResult, hold: number, after: () => void, reveal?: () => void) => {
+    const step = ++dropCount.current;
+    running.current = { step, settled: false, reveal, hold, after };
+    setDrop({ ...result, step });
+    later(() => settle(step), SETTLE_FALLBACK_MS);
+  };
+
   /** Easy and medium: one object drops right after its prediction. */
   const dropOne = (object: SinkFloatObject, prediction: Prediction) => {
+    if (busy || running.current) return;
     const correct = isCorrectPrediction(object, prediction);
     setBusy(true);
     setSelected(null);
-    setDrop({ emoji: object.emoji, result: trueResult(object), correct, step: ++dropCount.current });
-    later(() => {
+    startDrop({ emoji: object.emoji, result: trueResult(object), correct }, HOLD_MS, () => {
+      running.current = null;
       if (correct) {
         const next = new Set(solved).add(object.emoji);
         setSolved(next);
@@ -94,23 +133,29 @@ export default function SinkOrFloat() {
         // Gentle retry: the object is back on the shelf for another go.
         setBusy(false);
       }
-    }, DROP_MS);
+    });
   };
 
   /** Hard: every object is predicted, then they drop one after the other. */
   const dropAll = () => {
+    if (busy || running.current) return;
     const results = resolveBatch(round, predictions);
     setBusy(true);
     setSelected(null);
     const run = (i: number) => {
       const r = results[i];
-      setDrop({ ...r, step: ++dropCount.current });
-      setMarks((m) => ({ ...m, [r.emoji]: r.correct }));
-      later(() => {
-        if (i + 1 < results.length) run(i + 1);
-        else if (results.every((x) => x.correct)) completeRound();
-        else nextRound(level);
-      }, DROP_MS);
+      const last = i + 1 >= results.length;
+      startDrop(
+        r,
+        last ? HOLD_MS : HOLD_BETWEEN_MS,
+        () => {
+          running.current = null;
+          if (!last) run(i + 1);
+          else if (results.every((x) => x.correct)) completeRound();
+          else nextRound(level);
+        },
+        () => setMarks((m) => ({ ...m, [r.emoji]: r.correct })),
+      );
     };
     run(0);
   };
@@ -221,7 +266,13 @@ export default function SinkOrFloat() {
               >
                 {drop.emoji}
               </span>
-              <span aria-hidden="true" className="sof-splash absolute left-1/2 -ml-4 top-6 tiny:top-4 text-3xl tiny:text-2xl leading-none">💦</span>
+              <span
+                aria-hidden="true"
+                onAnimationEnd={() => settle(drop.step)}
+                className="sof-splash absolute left-1/2 -ml-4 top-6 tiny:top-4 text-3xl tiny:text-2xl leading-none"
+              >
+                💦
+              </span>
             </span>
           )}
           {canDrop && (
@@ -231,17 +282,31 @@ export default function SinkOrFloat() {
               </KidButton>
             </div>
           )}
-          {drop && (
-            <p
-              data-testid="sof-result"
-              data-result={drop.result}
-              data-correct={String(drop.correct)}
-              className="absolute inset-x-0 top-1 text-center text-sm font-black text-slate-800"
-            >
-              {drop.result === 'float' ? t.sinkOrFloat.floated : t.sinkOrFloat.sank}{' '}
-              {drop.correct ? '✅' : flow === 'batch' || afterWrong(level, challengeMode) === 'fresh' ? t.sinkOrFloat.newRound : t.sinkOrFloat.tryAgain}
-            </p>
+          {/* Result badge: what happened (🌊 / ⬇️) next to the guess (✅ / 💡). Icons only, after the animation. */}
+          {drop && shownStep === drop.step && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div
+                data-testid="sof-badge"
+                data-result={drop.result}
+                data-correct={String(drop.correct)}
+                aria-hidden="true"
+                className="animate-pop-in flex items-center justify-center gap-1 rounded-full bg-white border-[3px] px-3 leading-none"
+                style={{ borderColor: INK, boxShadow: hardShadow(2, 3), height: 'calc(3.5rem * var(--game-scale))', minHeight: '2.5rem', fontSize: 'calc(1.75rem * var(--game-scale))' }}
+              >
+                <span style={{ fontSize: 'max(1.25rem, calc(1.75rem * var(--game-scale)))' }}>{ZONE_EMOJI[drop.result]}</span>
+                <span style={{ fontSize: 'max(1.25rem, calc(1.75rem * var(--game-scale)))' }}>{drop.correct ? GUESS_EMOJI.right : GUESS_EMOJI.wrong}</span>
+              </div>
+            </div>
           )}
+          {/* The spoken result for screen readers: visually hidden, announced only once the badge shows. */}
+          <div aria-live="polite" className="sr-only">
+            {drop && shownStep === drop.step && (
+              <p data-testid="sof-result" data-result={drop.result} data-correct={String(drop.correct)}>
+                {drop.result === 'float' ? t.sinkOrFloat.floated : t.sinkOrFloat.sank}{' '}
+                {drop.correct ? '✅' : flow === 'batch' || afterWrong(level, challengeMode) === 'fresh' ? t.sinkOrFloat.newRound : t.sinkOrFloat.tryAgain}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Predict: water = float, down arrow = sink. */}

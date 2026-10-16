@@ -26,7 +26,7 @@ The home screen sorts games into four colour-coded shelves. The 🧸 Preschool /
 - **Math Pop 🎈**: add and subtract on a notebook sheet. Easy has fruit pictures and works within 5, medium within 10, hard within 20.
 - **Croc Compare 🐊**: the crocodile eats the bigger side. Fruit groups, then numbers, then <, =, > on hard.
 - **Number Train 🚂**: count the passengers, then tap the right station.
-- **Dice Flash 🎲**: a dot pattern flashes, then hides; tap how many you saw. Die faces up to 3, then up to 6, then up to 10 scattered dots with a shorter flash.
+- **Dice Flash 🎲**: a blank white card (the die) is tossed and lands, the dot pattern flashes while everything holds still, then it hides; tap how many you saw. Die faces up to 3, then up to 6, then up to 10 scattered dots with a shorter flash.
 - **Fair Share Picnic 🧺**: share snacks equally (early division).
 - **Balance ⚖️**: level the seesaw. Weights show dots on easy and medium. *(school)*
 
@@ -43,7 +43,7 @@ The home screen sorts games into four colour-coded shelves. The 🧸 Preschool /
 - **Pattern Train 🚃**: what wagon comes next? AB, then AAB/ABC, then a gap in the middle on hard.
 - **Animal Genie 🧞**: think of an animal, the genie asks yes/no questions and guesses it. On easy and medium the animals that no longer fit fade out.
 - **Simon Lights 🐵**: four animals light up one at a time, then tap them back in order. Each repeat adds a step: 2 to 4 slowly on easy, 3 to 6 on medium, 4 to 8 fast on hard. A miss replays the sequence (easy/medium, with a hint after two misses on a step) or starts a new one (hard).
-- **Sink or Float 🛁**: predict whether an object sinks or floats, then watch it drop. Easy has 2 obvious objects one at a time, medium 3-4 in any order, hard 4-5 with surprises, predicted all before the drops.
+- **Sink or Float 🛁**: predict whether an object sinks or floats, then watch it drop. Easy has 2 obvious objects one at a time, medium 3-4 in any order, hard 4-5 with surprises, predicted all before the drops. The result is shown with icons only, after the splash: 🌊 or ⬇️ for what happened, ✅ or 💡 for the guess.
 - **Match 🐯**: memory pairs.
 - **Shadow 🔦**: identify a silhouette with a flashlight. *(preschool)*
 - **Pearl Finder 🤿**: sort pearls into matching clams. *(preschool)*

@@ -11,15 +11,16 @@ import {
 } from './diceFlashLogic';
 
 /**
- * - ready: the card is covered, a beat before the flash
+ * - ready: the blank white card (the die) is tossed, landing as the flash starts (READY_MS)
  * - flash: dots visible for the tier's flash time
- * - answer: dots hidden, answer buttons visible
+ * - answer: blank card, answer buttons visible
  * - right: dots back and pulsing, stars paid
  * - reveal: after a miss the dots come back (3 s on easy/medium, a short look before a fresh flash on hard)
- * - complete: five flashes done
+ * - complete: five flashes done (no die picture, just confetti and the victory line)
  */
 type Phase = 'ready' | 'flash' | 'answer' | 'right' | 'reveal' | 'complete';
 
+/** The toss animation (`.dice-toss` in index.css) lasts exactly this long, so it lands as the flash starts. */
 const READY_MS = 800;
 const RIGHT_MS = 1300;
 const COMPLETE_MS = 1800;
@@ -129,21 +130,18 @@ export default function DiceFlash() {
 
         <div
           data-testid="dice-card"
-          className={`relative rounded-[2rem] border-[4px] bg-white ${phase === 'right' ? 'animate-pop-in' : ''}`}
+          className={`relative rounded-[2rem] border-[4px] bg-white ${phase === 'ready' ? 'dice-toss' : ''} ${phase === 'right' ? 'animate-pop-in' : ''} ${phase === 'complete' ? 'invisible' : ''}`}
           style={{ borderColor: INK, boxShadow: hardShadow(), width: CARD_SIZE, height: CARD_SIZE }}
         >
-          {showDots ? (
-            round.dots.map((d, i) => (
-              <span
-                key={`${flashNo}-${i}`}
-                data-testid="dice-dot"
-                className={`absolute w-[16%] aspect-square -ml-[8%] -mt-[8%] rounded-full ${phase === 'right' ? 'animate-pulse' : ''}`}
-                style={{ left: `${d.x}%`, top: `${d.y}%`, backgroundColor: phase === 'right' ? LEAF : INK }}
-              />
-            ))
-          ) : (
-            <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-7xl leading-none opacity-80">🎲</span>
-          )}
+          {/* The card itself is the die: blank until the flash, so only real dots are ever counted. */}
+          {showDots && round.dots.map((d, i) => (
+            <span
+              key={`${flashNo}-${i}`}
+              data-testid="dice-dot"
+              className={`absolute w-[16%] aspect-square -ml-[8%] -mt-[8%] rounded-full ${phase === 'flash' ? 'dice-dot-in' : ''} ${phase === 'right' ? 'animate-pulse' : ''}`}
+              style={{ left: `${d.x}%`, top: `${d.y}%`, backgroundColor: phase === 'right' ? LEAF : INK }}
+            />
+          ))}
         </div>
 
         <p aria-live="polite" className="min-h-6 text-slate-700 font-black text-lg text-center">{prompt}</p>

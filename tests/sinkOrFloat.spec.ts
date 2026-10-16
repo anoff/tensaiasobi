@@ -24,6 +24,13 @@ async function shelf(page: Page) {
   return items;
 }
 
+/** The result text is only for screen readers: it must take no visible space. */
+async function expectResultTextHidden(page: Page) {
+  // The region that holds the text is clipped to a 1px box (Tailwind `sr-only`).
+  const box = await page.getByTestId('sof-result').locator('xpath=..').boundingBox();
+  expect(box === null || (box.width <= 1 && box.height <= 1), 'result text is visually hidden').toBe(true);
+}
+
 test.describe('Sink or Float', () => {
   test('easy: one object at a time, a miss shows the result and lets the child retry', async ({ page }) => {
     await openGame(page, 'launch-sink-or-float', 'little', 'easy');
@@ -37,14 +44,29 @@ test.describe('Sink or Float', () => {
     const before = await stars(page);
     const [first] = await shelf(page);
     await predict(page, first.emoji, !first.floats);
+    // While the object falls the zones stay off and there is no result yet.
+    await expect(stage).toHaveAttribute('data-phase', 'dropping');
+    await expect(page.getByTestId('sof-float')).toBeDisabled();
+    await expect(page.getByTestId('sof-sink')).toBeDisabled();
+    await expect(page.getByTestId('sof-badge')).toHaveCount(0);
+    await expect(page.getByTestId('sof-badge')).toBeVisible();
+    // Icons: what happened (the object sinks or floats) next to the hint for a wrong guess, no text.
+    await expect(page.getByTestId('sof-badge')).toHaveAttribute('data-correct', 'false');
+    await expect(page.getByTestId('sof-badge')).toHaveAttribute('data-result', first.floats ? 'float' : 'sink');
+    await expect(page.getByTestId('sof-badge')).toHaveText(`${first.floats ? '🌊' : '⬇️'}💡`);
     await expect(page.getByTestId('sof-result')).toHaveAttribute('data-correct', 'false');
     await expect(page.getByTestId('sof-result')).toHaveAttribute('data-result', first.floats ? 'float' : 'sink');
+    await expectResultTextHidden(page);
+    // The badge is held (buttons still off), then the object is back for another try.
+    await expect(stage).toHaveAttribute('data-phase', 'dropping');
     await expect(stage).toHaveAttribute('data-phase', 'playing');
+    await expect(page.getByTestId('sof-badge')).toHaveCount(0);
     // Same object is back for another try.
     await expect(page.getByTestId('sof-object')).toHaveAttribute('data-emoji', first.emoji);
     expect(await stars(page)).toBe(before);
 
     await predict(page, first.emoji, first.floats);
+    await expect(page.getByTestId('sof-badge')).toHaveText(`${first.floats ? '🌊' : '⬇️'}✅`);
     await expect(page.getByTestId('sof-result')).toHaveAttribute('data-correct', 'true');
     await expect(stage).toHaveAttribute('data-phase', 'playing');
     await expect(page.getByTestId('sof-object')).not.toHaveAttribute('data-emoji', first.emoji);
@@ -67,6 +89,7 @@ test.describe('Sink or Float', () => {
   });
 
   test('hard: predict everything first, then drop; all right pays 10 stars', async ({ page }) => {
+    test.setTimeout(60_000);
     await openGame(page, 'launch-sink-or-float', 'big', 'hard');
     const stage = page.getByTestId('sof-stage');
     await expect(stage).toHaveAttribute('data-flow', 'batch');
@@ -80,11 +103,12 @@ test.describe('Sink or Float', () => {
     await predict(page, last.emoji, last.floats);
     await page.getByTestId('sof-drop').click();
     await expect(stage).toHaveAttribute('data-phase', 'dropping');
-    await expect(page.getByTestId('sof-victory')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('sof-victory')).toBeVisible({ timeout: 25_000 });
     await expect.poll(() => stars(page)).toBe(before + 10);
   });
 
   test('hard: one wrong prediction ends the round with no stars and fresh objects', async ({ page }) => {
+    test.setTimeout(60_000);
     await openGame(page, 'launch-sink-or-float', 'big', 'hard');
     const stage = page.getByTestId('sof-stage');
     const items = await shelf(page);
@@ -94,9 +118,61 @@ test.describe('Sink or Float', () => {
     await page.getByTestId('sof-drop').click();
     await expect(page.getByTestId('sof-victory')).toHaveCount(0);
     // The true result is shown, then a new round replaces the shelf.
-    await expect(page.locator('[data-testid="sof-object"][data-prediction="float"], [data-testid="sof-object"][data-prediction="sink"]')).toHaveCount(0, { timeout: 15_000 });
+    await expect(page.locator('[data-testid="sof-object"][data-prediction="float"], [data-testid="sof-object"][data-prediction="sink"]')).toHaveCount(0, { timeout: 25_000 });
     await expect(stage).toHaveAttribute('data-phase', 'playing');
     expect(await stars(page)).toBe(before);
+  });
+
+  test('the result badge only shows after the fall and splash have finished, and never as text', async ({ page }) => {
+    await openGame(page, 'launch-sink-or-float', 'little', 'easy');
+    const [first] = await shelf(page);
+    const clicked = Date.now();
+    await predict(page, first.emoji, first.floats);
+    await expect(page.getByTestId('sof-badge')).toHaveCount(0);
+    await expect(page.getByTestId('sof-drop-object')).toBeVisible();
+    await expect(page.getByTestId('sof-badge')).toBeVisible();
+    // Fall (1.2 s) and splash (ends at 1.3 s) are over by the time the badge pops up.
+    expect(Date.now() - clicked).toBeGreaterThanOrEqual(1250);
+    const running = await page.getByTestId('sof-drop-object').evaluate((el) =>
+      el.getAnimations({ subtree: true }).filter((a: { playState: string }) => a.playState === 'running').map((a: { playState: string }) => a.playState));
+    expect(running).toEqual([]);
+    await expectResultTextHidden(page);
+    // The badge is centred in the tank.
+    const tank = (await page.getByTestId('sof-tank').boundingBox())!;
+    const badge = (await page.getByTestId('sof-badge').boundingBox())!;
+    expect(Math.abs(badge.x + badge.width / 2 - (tank.x + tank.width / 2))).toBeLessThan(3);
+    expect(Math.abs(badge.y + badge.height / 2 - (tank.y + tank.height / 2))).toBeLessThan(3);
+    // Held for ~1.2 s: still there a moment later, gone with the next step.
+    await expect(page.getByTestId('sof-badge')).toBeVisible();
+    await expect(page.getByTestId('sof-badge')).toHaveCount(0);
+  });
+
+  test('a double tap on Float or Sink does not drop twice', async ({ page }) => {
+    await openGame(page, 'launch-sink-or-float', 'little', 'easy');
+    const [first] = await shelf(page);
+    await page.locator(`[data-testid="sof-object"][data-emoji="${first.emoji}"]`).click();
+    await page.getByTestId(first.floats ? 'sof-float' : 'sof-sink').dblclick({ force: true });
+    await expect(page.getByTestId('sof-badge')).toBeVisible();
+    expect(Number(await page.getByTestId('sof-drop-object').getAttribute('data-drop-id'))).toBe(1);
+  });
+
+  test.describe('reduced motion', () => {
+    test('easy: the badge still shows after the (instant) animation and the game moves on', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await openGame(page, 'launch-sink-or-float', 'little', 'easy');
+      const before = await stars(page);
+      for (let i = 0; i < 2; i++) {
+        const [item] = await shelf(page);
+        await predict(page, item.emoji, item.floats);
+        await expect(page.getByTestId('sof-badge')).toBeVisible();
+        await expect(page.getByTestId('sof-badge')).toHaveText(`${item.floats ? '🌊' : '⬇️'}✅`);
+        await expectResultTextHidden(page);
+        // Wait for the next object (the first drop) before reading the shelf again.
+        if (i === 0) await expect(page.getByTestId('sof-object')).not.toHaveAttribute('data-emoji', item.emoji);
+      }
+      await expect(page.getByTestId('sof-victory')).toBeVisible();
+      await expect.poll(() => stars(page)).toBe(before + 2);
+    });
   });
 
   test('every drop restarts the animation: two misses in a row, then a right answer right after a miss', async ({ page }) => {
@@ -165,6 +241,7 @@ test.describe('Sink or Float', () => {
 
       for (const [band, level] of [['little', 'easy'], ['big', 'medium'], ['big', 'hard']] as const) {
         test(`${level}: shelf, tank and both zones fit together, also with an object picked up`, async ({ page }) => {
+          test.setTimeout(60_000);
           await openGame(page, 'launch-sink-or-float', band, level);
           if (level === 'hard') {
             // Worst case: five objects on the shelf.
@@ -192,7 +269,9 @@ test.describe('Sink or Float', () => {
             await expect(page.getByTestId('sof-drop')).toBeVisible();
             await expectFits(page, true);
             await page.getByTestId('sof-drop').click();
-            await expect(page.getByTestId('sof-victory')).toBeVisible({ timeout: 15_000 });
+            await expect(page.getByTestId('sof-badge')).toBeVisible();
+            await expectOnScreen(page.getByTestId('sof-badge'), 'result badge');
+            await expect(page.getByTestId('sof-victory')).toBeVisible({ timeout: 30_000 });
             await expectOnScreen(page.getByTestId('sof-victory'), 'victory text');
           }
         });

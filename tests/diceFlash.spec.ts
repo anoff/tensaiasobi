@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 import { openGame } from './ageLevels';
 
 async function stars(page: Page) {
@@ -22,7 +22,86 @@ async function wrongValue(page: Page) {
   return values.find((v) => v !== count)!;
 }
 
+/** The white card is the die: no dice emoji in the play area in any phase (the game title keeps its own 🎲). */
+async function expectNoDiceEmoji(page: Page) {
+  await expect(stage(page).getByText('🎲')).toHaveCount(0);
+  await expect(page.getByTestId('dice-card')).not.toContainText('🎲');
+}
+
+/** Computed style value of one element. */
+async function style(locator: Locator, prop: 'animationName' | 'animationDuration' | 'transform') {
+  return locator.evaluate((el, name) => el.ownerDocument.defaultView!.getComputedStyle(el)[name], prop);
+}
+
+/** Position of the card and of every dot, to prove nothing moves. */
+async function stillSnapshot(page: Page) {
+  const round = (r: { x: number; y: number; width: number; height: number }) =>
+    [r.x, r.y, r.width, r.height].map((n) => Math.round(n * 10) / 10);
+  const card = page.getByTestId('dice-card');
+  return {
+    card: await card.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height };
+    }).then(round),
+    dots: await page.getByTestId('dice-dot').evaluateAll((els) => els.map((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height };
+    })).then((list) => list.map(round)),
+    transform: await style(card, 'transform'),
+  };
+}
+
 test.describe('Dice Flash', () => {
+  test('the blank card is tossed before the flash, then card and dots stand completely still while counting', async ({ page }) => {
+    await openGame(page, 'launch-dice-flash', 'big', 'hard');
+    // Start a new set so the toss is seen from its beginning.
+    await page.getByTestId('difficulty-medium').click();
+    const card = page.getByTestId('dice-card');
+    await expect(card).toHaveClass(/dice-toss/);
+    await expect(page.getByTestId('dice-dot')).toHaveCount(0);
+    await expectNoDiceEmoji(page);
+    expect(await style(card, 'animationName')).toBe('dice-toss');
+    expect(await style(card, 'animationDuration')).toBe('0.8s');
+
+    // Landing coincides with the flash start: the toss class is gone and the dots appear.
+    await expect(stage(page)).toHaveAttribute('data-phase', 'flash');
+    await expect(card).not.toHaveClass(/dice-toss/);
+    await expect(page.getByTestId('dice-dot')).toHaveCount(Number(await stage(page).getAttribute('data-count')));
+    await expectNoDiceEmoji(page);
+    await page.waitForTimeout(250); // past the 80 ms dot fade
+    const first = await stillSnapshot(page);
+    expect(first.transform).toBe('none');
+    await page.waitForTimeout(400);
+    expect(await stillSnapshot(page)).toEqual(first);
+    await expect(stage(page)).toHaveAttribute('data-phase', 'flash');
+  });
+
+  test('answer phase: a blank card, no dots and no dice emoji; the toss class only exists while getting ready', async ({ page }) => {
+    await openGame(page, 'launch-dice-flash', 'little', 'easy');
+    await waitForAnswer(page);
+    await expect(page.getByTestId('dice-card')).toBeVisible();
+    await expect(page.getByTestId('dice-card')).not.toHaveClass(/dice-toss/);
+    await expect(page.getByTestId('dice-dot')).toHaveCount(0);
+    await expectNoDiceEmoji(page);
+    await expect(page.getByTestId('dice-card')).toHaveText('');
+  });
+
+  test.describe('reduced motion', () => {
+    test('no toss, and the dots still fade in over 150 ms', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await openGame(page, 'launch-dice-flash', 'big', 'hard');
+      await page.getByTestId('difficulty-medium').click();
+      const card = page.getByTestId('dice-card');
+      await expect(card).toHaveClass(/dice-toss/);
+      expect(await style(card, 'animationName')).toBe('none');
+      await expect(stage(page)).toHaveAttribute('data-phase', 'flash');
+      const dot = page.getByTestId('dice-dot').first();
+      await expect(dot).toBeVisible();
+      expect(await style(dot, 'animationName')).toBe('dice-dot-fade');
+      expect(await style(dot, 'animationDuration')).toBe('0.15s');
+    });
+  });
+
   test('easy: dots flash, then three answer buttons appear, and a right tap pays 2 stars', async ({ page }) => {
     await openGame(page, 'launch-dice-flash', 'little', 'easy');
     await expect(stage(page)).toHaveAttribute('data-flash-ms', '2000');
@@ -46,7 +125,9 @@ test.describe('Dice Flash', () => {
     const before = await stars(page);
     await tap(page, count);
     await expect(stage(page)).toHaveAttribute('data-phase', 'right');
+    // Right: the dots are shown again, still, in green (the spec keeps this); no dice emoji.
     await expect(page.getByTestId('dice-dot')).toHaveCount(count);
+    await expectNoDiceEmoji(page);
     await expect.poll(() => stars(page)).toBe(before + 2);
   });
 
@@ -61,6 +142,9 @@ test.describe('Dice Flash', () => {
     await expect(stage(page)).toHaveAttribute('data-phase', 'reveal');
     await expect(page.getByTestId('dice-dot')).toHaveCount(Number(count));
     await expect(page.getByTestId('dice-option')).toHaveCount(0);
+    await expectNoDiceEmoji(page);
+    // Still, not tossed: the card has no motion class and keeps its place while the dots are back.
+    await expect(page.getByTestId('dice-card')).not.toHaveClass(/dice-toss/);
     // Still showing the dots two seconds later.
     await page.waitForTimeout(2000);
     await expect(stage(page)).toHaveAttribute('data-phase', 'reveal');
@@ -184,6 +268,10 @@ test.describe('Dice Flash', () => {
       await tap(page, Number(await stage(page).getAttribute('data-count')));
     }
     await expect(page.getByTestId('dice-victory')).toBeVisible({ timeout: 10_000 });
+    // No die picture at the end of a set: neither the card nor any emoji, just confetti and the victory line.
+    await expect(page.getByTestId('dice-card')).toBeHidden();
+    await expect(page.getByTestId('dice-dot')).toHaveCount(0);
+    await expectNoDiceEmoji(page);
     await expect(stage(page)).toHaveAttribute('data-progress', '5');
     await expect.poll(() => stars(page)).toBe(before + 10);
     // A new set starts on its own.
