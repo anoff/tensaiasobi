@@ -37,7 +37,7 @@ const TILE_COLORS = [
 
 export default function SimonLights() {
   const { t } = useTranslation();
-  const { playPop, playSuccess, onStarEarned, challengeMode } = useGameFX();
+  const { playPop, playSuccess, onStarEarned, challengeMode, playSimonTone } = useGameFX();
   const [level, setLevel] = useAgeDifficulty();
   const [game, setGame] = useState<SimonState>(() => startRun(level));
   const [phase, setPhase] = useState<Phase>('ready');
@@ -53,8 +53,10 @@ export default function SimonLights() {
   const { later, cancelAll } = useLater();
   // The sound callbacks change identity on every app render; the playback timers must not restart with them.
   const popRef = useRef(playPop);
+  const simonRef = useRef(playSimonTone);
   useEffect(() => {
     popRef.current = playPop;
+    simonRef.current = playSimonTone;
   });
 
   useEffect(() => {
@@ -75,7 +77,8 @@ export default function SimonLights() {
           const start = i * (speed.stepMs + speed.gapMs);
           at(() => {
             setLit(animal);
-            popRef.current();
+            if (simonRef.current) simonRef.current(animal);
+            else popRef.current();
           }, start);
           at(() => setLit(null), start + speed.stepMs);
         });
@@ -124,7 +127,8 @@ export default function SimonLights() {
     const { state, outcome } = press(game, animal, level, challengeMode);
     setGame(state);
     if (outcome === 'next') {
-      playPop();
+      if (playSimonTone) playSimonTone(animal);
+      else playPop();
       const id = ++tapId.current;
       setPressed({ animal, id });
       later(() => setPressed((current) => endGlow(current, id)), PRESS_GLOW_MS);
@@ -139,7 +143,8 @@ export default function SimonLights() {
       setPhase('complete');
     } else {
       // Retry or fresh sequence: a gentle wobble, no buzzer, nothing red.
-      playPop();
+      if (playSimonTone) playSimonTone(animal);
+      else playPop();
       setWrongTap(animal);
       setReplay(outcome === 'retry');
       setFresh(outcome === 'fresh');
