@@ -166,9 +166,28 @@ test.describe('Magic Puzzle gallery', () => {
     await expect(page.getByTestId('puzzle-tray-piece').first()).toBeVisible();
     await expect(page.getByTestId('difficulty-easy')).toBeVisible();
 
+    const pill = await page.getByTestId('puzzle-back').boundingBox();
+    expect(pill!.height).toBeGreaterThanOrEqual(44);
     await page.getByTestId('puzzle-back').click();
     await expect(page.getByTestId('puzzle-gallery')).toBeVisible();
     expect(Math.abs((await main.evaluate((el) => el.scrollTop)) - scrolled)).toBeLessThanOrEqual(1);
+
+    // Android's hardware Back (Capacitor's App backButton event) does the same from a puzzle.
+    const hardwareBack = () =>
+      page.evaluate(() => {
+        const cap = (globalThis as unknown as { Capacitor: { Plugins: { App: { notifyListeners: (e: string, d: unknown) => Promise<void> } } } }).Capacitor;
+        return cap.Plugins.App.notifyListeners('backButton', { canGoBack: false });
+      });
+    await last.click();
+    await expect(page.getByTestId('puzzle-tray-piece').first()).toBeVisible();
+    await hardwareBack();
+    await expect(page.getByTestId('puzzle-gallery')).toBeVisible();
+    expect(Math.abs((await main.evaluate((el) => el.scrollTop)) - scrolled)).toBeLessThanOrEqual(1);
+
+    // From the gallery, hardware Back leaves the game as it always did.
+    await hardwareBack();
+    await expect(page.getByTestId('launch-puzzle')).toBeVisible();
+    await page.getByTestId('launch-puzzle').click();
 
     // Back from the gallery leaves the game, as before.
     await page.getByTestId('home-button').click();

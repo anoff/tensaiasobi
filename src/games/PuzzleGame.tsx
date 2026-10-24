@@ -412,6 +412,20 @@ export function PuzzleGame() {
     setInGallery(true);
   };
 
+  // Hardware Back (App.tsx fires 'app-back') leaves a puzzle for the gallery, like the back pill.
+  useEffect(() => {
+    if (inGallery) return;
+    const onBack = (e: Event) => {
+      e.preventDefault();
+      playPop();
+      setDrag(null);
+      dragStartRef.current = null;
+      setInGallery(true);
+    };
+    window.addEventListener('app-back', onBack);
+    return () => window.removeEventListener('app-back', onBack);
+  }, [inGallery, playPop]);
+
   // Coming back from a puzzle puts the gallery where the child left it.
   useLayoutEffect(() => {
     if (inGallery) scrollParent(rootRef.current).scrollTop = galleryScrollRef.current;
@@ -472,14 +486,15 @@ export function PuzzleGame() {
         <GameConfetti pieces={120} />
       )}
 
-      {/* Back to the gallery, same pill as the other games' in-game back button */}
+      {/* Back to the gallery; hardware Back does the same (see the 'app-back' listener) */}
       <div className="w-full flex">
         <button
           type="button"
           data-testid="puzzle-back"
           onClick={handleBackToGallery}
           aria-label={t.puzzleGame?.gallery || 'All pictures'}
-          className="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-extrabold text-xs rounded-full cursor-pointer outline-none transition-colors"
+          className="min-h-11 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 font-black text-sm rounded-2xl border-2 border-b-4 shadow-md cursor-pointer outline-none select-none transition-all duration-75 active:translate-y-[1px] focus-visible:ring-4 focus-visible:ring-amber-400/70"
+          style={{ borderColor: INK }}
         >
           ⬅️ 🖼️
         </button>
