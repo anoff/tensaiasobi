@@ -42,6 +42,14 @@ describe('game catalog', () => {
     expect(gameVisibleForAge(GAMES.find((g) => g.id === 'math')!, 'big')).toBe(true);
   });
 
+  it('folds Missing Letter into First Sound (school only, same streak keys)', () => {
+    expect(GAMES.some((g) => (g.id as string) === 'missingLetter' || (g.testid as string) === 'launch-missing-letter')).toBe(false);
+    expect(isGameId('missingLetter')).toBe(false);
+    const anlaut = GAMES.find((g) => g.id === 'anlaut')!;
+    expect(anlaut.ageBands).toEqual(['big']);
+    expect(anlaut.storageKeys).toEqual(['anlaut_streak', 'anlaut_highscore']);
+  });
+
   it('keeps the trimmed menu: Kita-only, School-only and Just for fun games', () => {
     const band = (id: string) => GAMES.find((g) => g.id === id)!.ageBands;
     expect(band('numberTrain')).toEqual(['little']);
@@ -53,9 +61,9 @@ describe('game catalog', () => {
     const genie = GAMES.find((g) => g.id === 'animalGenie')!;
     expect(genie.category).toBe('play');
     expect(genie.kind).toBe('play');
-    expect(GAMES).toHaveLength(27);
+    expect(GAMES).toHaveLength(26);
     expect(GAMES.filter((g) => gameVisibleForAge(g, 'little'))).toHaveLength(22);
-    expect(GAMES.filter((g) => gameVisibleForAge(g, 'big'))).toHaveLength(22);
+    expect(GAMES.filter((g) => gameVisibleForAge(g, 'big'))).toHaveLength(21);
   });
 
   it('covers every GameId in challenge defaults', () => {

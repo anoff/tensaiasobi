@@ -43,7 +43,6 @@ export const fr: TranslationSchema = {
     letterPairs: "Paires de lettres",
     patternTrain: "Train des motifs",
     syllableDrum: "Tambour syllabes",
-    missingLetter: "Lettre perdue",
     animalGenie: "Génie animal",
     simonLights: "Lumières des animaux",
     sinkOrFloat: "Flotte ou coule",
@@ -157,6 +156,7 @@ export const fr: TranslationSchema = {
   anlautGame: {
     title: "Premier Son",
     subtitle: "Par quel son commence le mot ?",
+    subtitleHard: "Quelle lettre manque ?",
     help: "Appuie sur la bonne lettre !",
     hint: "Indice 💡",
     continue: "Continuer ➜",
@@ -433,8 +433,8 @@ export const fr: TranslationSchema = {
   letterPairs: {
     title: "Paires de lettres 🔠",
     subtitleEasy: "Trouve sa lettre minuscule !",
-    subtitleMedium: "Par quelle lettre ça commence ?",
-    subtitleHard: "Quelle image commence par cette lettre ?",
+    subtitleMedium: "Trouve sa lettre majuscule !",
+    subtitleHard: "Attention, elles se ressemblent ! Trouve la minuscule.",
     help: "Touche la bonne bulle !",
   },
   simonLights: {
@@ -481,10 +481,6 @@ export const fr: TranslationSchema = {
     help: "Pa-pi-llon = 3 coups. Puis touche ✓",
     check: "Fini",
     drum: "Tambour",
-  },
-  missingLetter: {
-    title: "Lettre perdue ✍️",
-    subtitle: "Quelle lettre manque ?",
   },
   animalGenie: {
     title: "Génie des animaux 🧞",

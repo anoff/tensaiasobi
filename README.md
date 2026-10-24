@@ -31,11 +31,10 @@ The home screen sorts games into four colour-coded shelves. The 🧸 Preschool /
 - **Balance ⚖️**: level the seesaw. Weights show dots on easy and medium. *(school)*
 
 **🔤 Language** (coral)
-- **Letter Pairs 🔠**: upper → lower case, then picture → its first letter, then letter → picture. Japanese: picture → first hiragana, hiragana → katakana, hiragana → romaji.
+- **Letter Pairs 🔠**: letter shapes only. Upper → lower case, then lower → upper case, then upper → lower case among look-alikes (b/d/p/q, m/n, u/n, i/l). Japanese: hiragana → katakana, katakana → hiragana, hiragana → romaji.
 - **Letters ✏️**: trace letters (Latin, Hiragana, Katakana, Hangul).
 - **Syllable Drum 🥁**: drum once per syllable (Gi-raf-fe = 3). Japanese counts morae.
-- **First Sound 🔤**: find the starting letter. *(school)*
-- **Missing Letter ✍️**: fill the gap in M_USE. *(school)*
+- **First Sound 🍎**: find the starting letter. Hard fills the missing letter anywhere in the word (M_USE). *(school)*
 - **Word Chain 🔗**: shiritori, matching the last letter to the next word's first letter. Easy and medium show the words. *(school)*
 
 **🧠 Logic** (leaf)

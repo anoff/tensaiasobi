@@ -2,7 +2,8 @@
 
 A pass over all 19 games plus the open issues, aimed at the "some games are too
 hard" feedback. The result: one merge, difficulty fixes in seven games, and a home
-screen sorted into four categories.
+screen sorted into four categories. With the games added since, the menu now has
+26 games.
 
 ## What the open issues say
 
@@ -43,19 +44,19 @@ games use chalk, pebble and coal (white, grey, black). Only the fun shelf is
 | **Odd One** | 👑 👜 🕶️ were "clothing", 🔔 was an "instrument", and 🎱 🏹 were "sports". Grown-ups argue about these. | Removed those emojis. |
 | **Letters** | Preschool had no language game | Now available to preschool. Easy has the widest tracing tolerance. |
 | **Emoji Match** | Zen mode added little; easy had nothing else | Zen removed; Time Attack opens on easy (60 s). New 2-player duel: phone between two kids, the screen split in half with one card each (player 2's upside down); the two cards share one emoji, whoever taps it first scores and both get new cards. First to 10 wins. Running out of cards no longer deals an unsolvable card. |
+| **First Sound + Missing Letter** | Missing Letter repeated First Sound's first-letter rounds on its easy level, and First Sound had no levels | **Missing Letter is now First Sound's hard level** (any letter missing in a short word, 3 choices). Easy and medium are the picture → first letter rounds; school starts on medium. Streak and high score keys are unchanged. |
 | **City Dispatch** | Timed arcade game listed as "learn" and school-only, although police / fire / ambulance suits age 4 too | Moved to Just for fun and opened to preschool. Easy is 1 event with 24 s. |
 
 ## New games (added after the review)
 
-These five fill the gaps the review found. After adding them, preschool has at least
+These fill the gaps the review found. After adding them, preschool has at least
 two games in every learning category, and school has three or more.
 
 | Game | Category | Who | Fills | Levels |
 |---|---|---|---|---|
 | **Croc Compare 🐊** | Numbers | both | more / less | fruit groups up to 5 → numbers up to 20 (dots appear after a miss) → <, =, > with numbers up to 100 and small sums |
-| **Letter Pairs 🔠** | Language | both | letter recognition | upper→lower case (B→b) → picture → its first letter (🐇→R) → letter → picture that starts with it. Japanese: picture → first hiragana (🍎→り) → hiragana→katakana → hiragana→romaji. Korean: same letter → first consonant (가→ㄱ) → picture |
+| **Letter Pairs 🔠** | Language | both | letter recognition | Letter shapes only (pictures are First Sound's job): upper→lower case (B→b) → lower→upper case (b→B) → upper→lower case among look-alikes (b/d/p/q, m/n, u/n, i/l). Japanese: hiragana→katakana (あ→ア) → katakana→hiragana → hiragana→romaji. Korean: same letter → first consonant (가→ㄱ) → consonant → syllable |
 | **Syllable Drum 🥁** | Language | both | hearing syllables | 1–2 syllables with the word split into beats → 1–3 with the whole word → 2–4 with the picture only. Japanese counts morae, Korean counts blocks |
-| **Missing Letter ✍️** | Language | school | spelling | first letter → any letter in short words → longer words with 4 choices (vowel against vowel) |
 | **Pattern Train 🚃** | Logic | both | sequences | AB → AAB/ABB/ABC → AABB/ABCD with the gap anywhere |
 | **Animal Genie 🧞** | Just for fun | both | yes/no deduction | 10 → 20 → 33 animals. Offline Akinator: picks the question that splits the remaining animals most evenly. Easy/medium fade out animals that no longer fit; hard keeps them hidden. Tolerates a wrong answer; after 3 wrong guesses the child wins |
 | **Simon Lights 🐵** | Logic | both | working memory | 4 animals on every level. The sequence starts short and gains a step per repeat: 2 → 4 (slow) → 3 → 6 (medium) → 4 → 8 (fast). Watch and your-turn are separate states and taps are ignored while watching. A miss replays the same sequence slowly (easy/medium; after 2 misses on a step the right animal is highlighted); on hard (and in parent challenges) it starts a new sequence of the same length. 2 / 6 / 10 stars per finished run |
@@ -76,6 +77,5 @@ clap them, so a silent final *e* is not a beat (*pomme* = 1).
 
 ## Not changed (yet)
 
-- **First Sound** has no difficulty levels. Preschool could get a version with two letters plus the word shown.
 - **Tower Sort** stays school-only. Its easy level (2 types, 12 scramble steps) could open it to older preschool kids later.
 - A global theme switch (#74) and per-game explainer screens (#30) are still open.

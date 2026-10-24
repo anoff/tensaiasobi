@@ -43,7 +43,6 @@ export const ja: TranslationSchema = {
     letterPairs: "もじのペア",
     patternTrain: "もようれっしゃ",
     syllableDrum: "おとのたいこ",
-    missingLetter: "きえたもじ",
     animalGenie: "どうぶつまじん",
     simonLights: "どうぶつライト",
     sinkOrFloat: "うく？しずむ？",
@@ -157,6 +156,7 @@ export const ja: TranslationSchema = {
   anlautGame: {
     title: "はじまりの おと",
     subtitle: "なんの おとで はじまるかな？",
+    subtitleHard: "どの もじが きえたかな？",
     help: "ただしい ひらがなを タップしてね！",
     hint: "ヒント 💡",
     continue: "つぎへ ➜",
@@ -432,8 +432,8 @@ export const ja: TranslationSchema = {
   },
   letterPairs: {
     title: "もじのペア 🔠",
-    subtitleEasy: "なんの もじで はじまるかな？",
-    subtitleMedium: "おなじ おとの カタカナは どれ？",
+    subtitleEasy: "おなじ おとの カタカナは どれ？",
+    subtitleMedium: "おなじ おとの ひらがなは どれ？",
     subtitleHard: "ローマじで かくと どれ？",
     help: "あう バブルを タップしてね！",
   },
@@ -481,10 +481,6 @@ export const ja: TranslationSchema = {
     help: "き・り・ん = 3かい。それから ✓ を タップ",
     check: "できた",
     drum: "たいこ",
-  },
-  missingLetter: {
-    title: "きえたもじ ✍️",
-    subtitle: "どの もじが きえたかな？",
   },
   animalGenie: {
     title: "どうぶつまじん 🧞",

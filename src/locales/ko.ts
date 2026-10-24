@@ -43,7 +43,6 @@ export const ko: TranslationSchema = {
     letterPairs: "글자 짝꿍",
     patternTrain: "규칙 기차",
     syllableDrum: "음절 북",
-    missingLetter: "빠진 글자",
     animalGenie: "동물 지니",
     simonLights: "동물 불빛",
     sinkOrFloat: "뜰까 가라앉을까",
@@ -157,6 +156,7 @@ export const ko: TranslationSchema = {
   anlautGame: {
     title: "첫 소리 글자",
     subtitle: "낱말이 어떤 글자로 시작할까요?",
+    subtitleHard: "어떤 글자가 빠졌을까요?",
     help: "올바른 글자를 터치하세요!",
     hint: "힌트 💡",
     continue: "계속하기 ➜",
@@ -434,7 +434,7 @@ export const ko: TranslationSchema = {
     title: "글자 짝꿍 🔠",
     subtitleEasy: "똑같은 글자를 찾아요!",
     subtitleMedium: "첫 자음을 찾아요!",
-    subtitleHard: "이 글자로 시작하는 그림은?",
+    subtitleHard: "이 자음으로 시작하는 글자는?",
     help: "맞는 방울을 눌러요!",
   },
   simonLights: {
@@ -481,10 +481,6 @@ export const ko: TranslationSchema = {
     help: "기-린 = 2번. 그다음 ✓ 를 눌러요",
     check: "다 했어요",
     drum: "북",
-  },
-  missingLetter: {
-    title: "빠진 글자 ✍️",
-    subtitle: "어떤 글자가 빠졌을까요?",
   },
   animalGenie: {
     title: "동물 지니 🧞",
