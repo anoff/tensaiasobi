@@ -1,0 +1,357 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Background Sky Gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+
+    <!-- Mountain Gradient -->
+    <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#93c5fd"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+
+    <!-- Patterns -->
+    <pattern id="checkers" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="5" height="5" fill="#1e293b"/>
+      <rect x="5" width="5" height="5" fill="#ffffff"/>
+      <rect y="5" width="5" height="5" fill="#ffffff"/>
+      <rect x="5" y="5" width="5" height="5" fill="#1e293b"/>
+    </pattern>
+
+    <pattern id="brickWall" width="10" height="6" patternUnits="userSpaceOnUse">
+      <rect width="10" height="6" fill="#f87171"/>
+      <path d="M 0 3 L 10 3 M 5 0 L 5 3 M 0 3 L 0 6 M 10 3 L 10 6" stroke="#b91c1c" stroke-width="0.8"/>
+    </pattern>
+
+    <!-- Monster Wheel Template -->
+    <g id="monsterWheel">
+      <circle cx="0" cy="0" r="30" fill="#1e293b"/>
+      <!-- Treads -->
+      <path d="M -26 -12 L -33 -15 L -30 -6 Z M -12 -26 L -15 -33 L -6 -30 Z M 12 -26 L 15 -33 L 6 -30 Z M 26 -12 L 33 -15 L 30 -6 Z M 26 12 L 33 15 L 30 6 Z M 12 26 L 15 33 L 6 30 Z M -12 26 L -15 33 L -6 30 Z M -26 12 L -33 15 L -30 6 Z" fill="#0f172a"/>
+      <circle cx="0" cy="0" r="18" fill="#64748b"/>
+      <circle cx="0" cy="0" r="12" fill="#cbd5e1"/>
+      <circle cx="0" cy="0" r="4" fill="#1e293b"/>
+      <circle cx="0" cy="-8" r="1.5" fill="#1e293b"/>
+      <circle cx="7" cy="4" r="1.5" fill="#1e293b"/>
+      <circle cx="-7" cy="4" r="1.5" fill="#1e293b"/>
+    </g>
+
+    <!-- Standard Wheel Template -->
+    <g id="carWheel">
+      <circle cx="0" cy="0" r="12" fill="#1e293b"/>
+      <circle cx="0" cy="0" r="7" fill="#94a3b8"/>
+      <circle cx="0" cy="0" r="3" fill="#ffffff"/>
+    </g>
+  </defs>
+
+  <!-- ==================== BACKGROUND & SKY ==================== -->
+  <rect width="400" height="400" fill="url(#skyGrad)"/>
+
+  <!-- Sun -->
+  <g transform="translate(340, 50)">
+    <circle r="22" fill="#facc15"/>
+    <!-- Rays -->
+    <path d="M 0 -30 L 0 -25 M 0 25 L 0 30 M -30 0 L -25 0 M 25 0 L 30 0 M -21 -21 L -17 -17 M 17 17 L 21 21 M -21 21 L -17 17 M 17 -17 L 21 -21" stroke="#facc15" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Sky Clouds & Stylized Shapes -->
+  <g fill="#38bdf8" opacity="0.7">
+    <polygon points="40,30 60,30 50,15"/>
+    <polygon points="50,30 75,30 62,10"/>
+    <polygon points="65,35 85,35 75,20"/>
+    <path d="M 260 55 Q 270 45 285 45 Q 295 35 310 42 Q 325 38 335 50 Q 345 50 345 60 L 255 60 Z" fill="#bae6fd" opacity="0.9"/>
+  </g>
+
+  <!-- Helicopter -->
+  <g transform="translate(200, 70)">
+    <!-- Main Body -->
+    <ellipse cx="0" cy="0" rx="28" ry="18" fill="#facc15" stroke="#1e293b" stroke-width="2"/>
+    <!-- Windshield -->
+    <path d="M 5 -12 Q 22 -12 24 0 Q 22 12 5 12 Z" fill="#38bdf8" stroke="#1e293b" stroke-width="1.5"/>
+    <!-- Tail -->
+    <path d="M -25 -4 L -55 -10 L -55 2 L -25 4 Z" fill="#facc15" stroke="#1e293b" stroke-width="2"/>
+    <path d="M -50 -12 L -60 -18 L -55 -4 Z" fill="#2563eb" stroke="#1e293b" stroke-width="1.5"/>
+    <!-- Tail Rotor -->
+    <circle cx="-55" cy="-7" r="3" fill="#1e293b"/>
+    <line x1="-63" y1="-7" x2="-47" y2="-7" stroke="#2563eb" stroke-width="2"/>
+    <line x1="-55" y1="-15" x2="-55" y2="1" stroke="#2563eb" stroke-width="2"/>
+    <!-- Main Rotor Base & Blades -->
+    <rect x="-3" y="-22" width="6" height="5" fill="#1e293b"/>
+    <line x1="-50" y1="-22" x2="45" y2="-22" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+    <!-- Landing Skids -->
+    <line x1="-12" y1="18" x2="-12" y2="25" stroke="#1e293b" stroke-width="2"/>
+    <line x1="12" y1="18" x2="12" y2="25" stroke="#1e293b" stroke-width="2"/>
+    <line x1="-25" y1="25" x2="25" y2="25" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Pilot -->
+    <circle cx="10" cy="-2" r="4" fill="#1e293b"/>
+  </g>
+
+  <!-- ==================== BACKGROUND BUILDINGS & HILLS ==================== -->
+  <!-- Distant Mountains -->
+  <path d="M 230 180 L 280 120 L 330 180 L 380 110 L 400 140 L 400 200 L 230 200 Z" fill="url(#mountainGrad)"/>
+
+  <!-- City Buildings Left -->
+  <g stroke="#1e293b" stroke-width="1.5">
+    <rect x="20" y="140" width="30" height="60" fill="#ef4444"/>
+    <rect x="52" y="90" width="38" height="110" fill="#0284c7"/>
+    <!-- Windows Blue Tower -->
+    <rect x="60" y="100" width="8" height="12" fill="#e0f2fe"/>
+    <rect x="74" y="100" width="8" height="12" fill="#e0f2fe"/>
+    <rect x="60" y="120" width="8" height="12" fill="#e0f2fe"/>
+    <rect x="74" y="120" width="8" height="12" fill="#fef08a"/>
+    <rect x="60" y="140" width="8" height="12" fill="#e0f2fe"/>
+    <rect x="74" y="140" width="8" height="12" fill="#e0f2fe"/>
+
+    <rect x="92" y="80" width="22" height="120" fill="#facc15"/>
+    <rect x="116" y="110" width="28" height="90" fill="#38bdf8"/>
+    <rect x="135" y="115" width="28" height="85" fill="url(#brickWall)"/>
+  </g>
+
+  <!-- Green Rolling Hills & Trees (Middle Background) -->
+  <path d="M 0 190 Q 120 160 240 180 T 400 170 L 400 210 L 0 210 Z" fill="#22c55e"/>
+
+  <!-- Background Trees -->
+  <g fill="#15803d" stroke="#1e293b" stroke-width="1.5">
+    <circle cx="75" cy="165" r="10"/>
+    <rect x="73" y="175" width="4" height="10" fill="#78350f"/>
+
+    <circle cx="160" cy="155" r="12"/>
+    <rect x="158" y="167" width="4" height="10" fill="#78350f"/>
+
+    <circle cx="210" cy="150" r="11"/>
+    <rect x="208" y="161" width="4" height="10" fill="#78350f"/>
+
+    <circle cx="250" cy="155" r="13"/>
+    <rect x="248" y="168" width="4" height="10" fill="#78350f"/>
+
+    <!-- Pine trees right -->
+    <polygon points="360,140 352,160 368,160"/>
+    <rect x="358" y="160" width="4" height="8" fill="#78350f"/>
+    <polygon points="380,135 370,158 390,158"/>
+    <rect x="378" y="158" width="4" height="8" fill="#78350f"/>
+  </g>
+
+  <!-- ==================== ROADS & BACKGROUND VEHICLES ==================== -->
+  <!-- Middle Road Layer -->
+  <rect x="0" y="195" width="400" height="35" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
+  <line x1="0" y1="212" x2="400" y2="212" stroke="#ffffff" stroke-width="2" stroke-dasharray="15,10"/>
+
+  <!-- Tow Truck (Background Right) -->
+  <g transform="translate(285, 153)">
+    <!-- Cabin & Body -->
+    <rect x="0" y="20" width="45" height="25" fill="#a855f7" stroke="#1e293b" stroke-width="1.5"/>
+    <path d="M 10 20 L 20 5 L 38 5 L 45 20 Z" fill="#a855f7" stroke="#1e293b" stroke-width="1.5"/>
+    <path d="M 18 18 L 23 8 L 35 8 L 38 18 Z" fill="#bae6fd" stroke="#1e293b" stroke-width="1"/>
+    <!-- Crane Arm -->
+    <path d="M -15 25 L 20 0 L 23 4 L -12 29 Z" fill="#facc15" stroke="#1e293b" stroke-width="1"/>
+    <line x1="-15" y1="25" x2="-15" y2="40" stroke="#1e293b" stroke-width="2"/>
+    <path d="M -15 27 Q -22 27 -22 35" fill="none" stroke="#1e293b" stroke-width="1.5"/>
+    <!-- Beacon Light -->
+    <rect x="25" y="2" width="6" height="3" fill="#ef4444"/>
+    <!-- Wheels -->
+    <use href="#carWheel" x="10" y="45"/>
+    <use href="#carWheel" x="38" y="45"/>
+  </g>
+
+  <!-- Traffic Light Left -->
+  <g transform="translate(22, 150)">
+    <rect x="0" y="0" width="12" height="30" rx="3" fill="#1e293b"/>
+    <circle cx="6" cy="5" r="3" fill="#ef4444"/>
+    <circle cx="6" cy="15" r="3" fill="#facc15"/>
+    <circle cx="6" cy="25" r="3" fill="#22c55e"/>
+    <line x1="6" y1="30" x2="6" y2="60" stroke="#1e293b" stroke-width="2"/>
+  </g>
+
+  <!-- Hydrant & Traffic Cones (Middle Scene) -->
+  <g transform="translate(270, 178)">
+    <rect x="0" y="0" width="8" height="14" rx="2" fill="#ef4444" stroke="#1e293b" stroke-width="1"/>
+    <circle cx="4" cy="-2" r="3" fill="#ef4444" stroke="#1e293b" stroke-width="1"/>
+  </g>
+  <g transform="translate(84, 202)">
+    <polygon points="5,0 0,10 10,10" fill="#f97316"/>
+    <rect x="-1" y="10" width="12" height="2" fill="#f97316"/>
+    <polygon points="3,4 7,4 8,6 2,6" fill="#ffffff"/>
+  </g>
+
+  <!-- Small Green Car (Left Lane) -->
+  <g transform="translate(22, 210)">
+    <path d="M 0 15 Q 5 0 25 0 Q 50 0 60 12 L 75 15 Q 80 18 80 25 L 80 28 L -5 28 Z" fill="#22c55e" stroke="#1e293b" stroke-width="2"/>
+    <!-- Racing Stripes -->
+    <path d="M 18 2 Q 35 2 45 12 L 55 15 L -2 15 L 0 12 Z" fill="#ffffff" opacity="0.4"/>
+    <!-- Window -->
+    <path d="M 15 10 Q 25 3 42 3 L 42 12 L 10 12 Z" fill="#bae6fd" stroke="#1e293b" stroke-width="1.5"/>
+    <!-- Headlight -->
+    <circle cx="75" cy="18" r="4" fill="#fef08a" stroke="#1e293b" stroke-width="1"/>
+    <!-- Wheels -->
+    <use href="#carWheel" x="18" y="28"/>
+    <use href="#carWheel" x="60" y="28"/>
+  </g>
+
+
+  <!-- ==================== MAIN FOREGROUND STREET ==================== -->
+  <!-- Colorful Graphic Street Base -->
+  <polygon points="0,230 400,230 400,380 0,380" fill="#3b82f6"/>
+  <!-- Street Color Panels -->
+  <polygon points="0,230 180,230 120,380 0,380" fill="#f97316"/>
+  <polygon points="0,280 140,280 100,380 0,380" fill="#e11d48"/>
+  <polygon points="0,320 110,320 80,380 0,380" fill="#10b981"/>
+
+  <!-- Road Directional Arrows -->
+  <g fill="#ffffff" opacity="0.9">
+    <!-- Curved Arrow -->
+    <path d="M 130 340 Q 150 340 150 355 L 140 355 L 155 370 L 170 355 L 160 355 Q 160 330 130 330 Z"/>
+    <!-- Straight/Turn Arrow 1 -->
+    <path d="M 230 330 L 230 355 L 220 355 L 235 375 L 250 355 L 240 355 L 240 330 Z"/>
+    <!-- Straight/Turn Arrow 2 -->
+    <path d="M 320 330 L 320 355 L 310 355 L 325 375 L 340 355 L 330 355 L 330 330 Z"/>
+  </g>
+
+  <!-- Sidewalk Bottom & Left -->
+  <rect x="0" y="380" width="400" height="20" fill="#f1f5f9"/>
+  <line x1="0" y1="380" x2="400" y2="380" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- Traffic Cones Foreground Left -->
+  <g transform="translate(20, 275)">
+    <polygon points="10,0 0,22 20,22" fill="#ea580c" stroke="#1e293b" stroke-width="1.5"/>
+    <rect x="-3" y="22" width="26" height="4" fill="#ea580c" stroke="#1e293b" stroke-width="1.5"/>
+    <polygon points="7,7 13,7 15 12 5 12" fill="#ffffff"/>
+  </g>
+  <g transform="translate(50, 305)">
+    <polygon points="12,0 0,26 24,26" fill="#ea580c" stroke="#1e293b" stroke-width="1.5"/>
+    <rect x="-3" y="26" width="30" height="5" fill="#ea580c" stroke="#1e293b" stroke-width="1.5"/>
+    <polygon points="8,8 16,8 18 14 6 14" fill="#ffffff"/>
+  </g>
+
+  <!-- Hydrant Foreground Left -->
+  <g transform="translate(85, 325)">
+    <rect x="0" y="0" width="18" height="30" rx="4" fill="#dc2626" stroke="#1e293b" stroke-width="2"/>
+    <ellipse cx="9" cy="0" rx="12" ry="5" fill="#dc2626" stroke="#1e293b" stroke-width="2"/>
+    <rect x="-4" y="8" width="26" height="5" fill="#dc2626" stroke="#1e293b" stroke-width="1.5"/>
+    <circle cx="9" cy="18" r="4" fill="#94a3b8" stroke="#1e293b" stroke-width="1.5"/>
+  </g>
+
+  <!-- ==================== HERO MONSTER TRUCK (CENTER) ==================== -->
+  <g transform="translate(95, 170)">
+
+    <!-- Spoiler / Rear Wing -->
+    <path d="M 0 35 L -20 20 L 5 20 L 15 35 Z" fill="#dc2626" stroke="#1e293b" stroke-width="2"/>
+    <rect x="-18" y="16" width="30" height="6" rx="2" fill="#dc2626" stroke="#1e293b" stroke-width="2"/>
+
+    <!-- Main Chassis Frame -->
+    <rect x="30" y="85" width="140" height="20" fill="#475569" stroke="#1e293b" stroke-width="2" rx="4"/>
+
+    <!-- Main Car Body -->
+    <path d="M 0 70 L 15 35 L 75 35 L 115 45 L 200 55 Q 215 65 210 80 L 205 95 L 0 95 Z" fill="#ef4444" stroke="#1e293b" stroke-width="2.5"/>
+
+    <!-- Hood Scoop -->
+    <path d="M 130 50 L 165 50 L 160 42 L 135 42 Z" fill="#dc2626" stroke="#1e293b" stroke-width="2"/>
+
+    <!-- Checkered Side Pattern Strip -->
+    <path d="M 10 70 L 120 70 L 120 82 L 10 82 Z" fill="url(#checkers)" stroke="#1e293b" stroke-width="1.5"/>
+
+    <!-- Racing Number Circle '5' -->
+    <circle cx="62" cy="72" r="16" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+    <text x="62" y="79" font-family="Arial Black, sans-serif" font-size="20" font-weight="bold" fill="#1e293b" text-anchor="middle">5</text>
+
+    <!-- Front Grill & Teeth -->
+    <path d="M 195 65 L 210 66 L 208 88 L 193 85 Z" fill="#1e293b"/>
+    <line x1="198" y1="65" x2="196" y2="86" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="202" y1="66" x2="200" y2="87" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="206" y1="66" x2="204" y2="87" stroke="#cbd5e1" stroke-width="2"/>
+
+    <!-- Big Front Bumper -->
+    <rect x="110" y="90" width="102" height="12" rx="4" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
+
+    <!-- Headlights -->
+    <circle cx="132" cy="74" r="8" fill="#fde047" stroke="#1e293b" stroke-width="2"/>
+    <circle cx="200" cy="65" r="7" fill="#fde047" stroke="#1e293b" stroke-width="2"/>
+
+    <!-- Windows & Cabin -->
+    <path d="M 22 40 L 68 40 L 68 65 L 12 65 Z" fill="#bae6fd" stroke="#1e293b" stroke-width="2"/>
+    <path d="M 74 40 L 115 48 L 108 65 L 74 65 Z" fill="#bae6fd" stroke="#1e293b" stroke-width="2"/>
+
+    <!-- Side Mirror -->
+    <rect x="65" y="58" width="8" height="10" rx="2" fill="#ef4444" stroke="#1e293b" stroke-width="1.5"/>
+
+    <!-- Driver Character -->
+    <g transform="translate(40, 42)">
+      <!-- Helmet -->
+      <path d="M 0 14 Q 0 0 12 0 Q 24 0 24 14 Z" fill="#f97316" stroke="#1e293b" stroke-width="1.5"/>
+      <rect x="2" y="6" width="20" height="4" fill="#fde047"/>
+      <!-- Face -->
+      <circle cx="12" cy="14" r="8" fill="#fed7aa"/>
+      <circle cx="15" cy="12" r="1.5" fill="#1e293b"/>
+      <path d="M 12 17 Q 15 19 17 17" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Steering Wheel -->
+      <path d="M 16 16 A 8 8 0 0 1 25 22" fill="none" stroke="#1e293b" stroke-width="2.5"/>
+    </g>
+
+    <!-- Monster Truck Giant Wheels (Front Overlap Body) -->
+    <!-- Back Wheel Left -->
+    <use href="#monsterWheel" x="18" y="110"/>
+    <!-- Back Wheel Right -->
+    <use href="#monsterWheel" x="82" y="115"/>
+    <!-- Front Wheel -->
+    <use href="#monsterWheel" x="180" y="110"/>
+
+  </g> <!-- End Hero Car -->
+
+
+  <!-- ==================== PEDESTRIANS / KIDS (RIGHT SIDE) ==================== -->
+  <g transform="translate(320, 230)">
+
+    <!-- Boy Cheering -->
+    <g transform="translate(0, 0)">
+      <!-- Head -->
+      <circle cx="15" cy="12" r="8" fill="#fed7aa" stroke="#1e293b" stroke-width="1.5"/>
+      <!-- Hair -->
+      <path d="M 7 10 Q 8 2 16 4 Q 22 2 23 10 Z" fill="#78350f"/>
+      <!-- Face -->
+      <circle cx="13" cy="11" r="1" fill="#1e293b"/>
+      <circle cx="17" cy="11" r="1" fill="#1e293b"/>
+      <path d="M 13 15 Q 15 17 17 15" fill="none" stroke="#1e293b" stroke-width="1"/>
+      <!-- Body / Shirt -->
+      <rect x="8" y="20" width="14" height="18" rx="2" fill="#3b82f6" stroke="#1e293b" stroke-width="1.5"/>
+      <!-- Raised Arms -->
+      <path d="M 8 22 L -2 10" stroke="#fed7aa" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 8 22 L -2 10" stroke="#1e293b" stroke-width="1" stroke-dasharray="0,12"/>
+      <path d="M 22 22 L 30 12" stroke="#fed7aa" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs -->
+      <rect x="9" y="38" width="4" height="12" fill="#1e293b"/>
+      <rect x="17" y="38" width="4" height="12" fill="#1e293b"/>
+      <!-- Shoes -->
+      <rect x="7" y="48" width="7" height="4" rx="1" fill="#ef4444"/>
+      <rect x="17" y="48" width="7" height="4" rx="1" fill="#ef4444"/>
+    </g>
+
+    <!-- Girl Waving -->
+    <g transform="translate(28, 6)">
+      <!-- Head -->
+      <circle cx="12" cy="12" r="8" fill="#fed7aa" stroke="#1e293b" stroke-width="1.5"/>
+      <!-- Pigtails -->
+      <circle cx="3" cy="10" r="4" fill="#a16207"/>
+      <circle cx="21" cy="10" r="4" fill="#a16207"/>
+      <path d="M 5 10 Q 12 4 19 10 Z" fill="#a16207"/>
+      <!-- Face -->
+      <circle cx="10" cy="12" r="1" fill="#1e293b"/>
+      <circle cx="14" cy="12" r="1" fill="#1e293b"/>
+      <path d="M 10 15 Q 12 17 14 15" fill="none" stroke="#1e293b" stroke-width="1"/>
+      <!-- Dress -->
+      <path d="M 12 20 L 3 36 L 21 36 Z" fill="#facc15" stroke="#1e293b" stroke-width="1.5"/>
+      <!-- Waving Arm -->
+      <path d="M 17 22 L 25 12" stroke="#fed7aa" stroke-width="3" stroke-linecap="round"/>
+      <!-- Legs -->
+      <rect x="7" y="36" width="3" height="10" fill="#fed7aa"/>
+      <rect x="14" y="36" width="3" height="10" fill="#fed7aa"/>
+      <!-- Shoes -->
+      <circle cx="8" cy="46" r="3" fill="#ec4899"/>
+      <circle cx="15" cy="46" r="3" fill="#ec4899"/>
+    </g>
+
+  </g>
+
+  <!-- Outer Border Frame -->
+  <rect x="1" y="1" width="398" height="398" rx="12" fill="none" stroke="#1e293b" stroke-width="3"/>
+</svg>
