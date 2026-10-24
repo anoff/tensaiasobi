@@ -271,7 +271,7 @@ test.describe('Word Chain fits a phone screen', () => {
     }
   }
 
-  async function pickWrong(page: Page, count: number, lang: 'en' | 'ja' = 'en') {
+  async function pickWrong(page: Page, count: number, lang: 'en' | 'ja' | 'fr' = 'en') {
     const activeWord = await page.getByTestId('active-card').getAttribute('data-word');
     const activeEndChar = getEndChar(activeWord || '', lang);
     const options = page.getByTestId('shiritori-option');
@@ -285,7 +285,7 @@ test.describe('Word Chain fits a phone screen', () => {
     throw new Error('no wrong option on the board');
   }
 
-  async function openWordChain(page: Page, lang: 'en' | 'ja' = 'en') {
+  async function openWordChain(page: Page, lang: 'en' | 'ja' | 'fr' = 'en') {
     await page.goto('/');
     await page.getByTestId('age-mode-big').click();
     await switchLanguage(page, lang);
@@ -302,8 +302,19 @@ test.describe('Word Chain fits a phone screen', () => {
     expect(speech!.y + speech!.height).toBeLessThan(firstOption!.y);
   }
 
-  // Japanese has the longest button and help lines, so it is the real risk.
-  for (const lang of ['en', 'ja'] as const) {
+  // Both counter chips stay on one line (28 px; a wrapped label is 44 px).
+  async function expectCountersOnOneLine(page: Page) {
+    const counters = page.getByTestId('shiritori-counter');
+    await expect(counters).toHaveCount(2);
+    for (let i = 0; i < 2; i++) {
+      const box = await counters.nth(i).boundingBox();
+      expect(box!.height).toBeLessThan(36);
+    }
+  }
+
+  // Japanese has the longest button and help lines, and French the longest
+  // counter labels, so they are the real risks.
+  for (const lang of ['en', 'ja', 'fr'] as const) {
     for (const mode of ['solo', 'panda'] as const) {
       test(`390x844 ${lang.toUpperCase()} ${mode}: medium, medium after a miss and hard show every option without scrolling`, async ({ page }) => {
         await page.setViewportSize({ width: 390, height: 844 });
@@ -313,6 +324,7 @@ test.describe('Word Chain fits a phone screen', () => {
           await expect(page.getByTestId('panda-speech')).toBeVisible();
         }
 
+        await expectCountersOnOneLine(page);
         await expectOptionsInViewport(page, 4);
         if (mode === 'panda') await expectSpeechClearOfOptions(page);
 
