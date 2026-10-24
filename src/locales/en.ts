@@ -386,6 +386,7 @@ export const en = {
     victory: "🎉 Superb! You completed the puzzle!",
     preview: "Show Picture 🖼️",
     selectImage: "Choose a Picture:",
+    gallery: "All pictures",
     rainbow: "Rainbow",
     space: "Space Rocket",
     dino: "Friendly Dino",
