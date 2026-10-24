@@ -11,8 +11,13 @@ test.describe('Home sorts games into categories', () => {
       await expect(page.getByTestId('category-play').getByTestId('launch-maze')).toBeVisible();
       await expect(page.getByTestId('category-play').getByTestId('launch-dispatch')).toBeVisible();
       await expect(page.getByTestId('category-play').getByTestId('launch-town')).toBeVisible();
+      await expect(page.getByTestId('category-play').getByTestId('launch-animal-genie')).toBeVisible();
+      await expect(page.getByTestId('category-logic').getByTestId('launch-animal-genie')).toHaveCount(0);
     }
     await expect(page.getByTestId('category-language').getByTestId('launch-shiritori')).toBeVisible();
     await expect(page.getByTestId('category-logic').getByTestId('launch-tower-sort')).toBeVisible();
+    await expect(page.getByTestId('launch-number-train')).toHaveCount(0);
+    await page.getByTestId('age-mode-little').click();
+    await expect(page.getByTestId('category-numbers').getByTestId('launch-number-train')).toBeVisible();
   });
 });

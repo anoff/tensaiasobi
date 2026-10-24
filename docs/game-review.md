@@ -25,7 +25,7 @@ games use chalk, pebble and coal (white, grey, black). Only the fun shelf is
 
 | Category | Colour | Preschool (🧸) | School (🎒) |
 |---|---|---|---|
-| 🔢 Numbers | butter | Math Pop, Number Train, Fair Share Picnic | + Balance |
+| 🔢 Numbers | butter | Math Pop, Number Train, Fair Share Picnic | Math Pop, Fair Share Picnic, Balance |
 | 🔤 Language | coral | Letters | Letters, First Sound, Word Chain |
 | 🧠 Logic | leaf | Odd One, Match, Shadow, Pearl Finder, Magic Puzzle | Odd One, Match, Magic Puzzle, Tower Sort |
 | 🎲 Just for fun | chalk / pebble / coal | Doodle, Trace, Mazes, Emoji Match, City Dispatch, My Town, Coupons | Mazes, Emoji Match, City Dispatch, My Town, Coupons |
@@ -57,7 +57,7 @@ two games in every learning category, and school has three or more.
 | **Syllable Drum 🥁** | Language | both | hearing syllables | 1–2 syllables with the word split into beats → 1–3 with the whole word → 2–4 with the picture only. Japanese counts morae, Korean counts blocks |
 | **Missing Letter ✍️** | Language | school | spelling | first letter → any letter in short words → longer words with 4 choices (vowel against vowel) |
 | **Pattern Train 🚃** | Logic | both | sequences | AB → AAB/ABB/ABC → AABB/ABCD with the gap anywhere |
-| **Animal Genie 🧞** | Logic | both | yes/no deduction | 10 → 20 → 33 animals. Offline Akinator: picks the question that splits the remaining animals most evenly. Easy/medium fade out animals that no longer fit; hard keeps them hidden. Tolerates a wrong answer; after 3 wrong guesses the child wins |
+| **Animal Genie 🧞** | Just for fun | both | yes/no deduction | 10 → 20 → 33 animals. Offline Akinator: picks the question that splits the remaining animals most evenly. Easy/medium fade out animals that no longer fit; hard keeps them hidden. Tolerates a wrong answer; after 3 wrong guesses the child wins |
 | **Simon Lights 🐵** | Logic | both | working memory | 4 animals on every level. The sequence starts short and gains a step per repeat: 2 → 4 (slow) → 3 → 6 (medium) → 4 → 8 (fast). Watch and your-turn are separate states and taps are ignored while watching. A miss replays the same sequence slowly (easy/medium; after 2 misses on a step the right animal is highlighted); on hard (and in parent challenges) it starts a new sequence of the same length. 2 / 6 / 10 stars per finished run |
 | **Sink or Float 🛁** | Logic | both | cause and effect (buoyancy) | 2 obvious objects one at a time → 3–4 objects in any order → 4–5 objects with surprises (🚢 floats, 🥚 sinks), all predicted before the drops. The result is icons only (no text) and appears after the fall and splash: 🌊 / ⬇️ for what happened next to ✅ / 💡 for the guess, held for 1.2 s. A miss shows the true result, then a retry; on hard (and in parent challenges) a miss ends the round with no stars |
 | **Dice Flash 🎲** | Numbers | both | subitizing (seeing an amount at a glance) | 1–3 dots in die faces (2 s flash, 3 answers) → 1–6 die faces (1.5 s, 4 answers) → 1–10 scattered dots (1 s, 4 answers). The blank white card is the die: it is tossed (800 ms) and lands as the flash starts, and neither card nor dots move while counting; no dice emoji, and no die picture at the end of a set. Answer buttons only appear after the flash. A miss shows the dots again for 3 s and repeats the flash; on hard (and in parent challenges) it gives a fresh flash. 2 / 3 / 4 stars per right answer, 5 flashes per set |
