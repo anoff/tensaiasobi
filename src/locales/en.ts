@@ -41,7 +41,6 @@ export const en = {
     letterPairs: "Letter Pairs",
     patternTrain: "Pattern Train",
     syllableDrum: "Syllable Drum",
-    missingLetter: "Missing Letter",
     animalGenie: "Animal Genie",
     simonLights: "Simon Lights",
     sinkOrFloat: "Sink or Float",
@@ -155,6 +154,7 @@ export const en = {
   anlautGame: {
     title: "First Sound",
     subtitle: "What sound does the word start with?",
+    subtitleHard: "Which letter is missing?",
     help: "Tap the correct letter!",
     hint: "Hint 💡",
     continue: "Continue ➜",
@@ -429,9 +429,9 @@ export const en = {
   },
   letterPairs: {
     title: "Letter Pairs 🔠",
-    subtitleEasy: "Find its partner letter!",
-    subtitleMedium: "Which letter does it start with?",
-    subtitleHard: "Which picture starts with this letter?",
+    subtitleEasy: "Find the small letter!",
+    subtitleMedium: "Find the big letter!",
+    subtitleHard: "Careful, they look alike! Find the small letter.",
     help: "Tap the matching bubble!",
   },
   simonLights: {
@@ -478,10 +478,6 @@ export const en = {
     help: "Gi-raf-fe = 3 beats. Then tap ✓",
     check: "Done",
     drum: "Drum",
-  },
-  missingLetter: {
-    title: "Missing Letter ✍️",
-    subtitle: "Which letter is missing?",
   },
   animalGenie: {
     title: "Animal Genie 🧞",

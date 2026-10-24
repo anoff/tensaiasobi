@@ -22,7 +22,6 @@ import CrocodileCompare from './CrocodileCompare';
 import LetterPairs from './LetterPairs';
 import PatternTrain from './PatternTrain';
 import SyllableDrum from './SyllableDrum';
-import MissingLetter from './MissingLetter';
 import AnimalGenie from './AnimalGenie';
 import SimonLights from './SimonLights';
 import SinkOrFloat from './SinkOrFloat';
@@ -64,7 +63,6 @@ export type GameLabelKey =
   | 'letterPairs'
   | 'patternTrain'
   | 'syllableDrum'
-  | 'missingLetter'
   | 'animalGenie'
   | 'simonLights'
   | 'sinkOrFloat'
@@ -96,7 +94,6 @@ export const GAMES = [
   { id: 'letterTrace', category: 'language', testid: 'launch-letterTrace', emoji: '✏️', labelKey: 'letterTrace', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: LetterTrace },
   { id: 'syllableDrum', category: 'language', testid: 'launch-syllable-drum', emoji: '🥁', labelKey: 'syllableDrum', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: SyllableDrum },
   { id: 'anlaut', category: 'language', testid: 'launch-anlaut', emoji: '🔤', labelKey: 'anlaut', ageBands: ['big'], kind: 'learn', storageKeys: ['anlaut_streak', 'anlaut_highscore'], Component: AnlautGame },
-  { id: 'missingLetter', category: 'language', testid: 'launch-missing-letter', emoji: '✍️', labelKey: 'missingLetter', ageBands: ['big'], kind: 'learn', storageKeys: [], Component: MissingLetter },
   { id: 'shiritori', category: 'language', testid: 'launch-shiritori', emoji: '🔗', labelKey: 'shiritori', ageBands: ['big'], kind: 'learn', storageKeys: ['shiritori_streak', 'shiritori_highscore'], Component: Shiritori },
   // Logic
   { id: 'odd', category: 'logic', testid: 'launch-odd', emoji: '🧐', labelKey: 'odd', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['odd_streak', 'odd_highscore'], Component: OddOneOut },

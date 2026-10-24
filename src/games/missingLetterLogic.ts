@@ -1,14 +1,12 @@
 import { shuffle } from '../utils/shuffle';
-import type { GameDifficulty } from '../types/game';
 import { CHOICE_STARS } from '../utils/difficulty';
 import { pick, type Rand } from '../utils/random';
 
 /**
- * Missing Letter: a picture, its word with one gap, three or four letters to
- * fill it (M_USE). The word list is the shared picture dictionary.
- * - easy: the first letter is missing (a step up from First Sound)
- * - medium: any letter, short words, 3 choices
- * - hard: any letter, longer words, 4 choices, vowels compete with vowels
+ * Missing letter, First Sound's hard level: a picture, its short word with one
+ * gap anywhere, three letters to fill it (M_USE). The word list is the shared
+ * picture dictionary. These are the rounds the old Missing Letter game showed
+ * on its school default level (medium).
  */
 export interface MissingLetterRound {
   emoji: string;
@@ -19,18 +17,22 @@ export interface MissingLetterRound {
   options: string[];
 }
 
-export const MISSING_LETTER_STARS = CHOICE_STARS;
+/** The hard-level star rate of the pick-one games. */
+export const MISSING_LETTER_STARS = CHOICE_STARS.hard;
 
 const LATIN_VOWELS = 'AEIOU'.split('');
 const LATIN_CONSONANTS = 'BCDFGHKLMNPRSTVWZ'.split('');
 const HIRAGANA = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわん'.split('');
 const SMALL_KANA = 'ぁぃぅぇぉっゃゅょゎー';
 
-const LENGTHS: Record<'latin' | 'ja' | 'ko', Record<GameDifficulty, [number, number]>> = {
-  latin: { easy: [3, 5], medium: [3, 5], hard: [5, 8] },
-  ja: { easy: [2, 3], medium: [2, 4], hard: [3, 5] },
-  ko: { easy: [2, 3], medium: [2, 3], hard: [3, 4] },
+/** Word lengths in letters: short words, so the gap is findable by sounding the word out. */
+const LENGTHS: Record<'latin' | 'ja' | 'ko', [number, number]> = {
+  latin: [3, 5],
+  ja: [2, 4],
+  ko: [2, 3],
 };
+
+const OPTION_COUNT = 3;
 
 type Script = 'latin' | 'ja' | 'ko';
 
@@ -49,20 +51,17 @@ export function displayWord(word: string, lang: string): string {
   return scriptOf(lang) === 'latin' ? word.toLocaleUpperCase(lang) : word;
 }
 
-/** Where the gap may go: easy only blanks the first letter, other levels any plain letter. */
-function gapPositions(chars: string[], level: GameDifficulty, script: Script): number[] {
-  return chars
-    .map((c, i) => (blankable(c, script) ? i : -1))
-    .filter((i) => i >= 0 && (level !== 'easy' || i === 0));
+/** Where the gap may go: any plain letter. */
+function gapPositions(chars: string[], script: Script): number[] {
+  return chars.map((c, i) => (blankable(c, script) ? i : -1)).filter((i) => i >= 0);
 }
 
 export function missingLetterCandidates(
-  level: GameDifficulty,
   lang: string,
   items: Record<string, string>,
 ): Array<[string, string]> {
   const script = scriptOf(lang);
-  const [min, max] = LENGTHS[script][level];
+  const [min, max] = LENGTHS[script];
   return Object.entries(items)
     .map(([emoji, word]) => [emoji, displayWord(word, lang)] as [string, string])
     .filter(([, word]) => {
@@ -70,8 +69,7 @@ export function missingLetterCandidates(
       if (chars.length < min || chars.length > max) return false;
       // Single words only; accented letters may show but are never the gap.
       const readable = chars.every((c) => blankable(c, script) || (script === 'latin' && /^[A-ZÄÖÜÉÈÊÀÂÇÎÏÔŒ]$/.test(c)) || (script === 'ja' && SMALL_KANA.includes(c)));
-      // ŒUF on easy would blank Œ, which is not a letter on the choices.
-      return readable && gapPositions(chars, level, script).length > 0;
+      return readable && gapPositions(chars, script).length > 0;
     });
 }
 
@@ -85,24 +83,22 @@ function distractorPool(answer: string, script: Script, items: Record<string, st
 }
 
 export function generateMissingLetterRound(
-  level: GameDifficulty,
   lang: string,
   items: Record<string, string>,
   rand: Rand = Math.random,
 ): MissingLetterRound | null {
   const script = scriptOf(lang);
-  const candidates = missingLetterCandidates(level, lang, items);
+  const candidates = missingLetterCandidates(lang, items);
   if (candidates.length === 0) return null;
   const [emoji, word] = pick(candidates, rand);
   const chars = [...word];
 
-  const gapIndex = pick(gapPositions(chars, level, script), rand);
+  const gapIndex = pick(gapPositions(chars, script), rand);
   const answer = chars[gapIndex];
 
-  const optionCount = level === 'hard' ? 4 : 3;
   // Latin distractors stay in the answer's class (vowel vs consonant) so the child has to listen, not guess.
   const pool = distractorPool(answer, script, items).filter((c) => c !== answer);
-  const options = shuffle([answer, ...shuffle(pool, rand).slice(0, optionCount - 1)], rand);
+  const options = shuffle([answer, ...shuffle(pool, rand).slice(0, OPTION_COUNT - 1)], rand);
 
   return { emoji, word, gapIndex, answer, options };
 }

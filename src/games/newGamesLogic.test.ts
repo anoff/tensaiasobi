@@ -7,7 +7,7 @@ import { fr } from '../locales/fr';
 import { ja } from '../locales/ja';
 import { ko } from '../locales/ko';
 import { COMPARE_MAX, generateCompareRound, symbolFor } from './crocodileCompareLogic';
-import { EASY_PICTURES, easyPictures, generateLetterPairsRound, startLetter, toKatakana, toRomaji } from './letterPairsLogic';
+import { LOOK_ALIKES, generateLetterPairsRound, toKatakana, toRomaji, type LetterPairsRound } from './letterPairsLogic';
 import { generatePatternRound } from './patternTrainLogic';
 import { generateMissingLetterRound, missingLetterCandidates } from './missingLetterLogic';
 import { SYLLABLE_RANGE, SYLLABLE_WORDS, generateSyllableRound, splitMorae, syllableWords } from './syllableDrumLogic';
@@ -46,103 +46,132 @@ describe('Crocodile Compare', () => {
 });
 
 describe('Letter Pairs', () => {
-  it('maps hiragana to katakana', () => {
+  const LATIN_LANGS = ['en', 'de', 'fr'] as const;
+  const HIRAGANA_RE = /^[\u3041-\u3093]$/;
+  const KATAKANA_RE = /^[\u30a1-\u30f3]$/;
+
+  /** Every round: three distinct letter bubbles, one of them the answer, and never a picture. */
+  function expectLetterRound(r: LetterPairsRound) {
+    expect(r.options).toHaveLength(3);
+    expect(new Set(r.options).size).toBe(3);
+    expect(r.options).toContain(r.answer);
+    expect(Object.keys(r)).toEqual(['prompt', 'answer', 'options']);
+    for (const shown of [r.prompt, ...r.options]) {
+      expect(Object.keys(en.anlautGame.items)).not.toContain(shown);
+      expect(shown).not.toMatch(/\p{Extended_Pictographic}/u);
+    }
+  }
+
+  it('maps hiragana to katakana and romaji', () => {
     expect(toKatakana('あ')).toBe('ア');
     expect(toKatakana('ね')).toBe('ネ');
-  });
-
-  it('always offers three distinct options containing the answer', () => {
-    for (const lang of ['en', 'de', 'fr', 'ko'] as const) {
-      for (const level of LEVELS) {
-        for (let i = 0; i < 50; i++) {
-          const r = generateLetterPairsRound(level, lang, items(lang));
-          expect(r.options).toHaveLength(3);
-          expect(new Set(r.options).size).toBe(3);
-          expect(r.options).toContain(r.answer);
-          if (level === 'easy' && lang === 'ko') expect(r.answer).toBe(r.prompt);
-          if (level === 'easy' && lang !== 'ko') {
-            expect(r.promptKind).toBe('letter');
-            expect(r.answer).toBe(r.prompt.toLowerCase());
-          }
-          if (level === 'medium' && lang !== 'ko') {
-            expect(r.promptKind).toBe('picture');
-            expect(r.answer).toBe(items(lang)[r.prompt][0].toUpperCase());
-            expect(r.word?.toLowerCase()).toBe(items(lang)[r.prompt].toLowerCase());
-          }
-          if (level === 'hard') {
-            expect(r.kind).toBe('picture');
-            expect(startLetter(items(lang)[r.answer], lang)).toBe(r.prompt);
-            for (const o of r.options.filter((o) => o !== r.answer)) {
-              expect(startLetter(items(lang)[o], lang)).not.toBe(r.prompt);
-            }
-          }
-        }
-      }
-    }
-  });
-
-  it('Japanese: picture → first hiragana, hiragana → katakana, hiragana → romaji', () => {
-    expect(easyPictures('ja', items('ja'))).toEqual(EASY_PICTURES);
-    for (let i = 0; i < 100; i++) {
-      const easy = generateLetterPairsRound('easy', 'ja', items('ja'));
-      expect(easy.promptKind).toBe('picture');
-      expect(EASY_PICTURES).toContain(easy.prompt);
-      expect(easy.answer).toBe(items('ja')[easy.prompt][0]);
-      expect(easy.word).toBe(items('ja')[easy.prompt]);
-
-      const medium = generateLetterPairsRound('medium', 'ja', items('ja'));
-      expect(medium.answer).toBe(toKatakana(medium.prompt));
-
-      const hard = generateLetterPairsRound('hard', 'ja', items('ja'));
-      expect(hard.answer).toBe(toRomaji(hard.prompt));
-      expect(hard.answer).toMatch(/^[a-z]+$/);
-
-      for (const r of [easy, medium, hard]) {
-        expect(r.options).toHaveLength(3);
-        expect(new Set(r.options).size).toBe(3);
-        expect(r.options).toContain(r.answer);
-      }
-    }
     expect(toRomaji('し')).toBe('shi');
-  });
-
-  it('Latin easy pictures are plentiful and never start with a misleading spelling', () => {
-    for (const lang of ['en', 'de', 'fr'] as const) {
-      const pictures = easyPictures(lang, items(lang));
-      expect(pictures.length, lang).toBeGreaterThan(20);
-      for (const emoji of pictures) {
-        expect(items(lang)[emoji], `${lang} ${emoji}`).not.toMatch(/^(ch|sh|sch|ph|th|kn|wh)/i);
-        expect(items(lang)[emoji][0].toUpperCase(), `${lang} ${emoji}`).toMatch(/^[A-Z]$/);
-      }
-    }
     expect(toRomaji('つ')).toBe('tsu');
   });
 
-  it('skips pictures whose first letter is not the first sound (Ei, Eule, Stern, hibou, ours)', () => {
-    const words = (lang: 'de' | 'fr') => easyPictures(lang, items(lang)).map((e) => items(lang)[e]);
-    for (const w of ['Ei', 'Eule', 'Stern', 'Pfirsich']) expect(words('de')).not.toContain(w);
-    for (const w of ['hibou', 'ours']) expect(words('fr')).not.toContain(w);
-    expect(words('de')).toContain('Apfel');
+  it('Latin easy: upper → lower case', () => {
+    for (const lang of LATIN_LANGS) {
+      for (let i = 0; i < 200; i++) {
+        const r = generateLetterPairsRound('easy', lang);
+        expectLetterRound(r);
+        expect(r.prompt).toMatch(/^[A-Z]$/);
+        expect(r.answer).toBe(r.prompt.toLowerCase());
+        for (const o of r.options) expect(o).toMatch(/^[a-z]$/);
+      }
+    }
+  });
+
+  it('Latin medium: lower → upper case', () => {
+    for (const lang of LATIN_LANGS) {
+      for (let i = 0; i < 200; i++) {
+        const r = generateLetterPairsRound('medium', lang);
+        expectLetterRound(r);
+        expect(r.prompt).toMatch(/^[a-z]$/);
+        expect(r.answer).toBe(r.prompt.toUpperCase());
+        for (const o of r.options) expect(o).toMatch(/^[A-Z]$/);
+      }
+    }
+  });
+
+  it('Latin hard: upper → lower case against its look-alikes (b/d/p/q, m/n, u/n, i/l)', () => {
+    expect(LOOK_ALIKES).toEqual({
+      b: ['d', 'p', 'q'], d: ['b', 'p', 'q'], p: ['b', 'd', 'q'], q: ['b', 'd', 'p'],
+      m: ['n'], n: ['m', 'u'], u: ['n'], i: ['l'], l: ['i'],
+    });
+    const prompts = new Set<string>();
+    for (const lang of LATIN_LANGS) {
+      for (let i = 0; i < 300; i++) {
+        const r = generateLetterPairsRound('hard', lang);
+        expectLetterRound(r);
+        prompts.add(r.prompt);
+        expect(r.answer).toBe(r.prompt.toLowerCase());
+        for (const o of r.options) expect(o).toMatch(/^[a-z]$/);
+        const twins = LOOK_ALIKES[r.answer];
+        expect(twins, r.prompt).toBeDefined();
+        // At least one wrong bubble is a look-alike; b/d/p/q rounds are all look-alikes.
+        const wrong = r.options.filter((o) => o !== r.answer);
+        expect(wrong.some((o) => twins.includes(o)), `${r.prompt}: ${r.options}`).toBe(true);
+        if (twins.length >= 2) expect(wrong.every((o) => twins.includes(o))).toBe(true);
+      }
+    }
+    expect([...prompts].sort()).toEqual(['B', 'D', 'I', 'L', 'M', 'N', 'P', 'Q', 'U']);
+  });
+
+  it('Japanese: hiragana → katakana, katakana → hiragana, hiragana → romaji', () => {
+    for (let i = 0; i < 200; i++) {
+      const easy = generateLetterPairsRound('easy', 'ja');
+      expectLetterRound(easy);
+      expect(easy.prompt).toMatch(HIRAGANA_RE);
+      expect(easy.answer).toBe(toKatakana(easy.prompt));
+      for (const o of easy.options) expect(o).toMatch(KATAKANA_RE);
+
+      const medium = generateLetterPairsRound('medium', 'ja');
+      expectLetterRound(medium);
+      expect(medium.prompt).toMatch(KATAKANA_RE);
+      expect(toKatakana(medium.answer)).toBe(medium.prompt);
+      for (const o of medium.options) expect(o).toMatch(HIRAGANA_RE);
+
+      const hard = generateLetterPairsRound('hard', 'ja');
+      expectLetterRound(hard);
+      expect(hard.prompt).toMatch(HIRAGANA_RE);
+      expect(hard.answer).toBe(toRomaji(hard.prompt));
+      for (const o of hard.options) expect(o).toMatch(/^[a-z]+$/);
+    }
+  });
+
+  it('Korean: same syllable, syllable → first consonant, consonant → syllable', () => {
+    for (let i = 0; i < 100; i++) {
+      const easy = generateLetterPairsRound('easy', 'ko');
+      expectLetterRound(easy);
+      expect(easy.answer).toBe(easy.prompt);
+
+      const medium = generateLetterPairsRound('medium', 'ko');
+      expectLetterRound(medium);
+      expect(medium.prompt).toMatch(/^[가-힣]$/);
+      expect(medium.answer).toMatch(/^[ㄱ-ㅎ]$/);
+
+      const hard = generateLetterPairsRound('hard', 'ko');
+      expectLetterRound(hard);
+      expect(hard.prompt).toMatch(/^[ㄱ-ㅎ]$/);
+      expect(hard.answer).toMatch(/^[가-힣]$/);
+    }
   });
 
   it('is reproducible with a seed', () => {
-    for (const level of LEVELS) {
-      expect(generateLetterPairsRound(level, 'en', items('en'), seededRand(7))).toEqual(
-        generateLetterPairsRound(level, 'en', items('en'), seededRand(7)),
-      );
+    for (const lang of ['en', 'ja', 'ko'] as const) {
+      for (const level of LEVELS) {
+        expect(generateLetterPairsRound(level, lang, seededRand(7))).toEqual(generateLetterPairsRound(level, lang, seededRand(7)));
+      }
     }
   });
 });
 
-describe('Missing Letter gaps', () => {
-  it('the gap is always a plain letter the choices can show (no ŒUF on easy)', () => {
+describe('First Sound hard (missing letter) gaps', () => {
+  it('the gap is always a plain letter the choices can show', () => {
     for (const lang of Object.keys(DICTS) as Array<keyof typeof DICTS>) {
-      for (const level of LEVELS) {
-        for (let i = 0; i < 300; i++) {
-          const r = generateMissingLetterRound(level, lang, items(lang))!;
-          if (lang === 'en' || lang === 'de' || lang === 'fr') expect(r.answer, `${lang} ${r.word}`).toMatch(/^[A-Z]$/);
-          if (level === 'easy') expect(r.gapIndex).toBe(0);
-        }
+      for (let i = 0; i < 300; i++) {
+        const r = generateMissingLetterRound(lang, items(lang))!;
+        if (lang === 'en' || lang === 'de' || lang === 'fr') expect(r.answer, `${lang} ${r.word}`).toMatch(/^[A-Z]$/);
       }
     }
   });
@@ -163,21 +192,22 @@ describe('Pattern Train', () => {
   });
 });
 
-describe('Missing Letter', () => {
-  it('has words for every language and level, and the gap is answerable', () => {
+describe('First Sound hard (missing letter)', () => {
+  it('has words for every language, and the gap is answerable with three letters', () => {
+    const gapPositions = new Set<number>();
     for (const lang of Object.keys(DICTS) as Array<keyof typeof DICTS>) {
-      for (const level of LEVELS) {
-        expect(missingLetterCandidates(level, lang, items(lang)).length).toBeGreaterThan(5);
-        for (let i = 0; i < 50; i++) {
-          const r = generateMissingLetterRound(level, lang, items(lang))!;
-          expect([...r.word][r.gapIndex]).toBe(r.answer);
-          expect(r.options).toContain(r.answer);
-          expect(new Set(r.options).size).toBe(r.options.length);
-          expect(r.options).toHaveLength(level === 'hard' ? 4 : 3);
-          if (level === 'easy') expect(r.gapIndex).toBe(0);
-        }
+      expect(missingLetterCandidates(lang, items(lang)).length).toBeGreaterThan(5);
+      for (let i = 0; i < 100; i++) {
+        const r = generateMissingLetterRound(lang, items(lang))!;
+        expect([...r.word][r.gapIndex]).toBe(r.answer);
+        expect(r.options).toContain(r.answer);
+        expect(new Set(r.options).size).toBe(r.options.length);
+        expect(r.options).toHaveLength(3);
+        gapPositions.add(r.gapIndex);
       }
     }
+    // Not just the first letter: that is what easy and medium already ask.
+    expect([...gapPositions].some((i) => i > 0)).toBe(true);
   });
 });
 

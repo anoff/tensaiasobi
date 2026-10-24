@@ -42,6 +42,14 @@ describe('game catalog', () => {
     expect(gameVisibleForAge(GAMES.find((g) => g.id === 'math')!, 'big')).toBe(true);
   });
 
+  it('folds Missing Letter into First Sound (school only, same streak keys)', () => {
+    expect(GAMES.some((g) => (g.id as string) === 'missingLetter' || (g.testid as string) === 'launch-missing-letter')).toBe(false);
+    expect(isGameId('missingLetter')).toBe(false);
+    const anlaut = GAMES.find((g) => g.id === 'anlaut')!;
+    expect(anlaut.ageBands).toEqual(['big']);
+    expect(anlaut.storageKeys).toEqual(['anlaut_streak', 'anlaut_highscore']);
+  });
+
   it('covers every GameId in challenge defaults', () => {
     const defaults = defaultChallengeAllowedGames();
     for (const game of GAMES) {

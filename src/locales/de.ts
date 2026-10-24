@@ -43,7 +43,6 @@ export const de: TranslationSchema = {
     letterPairs: "Buchstabenpaare",
     patternTrain: "Musterzug",
     syllableDrum: "Silbentrommel",
-    missingLetter: "Lückenwort",
     animalGenie: "Tier-Geist",
     simonLights: "Tier-Lichter",
     sinkOrFloat: "Schwimmen oder Sinken",
@@ -157,6 +156,7 @@ export const de: TranslationSchema = {
   anlautGame: {
     title: "Anlaute",
     subtitle: "Mit welchem Laut beginnt das Wort?",
+    subtitleHard: "Welcher Buchstabe fehlt?",
     help: "Tippe auf den richtigen Buchstaben!",
     hint: "Hinweis 💡",
     continue: "Weiter ➜",
@@ -431,9 +431,9 @@ export const de: TranslationSchema = {
   },
   letterPairs: {
     title: "Buchstabenpaare 🔠",
-    subtitleEasy: "Finde den kleinen Partner!",
-    subtitleMedium: "Mit welchem Buchstaben fängt es an?",
-    subtitleHard: "Welches Bild fängt mit diesem Buchstaben an?",
+    subtitleEasy: "Finde den kleinen Buchstaben!",
+    subtitleMedium: "Finde den großen Buchstaben!",
+    subtitleHard: "Vorsicht, die sehen sich ähnlich! Finde den kleinen Buchstaben.",
     help: "Tippe auf die passende Blase!",
   },
   simonLights: {
@@ -480,10 +480,6 @@ export const de: TranslationSchema = {
     help: "Gi-raf-fe = 3 Schläge. Dann tippe auf ✓",
     check: "Fertig",
     drum: "Trommel",
-  },
-  missingLetter: {
-    title: "Lückenwort ✍️",
-    subtitle: "Welcher Buchstabe fehlt?",
   },
   animalGenie: {
     title: "Tier-Geist 🧞",

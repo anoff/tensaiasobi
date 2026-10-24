@@ -2,11 +2,15 @@ import { useState, useMemo } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
 import StreakBadge from '../components/StreakBadge';
+import DifficultySelector from '../components/DifficultySelector';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
 import { NotebookChoice, NotebookSheet } from '../components/Notebook';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
+import type { GameDifficulty } from '../types/game';
+import FirstSoundGap from './FirstSoundGap';
 
 // 63 child-friendly emoji keys
 const EMOJI_ITEMS: string[] = [
@@ -67,9 +71,19 @@ const generateOptions = (
   return shuffle([correctChar, ...Array.from(wrongOptionsSet)]);
 };
 
+/**
+ * First Sound. Easy and medium: which letter does the picture's word start
+ * with (the same rounds on both; school starts on medium with easy locked).
+ * Hard: a letter is missing anywhere in the word (the former Missing Letter game).
+ */
 export function AnlautGame() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
   const { language, t } = useTranslation();
+  const [level, setLevel] = useAgeDifficulty();
+  const changeLevel = (next: GameDifficulty) => {
+    playPop();
+    setLevel(next);
+  };
 
   const [currentItem, setCurrentItem] = useState<string>(() => {
     const randomIndex = Math.floor(Math.random() * EMOJI_ITEMS.length);
@@ -187,74 +201,80 @@ export function AnlautGame() {
         <h2 className="text-3xl font-black text-slate-800 tracking-tight">
           {t.anlautGame.title}
         </h2>
-        <p className="text-slate-500 font-extrabold text-sm px-4">
-          {t.anlautGame.subtitle}
+        <p data-testid="anlaut-subtitle" className="text-slate-500 font-extrabold text-sm px-4">
+          {level === 'hard' ? t.anlautGame.subtitleHard : t.anlautGame.subtitle}
         </p>
         <StreakBadge streak={streak} highScore={highScore} size="sm" />
       </div>
 
-      <NotebookSheet className="flex-1 flex flex-col items-center gap-3 p-4">
-        {/* Hint button */}
-        {!isCorrect && !hintUsed && (
-          <button
-            type="button"
-            data-testid="anlaut-hint"
-            onClick={() => {
-              playPop();
-              setHintUsed(true);
-            }}
-            className="absolute top-3 right-3 px-3 py-2 rounded-xl bg-butter border-2 border-amber-300 border-b-4 text-sm font-black text-ink active:translate-y-[2px] outline-none cursor-pointer"
-          >
-            {t.anlautGame.hint}
-          </button>
-        )}
+      <DifficultySelector selected={level} options={['easy', 'medium', 'hard']} onChange={changeLevel} variant="paper" />
 
-        {/* Picture */}
-        <span className="text-7xl md:text-8xl leading-none pt-2 drop-shadow-[0_6px_6px_rgba(0,0,0,0.12)]">
-          {currentItem}
-        </span>
-
-        {/* Word line */}
-        <div className="min-h-14 flex items-center justify-center w-full border-b-4 border-dashed border-ink/20">
-          <span
-            className={`font-black tracking-wider text-center select-none ${
-              isCorrect
-                ? 'text-5xl text-emerald-600 animate-pop-in'
-                : hintUsed
-                ? 'text-4xl text-ink/70'
-                : 'text-3xl text-ink/35 font-mono'
-            }`}
-          >
-            {getPlaceholderWord()}
-          </span>
-        </div>
-
-        {/* Letter lines or Continue */}
-        <div className="flex-1 w-full flex flex-col justify-end gap-2">
-          {showContinue ? (
-            <KidButton
-              color="green"
-              size="lg"
-              onClick={handleContinue}
-              className="w-full rounded-2xl uppercase tracking-wider animate-pop-in"
+      {level === 'hard' ? (
+        <FirstSoundGap onCorrect={registerCorrect} onWrong={resetStreak} />
+      ) : (
+        <NotebookSheet className="flex-1 flex flex-col items-center gap-3 p-4">
+          {/* Hint button */}
+          {!isCorrect && !hintUsed && (
+            <button
+              type="button"
+              data-testid="anlaut-hint"
+              onClick={() => {
+                playPop();
+                setHintUsed(true);
+              }}
+              className="absolute top-3 right-3 px-3 py-2 rounded-xl bg-butter border-2 border-amber-300 border-b-4 text-sm font-black text-ink active:translate-y-[2px] outline-none cursor-pointer"
             >
-              {t.anlautGame.continue}
-            </KidButton>
-          ) : (
-            options.map((opt) => (
-              <NotebookChoice
-                key={opt}
-                state={selectedOption !== opt ? 'idle' : isCorrect ? 'correct' : 'wrong'}
-                disabled={selectedOption !== null}
-                onClick={() => handleOptionSelect(opt)}
-                testId="anlaut-option"
-              >
-                {opt}
-              </NotebookChoice>
-            ))
+              {t.anlautGame.hint}
+            </button>
           )}
-        </div>
-      </NotebookSheet>
+
+          {/* Picture */}
+          <span className="text-7xl md:text-8xl leading-none pt-2 drop-shadow-[0_6px_6px_rgba(0,0,0,0.12)]">
+            {currentItem}
+          </span>
+
+          {/* Word line */}
+          <div className="min-h-14 flex items-center justify-center w-full border-b-4 border-dashed border-ink/20">
+            <span
+              className={`font-black tracking-wider text-center select-none ${
+                isCorrect
+                  ? 'text-5xl text-emerald-600 animate-pop-in'
+                  : hintUsed
+                  ? 'text-4xl text-ink/70'
+                  : 'text-3xl text-ink/35 font-mono'
+              }`}
+            >
+              {getPlaceholderWord()}
+            </span>
+          </div>
+
+          {/* Letter lines or Continue */}
+          <div className="flex-1 w-full flex flex-col justify-end gap-2">
+            {showContinue ? (
+              <KidButton
+                color="green"
+                size="lg"
+                onClick={handleContinue}
+                className="w-full rounded-2xl uppercase tracking-wider animate-pop-in"
+              >
+                {t.anlautGame.continue}
+              </KidButton>
+            ) : (
+              options.map((opt) => (
+                <NotebookChoice
+                  key={opt}
+                  state={selectedOption !== opt ? 'idle' : isCorrect ? 'correct' : 'wrong'}
+                  disabled={selectedOption !== null}
+                  onClick={() => handleOptionSelect(opt)}
+                  testId="anlaut-option"
+                >
+                  {opt}
+                </NotebookChoice>
+              ))
+            )}
+          </div>
+        </NotebookSheet>
+      )}
     </div>
   );
 }

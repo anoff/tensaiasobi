@@ -33,41 +33,51 @@ test.describe('Crocodile Compare', () => {
 });
 
 test.describe('Letter Pairs', () => {
-  test('easy finds the partner letter, medium the first letter of a picture, hard a picture', async ({ page }) => {
+  test('letter shapes only: upper → lower, lower → upper, then look-alikes', async ({ page }) => {
     await openGame(page, 'launch-letter-pairs', 'little', 'easy');
     const prompt = page.getByTestId('letter-pairs-prompt');
-    await expect(prompt).toHaveAttribute('data-prompt-kind', 'letter');
+    await expect(prompt).toHaveText(/^[A-Z]$/);
     const partner = await prompt.getAttribute('data-answer');
     expect(partner).toMatch(/^[a-z]$/);
     await page.locator(`[data-testid="letter-pairs-option"][data-value="${partner}"]`).click();
     await expect(page.locator(`[data-testid="letter-pairs-option"][data-value="${partner}"]`)).toBeDisabled();
 
     await page.getByTestId('difficulty-medium').click();
-    await expect(prompt).toHaveAttribute('data-prompt-kind', 'picture');
-    const answer = await prompt.getAttribute('data-answer');
-    expect(answer).toMatch(/^[A-Z]$/);
-    await page.locator(`[data-testid="letter-pairs-option"][data-value="${answer}"]`).click();
-    await expect(page.getByTestId('letter-pairs-word')).toContainText(answer!);
+    await expect(prompt).toHaveText(/^[a-z]$/);
+    const upper = await prompt.getAttribute('data-answer');
+    expect(upper).toMatch(/^[A-Z]$/);
+    await expect(page.getByTestId('letter-pairs-option')).toHaveText([/^[A-Z]$/, /^[A-Z]$/, /^[A-Z]$/]);
 
     await openGame(page, 'launch-letter-pairs', 'big', 'hard');
     await expect(page.getByTestId('letter-pairs-option')).toHaveCount(3);
+    await expect(prompt).toHaveText(/^[BDPQMNUIL]$/);
+    const options = await page.getByTestId('letter-pairs-option').allInnerTexts();
+    const answer = await prompt.getAttribute('data-answer');
+    const twins: Record<string, string> = { b: 'dpq', d: 'bpq', p: 'bdq', q: 'bdp', m: 'n', n: 'mu', u: 'n', i: 'l', l: 'i' };
+    expect(options.some((o) => o !== answer && twins[answer!].includes(o))).toBe(true);
   });
 });
 
 test.describe('Letter Pairs in Japanese', () => {
-  test('easy shows a picture and reveals its word; hard asks for romaji', async ({ page }) => {
+  test('hiragana → katakana, katakana → hiragana, hiragana → romaji', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('lang-dropdown-trigger').click();
     await page.getByTestId('lang-select-ja').click();
     await openGame(page, 'launch-letter-pairs', 'little', 'easy');
     const prompt = page.getByTestId('letter-pairs-prompt');
-    await expect(prompt).toHaveAttribute('data-prompt-kind', 'picture');
+    await expect(prompt).toHaveText(/^[\u3041-\u3093]$/);
+    expect(await prompt.getAttribute('data-answer')).toMatch(/^[\u30a1-\u30f3]$/);
     const answer = await prompt.getAttribute('data-answer');
     await page.locator(`[data-testid="letter-pairs-option"][data-value="${answer}"]`).click();
-    await expect(page.getByTestId('letter-pairs-word')).toContainText(answer!);
+    await expect(page.locator(`[data-testid="letter-pairs-option"][data-value="${answer}"]`)).toBeDisabled();
+
+    await page.getByTestId('difficulty-medium').click();
+    await expect(prompt).toHaveText(/^[\u30a1-\u30f3]$/);
+    expect(await prompt.getAttribute('data-answer')).toMatch(/^[\u3041-\u3093]$/);
 
     await openGame(page, 'launch-letter-pairs', 'big', 'hard');
-    expect(await page.getByTestId('letter-pairs-prompt').getAttribute('data-answer')).toMatch(/^[a-z]+$/);
+    await expect(prompt).toHaveText(/^[\u3041-\u3093]$/);
+    expect(await prompt.getAttribute('data-answer')).toMatch(/^[a-z]+$/);
   });
 });
 
@@ -121,23 +131,44 @@ test.describe('Syllable Drum', () => {
   });
 });
 
-test.describe('Missing Letter', () => {
-  test('school only; picking the missing letter completes the word', async ({ page }) => {
+test.describe('First Sound levels (Missing Letter is its hard level)', () => {
+  test('Missing Letter is gone from the menu; First Sound stays school only', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('age-mode-little').click();
+    await expect(page.getByTestId('launch-anlaut')).toHaveCount(0);
+    await page.getByTestId('age-mode-big').click();
+    await expect(page.getByTestId('launch-anlaut')).toBeVisible();
     await expect(page.getByTestId('launch-missing-letter')).toHaveCount(0);
+  });
 
-    await openGame(page, 'launch-missing-letter', 'big', 'medium');
+  test('medium keeps the first-letter rounds; hard fills the missing letter', async ({ page }) => {
+    await openGame(page, 'launch-anlaut', 'big');
+    await expect(page.getByTestId('difficulty-medium')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('difficulty-easy')).toBeDisabled();
+    await expect(page.getByTestId('anlaut-option')).toHaveCount(3);
+    await expect(page.getByTestId('missing-letter-word')).toHaveCount(0);
+
+    await page.getByTestId('difficulty-hard').click();
+    await expect(page.getByTestId('anlaut-option')).toHaveCount(0);
     const word = page.getByTestId('missing-letter-word');
     const answer = await word.getAttribute('data-answer');
     await expect(page.getByTestId('missing-letter-option')).toHaveCount(3);
     await page.locator(`[data-testid="missing-letter-option"][data-value="${answer}"]`).click();
     await expect(page.getByTestId('missing-letter-gap')).toHaveText(answer!);
     await expect(word).toHaveText(await word.getAttribute('data-word') as string);
+    // Hard keeps feeding First Sound's own streak keys.
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('anlaut_streak'))).toBe('1');
+
+    await page.getByTestId('difficulty-medium').click();
+    await expect(page.getByTestId('anlaut-option')).toHaveCount(3);
   });
 
-  test('hard offers four letters', async ({ page }) => {
-    await openGame(page, 'launch-missing-letter', 'big', 'hard');
-    await expect(page.getByTestId('missing-letter-option')).toHaveCount(4);
+  test('hard: a wrong letter moves on to a new word', async ({ page }) => {
+    await openGame(page, 'launch-anlaut', 'big', 'hard');
+    const word = page.getByTestId('missing-letter-word');
+    const before = `${await word.getAttribute('data-word')}|${await word.getAttribute('data-answer')}`;
+    const answer = await word.getAttribute('data-answer');
+    await page.locator(`[data-testid="missing-letter-option"]:not([data-value="${answer}"])`).first().click();
+    await expect.poll(async () => `${await word.getAttribute('data-word')}|${await word.getAttribute('data-answer')}`).not.toBe(before);
   });
 });
