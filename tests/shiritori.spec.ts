@@ -246,3 +246,89 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
     }
   });
 });
+
+test.describe('Word Chain fits a phone screen', () => {
+  // Every option must be tappable without scrolling on a typical phone, with
+  // or without the words that a miss reveals on medium.
+  async function scrollToTop(page: Page) {
+    await page.evaluate(() => {
+      window.scrollTo(0, 0);
+      document.querySelectorAll<HTMLElement>('*').forEach((el) => { el.scrollTop = 0; });
+    });
+  }
+
+  async function expectOptionsInViewport(page: Page, count: number) {
+    await scrollToTop(page);
+    const options = page.getByTestId('shiritori-option');
+    await expect(options).toHaveCount(count);
+    const viewport = page.viewportSize()!;
+    for (let i = 0; i < count; i++) {
+      const box = await options.nth(i).boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.y).toBeGreaterThanOrEqual(0);
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+    }
+  }
+
+  async function pickWrong(page: Page, count: number) {
+    const activeWord = await page.getByTestId('active-card').getAttribute('data-word');
+    const activeEndChar = getEndChar(activeWord || '', 'en');
+    const options = page.getByTestId('shiritori-option');
+    for (let i = 0; i < count; i++) {
+      const word = await options.nth(i).getAttribute('data-word');
+      if (!areCharsCompatible(activeEndChar, getStartChar(word || '', 'en'), 'en')) {
+        await options.nth(i).click();
+        return;
+      }
+    }
+    throw new Error('no wrong option on the board');
+  }
+
+  async function openWordChain(page: Page) {
+    await page.goto('/');
+    await page.getByTestId('age-mode-big').click();
+    await switchLanguage(page, 'en');
+    await page.getByTestId('launch-shiritori').click();
+    await expect(page.getByTestId('active-card')).toBeVisible();
+  }
+
+  test('390x844: medium, medium after a miss and hard show every option without scrolling', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openWordChain(page);
+
+    await expectOptionsInViewport(page, 4);
+
+    await pickWrong(page, 4);
+    await expect(page.getByTestId('shiritori-option-label')).toHaveCount(4);
+    await expectOptionsInViewport(page, 4);
+
+    await page.getByTestId('difficulty-hard').click();
+    await expectOptionsInViewport(page, 6);
+    await pickWrong(page, 6);
+    await expectOptionsInViewport(page, 6);
+  });
+
+  test('360x640: nothing scrolls sideways', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await openWordChain(page);
+
+    const noSideScroll = async () => {
+      const overflow = await page.evaluate(() => {
+        const root = document.documentElement;
+        const scrollers = [root, ...document.querySelectorAll<HTMLElement>('main')];
+        return scrollers.map((el) => el.scrollWidth - el.clientWidth);
+      });
+      for (const extra of overflow) expect(extra).toBeLessThanOrEqual(0);
+    };
+
+    await noSideScroll();
+    await pickWrong(page, 4);
+    await expect(page.getByTestId('shiritori-option-label')).toHaveCount(4);
+    await noSideScroll();
+    await page.getByTestId('difficulty-hard').click();
+    await expect(page.getByTestId('shiritori-option')).toHaveCount(6);
+    await noSideScroll();
+  });
+});

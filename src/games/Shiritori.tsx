@@ -305,17 +305,17 @@ export function Shiritori() {
   const targetLetter = useMemo(() => (activeEmoji ? getEndChar(activeWord, language) : ''), [activeEmoji, activeWord, language]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-between p-4 w-full select-none max-w-lg mx-auto">
+    <div className="flex-1 flex flex-col items-center justify-between px-4 pt-2 pb-4 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
         <GameConfetti pieces={150} />
       )}
 
       {/* Header Panel */}
-      <div className="text-center space-y-2 w-full">
+      <div className="text-center space-y-1 w-full">
         <h2 className="text-3xl font-black text-slate-800 tracking-tight">
           {t.shiritori.title}
         </h2>
-        <div className="flex justify-center gap-2 mb-1">
+        <div className="flex justify-center gap-2">
           <button
             onClick={() => { playPop(); initGame('solo'); }}
             className={`px-4 py-1.5 rounded-full font-black text-sm border-2 transition-all ${
@@ -345,7 +345,7 @@ export function Shiritori() {
         />
 
         {/* Counters */}
-        <div className="flex gap-4 items-center justify-center pt-1">
+        <div className="flex gap-4 items-center justify-center">
           <span className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1 rounded-full border-2 border-amber-300 text-xs shadow-sm flex items-center gap-1.5 animate-pulse">
             ✨ {t.shiritori.streak}: {streak}
           </span>
@@ -356,8 +356,8 @@ export function Shiritori() {
       </div>
 
       {/* Scrolling Chain Track */}
-      <div className="w-full bg-white/70 border-2 border-slate-200/80 rounded-3xl p-3 my-3 shadow-inner overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
-        <div className="flex items-center gap-2 min-w-max px-2 py-1">
+      <div className="w-full bg-white/70 border-2 border-slate-200/80 rounded-3xl p-2 my-1 shadow-inner overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+        <div className="flex items-center gap-2 min-w-max px-2">
           {chain.map((emoji, index) => (
             <div key={index} className="flex items-center gap-2">
               <div
@@ -420,7 +420,7 @@ export function Shiritori() {
           </KidButton>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col items-center justify-center my-2 space-y-4 w-full">
+        <div className="flex-1 flex flex-col items-center justify-center space-y-2 w-full">
           {/* Panda Bubble in Panda Mode */}
           {mode === 'panda' && (
             <div className="flex items-center gap-3 w-full max-w-xs animate-pop-in mb-2">
@@ -444,12 +444,12 @@ export function Shiritori() {
             data-testid="active-card"
             data-word={activeWord}
             data-emoji={activeEmoji}
-            className="bg-white border-4 border-slate-200 rounded-[2.5rem] p-6 w-full max-w-xs flex flex-col items-center justify-center shadow-lg relative"
+            className="bg-white border-4 border-slate-200 rounded-[2.5rem] p-4 w-full max-w-xs flex flex-col items-center justify-center shadow-lg relative"
           >
             <span className="text-8xl drop-shadow-[0_8px_8px_rgba(0,0,0,0.1)] animate-bounce-subtle">
               {activeEmoji}
             </span>
-            <div className="mt-4 text-center">
+            <div className="mt-2 text-center">
               {renderHighlightedWord(activeEmoji)}
             </div>
 
