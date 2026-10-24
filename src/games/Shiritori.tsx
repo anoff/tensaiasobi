@@ -17,6 +17,7 @@ import {
   getPandaPlayChoice,
   cleanWesternWord,
   SHIRITORI_LEVELS,
+  showShiritoriLabels,
 } from './shiritoriLogic';
 
 export function Shiritori() {
@@ -51,6 +52,9 @@ export function Shiritori() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const [shakeOption, setShakeOption] = useState<string | null>(null);
+  // Medium hides the words until a miss, then shows them for the rest of the round.
+  const [missed, setMissed] = useState(false);
+  const showLabels = showShiritoriLabels(levelConfig.labels, missed);
 
   // Panda Co-op Turn State
   const [turn, setTurn] = useState<'player' | 'panda'>('player');
@@ -93,6 +97,7 @@ export function Shiritori() {
       setIsGameOver(true);
     } else {
       setOptions(result.options);
+      setMissed(false);
     }
   }, [language, itemsDict, t.shiritori.yourTurn, resetStreak, optionCount]);
 
@@ -138,6 +143,7 @@ export function Shiritori() {
         setIsGameOver(true);
       } else {
         setOptions(result.options);
+        setMissed(false);
       }
     } else {
       // Panda gets stuck! Child wins!
@@ -205,6 +211,7 @@ export function Shiritori() {
             setIsGameOver(true);
           } else {
             setOptions(result.options);
+            setMissed(false);
           }
         }, 1000);
       }
@@ -213,6 +220,7 @@ export function Shiritori() {
       playError();
       resetStreak();
       setShakeOption(emoji);
+      setMissed(true);
 
       if (challengeMode) {
         setSelectedOption(emoji);
@@ -297,20 +305,20 @@ export function Shiritori() {
   const targetLetter = useMemo(() => (activeEmoji ? getEndChar(activeWord, language) : ''), [activeEmoji, activeWord, language]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-between p-4 w-full select-none max-w-lg mx-auto">
+    <div className="flex-1 flex flex-col items-center justify-between px-4 pt-2 pb-4 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
         <GameConfetti pieces={150} />
       )}
 
       {/* Header Panel */}
-      <div className="text-center space-y-2 w-full">
+      <div className="text-center space-y-1 w-full">
         <h2 className="text-3xl font-black text-slate-800 tracking-tight">
           {t.shiritori.title}
         </h2>
-        <div className="flex justify-center gap-2 mb-1">
+        <div className="flex justify-center gap-1.5">
           <button
             onClick={() => { playPop(); initGame('solo'); }}
-            className={`px-4 py-1.5 rounded-full font-black text-sm border-2 transition-all ${
+            className={`px-2 py-1.5 rounded-full font-black text-[13px] whitespace-nowrap border-2 transition-all ${
               mode === 'solo'
                 ? 'bg-candy-blue text-white border-sky-500 shadow-[0_2px_0_0_#0284c7]'
                 : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
@@ -320,7 +328,8 @@ export function Shiritori() {
           </button>
           <button
             onClick={() => { playPop(); initGame('panda'); }}
-            className={`px-4 py-1.5 rounded-full font-black text-sm border-2 transition-all ${
+            data-testid="shiritori-mode-panda"
+            className={`px-2 py-1.5 rounded-full font-black text-[13px] whitespace-nowrap border-2 transition-all ${
               mode === 'panda'
                 ? 'bg-candy-purple text-white border-purple-500 shadow-[0_2px_0_0_#7c3aed]'
                 : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
@@ -336,20 +345,21 @@ export function Shiritori() {
           onChange={handleLevelChange}
         />
 
-        {/* Counters */}
-        <div className="flex gap-4 items-center justify-center pt-1">
-          <span className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1 rounded-full border-2 border-amber-300 text-xs shadow-sm flex items-center gap-1.5 animate-pulse">
-            ✨ {t.shiritori.streak}: {streak}
+        {/* Counters: one line in every language; a label too long for the row
+            is cut with an ellipsis as a safety net; the number always shows. */}
+        <div className="flex gap-4 items-center justify-center">
+          <span data-testid="shiritori-counter" className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1 rounded-full border-2 border-amber-300 text-xs shadow-sm flex items-center min-w-0 whitespace-nowrap animate-pulse">
+            <span data-testid="shiritori-counter-label" className="truncate">✨ {t.shiritori.streak}</span>: {streak}
           </span>
-          <span className="bg-indigo-100 text-indigo-600 font-extrabold px-4 py-1 rounded-full border-2 border-indigo-300 text-xs shadow-sm">
-            🏆 {t.shiritori.highScore}: {highScore}
+          <span data-testid="shiritori-counter" className="bg-indigo-100 text-indigo-600 font-extrabold px-4 py-1 rounded-full border-2 border-indigo-300 text-xs shadow-sm flex items-center min-w-0 whitespace-nowrap">
+            <span data-testid="shiritori-counter-label" className="truncate">🏆 {t.shiritori.highScore}</span>: {highScore}
           </span>
         </div>
       </div>
 
       {/* Scrolling Chain Track */}
-      <div className="w-full bg-white/70 border-2 border-slate-200/80 rounded-3xl p-3 my-3 shadow-inner overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
-        <div className="flex items-center gap-2 min-w-max px-2 py-1">
+      <div className="w-full bg-white/70 border-2 border-slate-200/80 rounded-3xl p-2 my-1 shadow-inner overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+        <div className="flex items-center gap-2 min-w-max px-2">
           {chain.map((emoji, index) => (
             <div key={index} className="flex items-center gap-2">
               <div
@@ -412,36 +422,31 @@ export function Shiritori() {
           </KidButton>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col items-center justify-center my-2 space-y-4 w-full">
-          {/* Panda Bubble in Panda Mode */}
-          {mode === 'panda' && (
-            <div className="flex items-center gap-3 w-full max-w-xs animate-pop-in mb-2">
-              <div className={`w-16 h-16 rounded-full border-4 border-purple-200 bg-white flex items-center justify-center text-4xl shadow-md transition-transform duration-300 ${
-                pandaState === 'thinking' ? 'animate-bounce' : 'hover:rotate-12'
-              }`}>
-                🐼
-              </div>
-              <div className="relative bg-white border-2 border-purple-200 rounded-2xl py-2 px-4 shadow-md flex-1">
-                {/* Speech Bubble Arrow */}
-                <div className="absolute left-[-9px] top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-l-2 border-b-2 border-purple-200 rotate-45" />
-                <span className="text-xs font-black text-purple-700 leading-tight block">
-                  {pandaSpeech}
-                </span>
-              </div>
-            </div>
-          )}
-
+        <div className="flex-1 flex flex-col items-center justify-center space-y-2 w-full">
           {/* Active Word Card */}
           <div
             data-testid="active-card"
             data-word={activeWord}
             data-emoji={activeEmoji}
-            className="bg-white border-4 border-slate-200 rounded-[2.5rem] p-6 w-full max-w-xs flex flex-col items-center justify-center shadow-lg relative"
+            className={`bg-white border-4 border-slate-200 rounded-[2.5rem] p-4 w-full max-w-xs flex flex-col items-center justify-center shadow-lg relative ${mode === 'panda' ? 'mt-3' : ''}`}
           >
+            {/* Panda speech: a compact chip on the card's top edge, so panda mode
+                needs no extra row and every option stays above the fold. */}
+            {mode === 'panda' && (
+              <div className="absolute inset-x-0 -top-4 z-10 flex justify-center px-3 pointer-events-none">
+                <div
+                  data-testid="panda-speech"
+                  className="flex items-center gap-1.5 max-w-full bg-white border-2 border-purple-200 rounded-full py-1 pl-1.5 pr-3 shadow-md animate-pop-in"
+                >
+                  <span className={`text-xl leading-none inline-block ${pandaState === 'thinking' ? 'animate-bounce' : ''}`}>🐼</span>
+                  <span className="text-xs font-black text-purple-700 leading-tight">{pandaSpeech}</span>
+                </div>
+              </div>
+            )}
             <span className="text-8xl drop-shadow-[0_8px_8px_rgba(0,0,0,0.1)] animate-bounce-subtle">
               {activeEmoji}
             </span>
-            <div className="mt-4 text-center">
+            <div className="mt-2 text-center">
               {renderHighlightedWord(activeEmoji)}
             </div>
 
@@ -482,7 +487,7 @@ export function Shiritori() {
                 >
                   <span className="flex flex-col items-center gap-1">
                     <span className="text-5xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)]">{opt}</span>
-                    {levelConfig.labels && (
+                    {showLabels && (
                       <span data-testid="shiritori-option-label" className="text-xs font-black leading-none text-slate-600 max-w-[90px] truncate">
                         {itemsDict[opt]}
                       </span>

@@ -4,6 +4,8 @@ import {
   getEndChar,
   getStartChar,
   generateOptionsForWord,
+  SHIRITORI_LEVELS,
+  showShiritoriLabels,
 } from './shiritoriLogic';
 
 describe('shiritori character matching', () => {
@@ -37,5 +39,24 @@ describe('shiritori character matching', () => {
     expect(result.options.length).toBeGreaterThan(0);
     const starts = result.options.map((emoji) => getStartChar(dict[emoji as keyof typeof dict] ?? '', 'en'));
     expect(starts).toContain('E');
+  });
+});
+
+describe('Word Chain level labels', () => {
+  it('shows words always on easy, after a miss on medium, never on hard', () => {
+    expect(SHIRITORI_LEVELS.easy).toEqual({ options: 3, labels: 'always' });
+    expect(SHIRITORI_LEVELS.medium).toEqual({ options: 4, labels: 'afterMiss' });
+    expect(SHIRITORI_LEVELS.hard).toEqual({ options: 6, labels: 'never' });
+  });
+
+  it('showShiritoriLabels reveals medium words only after a miss', () => {
+    const show = (level: keyof typeof SHIRITORI_LEVELS, missed: boolean) =>
+      showShiritoriLabels(SHIRITORI_LEVELS[level].labels, missed);
+    expect(show('easy', false)).toBe(true);
+    expect(show('easy', true)).toBe(true);
+    expect(show('medium', false)).toBe(false);
+    expect(show('medium', true)).toBe(true);
+    expect(show('hard', false)).toBe(false);
+    expect(show('hard', true)).toBe(false);
   });
 });
