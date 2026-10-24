@@ -315,10 +315,10 @@ export function Shiritori() {
         <h2 className="text-3xl font-black text-slate-800 tracking-tight">
           {t.shiritori.title}
         </h2>
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center gap-1.5">
           <button
             onClick={() => { playPop(); initGame('solo'); }}
-            className={`px-4 py-1.5 rounded-full font-black text-sm border-2 transition-all ${
+            className={`px-2 py-1.5 rounded-full font-black text-[13px] whitespace-nowrap border-2 transition-all ${
               mode === 'solo'
                 ? 'bg-candy-blue text-white border-sky-500 shadow-[0_2px_0_0_#0284c7]'
                 : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
@@ -328,7 +328,8 @@ export function Shiritori() {
           </button>
           <button
             onClick={() => { playPop(); initGame('panda'); }}
-            className={`px-4 py-1.5 rounded-full font-black text-sm border-2 transition-all ${
+            data-testid="shiritori-mode-panda"
+            className={`px-2 py-1.5 rounded-full font-black text-[13px] whitespace-nowrap border-2 transition-all ${
               mode === 'panda'
                 ? 'bg-candy-purple text-white border-purple-500 shadow-[0_2px_0_0_#7c3aed]'
                 : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
@@ -421,31 +422,26 @@ export function Shiritori() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center space-y-2 w-full">
-          {/* Panda Bubble in Panda Mode */}
-          {mode === 'panda' && (
-            <div className="flex items-center gap-3 w-full max-w-xs animate-pop-in mb-2">
-              <div className={`w-16 h-16 rounded-full border-4 border-purple-200 bg-white flex items-center justify-center text-4xl shadow-md transition-transform duration-300 ${
-                pandaState === 'thinking' ? 'animate-bounce' : 'hover:rotate-12'
-              }`}>
-                🐼
-              </div>
-              <div className="relative bg-white border-2 border-purple-200 rounded-2xl py-2 px-4 shadow-md flex-1">
-                {/* Speech Bubble Arrow */}
-                <div className="absolute left-[-9px] top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-l-2 border-b-2 border-purple-200 rotate-45" />
-                <span className="text-xs font-black text-purple-700 leading-tight block">
-                  {pandaSpeech}
-                </span>
-              </div>
-            </div>
-          )}
-
           {/* Active Word Card */}
           <div
             data-testid="active-card"
             data-word={activeWord}
             data-emoji={activeEmoji}
-            className="bg-white border-4 border-slate-200 rounded-[2.5rem] p-4 w-full max-w-xs flex flex-col items-center justify-center shadow-lg relative"
+            className={`bg-white border-4 border-slate-200 rounded-[2.5rem] p-4 w-full max-w-xs flex flex-col items-center justify-center shadow-lg relative ${mode === 'panda' ? 'mt-3' : ''}`}
           >
+            {/* Panda speech: a compact chip on the card's top edge, so panda mode
+                needs no extra row and every option stays above the fold. */}
+            {mode === 'panda' && (
+              <div className="absolute inset-x-0 -top-4 z-10 flex justify-center px-3 pointer-events-none">
+                <div
+                  data-testid="panda-speech"
+                  className="flex items-center gap-1.5 max-w-full bg-white border-2 border-purple-200 rounded-full py-1 pl-1.5 pr-3 shadow-md animate-pop-in"
+                >
+                  <span className={`text-xl leading-none inline-block ${pandaState === 'thinking' ? 'animate-bounce' : ''}`}>🐼</span>
+                  <span className="text-xs font-black text-purple-700 leading-tight">{pandaSpeech}</span>
+                </div>
+              </div>
+            )}
             <span className="text-8xl drop-shadow-[0_8px_8px_rgba(0,0,0,0.1)] animate-bounce-subtle">
               {activeEmoji}
             </span>

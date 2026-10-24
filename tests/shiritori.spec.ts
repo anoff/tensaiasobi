@@ -271,13 +271,13 @@ test.describe('Word Chain fits a phone screen', () => {
     }
   }
 
-  async function pickWrong(page: Page, count: number) {
+  async function pickWrong(page: Page, count: number, lang: 'en' | 'ja' = 'en') {
     const activeWord = await page.getByTestId('active-card').getAttribute('data-word');
-    const activeEndChar = getEndChar(activeWord || '', 'en');
+    const activeEndChar = getEndChar(activeWord || '', lang);
     const options = page.getByTestId('shiritori-option');
     for (let i = 0; i < count; i++) {
       const word = await options.nth(i).getAttribute('data-word');
-      if (!areCharsCompatible(activeEndChar, getStartChar(word || '', 'en'), 'en')) {
+      if (!areCharsCompatible(activeEndChar, getStartChar(word || '', lang), lang)) {
         await options.nth(i).click();
         return;
       }
@@ -285,29 +285,50 @@ test.describe('Word Chain fits a phone screen', () => {
     throw new Error('no wrong option on the board');
   }
 
-  async function openWordChain(page: Page) {
+  async function openWordChain(page: Page, lang: 'en' | 'ja' = 'en') {
     await page.goto('/');
     await page.getByTestId('age-mode-big').click();
-    await switchLanguage(page, 'en');
+    await switchLanguage(page, lang);
     await page.getByTestId('launch-shiritori').click();
     await expect(page.getByTestId('active-card')).toBeVisible();
   }
 
-  test('390x844: medium, medium after a miss and hard show every option without scrolling', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await openWordChain(page);
+  // The panda's speech sits on the card's top edge; it must stay clear of the options.
+  async function expectSpeechClearOfOptions(page: Page) {
+    const speech = await page.getByTestId('panda-speech').boundingBox();
+    expect(speech).not.toBeNull();
+    expect(speech!.y).toBeGreaterThanOrEqual(0);
+    const firstOption = await page.getByTestId('shiritori-option').first().boundingBox();
+    expect(speech!.y + speech!.height).toBeLessThan(firstOption!.y);
+  }
 
-    await expectOptionsInViewport(page, 4);
+  // Japanese has the longest button and help lines, so it is the real risk.
+  for (const lang of ['en', 'ja'] as const) {
+    for (const mode of ['solo', 'panda'] as const) {
+      test(`390x844 ${lang.toUpperCase()} ${mode}: medium, medium after a miss and hard show every option without scrolling`, async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        await openWordChain(page, lang);
+        if (mode === 'panda') {
+          await page.getByTestId('shiritori-mode-panda').click();
+          await expect(page.getByTestId('panda-speech')).toBeVisible();
+        }
 
-    await pickWrong(page, 4);
-    await expect(page.getByTestId('shiritori-option-label')).toHaveCount(4);
-    await expectOptionsInViewport(page, 4);
+        await expectOptionsInViewport(page, 4);
+        if (mode === 'panda') await expectSpeechClearOfOptions(page);
 
-    await page.getByTestId('difficulty-hard').click();
-    await expectOptionsInViewport(page, 6);
-    await pickWrong(page, 6);
-    await expectOptionsInViewport(page, 6);
-  });
+        await pickWrong(page, 4, lang);
+        await expect(page.getByTestId('shiritori-option-label')).toHaveCount(4);
+        await expectOptionsInViewport(page, 4);
+        if (mode === 'panda') await expectSpeechClearOfOptions(page);
+
+        await page.getByTestId('difficulty-hard').click();
+        await expectOptionsInViewport(page, 6);
+        if (mode === 'panda') await expectSpeechClearOfOptions(page);
+        await pickWrong(page, 6, lang);
+        await expectOptionsInViewport(page, 6);
+      });
+    }
+  }
 
   test('360x640: nothing scrolls sideways', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 640 });
