@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import type { GameDifficulty } from '../types/game';
@@ -12,6 +12,16 @@ import {
   type EdgeProfile,
 } from './puzzleLogic';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
+import { INK, hardShadow } from '../theme/blockTable';
+
+/** The element that scrolls the game: the app's <main>, or the page itself. */
+function scrollParent(el: HTMLElement | null): HTMLElement {
+  for (let node = el?.parentElement; node; node = node.parentElement) {
+    const { overflowY } = getComputedStyle(node);
+    if (overflowY === 'auto' || overflowY === 'scroll') return node;
+  }
+  return (document.scrollingElement as HTMLElement | null) ?? document.documentElement;
+}
 
 interface JigsawPieceProps {
   pieceId: number;
@@ -154,6 +164,10 @@ export function PuzzleGame() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
   const [level, setLevel] = useAgeDifficulty();
   const [selectedImage, setSelectedImage] = useState<PuzzleImage>(PUZZLE_IMAGES[0]);
+  // The game opens on the picture gallery; tapping a picture starts its puzzle.
+  const [inGallery, setInGallery] = useState(true);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const galleryScrollRef = useRef(0);
 
   // Board contains pieceId or null (empty cell)
   const [board, setBoard] = useState<(number | null)[]>([]);
@@ -383,8 +397,39 @@ export function PuzzleGame() {
 
   const handleSelectImage = (img: PuzzleImage) => {
     playPop();
+    const scroller = scrollParent(rootRef.current);
+    galleryScrollRef.current = scroller.scrollTop;
     setSelectedImage(img);
+    initGame(size);
+    setInGallery(false);
+    scroller.scrollTop = 0;
   };
+
+  const handleBackToGallery = () => {
+    playPop();
+    setDrag(null);
+    dragStartRef.current = null;
+    setInGallery(true);
+  };
+
+  // Hardware Back (App.tsx fires 'app-back') leaves a puzzle for the gallery, like the back pill.
+  useEffect(() => {
+    if (inGallery) return;
+    const onBack = (e: Event) => {
+      e.preventDefault();
+      playPop();
+      setDrag(null);
+      dragStartRef.current = null;
+      setInGallery(true);
+    };
+    window.addEventListener('app-back', onBack);
+    return () => window.removeEventListener('app-back', onBack);
+  }, [inGallery, playPop]);
+
+  // Coming back from a puzzle puts the gallery where the child left it.
+  useLayoutEffect(() => {
+    if (inGallery) scrollParent(rootRef.current).scrollTop = galleryScrollRef.current;
+  }, [inGallery]);
 
   const handleLevelChange = (lvl: GameDifficulty) => {
     playPop();
@@ -400,11 +445,60 @@ export function PuzzleGame() {
     }
   };
 
+  const imageName = (img: PuzzleImage) =>
+    (t.puzzleGame?.[img.nameKey as keyof typeof t.puzzleGame] as string) || img.id;
+
+  if (inGallery) {
+    return (
+      <div ref={rootRef} data-testid="puzzle-gallery" className="flex flex-col items-center py-4 w-full select-none max-w-lg md:max-w-2xl mx-auto">
+        <div className="text-center space-y-1">
+          <h2 className="text-3xl font-black text-slate-800 tracking-tight">
+            {t.puzzleGame?.title || 'Magic Puzzle! 🧩'}
+          </h2>
+          <p className="text-slate-500 font-extrabold text-sm">
+            {t.puzzleGame?.selectImage || 'Choose a Picture:'}
+          </p>
+        </div>
+        <div data-testid="puzzle-gallery-grid" className="grid grid-cols-3 md:grid-cols-4 gap-3 w-full mt-4 pr-1 pb-1">
+          {PUZZLE_IMAGES.map((img) => (
+            <button
+              key={img.id}
+              type="button"
+              data-testid="puzzle-tile"
+              data-puzzle-id={img.id}
+              onClick={() => handleSelectImage(img)}
+              aria-label={imageName(img)}
+              title={imageName(img)}
+              className="aspect-square min-h-24 w-full overflow-hidden rounded-2xl border-[3px] bg-white p-0 cursor-pointer outline-none select-none touch-manipulation transition-transform duration-75 focus-visible:ring-4 focus-visible:ring-amber-400/70 active:translate-x-[3px] active:translate-y-[4px] active:scale-[0.97] active:[box-shadow:none]"
+              style={{ borderColor: INK, boxShadow: hardShadow(3, 4) }}
+            >
+              <img src={img.src} alt="" draggable={false} className="h-full w-full object-cover pointer-events-none" />
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 flex flex-col items-center justify-between p-4 w-full select-none max-w-lg mx-auto">
+    <div ref={rootRef} className="flex-1 flex flex-col items-center justify-between p-4 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
         <GameConfetti pieces={120} />
       )}
+
+      {/* Back to the gallery; hardware Back does the same (see the 'app-back' listener) */}
+      <div className="w-full flex">
+        <button
+          type="button"
+          data-testid="puzzle-back"
+          onClick={handleBackToGallery}
+          aria-label={t.puzzleGame?.gallery || 'All pictures'}
+          className="min-h-11 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 font-black text-sm rounded-2xl border-2 border-b-4 shadow-md cursor-pointer outline-none select-none transition-all duration-75 active:translate-y-[1px] focus-visible:ring-4 focus-visible:ring-amber-400/70"
+          style={{ borderColor: INK }}
+        >
+          ⬅️ 🖼️
+        </button>
+      </div>
 
       {/* Title block */}
       <div className="text-center space-y-1">
@@ -414,34 +508,6 @@ export function PuzzleGame() {
         <p className="text-slate-500 font-extrabold text-sm">
           {t.puzzleGame?.subtitle || 'Fix the picture by putting pieces on the board!'}
         </p>
-      </div>
-
-      {/* Image selector */}
-      <div className="w-full flex flex-col items-center gap-1 my-2">
-        <span className="text-xs font-black text-slate-400 uppercase tracking-wider">
-          {t.puzzleGame?.selectImage || 'Choose a Picture:'}
-        </span>
-        <div className="flex gap-3 justify-center items-center py-1">
-          {PUZZLE_IMAGES.map((img) => {
-            const isSelected = selectedImage.id === img.id;
-            return (
-              <button
-                key={img.id}
-                onClick={() => handleSelectImage(img)}
-                title={t.puzzleGame?.[img.nameKey as keyof typeof t.puzzleGame] as string || img.id}
-                className={`
-                  w-11 h-11 rounded-full text-xl flex items-center justify-center border-4 transition-all duration-150 outline-none cursor-pointer
-                  ${isSelected 
-                    ? 'bg-candy-purple border-purple-500 scale-110 shadow-md translate-y-[-2px]' 
-                    : 'bg-white border-slate-300 hover:scale-105 active:scale-95'
-                  }
-                `}
-              >
-                {img.emoji}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       {/* Level / Difficulty Selector */}
