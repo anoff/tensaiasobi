@@ -7,7 +7,7 @@ import { fr } from '../locales/fr';
 import { ja } from '../locales/ja';
 import { ko } from '../locales/ko';
 import { COMPARE_MAX, generateCompareRound, symbolFor } from './crocodileCompareLogic';
-import { LOOK_ALIKES, generateLetterPairsRound, toKatakana, toRomaji, type LetterPairsRound } from './letterPairsLogic';
+import { KANA_PAIR_POOL, LOOK_ALIKES, generateLetterPairsRound, toKatakana, toRomaji, type LetterPairsRound } from './letterPairsLogic';
 import { generatePatternRound } from './patternTrainLogic';
 import { generateMissingLetterRound, missingLetterCandidates } from './missingLetterLogic';
 import { SYLLABLE_RANGE, SYLLABLE_WORDS, generateSyllableRound, splitMorae, syllableWords } from './syllableDrumLogic';
@@ -115,6 +115,24 @@ describe('Letter Pairs', () => {
       }
     }
     expect([...prompts].sort()).toEqual(['B', 'D', 'I', 'L', 'M', 'N', 'P', 'Q', 'U']);
+  });
+
+  it('Japanese easy/medium never pair kana that look the same in both scripts', () => {
+    // Explicit list, so a wrong exclusion in the game code can't hide itself.
+    const sameShape = [['へ', 'ヘ'], ['べ', 'ベ'], ['ぺ', 'ペ']];
+    const sameKatakana = sameShape.map(([, k]) => k);
+    for (const kana of KANA_PAIR_POOL) {
+      expect(sameKatakana, kana).not.toContain(toKatakana(kana));
+    }
+    expect(KANA_PAIR_POOL.length).toBeGreaterThan(40);
+    for (let i = 0; i < 500; i++) {
+      for (const level of ['easy', 'medium'] as const) {
+        const r = generateLetterPairsRound(level, 'ja');
+        for (const shown of [r.prompt, ...r.options]) {
+          expect(sameShape.flat(), `${level} ${shown}`).not.toContain(shown);
+        }
+      }
+    }
   });
 
   it('Japanese: hiragana → katakana, katakana → hiragana, hiragana → romaji', () => {

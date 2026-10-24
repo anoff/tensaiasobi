@@ -207,7 +207,7 @@ export function AnlautGame() {
         <StreakBadge streak={streak} highScore={highScore} size="sm" />
       </div>
 
-      <DifficultySelector selected={level} options={['easy', 'medium', 'hard']} onChange={changeLevel} variant="paper" />
+      <DifficultySelector selected={level} options={['easy', 'medium', 'hard']} onChange={changeLevel} />
 
       {level === 'hard' ? (
         <FirstSoundGap onCorrect={registerCorrect} onWrong={resetStreak} />

@@ -12,7 +12,7 @@ import { HIRAGANA } from '../utils/kana';
  * - medium: lower → upper case (b → B)
  * - hard: upper → lower case against look-alikes (B → b among d, p, q)
  * Japanese:
- * - easy: hiragana → katakana (あ → ア)
+ * - easy: hiragana → katakana (あ → ア), without same-shape pairs like へ/ヘ
  * - medium: katakana → hiragana (ア → あ)
  * - hard: hiragana → romaji (し → shi)
  * Korean: syllable → same syllable, then → its first consonant (가 → ㄱ),
@@ -58,6 +58,12 @@ const ROMAJI: Record<string, string> = {
   ら: 'ra', り: 'ri', る: 'ru', れ: 're', ろ: 'ro', わ: 'wa',
 };
 
+/** Hiragana whose katakana has the same shape (へ/ヘ, べ/ベ, ぺ/ペ): no partner to find. */
+export const SAME_SHAPE_KANA = ['へ', 'べ', 'ぺ'];
+
+/** Kana for the hiragana ⇄ katakana levels. */
+export const KANA_PAIR_POOL = HIRAGANA.filter((kana) => !SAME_SHAPE_KANA.includes(kana));
+
 /** Katakana sits exactly 0x60 above hiragana. */
 export function toKatakana(kana: string): string {
   return String.fromCharCode(kana.charCodeAt(0) + 0x60);
@@ -94,8 +100,8 @@ const consonantOf = (syllable: string) => HANGUL.find(([s]) => s === syllable)?.
 
 export function generateLetterPairsRound(level: GameDifficulty, lang: string, rand: Rand = Math.random): LetterPairsRound {
   if (lang === 'ja') {
-    if (level === 'easy') return pairRound(HIRAGANA, same, toKatakana, rand);
-    if (level === 'medium') return pairRound(HIRAGANA, toKatakana, same, rand);
+    if (level === 'easy') return pairRound(KANA_PAIR_POOL, same, toKatakana, rand);
+    if (level === 'medium') return pairRound(KANA_PAIR_POOL, toKatakana, same, rand);
     return pairRound(HIRAGANA, same, toRomaji, rand);
   }
   if (lang === 'ko') {

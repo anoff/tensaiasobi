@@ -93,7 +93,7 @@ export const GAMES = [
   { id: 'letterPairs', category: 'language', testid: 'launch-letter-pairs', emoji: '🔠', labelKey: 'letterPairs', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: LetterPairs },
   { id: 'letterTrace', category: 'language', testid: 'launch-letterTrace', emoji: '✏️', labelKey: 'letterTrace', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: LetterTrace },
   { id: 'syllableDrum', category: 'language', testid: 'launch-syllable-drum', emoji: '🥁', labelKey: 'syllableDrum', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: SyllableDrum },
-  { id: 'anlaut', category: 'language', testid: 'launch-anlaut', emoji: '🔤', labelKey: 'anlaut', ageBands: ['big'], kind: 'learn', storageKeys: ['anlaut_streak', 'anlaut_highscore'], Component: AnlautGame },
+  { id: 'anlaut', category: 'language', testid: 'launch-anlaut', emoji: '🍎', labelKey: 'anlaut', ageBands: ['big'], kind: 'learn', storageKeys: ['anlaut_streak', 'anlaut_highscore'], Component: AnlautGame },
   { id: 'shiritori', category: 'language', testid: 'launch-shiritori', emoji: '🔗', labelKey: 'shiritori', ageBands: ['big'], kind: 'learn', storageKeys: ['shiritori_streak', 'shiritori_highscore'], Component: Shiritori },
   // Logic
   { id: 'odd', category: 'logic', testid: 'launch-odd', emoji: '🧐', labelKey: 'odd', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['odd_streak', 'odd_highscore'], Component: OddOneOut },
