@@ -251,10 +251,9 @@ test.describe('Word Chain fits a phone screen', () => {
   // Every option must be tappable without scrolling on a typical phone, with
   // or without the words that a miss reveals on medium.
   async function scrollToTop(page: Page) {
-    await page.evaluate(() => {
-      window.scrollTo(0, 0);
-      document.querySelectorAll<HTMLElement>('*').forEach((el) => { el.scrollTop = 0; });
-    });
+    // String form: the tests tsconfig has no DOM lib.
+    await page.evaluate(`window.scrollTo(0, 0);
+      document.querySelectorAll('*').forEach((el) => { el.scrollTop = 0; });`);
   }
 
   async function expectOptionsInViewport(page: Page, count: number) {
@@ -315,11 +314,9 @@ test.describe('Word Chain fits a phone screen', () => {
     await openWordChain(page);
 
     const noSideScroll = async () => {
-      const overflow = await page.evaluate(() => {
-        const root = document.documentElement;
-        const scrollers = [root, ...document.querySelectorAll<HTMLElement>('main')];
-        return scrollers.map((el) => el.scrollWidth - el.clientWidth);
-      });
+      // Page and the <main> scroller must not be wider than the screen.
+      const overflow = await page.evaluate<number[]>(`[document.documentElement, ...document.querySelectorAll('main')]
+        .map((el) => el.scrollWidth - el.clientWidth)`);
       for (const extra of overflow) expect(extra).toBeLessThanOrEqual(0);
     };
 
