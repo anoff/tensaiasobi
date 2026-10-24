@@ -112,16 +112,26 @@ export const getStartWord = (lang: string, itemsDict: Record<string, string>): s
   return EMOJI_ITEMS[Math.floor(Math.random() * EMOJI_ITEMS.length)];
 };
 
+/** When the option words show under the pictures. */
+export type ShiritoriLabels = 'always' | 'afterMiss' | 'never';
+
 /**
  * Word Chain levels. The old board was always nine unlabeled pictures, so the
- * child had to name nine emojis *and* spell their first letters. Now the
- * school start (medium) is four labeled pictures; only hard drops the words.
+ * child had to name nine emojis *and* spell their first letters.
+ * - easy: 3 labeled pictures
+ * - medium (school start): 4 pictures; the words come back after a miss
+ *   (like Math Pop medium's pictures) and stay for the rest of the round
+ * - hard: 6 pictures without words; a miss reveals nothing
  */
-export const SHIRITORI_LEVELS: Record<'easy' | 'medium' | 'hard', { options: number; labels: boolean }> = {
-  easy: { options: 3, labels: true },
-  medium: { options: 4, labels: true },
-  hard: { options: 6, labels: false },
+export const SHIRITORI_LEVELS: Record<'easy' | 'medium' | 'hard', { options: number; labels: ShiritoriLabels }> = {
+  easy: { options: 3, labels: 'always' },
+  medium: { options: 4, labels: 'afterMiss' },
+  hard: { options: 6, labels: 'never' },
 };
+
+/** Whether the option words show, given the level's rule and a miss this round. */
+export const showShiritoriLabels = (labels: ShiritoriLabels, missed: boolean): boolean =>
+  labels === 'always' || (labels === 'afterMiss' && missed);
 
 interface GeneratedOptions {
   options: string[];

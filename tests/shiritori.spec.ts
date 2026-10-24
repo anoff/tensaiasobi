@@ -109,9 +109,9 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
 
       // 3. Locate options
       const options = page.getByTestId('shiritori-option');
-      // School starts on medium: four labeled pictures.
+      // School starts on medium: four pictures, words hidden until a miss.
       await expect(options).toHaveCount(4);
-      await expect(page.getByTestId('shiritori-option-label')).toHaveCount(4);
+      await expect(page.getByTestId('shiritori-option-label')).toHaveCount(0);
 
       // Find the correct matching option based on start/end letter compatibility
       let correctOptionLocator = null;
@@ -144,7 +144,7 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
     });
   }
 
-  test('Verify incorrect match resets streak', async ({ page }) => {
+  test('Verify incorrect match resets streak and reveals the words on medium', async ({ page }) => {
     await switchLanguage(page, 'en');
     await page.getByTestId('launch-shiritori').click();
 
@@ -153,8 +153,11 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
     const activeEndChar = getEndChar(activeWord || '', 'en');
 
     const options = page.getByTestId('shiritori-option');
-    let wrongOptionLocator = null;
+    const labels = page.getByTestId('shiritori-option-label');
+    await expect(options).toHaveCount(4);
+    await expect(labels).toHaveCount(0);
 
+    let wrongOptionLocator = null;
     for (let i = 0; i < 4; i++) {
       const option = options.nth(i);
       const word = await option.getAttribute('data-word');
@@ -165,11 +168,46 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
       }
     }
 
-    if (wrongOptionLocator) {
-      await wrongOptionLocator.click();
-      const streakCounter = page.locator('.bg-amber-100');
-      await expect(streakCounter).toHaveText(/0/);
+    // The generator always fills the other three slots with non-matching words.
+    expect(wrongOptionLocator).not.toBeNull();
+    await wrongOptionLocator!.click();
+    const streakCounter = page.locator('.bg-amber-100');
+    await expect(streakCounter).toHaveText(/0/);
+
+    // One miss brings the words back on every option, and they stay.
+    await expect(labels).toHaveCount(4);
+    await page.waitForTimeout(800);
+    await expect(labels).toHaveCount(4);
+  });
+
+  test('Verify hard keeps the words hidden after a wrong pick', async ({ page }) => {
+    await switchLanguage(page, 'en');
+    await page.getByTestId('launch-shiritori').click();
+    await page.getByTestId('difficulty-hard').click();
+
+    const activeCard = page.getByTestId('active-card');
+    const activeWord = await activeCard.getAttribute('data-word');
+    const activeEndChar = getEndChar(activeWord || '', 'en');
+
+    const options = page.getByTestId('shiritori-option');
+    const labels = page.getByTestId('shiritori-option-label');
+    await expect(options).toHaveCount(6);
+    await expect(labels).toHaveCount(0);
+
+    let wrongOptionLocator = null;
+    for (let i = 0; i < 6; i++) {
+      const option = options.nth(i);
+      const word = await option.getAttribute('data-word');
+      if (!areCharsCompatible(activeEndChar, getStartChar(word || '', 'en'), 'en')) {
+        wrongOptionLocator = option;
+        break;
+      }
     }
+
+    expect(wrongOptionLocator).not.toBeNull();
+    await wrongOptionLocator!.click();
+    await expect(page.locator('.bg-amber-100')).toHaveText(/0/);
+    await expect(labels).toHaveCount(0);
   });
 
   test('Verify Japanese "ん" rule triggers game over', async ({ page }) => {
