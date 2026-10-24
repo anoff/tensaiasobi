@@ -21,7 +21,9 @@ test.describe('Hard mode keeps targets tap-sized', () => {
   test('Magic Puzzle grows 2×2 → 3×3 → 4×4', async ({ page }) => {
     const pieces = { easy: 4, medium: 9, hard: 16 } as const;
     for (const [band, diff] of ALL_LEVELS) {
-      await openGame(page, 'launch-puzzle', band, diff);
+      await openGame(page, 'launch-puzzle', band);
+      await page.getByTestId('puzzle-tile').first().click();
+      await page.getByTestId(`difficulty-${diff}`).click();
       await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(pieces[diff]);
     }
   });

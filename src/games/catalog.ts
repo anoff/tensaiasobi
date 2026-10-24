@@ -85,7 +85,7 @@ export const GAMES = [
   // Numbers
   { id: 'math', category: 'numbers', testid: 'launch-math', emoji: '🎈', labelKey: 'math', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['math_streak', 'math_highscore'], Component: MathGame },
   { id: 'crocodileCompare', category: 'numbers', testid: 'launch-crocodile-compare', emoji: '🐊', labelKey: 'crocodileCompare', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: CrocodileCompare },
-  { id: 'numberTrain', category: 'numbers', testid: 'launch-number-train', emoji: '🚂', labelKey: 'numberTrain', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: NumberTrain },
+  { id: 'numberTrain', category: 'numbers', testid: 'launch-number-train', emoji: '🚂', labelKey: 'numberTrain', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: NumberTrain },
   { id: 'diceFlash', category: 'numbers', testid: 'launch-dice-flash', emoji: '🎲', labelKey: 'diceFlash', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: DiceFlash },
   { id: 'fairSharePicnic', category: 'numbers', testid: 'launch-fair-share-picnic', emoji: '🧺', labelKey: 'fairSharePicnic', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: FairSharePicnic },
   { id: 'physics', category: 'numbers', testid: 'launch-physics', emoji: '⚖️', labelKey: 'physics', ageBands: ['big'], kind: 'learn', storageKeys: [], Component: PhysicsPuzzleGame },
@@ -98,7 +98,6 @@ export const GAMES = [
   // Logic
   { id: 'odd', category: 'logic', testid: 'launch-odd', emoji: '🧐', labelKey: 'odd', ageBands: ['little', 'big'], kind: 'learn', storageKeys: ['odd_streak', 'odd_highscore'], Component: OddOneOut },
   { id: 'patternTrain', category: 'logic', testid: 'launch-pattern-train', emoji: '🚃', labelKey: 'patternTrain', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: PatternTrain },
-  { id: 'animalGenie', category: 'logic', testid: 'launch-animal-genie', emoji: '🧞', labelKey: 'animalGenie', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: AnimalGenie },
   { id: 'simonLights', category: 'logic', testid: 'launch-simon-lights', emoji: '🐵', labelKey: 'simonLights', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: SimonLights },
   { id: 'sinkOrFloat', category: 'logic', testid: 'launch-sink-or-float', emoji: '🛁', labelKey: 'sinkOrFloat', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: SinkOrFloat },
   { id: 'memory', category: 'logic', testid: 'launch-memory', emoji: '🐯', labelKey: 'match', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: MemoryMatch },
@@ -111,6 +110,7 @@ export const GAMES = [
   { id: 'trace', category: 'play', testid: 'launch-trace', emoji: '⭐', labelKey: 'trace', ageBands: ['little'], kind: 'play', storageKeys: [], Component: ShapeTrace },
   { id: 'maze', category: 'play', testid: 'launch-maze', emoji: '🗺️', labelKey: 'maze', ageBands: ['little', 'big'], kind: 'play', storageKeys: [], Component: MazeGame },
   { id: 'emojiMatch', category: 'play', testid: 'launch-emojimatch', emoji: '⚡', labelKey: 'dobble', ageBands: ['little', 'big'], kind: 'play', storageKeys: [], storageKeyPrefixes: ['dobble_high_'], Component: EmojiMatch },
+  { id: 'animalGenie', category: 'play', testid: 'launch-animal-genie', emoji: '🧞', labelKey: 'animalGenie', ageBands: ['little', 'big'], kind: 'play', storageKeys: [], Component: AnimalGenie },
   { id: 'dispatch', category: 'play', testid: 'launch-dispatch', emoji: '🚒', labelKey: 'dispatch', ageBands: ['little', 'big'], kind: 'play', storageKeys: [], Component: DispatchGame },
 ] as const satisfies readonly GameCatalogEntry[];
 

@@ -388,6 +388,7 @@ export const ko: TranslationSchema = {
     victory: "🎉 멋져요! 퍼즐을 완성했어요!",
     preview: "그림 보기 🖼️",
     selectImage: "그림을 선택하세요:",
+    gallery: "그림 고르기",
     rainbow: "무지개",
     space: "우주 로켓",
     dino: "친근한 공룡",

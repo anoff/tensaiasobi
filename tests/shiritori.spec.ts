@@ -109,9 +109,9 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
 
       // 3. Locate options
       const options = page.getByTestId('shiritori-option');
-      // School starts on medium: four labeled pictures.
+      // School starts on medium: four pictures, words hidden until a miss.
       await expect(options).toHaveCount(4);
-      await expect(page.getByTestId('shiritori-option-label')).toHaveCount(4);
+      await expect(page.getByTestId('shiritori-option-label')).toHaveCount(0);
 
       // Find the correct matching option based on start/end letter compatibility
       let correctOptionLocator = null;
@@ -144,7 +144,7 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
     });
   }
 
-  test('Verify incorrect match resets streak', async ({ page }) => {
+  test('Verify incorrect match resets streak and reveals the words on medium', async ({ page }) => {
     await switchLanguage(page, 'en');
     await page.getByTestId('launch-shiritori').click();
 
@@ -153,8 +153,11 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
     const activeEndChar = getEndChar(activeWord || '', 'en');
 
     const options = page.getByTestId('shiritori-option');
-    let wrongOptionLocator = null;
+    const labels = page.getByTestId('shiritori-option-label');
+    await expect(options).toHaveCount(4);
+    await expect(labels).toHaveCount(0);
 
+    let wrongOptionLocator = null;
     for (let i = 0; i < 4; i++) {
       const option = options.nth(i);
       const word = await option.getAttribute('data-word');
@@ -165,11 +168,46 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
       }
     }
 
-    if (wrongOptionLocator) {
-      await wrongOptionLocator.click();
-      const streakCounter = page.locator('.bg-amber-100');
-      await expect(streakCounter).toHaveText(/0/);
+    // The generator always fills the other three slots with non-matching words.
+    expect(wrongOptionLocator).not.toBeNull();
+    await wrongOptionLocator!.click();
+    const streakCounter = page.locator('.bg-amber-100');
+    await expect(streakCounter).toHaveText(/0/);
+
+    // One miss brings the words back on every option, and they stay.
+    await expect(labels).toHaveCount(4);
+    await page.waitForTimeout(800);
+    await expect(labels).toHaveCount(4);
+  });
+
+  test('Verify hard keeps the words hidden after a wrong pick', async ({ page }) => {
+    await switchLanguage(page, 'en');
+    await page.getByTestId('launch-shiritori').click();
+    await page.getByTestId('difficulty-hard').click();
+
+    const activeCard = page.getByTestId('active-card');
+    const activeWord = await activeCard.getAttribute('data-word');
+    const activeEndChar = getEndChar(activeWord || '', 'en');
+
+    const options = page.getByTestId('shiritori-option');
+    const labels = page.getByTestId('shiritori-option-label');
+    await expect(options).toHaveCount(6);
+    await expect(labels).toHaveCount(0);
+
+    let wrongOptionLocator = null;
+    for (let i = 0; i < 6; i++) {
+      const option = options.nth(i);
+      const word = await option.getAttribute('data-word');
+      if (!areCharsCompatible(activeEndChar, getStartChar(word || '', 'en'), 'en')) {
+        wrongOptionLocator = option;
+        break;
+      }
     }
+
+    expect(wrongOptionLocator).not.toBeNull();
+    await wrongOptionLocator!.click();
+    await expect(page.locator('.bg-amber-100')).toHaveText(/0/);
+    await expect(labels).toHaveCount(0);
   });
 
   test('Verify Japanese "ん" rule triggers game over', async ({ page }) => {
@@ -206,5 +244,129 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
       const text = await gameOverTitle.innerText();
       expect(text).toContain('おしまい');
     }
+  });
+});
+
+test.describe('Word Chain fits a phone screen', () => {
+  // Every option must be tappable without scrolling on a typical phone, with
+  // or without the words that a miss reveals on medium.
+  async function scrollToTop(page: Page) {
+    // String form: the tests tsconfig has no DOM lib.
+    await page.evaluate(`window.scrollTo(0, 0);
+      document.querySelectorAll('*').forEach((el) => { el.scrollTop = 0; });`);
+  }
+
+  async function expectOptionsInViewport(page: Page, count: number) {
+    await scrollToTop(page);
+    const options = page.getByTestId('shiritori-option');
+    await expect(options).toHaveCount(count);
+    const viewport = page.viewportSize()!;
+    for (let i = 0; i < count; i++) {
+      const box = await options.nth(i).boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.y).toBeGreaterThanOrEqual(0);
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+    }
+  }
+
+  async function pickWrong(page: Page, count: number, lang: 'en' | 'de' | 'ja' | 'fr' | 'ko' = 'en') {
+    const activeWord = await page.getByTestId('active-card').getAttribute('data-word');
+    const activeEndChar = getEndChar(activeWord || '', lang);
+    const options = page.getByTestId('shiritori-option');
+    for (let i = 0; i < count; i++) {
+      const word = await options.nth(i).getAttribute('data-word');
+      if (!areCharsCompatible(activeEndChar, getStartChar(word || '', lang), lang)) {
+        await options.nth(i).click();
+        return;
+      }
+    }
+    throw new Error('no wrong option on the board');
+  }
+
+  async function openWordChain(page: Page, lang: 'en' | 'de' | 'ja' | 'fr' | 'ko' = 'en') {
+    await page.goto('/');
+    await page.getByTestId('age-mode-big').click();
+    await switchLanguage(page, lang);
+    await page.getByTestId('launch-shiritori').click();
+    await expect(page.getByTestId('active-card')).toBeVisible();
+  }
+
+  // The panda's speech sits on the card's top edge; it must stay clear of the options.
+  async function expectSpeechClearOfOptions(page: Page) {
+    const speech = await page.getByTestId('panda-speech').boundingBox();
+    expect(speech).not.toBeNull();
+    expect(speech!.y).toBeGreaterThanOrEqual(0);
+    const firstOption = await page.getByTestId('shiritori-option').first().boundingBox();
+    expect(speech!.y + speech!.height).toBeLessThan(firstOption!.y);
+  }
+
+  // Both counter chips stay on one line (28 px; a wrapped label is 44 px),
+  // and no label is cut by the ellipsis safety net.
+  async function expectCountersOnOneLine(page: Page) {
+    const counters = page.getByTestId('shiritori-counter');
+    await expect(counters).toHaveCount(2);
+    for (let i = 0; i < 2; i++) {
+      const box = await counters.nth(i).boundingBox();
+      expect(box!.height).toBeLessThan(36);
+    }
+    const labels = page.getByTestId('shiritori-counter-label');
+    await expect(labels).toHaveCount(2);
+    for (let i = 0; i < 2; i++) {
+      const { scrollWidth, clientWidth } = await labels.nth(i).evaluate(
+        (el) => ({ scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }));
+      expect(scrollWidth, await labels.nth(i).innerText()).toBeLessThanOrEqual(clientWidth);
+    }
+  }
+
+  // Every locale: Japanese has the longest button and help lines, French had
+  // the longest counter labels.
+  for (const lang of ['en', 'de', 'ja', 'fr', 'ko'] as const) {
+    for (const mode of ['solo', 'panda'] as const) {
+      test(`390x844 ${lang.toUpperCase()} ${mode}: medium, medium after a miss and hard show every option without scrolling`, async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        await openWordChain(page, lang);
+        if (mode === 'panda') {
+          await page.getByTestId('shiritori-mode-panda').click();
+          await expect(page.getByTestId('panda-speech')).toBeVisible();
+        }
+
+        await expectCountersOnOneLine(page);
+        await expectOptionsInViewport(page, 4);
+        if (mode === 'panda') await expectSpeechClearOfOptions(page);
+
+        await pickWrong(page, 4, lang);
+        await expect(page.getByTestId('shiritori-option-label')).toHaveCount(4);
+        await expectOptionsInViewport(page, 4);
+        if (mode === 'panda') await expectSpeechClearOfOptions(page);
+
+        await page.getByTestId('difficulty-hard').click();
+        await expectOptionsInViewport(page, 6);
+        if (mode === 'panda') await expectSpeechClearOfOptions(page);
+        await pickWrong(page, 6, lang);
+        await expectOptionsInViewport(page, 6);
+      });
+    }
+  }
+
+  test('360x640: nothing scrolls sideways', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await openWordChain(page);
+
+    const noSideScroll = async () => {
+      // Page and the <main> scroller must not be wider than the screen.
+      const overflow = await page.evaluate<number[]>(`[document.documentElement, ...document.querySelectorAll('main')]
+        .map((el) => el.scrollWidth - el.clientWidth)`);
+      for (const extra of overflow) expect(extra).toBeLessThanOrEqual(0);
+    };
+
+    await noSideScroll();
+    await pickWrong(page, 4);
+    await expect(page.getByTestId('shiritori-option-label')).toHaveCount(4);
+    await noSideScroll();
+    await page.getByTestId('difficulty-hard').click();
+    await expect(page.getByTestId('shiritori-option')).toHaveCount(6);
+    await noSideScroll();
   });
 });

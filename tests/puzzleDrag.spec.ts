@@ -1,5 +1,6 @@
+import { readdirSync } from 'node:fs';
 import { test, expect, Page } from '@playwright/test';
-import { openGame } from './ageLevels';
+import { openGame, type Band, type Level } from './ageLevels';
 
 async function center(page: Page, selector: string) {
   const box = await page.locator(selector).boundingBox();
@@ -11,6 +12,20 @@ async function firstTrayPieceId(page: Page) {
   return Number(await page.getByTestId('puzzle-tray-piece').first().getAttribute('data-piece-id'));
 }
 
+/** Open Magic Puzzle, tap the first gallery picture, then pick a level. */
+async function openPuzzle(page: Page, band?: Band, level?: Level) {
+  if (band) await openGame(page, 'launch-puzzle', band);
+  else {
+    await page.goto('/');
+    await page.getByTestId('launch-puzzle').click();
+  }
+  await page.getByTestId('puzzle-tile').first().click();
+  if (level) {
+    await page.getByTestId(`difficulty-${level}`).click();
+    await expect(page.getByTestId(`difficulty-${level}`)).toHaveAttribute('aria-pressed', 'true');
+  }
+}
+
 async function mouseDrag(page: Page, from: { x: number; y: number }, to: { x: number; y: number }) {
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
@@ -20,8 +35,7 @@ async function mouseDrag(page: Page, from: { x: number; y: number }, to: { x: nu
 
 test.describe('Magic Puzzle drag and drop', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('launch-puzzle').click();
+    await openPuzzle(page);
     await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(4);
   });
 
@@ -37,7 +51,7 @@ test.describe('Magic Puzzle drag and drop', () => {
   });
 
   test('hard is a 4×4 that can be solved by dragging, with tap-sized slots', async ({ page }) => {
-    await openGame(page, 'launch-puzzle', 'big', 'hard');
+    await openPuzzle(page, 'big', 'hard');
     await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(16);
     const slot = await page.locator('[data-puzzle-slot="0"]').boundingBox();
     expect(slot!.width).toBeGreaterThanOrEqual(64);
@@ -70,8 +84,7 @@ test.describe('Magic Puzzle drag with touch', () => {
   test.use({ hasTouch: true });
 
   test('a finger can drag every piece onto its spot, diagonals included', async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('launch-puzzle').click();
+    await openPuzzle(page);
     const cdp = await page.context().newCDPSession(page);
     const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', p?: { x: number; y: number }) =>
       cdp.send('Input.dispatchTouchEvent', { type, touchPoints: p ? [{ x: p.x, y: p.y }] : [] });
@@ -91,7 +104,7 @@ test.describe('Magic Puzzle drag with touch', () => {
   });
 
   test('a sideways swipe on a piece scrolls the tray instead of grabbing it', async ({ page }) => {
-    await openGame(page, 'launch-puzzle', 'big', 'hard');
+    await openPuzzle(page, 'big', 'hard');
     await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(16);
     const tray = page.getByTestId('puzzle-tray-piece').first().locator('..');
     const from = await center(page, '[data-testid="puzzle-tray-piece"]:nth-child(3)');
@@ -106,5 +119,78 @@ test.describe('Magic Puzzle drag with touch', () => {
     expect(await tray.evaluate((el) => el.scrollLeft)).toBeGreaterThan(50);
     await expect(page.getByTestId('puzzle-tray-piece')).toHaveCount(16);
     await expect(page.locator('[data-puzzle-slot] [data-testid="puzzle-tray-piece"]')).toHaveCount(0);
+  });
+});
+
+// One tile per picture in public/puzzles (src/data/puzzleImages.ts).
+const PUZZLE_COUNT = readdirSync(new URL('../public/puzzles/', import.meta.url)).filter((f) => f.endsWith('.svg')).length;
+
+test.describe('Magic Puzzle gallery', () => {
+  const columns = (page: Page) =>
+    page.getByTestId('puzzle-gallery-grid').evaluate((el) => el.ownerDocument.defaultView!.getComputedStyle(el).gridTemplateColumns.split(' ').length);
+
+  test('opens on a picture grid that never scrolls sideways', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await page.goto('/');
+    await page.getByTestId('launch-puzzle').click();
+    const tiles = page.getByTestId('puzzle-tile');
+    await expect(tiles).toHaveCount(PUZZLE_COUNT);
+    const box = await tiles.first().boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(96);
+    expect(Math.abs(box!.width - box!.height)).toBeLessThanOrEqual(1);
+    const overflow = await page.locator('main').evaluate((main) => {
+      const page = main.ownerDocument.scrollingElement!;
+      return { scroll: page.scrollWidth, client: page.clientWidth, main: main.scrollWidth - main.clientWidth };
+    });
+    expect(overflow.scroll).toBeLessThanOrEqual(overflow.client);
+    expect(overflow.main).toBeLessThanOrEqual(0);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect.poll(() => columns(page)).toBe(3);
+    await page.setViewportSize({ width: 820, height: 1180 });
+    await expect.poll(() => columns(page)).toBe(4);
+  });
+
+  test('a tile starts its puzzle and Back returns to the same scroll spot', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await page.getByTestId('launch-puzzle').click();
+    const main = page.locator('main');
+    const last = page.getByTestId('puzzle-tile').last();
+    await last.scrollIntoViewIfNeeded();
+    const scrolled = await main.evaluate((el) => el.scrollTop);
+    expect(scrolled).toBeGreaterThan(0);
+
+    await last.click();
+    await expect(page.getByTestId('puzzle-gallery')).toHaveCount(0);
+    await expect(page.getByTestId('puzzle-tray-piece').first()).toBeVisible();
+    await expect(page.getByTestId('difficulty-easy')).toBeVisible();
+
+    const pill = await page.getByTestId('puzzle-back').boundingBox();
+    expect(pill!.height).toBeGreaterThanOrEqual(44);
+    await page.getByTestId('puzzle-back').click();
+    await expect(page.getByTestId('puzzle-gallery')).toBeVisible();
+    expect(Math.abs((await main.evaluate((el) => el.scrollTop)) - scrolled)).toBeLessThanOrEqual(1);
+
+    // Android's hardware Back (Capacitor's App backButton event) does the same from a puzzle.
+    const hardwareBack = () =>
+      page.evaluate(() => {
+        const cap = (globalThis as unknown as { Capacitor: { Plugins: { App: { notifyListeners: (e: string, d: unknown) => Promise<void> } } } }).Capacitor;
+        return cap.Plugins.App.notifyListeners('backButton', { canGoBack: false });
+      });
+    await last.click();
+    await expect(page.getByTestId('puzzle-tray-piece').first()).toBeVisible();
+    await hardwareBack();
+    await expect(page.getByTestId('puzzle-gallery')).toBeVisible();
+    expect(Math.abs((await main.evaluate((el) => el.scrollTop)) - scrolled)).toBeLessThanOrEqual(1);
+
+    // From the gallery, hardware Back leaves the game as it always did.
+    await hardwareBack();
+    await expect(page.getByTestId('launch-puzzle')).toBeVisible();
+    await page.getByTestId('launch-puzzle').click();
+
+    // Back from the gallery leaves the game, as before.
+    await page.getByTestId('home-button').click();
+    await expect(page.getByTestId('launch-puzzle')).toBeVisible();
   });
 });

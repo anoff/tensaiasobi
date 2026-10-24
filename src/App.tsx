@@ -114,6 +114,10 @@ function AppContent() {
         setCelebratingCoupon(null);
         return;
       }
+      // A game with its own inner screen (Magic Puzzle's gallery) can take Back by cancelling this event.
+      if (isGameId(currentScreen) && !window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
+        return;
+      }
       if (currentScreen !== 'menu') {
         setCurrentScreen('menu');
         return;

@@ -388,6 +388,7 @@ export const ja: TranslationSchema = {
     victory: "🎉 すごい！パズルが かんせい したよ！",
     preview: "おてほんを みる 🖼️",
     selectImage: "えを えらんでね：",
+    gallery: "えを えらぶ",
     rainbow: "にじ",
     space: "うちゅうロケット",
     dino: "きょうりゅう",

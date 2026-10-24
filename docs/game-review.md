@@ -2,7 +2,8 @@
 
 A pass over all 19 games plus the open issues, aimed at the "some games are too
 hard" feedback. The result: one merge, difficulty fixes in seven games, and a home
-screen sorted into four categories.
+screen sorted into four categories. With the games added since, the menu now has
+26 games.
 
 ## What the open issues say
 
@@ -25,7 +26,7 @@ games use chalk, pebble and coal (white, grey, black). Only the fun shelf is
 
 | Category | Colour | Preschool (🧸) | School (🎒) |
 |---|---|---|---|
-| 🔢 Numbers | butter | Math Pop, Number Train, Fair Share Picnic | + Balance |
+| 🔢 Numbers | butter | Math Pop, Number Train, Fair Share Picnic | Math Pop, Fair Share Picnic, Balance |
 | 🔤 Language | coral | Letters | Letters, First Sound, Word Chain |
 | 🧠 Logic | leaf | Odd One, Match, Shadow, Pearl Finder, Magic Puzzle | Odd One, Match, Magic Puzzle, Tower Sort |
 | 🎲 Just for fun | chalk / pebble / coal | Doodle, Trace, Mazes, Emoji Match, City Dispatch, My Town, Coupons | Mazes, Emoji Match, City Dispatch, My Town, Coupons |
@@ -35,7 +36,7 @@ games use chalk, pebble and coal (white, grey, black). Only the fun shelf is
 | Game | Problem | Change |
 |---|---|---|
 | **Math Pop + Fruit Math Pop** | Two tiles did the same thing (add/subtract, three answer lines). Preschool "easy" Math Pop asked for sums up to 18 with no pictures. School "hard" asked for 87 + 58. | **Merged into one Math Pop.** Easy: add within 5, with fruit pictures and dot tallies. Medium: ± within 10, pictures come back after a miss. Hard: ± within 20, bridging ten. Logic is now in `mathPopLogic.ts` with unit tests. |
-| **Word Chain** | Always 9 pictures with no words, so a child had to name 9 emojis and know their first letters | Levels added. Easy: 3 labelled pictures. Medium (school start): 4 labelled pictures. Hard: 6 pictures without words, the old challenge. The Japanese ん trap only appears on hard. |
+| **Word Chain** | Always 9 pictures with no words, so a child had to name 9 emojis and know their first letters | Levels added. Easy: 3 labelled pictures. Medium (school start): 4 pictures without words; after one wrong pick the words appear on all of them for the rest of the round, like Math Pop medium's pictures (#89). Hard: 6 pictures without words, the old challenge; a wrong pick reveals nothing. The Japanese ん trap only appears on hard. |
 | **Balance** | A weight's value was hidden until you picked it up, so the child had to guess that a book weighs 3 | Easy and medium show dots on every weight. Hard keeps the hidden weights. |
 | **Shadow** | 🌙 looked like 🍌 (#57). Medium had 5 choices and an oversized shadow, which was too hard for preschool. | Moon removed. Medium: 4 choices at normal size. Hard: 5 choices. |
 | **Pearl Finder** | See-through bubbles didn't hide anything (#57, #67) | Bubbles are now opaque white-blue. |
@@ -48,7 +49,7 @@ games use chalk, pebble and coal (white, grey, black). Only the fun shelf is
 
 ## New games (added after the review)
 
-These five fill the gaps the review found. After adding them, preschool has at least
+These fill the gaps the review found. After adding them, preschool has at least
 two games in every learning category, and school has three or more.
 
 | Game | Category | Who | Fills | Levels |
@@ -57,7 +58,7 @@ two games in every learning category, and school has three or more.
 | **Letter Pairs 🔠** | Language | both | letter recognition | Letter shapes only (pictures are First Sound's job): upper→lower case (B→b) → lower→upper case (b→B) → upper→lower case among look-alikes (b/d/p/q, m/n, u/n, i/l). Japanese: hiragana→katakana (あ→ア) → katakana→hiragana → hiragana→romaji. Korean: same letter → first consonant (가→ㄱ) → consonant → syllable |
 | **Syllable Drum 🥁** | Language | both | hearing syllables | 1–2 syllables with the word split into beats → 1–3 with the whole word → 2–4 with the picture only. Japanese counts morae, Korean counts blocks |
 | **Pattern Train 🚃** | Logic | both | sequences | AB → AAB/ABB/ABC → AABB/ABCD with the gap anywhere |
-| **Animal Genie 🧞** | Logic | both | yes/no deduction | 10 → 20 → 33 animals. Offline Akinator: picks the question that splits the remaining animals most evenly. Easy/medium fade out animals that no longer fit; hard keeps them hidden. Tolerates a wrong answer; after 3 wrong guesses the child wins |
+| **Animal Genie 🧞** | Just for fun | both | yes/no deduction | 10 → 20 → 33 animals. Offline Akinator: picks the question that splits the remaining animals most evenly. Easy/medium fade out animals that no longer fit; hard keeps them hidden. Tolerates a wrong answer; after 3 wrong guesses the child wins |
 | **Simon Lights 🐵** | Logic | both | working memory | 4 animals on every level. The sequence starts short and gains a step per repeat: 2 → 4 (slow) → 3 → 6 (medium) → 4 → 8 (fast). Watch and your-turn are separate states and taps are ignored while watching. A miss replays the same sequence slowly (easy/medium; after 2 misses on a step the right animal is highlighted); on hard (and in parent challenges) it starts a new sequence of the same length. 2 / 6 / 10 stars per finished run |
 | **Sink or Float 🛁** | Logic | both | cause and effect (buoyancy) | 2 obvious objects one at a time → 3–4 objects in any order → 4–5 objects with surprises (🚢 floats, 🥚 sinks), all predicted before the drops. The result is icons only (no text) and appears after the fall and splash: 🌊 / ⬇️ for what happened next to ✅ / 💡 for the guess, held for 1.2 s. A miss shows the true result, then a retry; on hard (and in parent challenges) a miss ends the round with no stars |
 | **Dice Flash 🎲** | Numbers | both | subitizing (seeing an amount at a glance) | 1–3 dots in die faces (2 s flash, 3 answers) → 1–6 die faces (1.5 s, 4 answers) → 1–10 scattered dots (1 s, 4 answers). The blank white card is the die: it is tossed (800 ms) and lands as the flash starts, and neither card nor dots move while counting; no dice emoji, and no die picture at the end of a set. Answer buttons only appear after the flash. A miss shows the dots again for 3 s and repeats the flash; on hard (and in parent challenges) it gives a fresh flash. 2 / 3 / 4 stars per right answer, 5 flashes per set |

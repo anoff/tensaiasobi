@@ -388,6 +388,7 @@ export const de: TranslationSchema = {
     victory: "🎉 Super! Du hast das Puzzle gelöst!",
     preview: "Bild anzeigen 🖼️",
     selectImage: "Wähle ein Bild aus:",
+    gallery: "Alle Bilder",
     rainbow: "Regenbogen",
     space: "Weltraum-Rakete",
     dino: "Freundlicher Dino",
