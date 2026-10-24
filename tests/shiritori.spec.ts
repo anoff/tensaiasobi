@@ -271,7 +271,7 @@ test.describe('Word Chain fits a phone screen', () => {
     }
   }
 
-  async function pickWrong(page: Page, count: number, lang: 'en' | 'ja' | 'fr' = 'en') {
+  async function pickWrong(page: Page, count: number, lang: 'en' | 'de' | 'ja' | 'fr' | 'ko' = 'en') {
     const activeWord = await page.getByTestId('active-card').getAttribute('data-word');
     const activeEndChar = getEndChar(activeWord || '', lang);
     const options = page.getByTestId('shiritori-option');
@@ -285,7 +285,7 @@ test.describe('Word Chain fits a phone screen', () => {
     throw new Error('no wrong option on the board');
   }
 
-  async function openWordChain(page: Page, lang: 'en' | 'ja' | 'fr' = 'en') {
+  async function openWordChain(page: Page, lang: 'en' | 'de' | 'ja' | 'fr' | 'ko' = 'en') {
     await page.goto('/');
     await page.getByTestId('age-mode-big').click();
     await switchLanguage(page, lang);
@@ -302,7 +302,8 @@ test.describe('Word Chain fits a phone screen', () => {
     expect(speech!.y + speech!.height).toBeLessThan(firstOption!.y);
   }
 
-  // Both counter chips stay on one line (28 px; a wrapped label is 44 px).
+  // Both counter chips stay on one line (28 px; a wrapped label is 44 px),
+  // and no label is cut by the ellipsis safety net.
   async function expectCountersOnOneLine(page: Page) {
     const counters = page.getByTestId('shiritori-counter');
     await expect(counters).toHaveCount(2);
@@ -310,11 +311,18 @@ test.describe('Word Chain fits a phone screen', () => {
       const box = await counters.nth(i).boundingBox();
       expect(box!.height).toBeLessThan(36);
     }
+    const labels = page.getByTestId('shiritori-counter-label');
+    await expect(labels).toHaveCount(2);
+    for (let i = 0; i < 2; i++) {
+      const { scrollWidth, clientWidth } = await labels.nth(i).evaluate(
+        (el) => ({ scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }));
+      expect(scrollWidth, await labels.nth(i).innerText()).toBeLessThanOrEqual(clientWidth);
+    }
   }
 
-  // Japanese has the longest button and help lines, and French the longest
-  // counter labels, so they are the real risks.
-  for (const lang of ['en', 'ja', 'fr'] as const) {
+  // Every locale: Japanese has the longest button and help lines, French had
+  // the longest counter labels.
+  for (const lang of ['en', 'de', 'ja', 'fr', 'ko'] as const) {
     for (const mode of ['solo', 'panda'] as const) {
       test(`390x844 ${lang.toUpperCase()} ${mode}: medium, medium after a miss and hard show every option without scrolling`, async ({ page }) => {
         await page.setViewportSize({ width: 390, height: 844 });

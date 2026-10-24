@@ -346,13 +346,13 @@ export function Shiritori() {
         />
 
         {/* Counters: one line in every language; a label too long for the row
-            (French) is cut with an ellipsis, the number always shows. */}
+            is cut with an ellipsis as a safety net; the number always shows. */}
         <div className="flex gap-4 items-center justify-center">
           <span data-testid="shiritori-counter" className="bg-amber-100 text-amber-600 font-extrabold px-4 py-1 rounded-full border-2 border-amber-300 text-xs shadow-sm flex items-center min-w-0 whitespace-nowrap animate-pulse">
-            <span className="truncate">✨ {t.shiritori.streak}</span>: {streak}
+            <span data-testid="shiritori-counter-label" className="truncate">✨ {t.shiritori.streak}</span>: {streak}
           </span>
           <span data-testid="shiritori-counter" className="bg-indigo-100 text-indigo-600 font-extrabold px-4 py-1 rounded-full border-2 border-indigo-300 text-xs shadow-sm flex items-center min-w-0 whitespace-nowrap">
-            <span className="truncate">🏆 {t.shiritori.highScore}</span>: {highScore}
+            <span data-testid="shiritori-counter-label" className="truncate">🏆 {t.shiritori.highScore}</span>: {highScore}
           </span>
         </div>
       </div>
