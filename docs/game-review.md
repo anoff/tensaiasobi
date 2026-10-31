@@ -23,13 +23,15 @@ things are too big for a phone, too hard to see, or too hard to read.
 Each learning category has one of the three existing toy colours. Just-for-fun
 games use chalk, pebble and coal (white, grey, black). Only the fun shelf is
 `kind: 'play'`, so a learn-first challenge hides exactly that section.
+The 📒 Sticker Book has its own section above the shelves. It replaced My Town
+(#97): stars now buy sticker accessories.
 
 | Category | Colour | Preschool (🧸) | School (🎒) |
 |---|---|---|---|
 | 🔢 Numbers | butter | Math Pop, Number Train, Fair Share Picnic | Math Pop, Fair Share Picnic, Balance |
 | 🔤 Language | coral | Letters | Letters, First Sound, Word Chain |
 | 🧠 Logic | leaf | Odd One, Match, Shadow, Pearl Finder, Magic Puzzle | Odd One, Match, Magic Puzzle, Tower Sort |
-| 🎲 Just for fun | chalk / pebble / coal | Doodle, Trace, Mazes, Emoji Match, City Dispatch, My Town, Coupons | Mazes, Emoji Match, City Dispatch, My Town, Coupons |
+| 🎲 Just for fun | chalk / pebble / coal | Doodle, Trace, Mazes, Emoji Match, City Dispatch, Coupons | Mazes, Emoji Match, City Dispatch, Coupons |
 
 ## Changes per game
 

@@ -39,7 +39,7 @@ are canvas/SVG/CSS which run at full speed in WKWebView.
 7. `src/index.css` → add safe-area utilities using `env(safe-area-inset-*)`.
 8. `src/App.tsx:271` → apply safe-area padding to header/main; disable
    overscroll bounce, double-tap zoom, long-press callout, and text selection in games.
-9. Verify `localStorage` keys (streaks, stars, town, vouchers) persist in WKWebView (no change expected).
+9. Verify `localStorage` keys (streaks, stars, stickers, vouchers) persist in WKWebView (no change expected).
 
 ## Phase 3 — Native polish
 10. Create a 1024×1024 source icon (required by `@capacitor/assets`).
