@@ -4,8 +4,8 @@ import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
 import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
-import { getItemsByCategory } from '../data/townItems';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 import { useLater } from '../hooks/useLater';
 
@@ -50,23 +50,16 @@ function getDifficultySettings(diff: GameDifficulty) {
   }
 }
 
-function pickWeightedFiller(): string {
-  // Bias heavily toward buildings (especially houses) and away from flags.
-  const buildings = getItemsByCategory('buildings');
-  const nature = getItemsByCategory('nature');
-  const decorations = getItemsByCategory('decorations');
-  const house = buildings.find((item) => item.id === 'house');
-  const otherBuildings = buildings.filter((item) => item.id !== 'house');
-  const nonFlagDecorations = decorations.filter((item) => item.id !== 'flag');
+/** Filler emoji for the city grid, biased heavily toward houses (moved here from the old town shop). */
+const FILLER_POOL: readonly string[] = [
+  ...Array<string>(6).fill('🏠'),
+  '🏪', '🏫', '🏰', // other buildings
+  '🌳', '🌷', '🌿', '💧', // nature
+  '⛲', '🏮', '🏗️', // decorations, no flag
+];
 
-  const houseEmoji = house?.emoji ?? '🏠';
-  const pool: string[] = [
-    ...Array(6).fill(houseEmoji),
-    ...otherBuildings.map((item) => item.emoji),
-    ...nature.map((item) => item.emoji),
-    ...nonFlagDecorations.map((item) => item.emoji),
-  ];
-  return pool[Math.floor(Math.random() * pool.length)];
+function pickWeightedFiller(): string {
+  return FILLER_POOL[Math.floor(Math.random() * FILLER_POOL.length)];
 }
 
 function generateCity(size: number): Cell[][] {
@@ -87,6 +80,7 @@ function generateCity(size: number): Cell[][] {
 
 export function DispatchGame() {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const tallyRound = useRoundTally();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
   const [grid, setGrid] = useState<Cell[][]>([]);
@@ -197,6 +191,7 @@ export function DispatchGame() {
       return updatedScore;
     });
     onStarEarned?.(1);
+    tallyRound();
     playSuccess();
 
     setTimeout(() => {
@@ -206,7 +201,7 @@ export function DispatchGame() {
         setShowConfetti(false);
       }
     }, 400);
-  }, [onStarEarned, playSuccess]);
+  }, [onStarEarned, playSuccess, tallyRound]);
 
   const handleVehicleSelect = (type: ServiceType) => {
     playPop();

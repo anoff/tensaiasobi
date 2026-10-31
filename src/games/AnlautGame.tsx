@@ -8,6 +8,7 @@ import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
 import { NotebookChoice, NotebookSheet } from '../components/Notebook';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 import type { GameDifficulty } from '../types/game';
 import FirstSoundGap from './FirstSoundGap';
@@ -78,6 +79,7 @@ const generateOptions = (
  */
 export function AnlautGame() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
+  const tallyRound = useRoundTally();
   const { language, t } = useTranslation();
   const [level, setLevel] = useAgeDifficulty();
   const changeLevel = (next: GameDifficulty) => {
@@ -120,6 +122,7 @@ export function AnlautGame() {
       setShowConfetti(true);
       playSuccess();
       onStarEarned?.(2);
+      tallyRound();
 
       registerCorrect();
       // Let the green wash on the chosen line land before swapping in Continue.

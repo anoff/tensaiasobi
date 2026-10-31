@@ -92,6 +92,7 @@ describe('game catalog', () => {
     localStorage.setItem('dobble_high_solo_zen_easy', '9');
     localStorage.setItem('tower_sort_best_moves_easy_fruit', '12');
     localStorage.setItem('gamification_stars', '80');
+    localStorage.setItem('gamification_stickers', '{"version":1}');
     localStorage.setItem('challenge_active', 'true');
     localStorage.setItem('settings_sound_enabled', 'false');
     localStorage.setItem('app_language', 'ja');
@@ -103,6 +104,7 @@ describe('game catalog', () => {
     expect(localStorage.getItem('dobble_high_solo_zen_easy')).toBeNull();
     expect(localStorage.getItem('tower_sort_best_moves_easy_fruit')).toBeNull();
     expect(localStorage.getItem('gamification_stars')).toBeNull();
+    expect(localStorage.getItem('gamification_stickers')).toBeNull();
     expect(localStorage.getItem('challenge_active')).toBeNull();
     expect(localStorage.getItem('settings_sound_enabled')).toBe('false');
     expect(localStorage.getItem('app_language')).toBe('ja');

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import { NotebookChoice, NotebookSheet } from '../components/Notebook';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { useLater } from '../hooks/useLater';
 import { useTranslation } from '../hooks/useTranslation';
 import { freshRound } from '../utils/freshRound';
@@ -22,6 +23,7 @@ interface FirstSoundGapProps {
  */
 export default function FirstSoundGap({ onCorrect, onWrong }: FirstSoundGapProps) {
   const { playSuccess, playError, onStarEarned } = useGameFX();
+  const tallyRound = useRoundTally();
   const { language, t } = useTranslation();
   const items = t.anlautGame.items as Record<string, string>;
   // Every locale dictionary has plenty of fitting words (unit-tested), so null never reaches the UI.
@@ -47,6 +49,7 @@ export default function FirstSoundGap({ onCorrect, onWrong }: FirstSoundGapProps
       setSolved(true);
       playSuccess();
       onStarEarned?.(MISSING_LETTER_STARS);
+      tallyRound();
       onCorrect();
       later(nextRound, NEXT_MS);
       return;

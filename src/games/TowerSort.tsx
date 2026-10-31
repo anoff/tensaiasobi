@@ -39,7 +39,7 @@ const TOWER_COLORS = [
 ];
 
 export function TowerSort() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
   const [themeIndex, setThemeIndex] = useState(0);
@@ -130,6 +130,7 @@ export function TowerSort() {
       setShowConfetti(true);
       playSuccess();
       onStarEarned?.(config.starsAward);
+      onRoundComplete?.();
 
       const currentBest = loadBestMoves(difficulty, theme.id);
       if (currentBest === 0 || newMoveCount < currentBest) {

@@ -1,7 +1,7 @@
 interface LauncherGlyphProps {
   emoji: string;
   src?: string;
-  /** Town / wide buttons can use a slightly smaller glyph. */
+  /** Wide buttons can use a slightly smaller glyph. */
   sizeClass?: string;
 }
 

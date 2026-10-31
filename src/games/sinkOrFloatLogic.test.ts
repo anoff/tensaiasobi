@@ -4,7 +4,7 @@ import { seededRand } from '../utils/random';
 import { starMultiplier } from '../utils/difficulty';
 import {
   COMMON_FLOATS, COMMON_SINKS, OBJECT_COUNTS, OBVIOUS_FLOATS, OBVIOUS_SINKS, SURPRISING, SURPRISING_FLOATS, SURPRISING_SINKS,
-  afterWrong, allPredicted, flowFor, generateSinkFloatRound, isCorrectPrediction, resolveBatch, sinkFloatRoundKey, sinkFloatStars, trueResult,
+  afterBatch, afterWrong, allPredicted, flowFor, generateSinkFloatRound, isCorrectPrediction, resolveBatch, sinkFloatRoundKey, sinkFloatStars, trueResult,
   type Prediction,
 } from './sinkOrFloatLogic';
 
@@ -125,5 +125,19 @@ describe('flow, stars and wrong answers', () => {
     expect(afterWrong('hard')).toBe('fresh');
     expect(afterWrong('easy', true)).toBe('fresh');
     expect(afterWrong('medium', true)).toBe('fresh');
+  });
+});
+
+describe('Sink or Float hard batch end (no fail screen)', () => {
+  const r = (correct: boolean) => ({ correct }) as Parameters<typeof afterBatch>[0][number];
+  it('completes when every guess was right', () => {
+    expect(afterBatch([r(true), r(true)])).toBe('complete');
+  });
+  it('keeps right guesses and retries only the missed objects', () => {
+    expect(afterBatch([r(true), r(false)])).toBe('retryMissed');
+  });
+  it('keeps the strict fresh round in parent challenges', () => {
+    expect(afterBatch([r(true), r(false)], true)).toBe('fresh');
+    expect(afterBatch([r(true)], true)).toBe('complete');
   });
 });

@@ -1,0 +1,41 @@
+{
+ "host": "panda",
+ "characters": [
+  {
+   "id": "owl",
+   "shelf": "numbers",
+   "poses": {
+    "idle": "owl_idle.png",
+    "cheer": "owl_cheer.png",
+    "prop": "owl_prop.png"
+   }
+  },
+  {
+   "id": "fox",
+   "shelf": "language",
+   "poses": {
+    "idle": "fox_idle.png",
+    "cheer": "fox_cheer.png",
+    "prop": "fox_prop.png"
+   }
+  },
+  {
+   "id": "tortoise",
+   "shelf": "logic",
+   "poses": {
+    "idle": "tortoise_idle.png",
+    "cheer": "tortoise_cheer.png",
+    "prop": "tortoise_prop.png"
+   }
+  },
+  {
+   "id": "panda",
+   "shelf": "play",
+   "poses": {
+    "idle": "panda_idle.png",
+    "cheer": "panda_cheer.png",
+    "prop": "panda_prop.png"
+   }
+  }
+ ]
+}

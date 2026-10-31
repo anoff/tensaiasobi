@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useSound } from './hooks/useSound';
@@ -6,7 +6,7 @@ import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
 import { BlockTile } from './components/BlockTile';
 import { AgeSwitch } from './components/AgeSwitch';
-import { CORAL, LEAF, BUTTER, INK, PLAY_MAT_STYLE } from './theme/blockTable';
+import { CORAL, LEAF, BUTTER, CHALK, INK, PLAY_MAT_STYLE } from './theme/blockTable';
 import { CATEGORY_EMOJI, categoryFill } from './theme/categories';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
@@ -21,14 +21,18 @@ import { FlyUpStar } from './components/FlyUpStar';
 import { CouponShop } from './components/CouponShop';
 import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedeemDialogs';
 import { couponLabel, type Coupon } from './types/gamification';
-import { TownBuilder } from './games/TownBuilder';
 import { GAMES, GAME_CATEGORIES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, gamesInCategory, isGameId, type AgeBand, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
+import { useStickers } from './hooks/useStickers';
+import StickerBook from './components/stickers/StickerBook';
+import { StickerAward } from './components/stickers/StickerAward';
+import { StickerHomeCard } from './components/stickers/StickerHomeCard';
+import { accessoryById, bookTotals, collectibleById } from './data/stickers';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 import { formatRemaining, useSessionTimer } from './hooks/useSessionTimer';
 
-type Screen = 'menu' | 'town' | 'coupons' | 'settings' | 'session' | GameId;
+type Screen = 'menu' | 'stickers' | 'coupons' | 'settings' | 'session' | GameId;
 type ParentGateNext = 'settings' | 'session';
 
 function AppContent() {
@@ -38,13 +42,17 @@ function AppContent() {
   const [showParentGate, setShowParentGate] = useState(false);
   const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
 
-  const { playPop, playSuccess, playError, playAnimalSound, playCarHonk, playDoorChime, playWindBreeze, playSimonTone } =
-    useSound(soundEnabled, vibrationEnabled);
+  const { playPop, playSuccess, playError, playSimonTone } = useSound(soundEnabled, vibrationEnabled);
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
   const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
+  const stickers = useStickers();
+  const { completeRound, buyAccessory } = stickers;
+  /** Stickers won and waiting for their award overlay, oldest first. */
+  const [awardQueue, setAwardQueue] = useState<string[]>([]);
+  const finishAward = useCallback(() => setAwardQueue((q) => q.slice(1)), []);
   const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
   const [storedAgeBand, setAgeBand] = useLocalStorage<string>('settings_age_band', 'little');
   // Older installs may still hold 'all'; the home switch only knows two bands.
@@ -76,6 +84,27 @@ function AppContent() {
   const handleStarEarned = (amount: number) => {
     if (challengeFocusActive) addChallengeStars(amount);
     else addStars(amount);
+  };
+
+  /** A finished round earns the next missing sticker on that game's shelf (5 a day, never removed). */
+  const handleRoundComplete = (gameId: GameId) => {
+    const shelf = GAMES.find((game) => game.id === gameId)?.category;
+    if (!shelf) return;
+    const awarded = completeRound(shelf);
+    if (awarded) setAwardQueue((q) => [...q, awarded]);
+  };
+
+  const handleBuyAccessory = (accessoryId: string): boolean => {
+    const accessory = accessoryById(accessoryId);
+    if (!accessory || stickers.book.ownedAccessories.includes(accessoryId)) return false;
+    if (stars < accessory.price) {
+      playError();
+      return false;
+    }
+    spendStars(accessory.price);
+    buyAccessory(accessoryId);
+    playSuccess();
+    return true;
   };
 
   useEffect(() => {
@@ -156,6 +185,8 @@ function AppContent() {
     clearPersistedProgress();
     resetStars();
     resetCoupons();
+    stickers.resetStickers();
+    setAwardQueue([]);
     cancelChallenge();
     playSuccess();
   };
@@ -181,7 +212,8 @@ function AppContent() {
 
   const renderActiveScreen = () => {
     if (isGameId(currentScreen)) {
-      const Game = GAMES.find((game) => game.id === currentScreen)?.Component;
+      const gameId = currentScreen;
+      const Game = GAMES.find((game) => game.id === gameId)?.Component;
       if (!Game) return null;
       return (
         <GameFXProvider
@@ -191,6 +223,7 @@ function AppContent() {
             playError,
             playSimonTone,
             onStarEarned: handleStarEarned,
+            onRoundComplete: () => handleRoundComplete(gameId),
             challengeMode: challengeFocusActive,
             ageBand,
           }}
@@ -201,18 +234,18 @@ function AppContent() {
     }
 
     switch (currentScreen) {
-      case 'town':
+      case 'stickers':
         return (
-          <TownBuilder
+          <StickerBook
+            book={stickers.book}
             stars={stars}
-            spendStars={spendStars}
-            addStars={(amt) => addStars(amt)}
+            onBuyAccessory={handleBuyAccessory}
+            onPlaceAccessory={stickers.placeAccessory}
+            onRemoveAccessory={stickers.removeAccessory}
+            onPlaceScenePiece={stickers.placeScenePiece}
+            onSeen={stickers.markSeen}
             playPop={playPop}
             playSuccess={playSuccess}
-            playAnimalSound={playAnimalSound}
-            playCarHonk={playCarHonk}
-            playDoorChime={playDoorChime}
-            playWindBreeze={playWindBreeze}
           />
         );
       case 'coupons':
@@ -413,11 +446,30 @@ function AppContent() {
                 }}
               />
 
+              {!challengeFocusActive && (
+                <section data-testid="category-stickers" className="space-y-3">
+                  <h2 className="flex items-center gap-2 text-lg font-black tracking-tight" style={{ color: INK }}>
+                    <span
+                      aria-hidden
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-xl border-[3px] text-lg leading-none"
+                      style={{ backgroundColor: CHALK, borderColor: INK }}
+                    >
+                      📒
+                    </span>
+                    {t.menu.stickerBook}
+                  </h2>
+                  <StickerHomeCard
+                    book={stickers.book}
+                    totals={bookTotals(stickers.book)}
+                    onClick={() => handleScreenChange('stickers')}
+                  />
+                </section>
+              )}
+
               {GAME_CATEGORIES.map((category) => {
                 const games = gamesInCategory(visibleGames, category);
                 const rewards = category === 'play' && !challengeFocusActive
                   ? [
-                      { id: 'town', emoji: '🏘️', label: t.menu.town, testid: 'launch-town', screen: 'town' as const },
                       { id: 'coupons', emoji: '🎟️', label: t.menu.coupons, testid: 'launch-coupons', screen: 'coupons' as const },
                     ]
                   : [];
@@ -595,6 +647,11 @@ function AppContent() {
           </div>
         </div>
       )}
+
+      {awardQueue.length > 0 && (() => {
+        const sticker = collectibleById(awardQueue[0]);
+        return sticker ? <StickerAward key={awardQueue[0]} sticker={sticker} onDone={finishAward} /> : null;
+      })()}
 
       {sessionLocked && currentScreen !== 'settings' && currentScreen !== 'session' && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/70 p-6" data-testid="session-locked">

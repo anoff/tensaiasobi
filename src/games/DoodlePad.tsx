@@ -24,7 +24,7 @@ const PRESETS_COLORS = [
 ];
 
 export function DoodlePad() {
-  const { playPop } = useGameFX();
+  const { playPop, onRoundComplete } = useGameFX();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
@@ -185,6 +185,8 @@ export function DoodlePad() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      // Saving a drawing is Doodle Pad's "finished round" for the Sticker Book.
+      onRoundComplete?.();
     } catch (e) {
       console.error('Error downloading drawing:', e);
     }

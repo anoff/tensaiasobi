@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGameFX } from './gameFXContext';
+import { useRoundTally } from './useRoundTally';
 import { useAgeDifficulty } from './useAgeDifficulty';
 import { useLater } from './useLater';
 import { wrongMeansNewRound } from '../utils/difficulty';
@@ -21,6 +22,7 @@ export function useChoiceRound<R>(
   roundKey: (round: R) => string,
 ) {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
+  const tallyRound = useRoundTally();
   const [level, setLevel] = useAgeDifficulty();
   const [round, setRound] = useState<R>(() => generate(level));
   const [roundNo, setRoundNo] = useState(0);
@@ -51,6 +53,7 @@ export function useChoiceRound<R>(
       setSolved(true);
       playSuccess();
       onStarEarned?.(stars[level]);
+      tallyRound();
       later(() => nextRound(level), NEXT_MS);
       return;
     }

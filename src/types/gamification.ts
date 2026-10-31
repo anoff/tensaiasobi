@@ -1,30 +1,5 @@
 /** Shared types for the gamification system */
 
-/** A single cell in the town grid */
-export interface TownCell {
-  emoji: string;
-  itemId: string;
-}
-
-/** The full town grid state persisted in localStorage */
-export interface TownGrid {
-  cells: (TownCell | null)[][];
-}
-
-/** Categories for shop items */
-export type ShopCategory = 'buildings' | 'nature' | 'vehicles' | 'animals' | 'decorations';
-
-/** A purchasable item for the town */
-export interface ShopItem {
-  id: string;
-  emoji: string;
-  nameKey: string;
-  category: ShopCategory;
-  cost: number;
-  /** CSS animation class applied to this item in the town grid */
-  animation?: string;
-}
-
 /** How big of a reward a coupon represents, used to suggest a fitting challenge length */
 export type CouponRewardSize = 'small' | 'medium' | 'large';
 
@@ -59,14 +34,4 @@ export function couponLabel(coupon: Coupon, names: Record<CouponNameKey, string>
   if (coupon.customName) return coupon.customName;
   if (!coupon.nameKey) return coupon.id;
   return names[coupon.nameKey];
-}
-
-/** Default size of the town grid */
-export const TOWN_GRID_SIZE = 6;
-
-/** Create an empty town grid */
-export function createEmptyGrid(): (TownCell | null)[][] {
-  return Array.from({ length: TOWN_GRID_SIZE }, () =>
-    Array.from({ length: TOWN_GRID_SIZE }, () => null)
-  );
 }

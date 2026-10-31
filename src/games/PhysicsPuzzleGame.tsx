@@ -81,7 +81,7 @@ function MassDots({ mass }: { mass: number }) {
 }
 
 export function PhysicsPuzzleGame() {
-  const { playPop, playSuccess, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, onStarEarned, onRoundComplete } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
   const [weights, setWeights] = useState<Weight[]>(() => buildWeights(difficulty));
@@ -104,9 +104,10 @@ export function PhysicsPuzzleGame() {
       setShowConfetti(true);
       playSuccess();
       onStarEarned?.(settings.starMultiplier);
+      onRoundComplete?.();
       setTimeout(() => setShowConfetti(false), 1500);
     }
-  }, [leftMass, rightMass, solved, playSuccess, onStarEarned, settings.starMultiplier]);
+  }, [leftMass, rightMass, solved, playSuccess, onStarEarned, onRoundComplete, settings.starMultiplier]);
 
   const initGame = useCallback(() => {
     setWeights(buildWeights(difficulty));

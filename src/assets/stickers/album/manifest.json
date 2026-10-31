@@ -1,0 +1,519 @@
+{
+ "stickers": [
+  {
+   "id": "language_01",
+   "shelf": "language",
+   "file": "language_01.png",
+   "svg": "svg/language_01.svg",
+   "rim": "coral",
+   "label": "fox + letter block"
+  },
+  {
+   "id": "language_02",
+   "shelf": "language",
+   "file": "language_02.png",
+   "svg": "svg/language_02.svg",
+   "rim": "coral",
+   "label": "big + small block"
+  },
+  {
+   "id": "language_03",
+   "shelf": "language",
+   "file": "language_03.png",
+   "svg": "svg/language_03.svg",
+   "rim": "coral",
+   "label": "fox matches blocks"
+  },
+  {
+   "id": "language_04",
+   "shelf": "language",
+   "file": "language_04.png",
+   "svg": "svg/language_04.svg",
+   "rim": "coral",
+   "label": "fox + pencil (sample)"
+  },
+  {
+   "id": "language_05",
+   "shelf": "language",
+   "file": "language_05.png",
+   "svg": "svg/language_05.svg",
+   "rim": "coral",
+   "label": "fox writes in notebook"
+  },
+  {
+   "id": "language_06",
+   "shelf": "language",
+   "file": "language_06.png",
+   "svg": "svg/language_06.svg",
+   "rim": "coral",
+   "label": "drum"
+  },
+  {
+   "id": "language_07",
+   "shelf": "language",
+   "file": "language_07.png",
+   "svg": "svg/language_07.svg",
+   "rim": "coral",
+   "label": "fox drums"
+  },
+  {
+   "id": "language_08",
+   "shelf": "language",
+   "file": "language_08.png",
+   "svg": "svg/language_08.svg",
+   "rim": "coral",
+   "label": "apple in a speech bubble"
+  },
+  {
+   "id": "language_09",
+   "shelf": "language",
+   "file": "language_09.png",
+   "svg": "svg/language_09.svg",
+   "rim": "coral",
+   "label": "fox shows apple"
+  },
+  {
+   "id": "language_10",
+   "shelf": "language",
+   "file": "language_10.png",
+   "svg": "svg/language_10.svg",
+   "rim": "coral",
+   "label": "fox says the sound"
+  },
+  {
+   "id": "language_11",
+   "shelf": "language",
+   "file": "language_11.png",
+   "svg": "svg/language_11.svg",
+   "rim": "coral",
+   "label": "story book (sample)"
+  },
+  {
+   "id": "language_12",
+   "shelf": "language",
+   "file": "language_12.png",
+   "svg": "svg/language_12.svg",
+   "rim": "coral",
+   "label": "fox reads on tummy"
+  },
+  {
+   "id": "logic_01",
+   "shelf": "logic",
+   "file": "logic_01.png",
+   "svg": "svg/logic_01.svg",
+   "rim": "leaf",
+   "label": "shape sorter (sample)"
+  },
+  {
+   "id": "logic_02",
+   "shelf": "logic",
+   "file": "logic_02.png",
+   "svg": "svg/logic_02.svg",
+   "rim": "leaf",
+   "label": "tortoise has an idea"
+  },
+  {
+   "id": "logic_03",
+   "shelf": "logic",
+   "file": "logic_03.png",
+   "svg": "svg/logic_03.svg",
+   "rim": "leaf",
+   "label": "tortoise + puzzle piece"
+  },
+  {
+   "id": "logic_04",
+   "shelf": "logic",
+   "file": "logic_04.png",
+   "svg": "svg/logic_04.svg",
+   "rim": "leaf",
+   "label": "two puzzle pieces"
+  },
+  {
+   "id": "logic_05",
+   "shelf": "logic",
+   "file": "logic_05.png",
+   "svg": "svg/logic_05.svg",
+   "rim": "leaf",
+   "label": "maze card"
+  },
+  {
+   "id": "logic_06",
+   "shelf": "logic",
+   "file": "logic_06.png",
+   "svg": "svg/logic_06.svg",
+   "rim": "leaf",
+   "label": "tortoise + magnifier"
+  },
+  {
+   "id": "logic_07",
+   "shelf": "logic",
+   "file": "logic_07.png",
+   "svg": "svg/logic_07.svg",
+   "rim": "leaf",
+   "label": "shape tower"
+  },
+  {
+   "id": "logic_08",
+   "shelf": "logic",
+   "file": "logic_08.png",
+   "svg": "svg/logic_08.svg",
+   "rim": "leaf",
+   "label": "pattern beads"
+  },
+  {
+   "id": "logic_09",
+   "shelf": "logic",
+   "file": "logic_09.png",
+   "svg": "svg/logic_09.svg",
+   "rim": "leaf",
+   "label": "tortoise balances"
+  },
+  {
+   "id": "logic_10",
+   "shelf": "logic",
+   "file": "logic_10.png",
+   "svg": "svg/logic_10.svg",
+   "rim": "leaf",
+   "label": "shape house"
+  },
+  {
+   "id": "logic_11",
+   "shelf": "logic",
+   "file": "logic_11.png",
+   "svg": "svg/logic_11.svg",
+   "rim": "leaf",
+   "label": "tortoise stacks"
+  },
+  {
+   "id": "logic_12",
+   "shelf": "logic",
+   "file": "logic_12.png",
+   "svg": "svg/logic_12.svg",
+   "rim": "leaf",
+   "label": "pattern card"
+  },
+  {
+   "id": "numbers_01",
+   "shelf": "numbers",
+   "file": "numbers_01.png",
+   "svg": "svg/numbers_01.svg",
+   "rim": "butter",
+   "label": "balloon bunch"
+  },
+  {
+   "id": "numbers_02",
+   "shelf": "numbers",
+   "file": "numbers_02.png",
+   "svg": "svg/numbers_02.svg",
+   "rim": "butter",
+   "label": "owl + balloon"
+  },
+  {
+   "id": "numbers_03",
+   "shelf": "numbers",
+   "file": "numbers_03.png",
+   "svg": "svg/numbers_03.svg",
+   "rim": "butter",
+   "label": "fruit to count"
+  },
+  {
+   "id": "numbers_04",
+   "shelf": "numbers",
+   "file": "numbers_04.png",
+   "svg": "svg/numbers_04.svg",
+   "rim": "butter",
+   "label": "counting-bead abacus"
+  },
+  {
+   "id": "numbers_05",
+   "shelf": "numbers",
+   "file": "numbers_05.png",
+   "svg": "svg/numbers_05.svg",
+   "rim": "butter",
+   "label": "birthday cake, 3 candles"
+  },
+  {
+   "id": "numbers_06",
+   "shelf": "numbers",
+   "file": "numbers_06.png",
+   "svg": "svg/numbers_06.svg",
+   "rim": "butter",
+   "label": "counting train (sample)"
+  },
+  {
+   "id": "numbers_07",
+   "shelf": "numbers",
+   "file": "numbers_07.png",
+   "svg": "svg/numbers_07.svg",
+   "rim": "butter",
+   "label": "owl rides the train"
+  },
+  {
+   "id": "numbers_08",
+   "shelf": "numbers",
+   "file": "numbers_08.png",
+   "svg": "svg/numbers_08.svg",
+   "rim": "butter",
+   "label": "owl + dice (sample)"
+  },
+  {
+   "id": "numbers_09",
+   "shelf": "numbers",
+   "file": "numbers_09.png",
+   "svg": "svg/numbers_09.svg",
+   "rim": "butter",
+   "label": "owl stacks 1-2-3 blocks"
+  },
+  {
+   "id": "numbers_10",
+   "shelf": "numbers",
+   "file": "numbers_10.png",
+   "svg": "svg/numbers_10.svg",
+   "rim": "butter",
+   "label": "picnic basket"
+  },
+  {
+   "id": "numbers_11",
+   "shelf": "numbers",
+   "file": "numbers_11.png",
+   "svg": "svg/numbers_11.svg",
+   "rim": "butter",
+   "label": "owl + basket"
+  },
+  {
+   "id": "numbers_12",
+   "shelf": "numbers",
+   "file": "numbers_12.png",
+   "svg": "svg/numbers_12.svg",
+   "rim": "butter",
+   "label": "owl balances"
+  }
+ ],
+ "scenes": [
+  {
+   "shelf": "numbers",
+   "page": {
+    "set": "train_day",
+    "ground": 146,
+    "span": [
+     -125,
+     360
+    ]
+   },
+   "reward": "general_star",
+   "pieces": [
+    {
+     "id": "scene_engine",
+     "file": "scene_engine.png",
+     "svg": "svg/scene_engine.svg",
+     "rim": "butter",
+     "vb": [
+      -12.0,
+      8.25,
+      134.0
+     ],
+     "at": [
+      -24,
+      0
+     ]
+    },
+    {
+     "id": "scene_car_balls",
+     "file": "scene_car_balls.png",
+     "svg": "svg/scene_car_balls.svg",
+     "rim": "butter",
+     "vb": [
+      -20.38,
+      48.75,
+      92.75
+     ],
+     "at": [
+      108,
+      0
+     ]
+    },
+    {
+     "id": "scene_car_shapes",
+     "file": "scene_car_shapes.png",
+     "svg": "svg/scene_car_shapes.svg",
+     "rim": "butter",
+     "vb": [
+      -19.5,
+      51.62,
+      91.0
+     ],
+     "at": [
+      216,
+      0
+     ]
+    },
+    {
+     "id": "scene_owl_conductor",
+     "file": "scene_owl_conductor.png",
+     "svg": "svg/scene_owl_conductor.svg",
+     "rim": "butter",
+     "vb": [
+      -1.0,
+      19.88,
+      142.0
+     ],
+     "at": [
+      -150,
+      30
+     ],
+     "scale": 0.62
+    }
+   ]
+  },
+  {
+   "shelf": "language",
+   "page": {
+    "file": "scene_language_outline.png",
+    "ground": 170,
+    "span": [
+     -32.25,
+     645.0
+    ],
+    "set": "reading_corner"
+   },
+   "reward": "general_star",
+   "pieces": [
+    {
+     "id": "scene_language_lamp",
+     "file": "scene_language_lamp.png",
+     "rim": "coral",
+     "vb": [
+      -32.25,
+      7.25,
+      164.5
+     ],
+     "at": [
+      0,
+      1
+     ],
+     "svg": "svg/scene_language_lamp.svg"
+    },
+    {
+     "id": "scene_language_armchair_fox",
+     "file": "scene_language_armchair_fox.png",
+     "rim": "coral",
+     "vb": [
+      -11.25,
+      -7.38,
+      192.5
+     ],
+     "at": [
+      120,
+      2
+     ],
+     "svg": "svg/scene_language_armchair_fox.svg"
+    },
+    {
+     "id": "scene_language_book_stack",
+     "file": "scene_language_book_stack.png",
+     "rim": "coral",
+     "vb": [
+      -2.25,
+      -0.12,
+      128.5
+     ],
+     "at": [
+      318,
+      46
+     ],
+     "svg": "svg/scene_language_book_stack.svg"
+    },
+    {
+     "id": "scene_language_reading_rug",
+     "file": "scene_language_reading_rug.png",
+     "rim": "coral",
+     "vb": [
+      -2.75,
+      39.12,
+      155.5
+     ],
+     "at": [
+      460,
+      22
+     ],
+     "svg": "svg/scene_language_reading_rug.svg"
+    }
+   ]
+  },
+  {
+   "shelf": "logic",
+   "page": {
+    "file": "scene_logic_outline.png",
+    "ground": 170,
+    "span": [
+     -12.5,
+     623.0
+    ],
+    "set": "shape_garden"
+   },
+   "reward": "general_star",
+   "pieces": [
+    {
+     "id": "scene_logic_circle_tree",
+     "file": "scene_logic_circle_tree.png",
+     "rim": "leaf",
+     "vb": [
+      -12.5,
+      9.5,
+      151.0
+     ],
+     "at": [
+      0,
+      12
+     ],
+     "svg": "svg/scene_logic_circle_tree.svg"
+    },
+    {
+     "id": "scene_logic_tortoise",
+     "file": "scene_logic_tortoise.png",
+     "rim": "leaf",
+     "vb": [
+      -5.5,
+      25.0,
+      145.0
+     ],
+     "at": [
+      136,
+      20
+     ],
+     "svg": "svg/scene_logic_tortoise.svg"
+    },
+    {
+     "id": "scene_logic_triangle_tent",
+     "file": "scene_logic_triangle_tent.png",
+     "rim": "leaf",
+     "vb": [
+      -11.38,
+      -10.0,
+      162.75
+     ],
+     "at": [
+      300,
+      20
+     ],
+     "svg": "svg/scene_logic_triangle_tent.svg"
+    },
+    {
+     "id": "scene_logic_block_steps",
+     "file": "scene_logic_block_steps.png",
+     "rim": "leaf",
+     "vb": [
+      -2.5,
+      11.5,
+      143.0
+     ],
+     "at": [
+      470,
+      18
+     ],
+     "svg": "svg/scene_logic_block_steps.svg"
+    }
+   ]
+  }
+ ]
+}

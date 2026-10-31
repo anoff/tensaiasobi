@@ -10,7 +10,7 @@ import { freshRound } from '../utils/freshRound';
 import { INK, hardShadow } from '../theme/blockTable';
 import type { GameDifficulty } from '../types/game';
 import {
-  afterWrong, allPredicted, flowFor, generateSinkFloatRound, isCorrectPrediction, resolveBatch, sinkFloatRoundKey, sinkFloatStars,
+  afterBatch, afterWrong, flowFor, generateSinkFloatRound, isCorrectPrediction, resolveBatch, sinkFloatRoundKey, sinkFloatStars,
   trueResult, type DropResult, type Prediction, type SinkFloatObject,
 } from './sinkOrFloatLogic';
 
@@ -42,7 +42,7 @@ interface Drop extends DropResult {
 
 export default function SinkOrFloat() {
   const { t } = useTranslation();
-  const { playPop, playSuccess, onStarEarned, challengeMode } = useGameFX();
+  const { playPop, playSuccess, onStarEarned, onRoundComplete, challengeMode } = useGameFX();
   const [level, setLevel] = useAgeDifficulty();
   const [round, setRound] = useState(() => generateSinkFloatRound(level));
   const [roundNo, setRoundNo] = useState(0);
@@ -90,6 +90,7 @@ export default function SinkOrFloat() {
     setDone(true);
     playSuccess();
     onStarEarned?.(sinkFloatStars(level));
+    onRoundComplete?.();
     later(() => nextRound(level), NEXT_MS);
   };
 
@@ -139,7 +140,8 @@ export default function SinkOrFloat() {
   /** Hard: every object is predicted, then they drop one after the other. */
   const dropAll = () => {
     if (busy || running.current) return;
-    const results = resolveBatch(round, predictions);
+    // Only the objects still on the shelf drop; right guesses from an earlier try stay solved.
+    const results = resolveBatch(round, predictions).filter((r) => !solved.has(r.emoji));
     setBusy(true);
     setSelected(null);
     const run = (i: number) => {
@@ -150,9 +152,18 @@ export default function SinkOrFloat() {
         last ? HOLD_MS : HOLD_BETWEEN_MS,
         () => {
           running.current = null;
-          if (!last) run(i + 1);
-          else if (results.every((x) => x.correct)) completeRound();
-          else nextRound(level);
+          if (!last) return run(i + 1);
+          const outcome = afterBatch(results, challengeMode);
+          if (outcome === 'complete') completeRound();
+          else if (outcome === 'fresh') nextRound(level);
+          else {
+            // Friendly retry: keep the right ones solved, put the missed ones back with their 💡 hint.
+            const missed = results.filter((x) => !x.correct).map((x) => x.emoji);
+            setSolved((prev) => new Set([...prev, ...results.filter((x) => x.correct).map((x) => x.emoji)]));
+            setPredictions((p) => Object.fromEntries(Object.entries(p).filter(([emoji]) => !missed.includes(emoji))));
+            setDrop(null);
+            setBusy(false);
+          }
         },
         () => setMarks((m) => ({ ...m, [r.emoji]: r.correct })),
       );
@@ -173,6 +184,12 @@ export default function SinkOrFloat() {
     playPop();
     if (flow === 'batch') {
       setPredictions((p) => ({ ...p, [object.emoji]: prediction }));
+      setMarks((m) => {
+        if (!(object.emoji in m)) return m;
+        const rest = { ...m };
+        delete rest[object.emoji];
+        return rest;
+      });
       setSelected(null);
     } else {
       dropOne(object, prediction);
@@ -183,7 +200,7 @@ export default function SinkOrFloat() {
     flow === 'single'
       ? round.objects.filter((o) => !solved.has(o.emoji)).slice(0, 1)
       : round.objects.filter((o) => !solved.has(o.emoji));
-  const canDrop = flow === 'batch' && !busy && !done && allPredicted(round, predictions);
+  const canDrop = flow === 'batch' && !busy && !done && shelf.length > 0 && shelf.every((o) => predictions[o.emoji] !== undefined);
   const zonesOff = busy || done || !selected;
 
   return (
@@ -302,7 +319,7 @@ export default function SinkOrFloat() {
             {drop && shownStep === drop.step && (
               <p data-testid="sof-result" data-result={drop.result} data-correct={String(drop.correct)}>
                 {drop.result === 'float' ? t.sinkOrFloat.floated : t.sinkOrFloat.sank}{' '}
-                {drop.correct ? '✅' : flow === 'batch' || afterWrong(level, challengeMode) === 'fresh' ? t.sinkOrFloat.newRound : t.sinkOrFloat.tryAgain}
+                {drop.correct ? '✅' : afterWrong(level, challengeMode) === 'fresh' && (flow !== 'batch' || challengeMode) ? t.sinkOrFloat.newRound : t.sinkOrFloat.tryAgain}
               </p>
             )}
           </div>

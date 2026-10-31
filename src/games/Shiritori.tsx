@@ -8,6 +8,7 @@ import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { useGameFX } from '../hooks/gameFXContext';
+import pandaCheer from '../assets/characters/panda_cheer.png';
 import {
   getStartChar,
   getEndChar,
@@ -21,7 +22,7 @@ import {
 } from './shiritoriLogic';
 
 export function Shiritori() {
-  const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete, challengeMode } = useGameFX();
   const { language, t } = useTranslation();
   
 
@@ -62,13 +63,25 @@ export function Shiritori() {
   const [pandaState, setPandaState] = useState<'idle' | 'thinking' | 'talking'>('idle');
 
 
-  const [isNRuleLost, setIsNRuleLost] = useState<boolean>(false);
+  /** The chain ended on a word with ん (Japanese rule). A normal, positive chain end. */
+  const [isNRuleEnd, setIsNRuleEnd] = useState<boolean>(false);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
 
   const { streak, highScore, registerCorrect, resetStreak } = useStreak('shiritori');
 
   const chainEndRef = useRef<HTMLDivElement>(null);
+
+  // Any chain end is a finished round (Sticker Book). A ref keeps the latest callback without re-firing.
+  const roundCompleteRef = useRef(onRoundComplete);
+  useEffect(() => {
+    roundCompleteRef.current = onRoundComplete;
+  }, [onRoundComplete]);
+  useEffect(() => {
+    if (isGameOver && chain.length > 1) roundCompleteRef.current?.();
+    // Only the moment the chain ends counts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGameOver]);
 
 
   const initGame = useCallback((selectedMode: 'solo' | 'panda', count: number = optionCount) => {
@@ -77,7 +90,7 @@ export function Shiritori() {
     resetStreak();
     setMode(selectedMode);
     setTurn('player');
-    setIsNRuleLost(false);
+    setIsNRuleEnd(false);
     setIsGameOver(false);
     setSelectedOption(null);
     setIsCorrect(null);
@@ -133,7 +146,7 @@ export function Shiritori() {
       // Check if Panda choice ends in 'ん' (should not happen due to safety checks, but as fallback)
       const endingChar = getEndChar(itemsDict[pandaChoice] || '', language);
       if (language === 'ja' && endingChar === 'ん') {
-        setIsNRuleLost(true);
+        setIsNRuleEnd(true);
         setIsGameOver(true);
         return;
       }
@@ -175,16 +188,16 @@ export function Shiritori() {
 
       // Check Japanese 'ん' Game Over Rule
       const endingChar = getEndChar(selectedWord, language);
+      playSuccess();
+      onStarEarned?.(2);
+
+      // The ん rule ends the chain, but the pick was a good match: it pays and ends positively.
       if (language === 'ja' && endingChar === 'ん') {
-        playError();
-        setIsNRuleLost(true);
+        setShowConfetti(true);
+        setIsNRuleEnd(true);
         setIsGameOver(true);
         return;
       }
-
-
-      playSuccess();
-      onStarEarned?.(2);
 
 
       if (newStreak % 5 === 0) {
@@ -389,31 +402,31 @@ export function Shiritori() {
 
       {/* Main Interactive Stage */}
       {isGameOver ? (
-        <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm space-y-6 my-4 p-6 bg-white border-4 border-slate-200 rounded-[3rem] shadow-xl animate-pop-in">
-          {isNRuleLost ? (
-            <>
-              <span className="text-8xl animate-bounce">🦁❌</span>
-              <h3 className="text-2xl font-black text-red-500 text-center">
-                {t.shiritori.nRuleLost}
-              </h3>
-              <p className="text-slate-500 text-center font-extrabold text-sm px-4">
-                {t.shiritori.nRuleWarning}
-              </p>
-            </>
-          ) : (
-            <>
-              <span className="text-8xl">🏆🐼</span>
-              <h3 className="text-2xl font-black text-emerald-600 text-center">
-                {t.shiritori.victory}
-              </h3>
-              <p className="text-slate-500 text-center font-extrabold text-sm px-4">
-                {t.shiritori.congrats}
-              </p>
-            </>
-          )}
+        <div
+          className="flex-1 flex flex-col items-center justify-center w-full max-w-sm space-y-4 my-4 p-6 rounded-[2rem] border-[3px] animate-pop-in"
+          style={{ backgroundColor: '#fffaf0', borderColor: '#2a1c14', boxShadow: '5px 6px 0 0 #2a1c14' }}
+          data-testid="shiritori-end"
+        >
+          <img
+            src={pandaCheer}
+            alt=""
+            aria-hidden
+            draggable={false}
+            className="pointer-events-none h-32 w-32 select-none"
+            data-testid="shiritori-end-panda"
+          />
+          <h3 className="text-2xl font-black text-center" style={{ color: '#2a1c14' }}>
+            {isNRuleEnd ? t.shiritori.nRuleEnd : t.shiritori.victory}
+          </h3>
+          <p className="text-center text-lg font-black" style={{ color: '#2a1c14' }} data-testid="shiritori-end-chain">
+            🔗 {t.shiritori.streak}: {chain.length}
+          </p>
+          <p className="text-center font-extrabold text-sm px-4" style={{ color: '#6b5a4c' }}>
+            {isNRuleEnd ? t.shiritori.nRuleNote : t.shiritori.congrats}
+          </p>
 
           <KidButton
-            color={isNRuleLost ? 'orange' : 'green'}
+            color="green"
             size="lg"
             onClick={() => initGame(mode)}
             className="w-full rounded-2xl"

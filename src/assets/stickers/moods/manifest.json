@@ -1,0 +1,132 @@
+{
+ "moods": [
+  {
+   "id": "emo_owl_cheer",
+   "character": "owl",
+   "mood": "cheer",
+   "shelf": "numbers",
+   "file": "emo_owl_cheer.png",
+   "svg": "svg/emo_owl_cheer.svg"
+  },
+  {
+   "id": "emo_owl_surprised",
+   "character": "owl",
+   "mood": "surprised",
+   "shelf": "numbers",
+   "file": "emo_owl_surprised.png",
+   "svg": "svg/emo_owl_surprised.svg"
+  },
+  {
+   "id": "emo_owl_sleepy",
+   "character": "owl",
+   "mood": "sleepy",
+   "shelf": "numbers",
+   "file": "emo_owl_sleepy.png",
+   "svg": "svg/emo_owl_sleepy.svg"
+  },
+  {
+   "id": "emo_owl_proud",
+   "character": "owl",
+   "mood": "proud",
+   "shelf": "numbers",
+   "file": "emo_owl_proud.png",
+   "svg": "svg/emo_owl_proud.svg"
+  },
+  {
+   "id": "emo_fox_cheer",
+   "character": "fox",
+   "mood": "cheer",
+   "shelf": "language",
+   "file": "emo_fox_cheer.png",
+   "svg": "svg/emo_fox_cheer.svg"
+  },
+  {
+   "id": "emo_fox_surprised",
+   "character": "fox",
+   "mood": "surprised",
+   "shelf": "language",
+   "file": "emo_fox_surprised.png",
+   "svg": "svg/emo_fox_surprised.svg"
+  },
+  {
+   "id": "emo_fox_sleepy",
+   "character": "fox",
+   "mood": "sleepy",
+   "shelf": "language",
+   "file": "emo_fox_sleepy.png",
+   "svg": "svg/emo_fox_sleepy.svg"
+  },
+  {
+   "id": "emo_fox_proud",
+   "character": "fox",
+   "mood": "proud",
+   "shelf": "language",
+   "file": "emo_fox_proud.png",
+   "svg": "svg/emo_fox_proud.svg"
+  },
+  {
+   "id": "emo_tortoise_cheer",
+   "character": "tortoise",
+   "mood": "cheer",
+   "shelf": "logic",
+   "file": "emo_tortoise_cheer.png",
+   "svg": "svg/emo_tortoise_cheer.svg"
+  },
+  {
+   "id": "emo_tortoise_surprised",
+   "character": "tortoise",
+   "mood": "surprised",
+   "shelf": "logic",
+   "file": "emo_tortoise_surprised.png",
+   "svg": "svg/emo_tortoise_surprised.svg"
+  },
+  {
+   "id": "emo_tortoise_sleepy",
+   "character": "tortoise",
+   "mood": "sleepy",
+   "shelf": "logic",
+   "file": "emo_tortoise_sleepy.png",
+   "svg": "svg/emo_tortoise_sleepy.svg"
+  },
+  {
+   "id": "emo_tortoise_proud",
+   "character": "tortoise",
+   "mood": "proud",
+   "shelf": "logic",
+   "file": "emo_tortoise_proud.png",
+   "svg": "svg/emo_tortoise_proud.svg"
+  },
+  {
+   "id": "emo_panda_cheer",
+   "character": "panda",
+   "mood": "cheer",
+   "shelf": "play",
+   "file": "emo_panda_cheer.png",
+   "svg": "svg/emo_panda_cheer.svg"
+  },
+  {
+   "id": "emo_panda_surprised",
+   "character": "panda",
+   "mood": "surprised",
+   "shelf": "play",
+   "file": "emo_panda_surprised.png",
+   "svg": "svg/emo_panda_surprised.svg"
+  },
+  {
+   "id": "emo_panda_sleepy",
+   "character": "panda",
+   "mood": "sleepy",
+   "shelf": "play",
+   "file": "emo_panda_sleepy.png",
+   "svg": "svg/emo_panda_sleepy.svg"
+  },
+  {
+   "id": "emo_panda_proud",
+   "character": "panda",
+   "mood": "proud",
+   "shelf": "play",
+   "file": "emo_panda_proud.png",
+   "svg": "svg/emo_panda_proud.svg"
+  }
+ ]
+}

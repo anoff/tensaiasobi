@@ -28,7 +28,7 @@ function parseDropTarget(el: Element | null): SnackLocation | null {
 }
 
 export function FairSharePicnic() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
   const [round, setRound] = useState<FairShareRound>(() => generateRound(difficulty));
@@ -73,6 +73,7 @@ export function FairSharePicnic() {
         setPulseFriends(new Set());
         playSuccess();
         onStarEarned?.(STARS_BY_DIFFICULTY[difficulty]);
+        onRoundComplete?.();
       } else if (result.allPlaced) {
         setPulseFriends(result.pulseFriends);
         if (result.pulseFriends.size > 0) playError();
@@ -80,7 +81,7 @@ export function FairSharePicnic() {
         setPulseFriends(new Set());
       }
     },
-    [snacks, round, difficulty, playSuccess, playError, onStarEarned]
+    [snacks, round, difficulty, playSuccess, playError, onStarEarned, onRoundComplete]
   );
 
   const startDrag = useCallback(

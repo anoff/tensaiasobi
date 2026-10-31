@@ -151,7 +151,7 @@ function clamp(value: number, min: number, max: number) {
 }
 
 export function SnorkelPearlFinder() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
   const [pearls, setPearls] = useState<Pearl[]>([]);
@@ -292,6 +292,7 @@ export function SnorkelPearlFinder() {
           setShowConfetti(true);
           playSuccess();
           onStarEarned?.(config.starsAward);
+          onRoundComplete?.();
         }
       } else {
         playError();
@@ -301,7 +302,7 @@ export function SnorkelPearlFinder() {
         }, 400);
       }
     },
-    [pearls, config.starsAward, collectPearl, playError, playSuccess, onStarEarned]
+    [pearls, config.starsAward, collectPearl, playError, playSuccess, onStarEarned, onRoundComplete]
   );
 
   useEffect(() => {

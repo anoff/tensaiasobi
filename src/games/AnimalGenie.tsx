@@ -15,7 +15,7 @@ import {
 type Phase = 'think' | 'ask' | 'guess' | 'found' | 'stumped' | 'revealed';
 
 export default function AnimalGenie() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const { t } = useTranslation();
   const names = t.anlautGame.items as Record<string, string>;
   const [level, setLevel] = useAgeDifficulty();
@@ -70,6 +70,7 @@ export default function AnimalGenie() {
     if (right) {
       playSuccess();
       onStarEarned?.(GENIE_STARS[level]);
+      onRoundComplete?.();
       setPhase('found');
       return;
     }
@@ -87,6 +88,7 @@ export default function AnimalGenie() {
   const reveal = (animal: string) => {
     playSuccess();
     onStarEarned?.(GENIE_STARS[level]);
+    onRoundComplete?.();
     setRevealed(animal);
     setPhase('revealed');
   };

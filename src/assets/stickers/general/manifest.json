@@ -1,0 +1,18 @@
+{
+ "stickers": [
+  {
+   "id": "general_star",
+   "file": "general_star.png",
+   "svg": "svg/general_star.svg",
+   "label": "reward star",
+   "rim": "butter"
+  },
+  {
+   "id": "general_thank_you",
+   "file": "general_star.png",
+   "svg": "svg/general_star.svg",
+   "label": "thank-you sticker for a My Town player (placeholder art until the drawn one lands)",
+   "rim": "butter"
+  }
+ ]
+}

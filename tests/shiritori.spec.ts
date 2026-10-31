@@ -210,7 +210,7 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
     await expect(labels).toHaveCount(0);
   });
 
-  test('Verify Japanese "ん" rule triggers game over', async ({ page }) => {
+  test('Verify Japanese "ん" rule ends the chain positively (no fail screen)', async ({ page }) => {
     await switchLanguage(page, 'ja');
     await page.getByTestId('launch-shiritori').click();
     // The ん trap only appears on the six-picture hard board.
@@ -238,11 +238,17 @@ test.describe('tensaiasobi Shiritori Game E2E Tests', () => {
     }
 
     if (nOptionLocator) {
+      const starsBefore = Number((await page.getByTestId('stars-total').innerText()).replace(/\D/g, '') || '0');
       await nOptionLocator.click();
-      const gameOverTitle = page.locator('h3');
-      await expect(gameOverTitle).toBeVisible();
-      const text = await gameOverTitle.innerText();
-      expect(text).toContain('おしまい');
+      const end = page.getByTestId('shiritori-end');
+      await expect(end).toBeVisible();
+      // A finished chain: Panda cheers, the title celebrates and the ん pick still pays.
+      await expect(page.getByTestId('shiritori-end-panda')).toBeVisible();
+      await expect(end.locator('h3')).toContainText('かんせい');
+      await expect(page.getByTestId('shiritori-end-chain')).toBeVisible();
+      await expect
+        .poll(async () => Number((await page.getByTestId('stars-total').innerText()).replace(/\D/g, '') || '0'))
+        .toBeGreaterThan(starsBefore);
     }
   });
 });

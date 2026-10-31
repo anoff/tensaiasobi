@@ -4,6 +4,7 @@ import DifficultySelector from '../components/DifficultySelector';
 import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { wrongMeansNewRound } from '../utils/difficulty';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 import { DobbleCardView } from './DobbleCardView';
@@ -24,6 +25,7 @@ const SOLO_CARD_SIZE = 'w-[min(18rem,32dvh)] h-[min(18rem,32dvh)]';
 
 export function EmojiMatch() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
+  const tallyRound = useRoundTally();
   const { t } = useTranslation();
 
 
@@ -153,6 +155,7 @@ export function EmojiMatch() {
 
       const starsEarned = getStars(difficulty);
       onStarEarned?.(starsEarned);
+      tallyRound();
 
 
       const newScore = score + 1;

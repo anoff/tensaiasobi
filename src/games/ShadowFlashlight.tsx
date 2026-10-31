@@ -7,6 +7,7 @@ import { shuffle } from '../utils/shuffle';
 import { starMultiplier, wrongMeansNewRound } from '../utils/difficulty';
 import type { GameDifficulty } from '../types/game';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 interface ShadowItem {
@@ -67,6 +68,7 @@ function generateRound(difficulty: GameDifficulty): { target: ShadowItem; choice
 
 export function ShadowFlashlight() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
+  const tallyRound = useRoundTally();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
   const [target, setTarget] = useState<ShadowItem | null>(null);
@@ -126,6 +128,7 @@ export function ShadowFlashlight() {
       setShowConfetti(true);
       playSuccess();
       onStarEarned?.(config.baseStars * starMultiplier(difficulty));
+      tallyRound();
     } else {
       playError();
       setShakeChoice(item.emoji);

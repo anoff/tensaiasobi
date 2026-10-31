@@ -146,11 +146,11 @@ export function gameVisibleInChallenge(
   return Boolean(options.allowedGames[game.id]);
 }
 
-/** Progress keys owned by stars/coupons/town/challenge — not settings or language. */
+/** Progress keys owned by stars/coupons/stickers/challenge — not settings or language. */
 export const APP_PROGRESS_KEYS = [
   'gamification_stars',
   'gamification_coupons',
-  'gamification_town',
+  'gamification_stickers',
   'challenge_active',
   'challenge_stars_target',
   'challenge_stars_earned',

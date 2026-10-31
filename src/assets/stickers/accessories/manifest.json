@@ -1,0 +1,76 @@
+{
+ "accessories": [
+  {
+   "id": "crown",
+   "file": "acc_crown.png",
+   "svg": "svg/acc_crown.svg",
+   "price": 10
+  },
+  {
+   "id": "party_hat",
+   "file": "acc_party_hat.png",
+   "svg": "svg/acc_party_hat.svg",
+   "price": 10
+  },
+  {
+   "id": "wizard_hat",
+   "file": "acc_wizard_hat.png",
+   "svg": "svg/acc_wizard_hat.svg",
+   "price": 10
+  },
+  {
+   "id": "bow",
+   "file": "acc_bow.png",
+   "svg": "svg/acc_bow.svg",
+   "price": 10
+  },
+  {
+   "id": "flower",
+   "file": "acc_flower.png",
+   "svg": "svg/acc_flower.svg",
+   "price": 10
+  },
+  {
+   "id": "heart",
+   "file": "acc_heart.png",
+   "svg": "svg/acc_heart.svg",
+   "price": 10
+  },
+  {
+   "id": "star_clip",
+   "file": "acc_star_clip.png",
+   "svg": "svg/acc_star_clip.svg",
+   "price": 10
+  },
+  {
+   "id": "scarf",
+   "file": "acc_scarf.png",
+   "svg": "svg/acc_scarf.svg",
+   "price": 10
+  },
+  {
+   "id": "cape",
+   "file": "acc_cape.png",
+   "svg": "svg/acc_cape.svg",
+   "price": 10
+  },
+  {
+   "id": "sunglasses",
+   "file": "acc_sunglasses.png",
+   "svg": "svg/acc_sunglasses.svg",
+   "price": 10
+  },
+  {
+   "id": "moustache",
+   "file": "acc_moustache.png",
+   "svg": "svg/acc_moustache.svg",
+   "price": 10
+  },
+  {
+   "id": "headphones",
+   "file": "acc_headphones.png",
+   "svg": "svg/acc_headphones.svg",
+   "price": 10
+  }
+ ]
+}

@@ -194,7 +194,7 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
 
     await expect(page.getByTestId('launch-odd')).toBeVisible();
     await expect(page.getByTestId('launch-doodle')).toBeVisible();
-    await expect(page.getByTestId('launch-town')).toBeVisible();
+    await expect(page.getByTestId('launch-sticker-book')).toBeVisible();
 
     // Verify the coupon was awarded and persisted in the Coupon Shop
     const couponsLauncher = page.getByTestId('launch-coupons');
