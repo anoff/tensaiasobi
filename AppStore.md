@@ -19,7 +19,7 @@ npm run ios:auto-refresh -- install   # keep it from expiring after 7 days
 | Limits | 3 self-signed apps per device, 10 new app IDs per week | 100 registered devices per type per year |
 | TestFlight / App Store | ❌ | ✅ |
 
-Your kids' progress (stars, streaks, town, coupons) is stored on the device inside the app. **Re-installing or re-signing keeps it. Deleting the app erases it.**
+Your kids' progress (stars, streaks, stickers, coupons) is stored on the device inside the app. **Re-installing or re-signing keeps it. Deleting the app erases it.**
 
 ## Option A: Mac + Xcode (recommended)
 

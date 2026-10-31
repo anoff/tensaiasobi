@@ -23,7 +23,7 @@ Instead, we employ a dual-option monetization strategy offered exclusively withi
 | :--- | :--- | :--- |
 | **All-Access Games** | Full unlimited access to 5 foundational games: <br>• Math Game<br>• Emoji Match<br>• Animal Memory Match<br>• Odd One Out<br>• Magic Doodle Pad | Unlimited access to all 12+ games, including advanced logic and language games:<br>• Shiritori (Japanese word chain)<br>• Puzzle Game / physics puzzles<br>• Dispatch Game<br>• Letter/Shape Trace |
 | **Puzzles & Levels** | Access to Level 1 / basic configurations of all games (e.g., standard grids or layouts). | Access to hard modes, complex shapes (silhouettes), time-attack modes, and custom presets. |
-| **Town Builder / Shop** | Full basic gameplay loop. Earn stars and buy town items/decorations. | Premium town decorations, special sound effects, and secret item categories. |
+| **Sticker Book / Accessories** | Full basic gameplay loop. Finished rounds earn stickers, and stars buy accessories to drag onto any sticker. | Premium accessories, special sound effects, and secret accessory sets. |
 | **Profiles & Sync** | Single child profile on the active device. | **Multi-Profile Support:** Custom names, independent star/streak counts, and personalized avatars for up to 4 children. |
 | **Parent Vouchers** | Default vouchers (e.g., gummy bears, movie night) with standard costs. | **Dynamic Custom Vouchers:** Create custom real-world rewards (e.g., "15 minutes extra playground time") and modify star costs. |
 
@@ -56,7 +56,7 @@ When marketing the **Monthly Subscription** and the **Lifetime Pass** in the Par
 
 ### 🇰🇷 South Korea: The Cognitive Strategy Angle
 > **"월 2,000원 또는 평생 소장 15,000원으로 즐기는 안전한 창의력 놀이터."**
-> *Highlight:* Strengthens cognitive skills, creative construction in the Town Builder, and fine-motor handwriting accuracy with premium templates.
+> *Highlight:* Strengthens cognitive skills, creative dress-up in the Sticker Book, and fine-motor handwriting accuracy with premium templates.
 
 ### 🇺🇸 English-Speaking: The Screen-Time Value Angle
 > **"Unlock everything for $1.49/mo or $9.99 lifetime. Zero ads, total safety."**
