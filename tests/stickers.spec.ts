@@ -169,7 +169,7 @@ test.describe('Sticker Book', () => {
     const piece = scene.locator('[data-testid="scene-piece"][data-piece="scene_logic_block_steps"]');
     await piece.scrollIntoViewIfNeeded();
     // A drop far from the slot does not snap.
-    await dragTo(page, piece, scene.locator('[data-testid="scene-ghost"][data-piece="scene_logic_circle_tree"]'));
+    await dragTo(page, piece, scene.getByTestId('scene-piece-placed').first());
     await expect(scene).toHaveAttribute('data-complete', 'false');
     await dragTo(page, piece, scene.locator('[data-testid="scene-ghost"][data-piece="scene_logic_block_steps"]'));
     await expect(scene).toHaveAttribute('data-complete', 'true');
