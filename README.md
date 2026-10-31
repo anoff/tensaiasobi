@@ -48,9 +48,10 @@ The home screen sorts games into four colour-coded shelves. The 🧸 Preschool /
 - **Magic Puzzle 🧩**: interlocking SVG jigsaw.
 - **Tower Sort 🗼**: stack matching emojis. *(school)*
 
+**📒 Sticker Book**: every finished round earns the next drawn sticker on that game's shelf (12 per shelf, plus character moods and a scene set), at most 5 a day. Stars buy accessories (hats, bows, glasses…) to drag onto any sticker.
+
 **🎲 Just for fun** (chalk / pebble / coal). These unlock after a learn-first star goal.
 - **Doodle Pad 🎨**, **Trace ⭐** *(preschool)*, **Mazes 🗺️**, **Emoji Match ⚡** (Time Attack or 2-player duel), **City Dispatch 🚒**
-- **My Town 🏘️**: spend stars on a 6×6 sandbox.
 - **Coupons 🎟️**: parent-approved real-world rewards.
 - **Animal Genie 🧞**: think of an animal, the genie asks yes/no questions and guesses it. On easy and medium the animals that no longer fit fade out.
 

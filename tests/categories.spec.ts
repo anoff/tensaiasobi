@@ -10,7 +10,8 @@ test.describe('Home sorts games into categories', () => {
       await expect(page.getByTestId('category-logic').getByTestId('launch-odd')).toBeVisible();
       await expect(page.getByTestId('category-play').getByTestId('launch-maze')).toBeVisible();
       await expect(page.getByTestId('category-play').getByTestId('launch-dispatch')).toBeVisible();
-      await expect(page.getByTestId('category-play').getByTestId('launch-town')).toBeVisible();
+      await expect(page.getByTestId('category-stickers').getByTestId('launch-sticker-book')).toBeVisible();
+      await expect(page.getByTestId('launch-town')).toHaveCount(0);
       await expect(page.getByTestId('category-play').getByTestId('launch-animal-genie')).toBeVisible();
       await expect(page.getByTestId('category-logic').getByTestId('launch-animal-genie')).toHaveCount(0);
     }

@@ -21,7 +21,7 @@ import { SHAPES } from './shapeTraceData';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 export function ShapeTrace() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const { t } = useTranslation();
   const [shapeIndex, setShapeIndex] = useState(0);
   const [difficulty, setDifficulty] = useAgeDifficulty();
@@ -228,6 +228,7 @@ export function ShapeTrace() {
       playSuccess();
       const multiplier = starMultiplier(difficulty);
       onStarEarned?.(3 * multiplier);
+      onRoundComplete?.();
     } else {
       playError();
       setShowErrorShake(true);

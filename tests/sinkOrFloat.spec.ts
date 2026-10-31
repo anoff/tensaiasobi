@@ -116,20 +116,27 @@ test.describe('Sink or Float', () => {
     await expect.poll(() => stars(page)).toBe(before + 10);
   });
 
-  test('hard: one wrong prediction ends the round with no stars and fresh objects', async ({ page }) => {
-    test.setTimeout(60_000);
+  test('hard: a wrong prediction keeps the right ones and retries only the missed object (no fail screen)', async ({ page }) => {
+    test.setTimeout(90_000);
     await openGame(page, 'launch-sink-or-float', 'big', 'hard');
     const stage = page.getByTestId('sof-stage');
     const items = await shelf(page);
     const before = await stars(page);
+    const missed = items[0];
 
     for (const [i, item] of items.entries()) await predict(page, item.emoji, i === 0 ? !item.floats : item.floats);
     await page.getByTestId('sof-drop').click();
     await expect(page.getByTestId('sof-victory')).toHaveCount(0);
-    // The true result is shown, then a new round replaces the shelf.
-    await expect(page.locator('[data-testid="sof-object"][data-prediction="float"], [data-testid="sof-object"][data-prediction="sink"]')).toHaveCount(0, { timeout: 25_000 });
-    await expect(stage).toHaveAttribute('data-phase', 'playing');
+    // Back to guessing: the same objects stay, the right ones are solved and only the miss needs a new guess.
+    await expect(stage).toHaveAttribute('data-phase', 'playing', { timeout: 25_000 });
+    await expect(page.locator(`[data-testid="sof-object"][data-emoji="${missed.emoji}"]`)).toBeVisible();
+    await expect(page.getByTestId('sof-drop')).toHaveCount(0);
     expect(await stars(page)).toBe(before);
+
+    await predict(page, missed.emoji, missed.floats);
+    await page.getByTestId('sof-drop').click();
+    await expect(page.getByTestId('sof-victory')).toBeVisible({ timeout: 25_000 });
+    await expect.poll(() => stars(page)).toBe(before + 10);
   });
 
   test('the result badge only shows after the fall and splash have finished, and never as text', async ({ page }) => {

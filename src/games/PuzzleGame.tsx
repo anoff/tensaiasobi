@@ -161,7 +161,7 @@ export function JigsawPiece({
 
 
 export function PuzzleGame() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const [level, setLevel] = useAgeDifficulty();
   const [selectedImage, setSelectedImage] = useState<PuzzleImage>(PUZZLE_IMAGES[0]);
   // The game opens on the picture gallery; tapping a picture starts its puzzle.
@@ -293,6 +293,7 @@ export function PuzzleGame() {
         else if (level === 'hard') starAward = 20;
 
         onStarEarned?.(starAward);
+        onRoundComplete?.();
       }
     }
   };

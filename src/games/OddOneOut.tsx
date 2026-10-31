@@ -5,6 +5,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useStreak } from '../hooks/useStreak';
 import { shuffle } from '../utils/shuffle';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 
 interface EmojiItem {
   emoji: string;
@@ -24,6 +25,7 @@ const CATEGORIES: Record<string, string[]> = {
 
 export function OddOneOut() {
   const { playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
+  const tallyRound = useRoundTally();
   const [items, setItems] = useState<EmojiItem[]>([]);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -82,6 +84,7 @@ export function OddOneOut() {
 
       // Award 2 stars per correct pick
       onStarEarned?.(2);
+      tallyRound();
 
       setTimeout(() => {
         setShowConfetti(false);

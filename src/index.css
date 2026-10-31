@@ -68,96 +68,36 @@
     animation: star-counter-pulse 0.3s ease-out;
   }
 
-  /* ── Town Builder Animations ── */
-  @keyframes town-sway {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-4deg); }
-    75% { transform: rotate(4deg); }
+  /* ── Sticker Book award (ART.md §8) ── */
+  .sticker-award-rays {
+    background: repeating-conic-gradient(#ffc21a 0deg 12deg, transparent 12deg 30deg);
+    mask: radial-gradient(circle, #000 35%, transparent 70%);
+    -webkit-mask: radial-gradient(circle, #000 35%, transparent 70%);
+    animation: sticker-rays-spin 6s linear infinite;
   }
-  .town-sway {
-    animation: town-sway 3s ease-in-out infinite;
+  @keyframes sticker-rays-spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
   }
-
-  @keyframes town-bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
+  .sticker-award-fly {
+    animation: sticker-award-fly 0.6s ease-in 1.8s forwards;
   }
-  .town-bounce {
-    animation: town-bounce 2s ease-in-out infinite;
+  @keyframes sticker-award-fly {
+    to { transform: translate(-30vw, -40vh) scale(0.25); opacity: 0; }
   }
-
-  @keyframes town-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.06); }
+  .sticker-award-scrim {
+    animation: sticker-award-scrim 0.3s ease-out 2.2s forwards;
   }
-  .town-pulse {
-    animation: town-pulse 3s ease-in-out infinite;
+  @keyframes sticker-award-scrim {
+    to { opacity: 0; }
   }
 
-  @keyframes town-wobble {
-    0%, 100% { transform: rotate(0deg) scale(1); }
-    25% { transform: rotate(-2deg) scale(1.02); }
-    75% { transform: rotate(2deg) scale(1.02); }
-  }
-  .town-wobble {
-    animation: town-wobble 2.5s ease-in-out infinite;
-  }
-
-  @keyframes town-place {
-    0% { transform: scale(0); opacity: 0; }
-    60% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-  .town-place {
-    animation: town-place 0.4s ease-out;
-  }
-
-  /* Played once when a placed item is tapped ("Petting Zoo" interaction).
-     Buildings double in size and shrink back to their original size. */
-  @keyframes town-poke-swell {
-    0% { transform: scale(1); }
-    50% { transform: scale(2); }
-    100% { transform: scale(1); }
-  }
-  .town-poke-swell {
-    animation: town-poke-swell 1s ease-in-out;
-  }
-
-  /* Vehicles drive from the right side of the cell to the left side when tapped */
-  @keyframes town-poke-slide {
-    0% { transform: translateX(60%); }
-    100% { transform: translateX(-60%); }
-  }
-  .town-poke-slide {
-    animation: town-poke-slide 1s ease-in-out;
-  }
-
-  /* Animals jump up and down twice: bottom -> top -> bottom -> top -> bottom */
-  @keyframes town-poke-jump {
-    0%, 50%, 100% { transform: translateY(0); }
-    25%, 75% { transform: translateY(-14px); }
-  }
-  .town-poke-jump {
-    animation: town-poke-jump 1s ease-in-out;
-  }
-
-  /* Decorations rotate once, a full turn */
-  @keyframes town-poke-rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  .town-poke-rotate {
-    animation: town-poke-rotate 1s ease-in-out;
-  }
-
-  /* Nature sways left/right only a few pixels, three full swings */
-  @keyframes town-poke-sway-small {
-    0%, 100% { transform: translateX(0); }
-    16.67%, 50%, 83.33% { transform: translateX(-4px); }
-    33.33%, 66.67% { transform: translateX(4px); }
-  }
-  .town-poke-sway-small {
-    animation: town-poke-sway-small 1s ease-in-out;
+  /* Reduced motion: the sticker and panda just appear and stay until the overlay closes. */
+  @media (prefers-reduced-motion: reduce) {
+    .sticker-award-fly,
+    .sticker-award-scrim,
+    .sticker-award-rays {
+      animation: none !important;
+    }
   }
 
   /* ── Emoji Match Animations ── */

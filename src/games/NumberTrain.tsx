@@ -4,6 +4,7 @@ import DifficultySelector from '../components/DifficultySelector';
 import { useTranslation } from '../hooks/useTranslation';
 import type { GameDifficulty } from '../types/game';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { OPERATION_CLASSES, operationOf } from '../utils/operatorColors';
 import { wrongMeansNewRound } from '../utils/difficulty';
 import {
@@ -21,6 +22,7 @@ const DEPART_MS = 1500;
 
 export default function NumberTrain() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
+  const tallyRound = useRoundTally();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
   const [round, setRound] = useState<NumberTrainRound>(() => generateNumberTrainRound(difficulty));
@@ -58,6 +60,7 @@ export default function NumberTrain() {
       playSuccess();
       setCorrectStation(target);
       onStarEarned?.(NUMBER_TRAIN_CONFIG[difficulty].stars);
+      tallyRound();
       later(() => startNewRound(difficulty), DEPART_MS);
     } else {
       playError();

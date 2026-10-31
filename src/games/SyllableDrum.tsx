@@ -4,6 +4,7 @@ import DifficultySelector from '../components/DifficultySelector';
 import KidButton from '../components/KidButton';
 import { useTranslation } from '../hooks/useTranslation';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 import { useLater } from '../hooks/useLater';
 import { wrongMeansNewRound } from '../utils/difficulty';
@@ -16,6 +17,7 @@ const MAX_BEATS = 6;
 
 export default function SyllableDrum() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
+  const tallyRound = useRoundTally();
   const { language, t } = useTranslation();
   const items = t.anlautGame.items as Record<string, string>;
   const [level, setLevel] = useAgeDifficulty();
@@ -59,6 +61,7 @@ export default function SyllableDrum() {
       setSolved(true);
       playSuccess();
       onStarEarned?.(SYLLABLE_STARS[level]);
+      tallyRound();
       later(() => nextRound(level), 2000);
       return;
     }

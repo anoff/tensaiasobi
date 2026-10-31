@@ -29,7 +29,7 @@ import {
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 
 export function LetterTrace() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const { t, language } = useTranslation();
   const levels = LEVELS_BY_LANGUAGE[language];
   const [level, setLevel] = useState<LetterLevel>(levels[0]);
@@ -298,6 +298,7 @@ export function LetterTrace() {
           playSuccess();
           const multiplier = starMultiplier(difficulty);
           onStarEarned?.(3 * multiplier);
+          onRoundComplete?.();
         }
         return next;
       });

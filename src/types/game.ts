@@ -10,6 +10,8 @@ export interface GameProps {
   /** Distinct Simon-style tone for each of the four buttons (0–3). */
   playSimonTone?: (index: number) => void;
   onStarEarned?: (amount: number) => void;
+  /** A whole round is finished (not one answer). Earns the next Sticker Book sticker. */
+  onRoundComplete?: () => void;
   challengeMode?: boolean;
   /** Home age switch; sets the starting difficulty and which one is locked. */
   ageBand?: AgeBand;

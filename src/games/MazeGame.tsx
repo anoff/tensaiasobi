@@ -103,7 +103,7 @@ const THEMES: Theme[] = [
 ];
 
 export function MazeGame() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
   const [themeIndex, setThemeIndex] = useState(0);
@@ -475,6 +475,7 @@ export function MazeGame() {
           playSuccess();
           const multiplier = starMultiplier(difficulty);
           onStarEarned?.(3 * multiplier);
+          onRoundComplete?.();
           setIsAnimating(false);
         } else {
 

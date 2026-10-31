@@ -16,7 +16,7 @@ When picking this up, start at Slice C if two kids share a phone. Product beats 
 
 ## Slice C — family on one phone
 
-- [ ] **Multi-child profiles.** Names, independent stars / streaks / town / coupons. Two siblings sharing a device is a real-family bug today (`localStorage` is one blob). This is the change that may finally justify a small store; do not add Zustand before this.
+- [ ] **Multi-child profiles.** Names, independent stars / streaks / stickers / coupons. Two siblings sharing a device is a real-family bug today (`localStorage` is one blob). This is the change that may finally justify a small store; do not add Zustand before this.
 - [ ] **Save schema version + migrations.** Version the persisted blob so profile split and future keys do not require another hardcoded wipe list. Build on `clearPersistedProgress()` in `src/games/catalog.ts`.
 
 ## Slice D — native parent gate
@@ -32,19 +32,13 @@ When picking this up, start at Slice C if two kids share a phone. Product beats 
 
 - [ ] **SVG for signature surfaces.** Emoji stays the iteration language. Menu launchers stay emoji — custom candy SVGs looked worse and sat off-center. Puzzle art in `public/puzzles/` is the existing SVG path to build on, not the home grid.
 
-## Already-specced town follow-ups (optional, after B–C)
-
-- [ ] Town day/night + weather — [issue-town-environment.md](./issue-town-environment.md)
-- [ ] Town juice / feel — [issue-town-juice.md](./issue-town-juice.md)
-- [ ] Town milestones — [issue-town-milestones.md](./issue-town-milestones.md)
-
 ---
 
 ## Explicitly do not do
 
 These were considered and rejected or deferred hard:
 
-- **Do not lock games behind freemium.** The catalog is the product. If monetization happens, sell parent features (profiles, custom coupons, extra town packs), never hide Shiritori. Ignore the “hide premium games” split in [freemium.md](./freemium.md) / [issue-freemium.md](./issue-freemium.md).
+- **Do not lock games behind freemium.** The catalog is the product. If monetization happens, sell parent features (profiles, custom coupons, accessory packs), never hide Shiritori. Ignore the “hide premium games” split in [freemium.md](./freemium.md) / [issue-freemium.md](./issue-freemium.md).
 - **No RevenueCat / IAP** until B and C exist.
 - **No React Router.** Hardware back is enough.
 - **No i18next.** Five parallel locale objects with `TranslationSchema` are the right weight.

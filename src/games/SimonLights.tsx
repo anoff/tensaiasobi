@@ -37,7 +37,7 @@ const TILE_COLORS = [
 
 export default function SimonLights() {
   const { t } = useTranslation();
-  const { playPop, playSuccess, onStarEarned, challengeMode, playSimonTone } = useGameFX();
+  const { playPop, playSuccess, onStarEarned, onRoundComplete, challengeMode, playSimonTone } = useGameFX();
   const [level, setLevel] = useAgeDifficulty();
   const [game, setGame] = useState<SimonState>(() => startRun(level));
   const [phase, setPhase] = useState<Phase>('ready');
@@ -140,6 +140,7 @@ export default function SimonLights() {
     } else if (outcome === 'done') {
       playSuccess();
       onStarEarned?.(simonStars(level));
+      onRoundComplete?.();
       setPhase('complete');
     } else {
       // Retry or fresh sequence: a gentle wobble, no buzzer, nothing red.

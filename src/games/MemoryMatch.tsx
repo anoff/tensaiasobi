@@ -19,7 +19,7 @@ interface Card {
 const ANIMAL_POOL = ['🦁', '🐯', '🐼', '🐨', '🦊', '🐰', '🐸', '🐷', '🐮', '🐔', '🐧', '🦉', '🐻', '🐹', '🐭', '🐱'];
 
 export function MemoryMatch() {
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const [level, setLevel] = useAgeDifficulty();
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
@@ -96,6 +96,7 @@ export function MemoryMatch() {
             // Award 4 stars × level multiplier
             const multiplier = starMultiplier(level);
             onStarEarned?.(4 * multiplier);
+            onRoundComplete?.();
             setTimeout(() => {
               initGame(level);
             }, 3000);

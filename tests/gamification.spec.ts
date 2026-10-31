@@ -44,17 +44,19 @@ test.describe('tensaiasobi Gamification Checks', () => {
     await page.reload();
   });
 
-  test('Verify Town Builder and Coupon Shop are accessible and have the core components', async ({ page }) => {
-    // 1. Check Town Builder Launcher
-    const townLauncher = page.getByTestId('launch-town');
-    await expect(townLauncher).toBeVisible();
-    await townLauncher.click();
+  test('Verify Sticker Book and Coupon Shop are accessible and have the core components', async ({ page }) => {
+    // 1. Check the Sticker Book launcher (My Town is gone)
+    await expect(page.getByTestId('launch-town')).toHaveCount(0);
+    const bookLauncher = page.getByTestId('launch-sticker-book');
+    await expect(bookLauncher).toBeVisible();
+    await bookLauncher.click();
 
-    // Verify Town Builder title and grid
-    const townTitle = page.locator('h2', { hasText: 'My Town' });
-    await expect(townTitle).toBeVisible();
-    const gridCells = page.locator('button[aria-label="Tap an empty spot to build!"]');
-    await expect(gridCells).toHaveCount(36); // 6x6 grid
+    // Verify the book shows one page per shelf with 12 sticker slots each
+    await expect(page.getByTestId('sticker-book')).toBeVisible();
+    for (const shelf of ['numbers', 'language', 'logic', 'play']) {
+      await expect(page.getByTestId(`book-shelf-${shelf}`)).toBeVisible();
+    }
+    await expect(page.getByTestId('book-stickers-numbers').getByTestId('sticker-slot-empty')).toHaveCount(12);
 
     // Return to menu
     await page.getByTestId('home-button').click();
@@ -204,124 +206,5 @@ test.describe('tensaiasobi Gamification Checks', () => {
 
     const couponSelect = page.getByTestId('challenge-coupon-select');
     await expect(couponSelect).toHaveValue('movie_night');
-  });
-
-  test('Verify Town Builder Delete All with reimbursement', async ({ page }) => {
-    // 1. Injected 100 stars via localStorage to afford purchases
-    await page.addInitScript(() => {
-      localStorage.setItem('gamification_stars', '100');
-    });
-
-    await page.goto('/');
-
-    // 2. Open Town Builder
-    const townLauncher = page.getByTestId('launch-town');
-    await expect(townLauncher).toBeVisible();
-    await townLauncher.click();
-
-    // 3. Place a House (cost: 10) in the first cell
-    const cells = page.locator('button[aria-label="Tap an empty spot to build!"]');
-    await expect(cells.first()).toBeVisible();
-    await cells.first().click();
-
-    const houseBtn = page.locator('button', { hasText: 'House' });
-    await expect(houseBtn).toBeVisible();
-    await houseBtn.click();
-
-    // 4. Place a Tree (cost: 5) in the second cell
-    await cells.first().click(); // Open catalog on second cell (index 0 of remaining empty cells)
-    
-    // Switch to nature category tab
-    const natureTab = page.locator('button', { hasText: 'Nature' });
-    await expect(natureTab).toBeVisible();
-    await natureTab.click();
-
-    const treeBtn = page.locator('button', { hasText: 'Tree' });
-    await expect(treeBtn).toBeVisible();
-    await treeBtn.click();
-
-    // Verify Delete All button is visible and active
-    const deleteAllBtn = page.getByTestId('town-delete-all');
-    await expect(deleteAllBtn).toBeVisible();
-    await expect(deleteAllBtn).toBeEnabled();
-
-    // 5. Long hold Delete All button to trigger the confirmation prompt
-    // We dispatch pointerdown, wait, then dispatch pointerup
-    await deleteAllBtn.dispatchEvent('pointerdown');
-    await page.waitForTimeout(1200);
-    await deleteAllBtn.dispatchEvent('pointerup');
-
-    // Verify Delete All Confirmation modal is shown
-    const confirmModalTitle = page.locator('p', { hasText: 'Are you sure you want to delete all items and receive a refund?' });
-    await expect(confirmModalTitle).toBeVisible();
-
-    // Verify correct refund amount (5 for house + 2 for tree = 7 stars)
-    const refundAmountText = page.locator('p', { hasText: 'Refund: ⭐ 7' });
-    await expect(refundAmountText).toBeVisible();
-
-    // 6. Confirm Delete All
-    const confirmDeleteBtn = page.getByTestId('town-confirm-delete-all-btn');
-    await expect(confirmDeleteBtn).toBeVisible();
-    await confirmDeleteBtn.click();
-
-    // Verify grid is empty again (36 empty cells)
-    await expect(cells).toHaveCount(36);
-
-    // Verify stars are reimbursed (85 left + 7 refund = 92 stars)
-    // We return home to check the star counter badge
-    await page.getByTestId('home-button').click();
-    const starCountBadge = page.getByTestId('stars-total');
-    await expect(starCountBadge).toHaveText('92');
-  });
-
-  test('Verify tapping a placed Town item triggers "Petting Zoo" feedback instead of opening the catalog', async ({ page }) => {
-    // 1. Inject stars to afford a purchase
-    await page.addInitScript(() => {
-      localStorage.setItem('gamification_stars', '100');
-    });
-
-    await page.goto('/');
-
-    // 2. Open Town Builder
-    const townLauncher = page.getByTestId('launch-town');
-    await expect(townLauncher).toBeVisible();
-    await townLauncher.click();
-
-    // 3. Placement Confetti overlay canvas should be present on the grid
-    const confettiCanvas = page.getByTestId('town-confetti-canvas');
-    await expect(confettiCanvas).toBeVisible();
-
-    // 4. Place a House (cost: 10) in the first cell
-    const emptyCells = page.locator('button[aria-label="Tap an empty spot to build!"]');
-    await expect(emptyCells.first()).toBeVisible();
-    await emptyCells.first().click();
-
-    const houseBtn = page.locator('button', { hasText: 'House' });
-    await expect(houseBtn).toBeVisible();
-    await houseBtn.click();
-
-    // The catalog modal should close after placing the item
-    await expect(houseBtn).not.toBeVisible();
-
-    // 5. Tap the placed House again – it should NOT reopen the catalog modal,
-    //    and it should instead play a swell "poke" animation.
-    // Buildings have an infinite CSS "town-pulse" animation applied, so the
-    // element's bounding box never settles; force the click to bypass
-    // Playwright's actionability/stability check. Also wait out the one-shot
-    // "town-place" placement animation window (500ms) so it doesn't take
-    // rendering priority over the poke animation class.
-    const placedHouse = page.locator('button[aria-label="🏠"]');
-    await expect(placedHouse).toBeVisible();
-    await page.waitForTimeout(600);
-    await placedHouse.click({ force: true });
-
-    // Catalog title should not appear since the tap was consumed as item feedback
-    const catalogTitle = page.locator('h3', { hasText: 'Choose an item' });
-    await expect(catalogTitle).not.toBeVisible();
-
-    // The poke swell animation class should be applied to the emoji inside
-    // the tapped cell (not the cell itself, which must stay in place)
-    // (assert promptly since the class is removed after ~1s).
-    await expect(placedHouse.locator('span')).toHaveClass(/town-poke-swell/, { timeout: 500 });
   });
 });

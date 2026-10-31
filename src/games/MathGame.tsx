@@ -10,12 +10,14 @@ import { freshRound } from '../utils/freshRound';
 import { NotebookChoice, NotebookOperator, NotebookSheet, NotebookTally, type NotebookChoiceState } from '../components/Notebook';
 import { generateMathQuestion as generateQuestion, type MathQuestion } from './mathPopLogic';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 import { useLater } from '../hooks/useLater';
 
 
 export function MathGame() {
   const { playPop, playSuccess, playError, onStarEarned, challengeMode } = useGameFX();
+  const tallyRound = useRoundTally();
   const [level, setLevel] = useAgeDifficulty();
   const [question, setQuestion] = useState<MathQuestion>(() => generateQuestion(level));
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -53,6 +55,7 @@ export function MathGame() {
       registerCorrect();
 
       onStarEarned?.(CHOICE_STARS[level]);
+      tallyRound();
 
       later(() => loadNewQuestion(level), 1800);
     } else {

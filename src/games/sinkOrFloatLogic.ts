@@ -132,3 +132,12 @@ export function resolveBatch(round: SinkFloatRound, predictions: Readonly<Record
 export function afterWrong(level: GameDifficulty, challengeMode = false): 'retry' | 'fresh' {
   return wrongMeansNewRound(level, challengeMode) ? 'fresh' : 'retry';
 }
+
+/**
+ * Hard: what happens once every object of a batch has dropped. Right guesses stay solved and only the
+ * missed objects go back on the shelf for another guess; parent challenges keep the strict fresh round.
+ */
+export function afterBatch(results: readonly DropResult[], challengeMode = false): 'complete' | 'retryMissed' | 'fresh' {
+  if (results.every((r) => r.correct)) return 'complete';
+  return challengeMode ? 'fresh' : 'retryMissed';
+}

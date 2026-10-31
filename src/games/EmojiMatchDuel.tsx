@@ -2,6 +2,7 @@ import { useState } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import { useTranslation } from '../hooks/useTranslation';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { useLater } from '../hooks/useLater';
 import type { GameDifficulty } from '../types/game';
 import { DobbleCardView } from './DobbleCardView';
@@ -46,6 +47,7 @@ interface EmojiMatchDuelProps {
  */
 export function EmojiMatchDuel({ difficulty, onExit }: EmojiMatchDuelProps) {
   const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const tallyRound = useRoundTally();
   const { t } = useTranslation();
   const [state, setState] = useState<DuelState>(() => dealDuel(difficulty));
   const [scores, setScores] = useState<[number, number]>([0, 0]);
@@ -77,6 +79,7 @@ export function EmojiMatchDuel({ difficulty, onExit }: EmojiMatchDuelProps) {
 
     playSuccess();
     onStarEarned?.(1);
+    tallyRound();
     setMatched({ player, emoji });
     const nextScore = scores[player] + 1;
     setScores((s) => (player === 0 ? [nextScore, s[1]] : [s[0], nextScore]));

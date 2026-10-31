@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import DifficultySelector from '../components/DifficultySelector';
 import { useGameFX } from '../hooks/gameFXContext';
+import { useRoundTally } from '../hooks/useRoundTally';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
 import { useTranslation } from '../hooks/useTranslation';
 import { INK, LEAF, hardShadow } from '../theme/blockTable';
@@ -31,6 +32,7 @@ const CARD_SIZE = 'calc(13rem * var(--game-scale))';
 export default function DiceFlash() {
   const { t } = useTranslation();
   const { playPop, playSuccess, onStarEarned, challengeMode } = useGameFX();
+  const tallyRound = useRoundTally();
   const [level, setLevel] = useAgeDifficulty();
   const [round, setRound] = useState(() => generateDiceRound(level));
   const [flashNo, setFlashNo] = useState(0);
@@ -83,6 +85,7 @@ export default function DiceFlash() {
     if (outcome === 'correct') {
       playSuccess();
       onStarEarned?.(DICE_STARS[level]);
+      tallyRound();
       setProgress((p) => p + 1);
       setPhase('right');
     } else {
