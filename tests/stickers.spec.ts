@@ -146,16 +146,18 @@ test.describe('Sticker Book', () => {
     expect(await stars(page)).toBe(5);
   });
 
-  test('scene pieces snap onto their outline and a full scene shows the reward', async ({ page }) => {
-    const pieces = ['scene_engine', 'scene_car_balls', 'scene_car_shapes', 'scene_owl_conductor'];
+  test('the Numbers train scene snaps onto its outline page and a full scene shows the reward', async ({ page }) => {
+    const pieces = ['scene_numbers_engine', 'scene_numbers_car_balls', 'scene_numbers_car_shapes', 'scene_numbers_owl_conductor'];
     await seed(page, { [KEY]: save({ earned: pieces, placedPieces: pieces.slice(1), seenCount: 4 }) });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
     const scene = page.getByTestId('scene-numbers');
     await expect(scene).toHaveAttribute('data-complete', 'false');
-    const piece = scene.locator('[data-testid="scene-piece"][data-piece="scene_engine"]');
+    // The Train day scene draws on the Art Director's outline page.
+    await expect(scene.getByTestId('scene-page')).toBeVisible();
+    const piece = scene.locator('[data-testid="scene-piece"][data-piece="scene_numbers_engine"]');
     await piece.scrollIntoViewIfNeeded();
-    await dragTo(page, piece, scene.locator('[data-testid="scene-ghost"][data-piece="scene_engine"]'));
+    await dragTo(page, piece, scene.locator('[data-testid="scene-ghost"][data-piece="scene_numbers_engine"]'));
     await expect(scene).toHaveAttribute('data-complete', 'true');
     await expect(scene.getByTestId('scene-reward')).toBeVisible();
   });

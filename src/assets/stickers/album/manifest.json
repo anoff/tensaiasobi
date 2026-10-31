@@ -389,19 +389,35 @@
   {
    "shelf": "numbers",
    "page": {
-    "set": "train_day",
+    "file": "scene_numbers_outline.png",
     "ground": 146,
     "span": [
-     -125,
-     360
-    ]
+     -150.62,
+     438.12
+    ],
+    "set": "train_day"
    },
    "reward": "general_star",
    "pieces": [
     {
-     "id": "scene_engine",
-     "file": "scene_engine.png",
-     "svg": "svg/scene_engine.svg",
+     "id": "scene_numbers_owl_conductor",
+     "file": "scene_numbers_owl_conductor.png",
+     "rim": "butter",
+     "vb": [
+      -0.62,
+      12.3256,
+      88.04
+     ],
+     "at": [
+      -150,
+      30
+     ],
+     "reused_from": "stickers/variations/scene_owl_conductor.png",
+     "svg": "svg/scene_numbers_owl_conductor.svg"
+    },
+    {
+     "id": "scene_numbers_engine",
+     "file": "scene_numbers_engine.png",
      "rim": "butter",
      "vb": [
       -12.0,
@@ -411,12 +427,13 @@
      "at": [
       -24,
       0
-     ]
+     ],
+     "reused_from": "stickers/variations/scene_engine.png",
+     "svg": "svg/scene_numbers_engine.svg"
     },
     {
-     "id": "scene_car_balls",
-     "file": "scene_car_balls.png",
-     "svg": "svg/scene_car_balls.svg",
+     "id": "scene_numbers_car_balls",
+     "file": "scene_numbers_car_balls.png",
      "rim": "butter",
      "vb": [
       -20.38,
@@ -426,12 +443,13 @@
      "at": [
       108,
       0
-     ]
+     ],
+     "reused_from": "stickers/variations/scene_car_balls.png",
+     "svg": "svg/scene_numbers_car_balls.svg"
     },
     {
-     "id": "scene_car_shapes",
-     "file": "scene_car_shapes.png",
-     "svg": "svg/scene_car_shapes.svg",
+     "id": "scene_numbers_car_shapes",
+     "file": "scene_numbers_car_shapes.png",
      "rim": "butter",
      "vb": [
       -19.5,
@@ -441,23 +459,9 @@
      "at": [
       216,
       0
-     ]
-    },
-    {
-     "id": "scene_owl_conductor",
-     "file": "scene_owl_conductor.png",
-     "svg": "svg/scene_owl_conductor.svg",
-     "rim": "butter",
-     "vb": [
-      -1.0,
-      19.88,
-      142.0
      ],
-     "at": [
-      -150,
-      30
-     ],
-     "scale": 0.62
+     "reused_from": "stickers/variations/scene_car_shapes.png",
+     "svg": "svg/scene_numbers_car_shapes.svg"
     }
    ]
   },

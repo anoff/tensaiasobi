@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { StickerSave } from '../../data/stickerRules';
 import { collectibleById, type SceneSet } from '../../data/stickers';
 import { useTranslation } from '../../hooks/useTranslation';
-import { INK, PAPER, PEBBLE } from '../../theme/blockTable';
-import { GhostOutline } from './StickerImage';
+import { INK } from '../../theme/blockTable';
 import { usePointerDrag } from './usePointerDrag';
 
 interface SceneBoardProps {
@@ -67,37 +66,17 @@ export function SceneBoard({ scene, book, onPlacePiece, playPop, playSuccess }: 
       <div
         ref={boardRef}
         data-testid="scene-board"
-        className="relative w-full overflow-visible rounded-2xl border-2"
-        style={{
-          aspectRatio: `${view.w} / ${view.h}`,
-          backgroundColor: scene.pageSrc ? 'transparent' : PAPER,
-          borderColor: scene.pageSrc ? 'transparent' : PEBBLE,
-        }}
+        className="relative w-full overflow-visible"
+        style={{ aspectRatio: `${view.w} / ${view.h}` }}
       >
-        {scene.pageSrc && (
-          <img
-            src={scene.pageSrc}
-            alt=""
-            aria-hidden
-            draggable={false}
-            data-testid="scene-page"
-            className="pointer-events-none absolute inset-0 h-full w-full max-w-none"
-          />
-        )}
-        {/* Ground line (track) under the pieces; outline pages draw their own. */}
-        {!scene.pageSrc && (
-          <span
-            aria-hidden
-            className="absolute block"
-            style={{
-              left: pct(scene.span[0] - view.x, view.w),
-              width: pct(scene.span[1], view.w),
-              top: pct(scene.ground - view.y, view.h),
-              height: 3,
-              backgroundColor: '#6b5a4c',
-            }}
-          />
-        )}
+        <img
+          src={scene.pageSrc}
+          alt=""
+          aria-hidden
+          draggable={false}
+          data-testid="scene-page"
+          className="pointer-events-none absolute inset-0 h-full w-full max-w-none"
+        />
         {scene.pieces.map((p) =>
           placed.has(p.id) && p.src ? (
             <img
@@ -109,7 +88,7 @@ export function SceneBoard({ scene, book, onPlacePiece, playPop, playSuccess }: 
               className="pointer-events-none absolute max-w-none animate-pop-in"
               style={boxStyle(p.box)}
             />
-          ) : scene.pageSrc ? (
+          ) : (
             // The page already shows the dashed slot; this only marks where it is.
             <span
               key={p.id}
@@ -119,9 +98,7 @@ export function SceneBoard({ scene, book, onPlacePiece, playPop, playSuccess }: 
               className="absolute block"
               style={boxStyle(p.box)}
             />
-          ) : p.src ? (
-            <GhostOutline key={p.id} src={p.src} piece={p.id} style={boxStyle(p.box)} />
-          ) : null,
+          ),
         )}
         {complete && reward?.src && (
           <img

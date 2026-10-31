@@ -61,9 +61,9 @@ export interface SceneSet {
   /** Ground line [min x, width] in scene units. */
   span: [number, number];
   pieces: ScenePiece[];
-  /** The Art Director's faded outline page (paper card, ground line, dashed slots), when it exists. */
-  pageSrc?: string;
-  /** Area the board shows, in scene units: the outline page, or else the pieces plus the ground line. */
+  /** The Art Director's faded outline page (paper card, ground line, dashed slots). */
+  pageSrc: string;
+  /** Area the board shows, in scene units: the whole outline page. */
   view: { x: number; y: number; w: number; h: number };
 }
 
@@ -125,23 +125,17 @@ function buildScene(entry: SceneEntry): SceneSet | null {
   });
   const { ground } = entry.page;
   const [spanX, spanW] = entry.page.span;
-  const pageSrc = entry.page.file ? artUrl('stickers/album', entry.page.file) : undefined;
-  let view: SceneSet['view'];
-  if (pageSrc) {
-    // Same maths the page was drawn with, so pieces land exactly on their dashed slots.
-    const s = (PAGE_W - 2 * PAGE_PAD) / spanW;
-    const top = Math.min(...entry.pieces.map((p) => p.vb[1] + p.at[1]));
-    const H = Math.round(s * (ground - top) + 150);
-    const ox = PAGE_PAD - s * spanX;
-    const oy = H - 70 - s * ground;
-    view = { x: -ox / s, y: -oy / s, w: (PAGE_W + 8) / s, h: (H + 9) / s };
-  } else {
-    const xs = pieces.flatMap((p) => [p.box.x, p.box.x + p.box.size]).concat([spanX, spanX + spanW]);
-    const ys = pieces.flatMap((p) => [p.box.y, p.box.y + p.box.size]).concat([ground + 8]);
-    const x = Math.min(...xs);
-    const y = Math.min(...ys);
-    view = { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
-  }
+  // A scene is only playable on its outline page; one without a page waits for the art.
+  if (!entry.page.file) return null;
+  const pageSrc = artUrl('stickers/album', entry.page.file);
+  if (!pageSrc) return null;
+  // Same maths the page was drawn with, so pieces land exactly on their dashed slots.
+  const s = (PAGE_W - 2 * PAGE_PAD) / spanW;
+  const top = Math.min(...entry.pieces.map((p) => p.vb[1] + p.at[1]));
+  const H = Math.round(s * (ground - top) + 150);
+  const ox = PAGE_PAD - s * spanX;
+  const oy = H - 70 - s * ground;
+  const view = { x: -ox / s, y: -oy / s, w: (PAGE_W + 8) / s, h: (H + 9) / s };
   return {
     id: entry.page.set,
     shelf: entry.shelf,
@@ -254,8 +248,7 @@ export function bookTotals(book: StickerSave): { earned: number; total: number }
   const general = GENERAL_STICKERS.filter((g) => g.id !== 'general_star');
   return {
     earned:
-      SHELVES.reduce((n, s) => n + shelfEarned(book, s), 0) +
-      general.filter((g) => book.earned.includes(g.id)).length,
+      SHELVES.reduce((n, s) => n + shelfEarned(book, s), 0) + general.filter((g) => book.earned.includes(g.id)).length,
     total: SHELVES.reduce((n, s) => n + shelfTotal(s), 0) + general.length,
   };
 }

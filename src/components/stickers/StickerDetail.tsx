@@ -102,7 +102,7 @@ export function StickerDetail({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="relative w-full max-w-md rounded-[2rem] border-[3px] p-4 animate-pop-in"
+        className="relative max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-[2rem] border-[3px] p-4 animate-pop-in"
         style={{ backgroundColor: CHALK, borderColor: INK, boxShadow: hardShadow() }}
       >
         <button

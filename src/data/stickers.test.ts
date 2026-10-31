@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SCENES,
   ACCESSORIES,
   AWARD_POOLS,
   CHARACTERS,
@@ -58,6 +59,16 @@ describe('sticker catalog (manifest driven)', () => {
       expect(AWARD_POOLS.stickers[shelf], shelf).toHaveLength(SHELF_SLOTS);
       expect(AWARD_POOLS.moods[shelf], shelf).toHaveLength(4);
     }
+  });
+
+  it('has one scene per shelf, each drawn on its outline page with 4 pieces', () => {
+    expect(SCENES.map((s) => s.shelf)).toEqual([...SHELVES]);
+    for (const scene of SCENES) {
+      expect(scene.pageSrc, scene.id).toBeTruthy();
+      expect(scene.pieces, scene.id).toHaveLength(4);
+      for (const p of scene.pieces) expect(p.src, p.id).toBeTruthy();
+    }
+    expect(SCENES[0].id).toBe('train_day');
   });
 
   it('sells 12 accessories and keeps the thank-you sticker', () => {

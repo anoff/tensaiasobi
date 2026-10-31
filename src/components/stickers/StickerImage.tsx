@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import type { AccessoryPlacement } from '../../data/stickerRules';
 import { accessoryById } from '../../data/stickers';
 import { PEBBLE } from '../../theme/blockTable';
@@ -11,20 +10,6 @@ export function EmptySlot({ size, testId }: { size: number | string; testId?: st
       aria-hidden
       className="block rounded-full border-2 border-dashed"
       style={{ width: size, height: size, borderColor: PEBBLE, backgroundColor: 'rgba(184,174,163,0.35)' }}
-    />
-  );
-}
-
-/** Faded outline of a known shape (scene pieces): the PNG used as a mask over a pebble fill. */
-export function GhostOutline({ src, style, piece }: { src: string; style?: CSSProperties; piece?: string }) {
-  const mask = `url("${src}") center / 100% 100% no-repeat`;
-  return (
-    <span
-      aria-hidden
-      data-testid="scene-ghost"
-      data-piece={piece}
-      className="absolute block"
-      style={{ ...style, backgroundColor: 'rgba(184,174,163,0.55)', WebkitMask: mask, mask }}
     />
   );
 }
