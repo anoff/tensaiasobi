@@ -176,20 +176,21 @@ test.describe('Sticker Book', () => {
     await expect(scene.getByTestId('scene-piece-placed')).toHaveCount(4);
   });
 
-  test('one character per shelf; art still to come shows as empty, data-driven slots', async ({ page }) => {
+  test('one character per shelf, 4 moods each and an outline-page scene on every shelf', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
     for (const c of ['owl', 'fox', 'tortoise', 'panda']) {
       await expect(page.getByTestId(`book-character-${c}`)).toHaveAttribute('data-has-art', 'true');
     }
-    // Moods and the Fun shelf have no art yet: their slots wait as dashed outlines.
+    // Nothing earned yet: every slot waits as a dashed outline.
     for (const shelf of ['numbers', 'language', 'logic', 'play']) {
       await expect(page.getByTestId(`book-moods-${shelf}`).getByTestId('sticker-slot-empty')).toHaveCount(4);
     }
     await expect(page.getByTestId('book-stickers-play').getByTestId('sticker-slot-empty')).toHaveCount(12);
-    await expect(page.getByTestId('scene-coming-play')).toBeVisible();
-    // Reading corner and Shape garden use the Art Director's outline pages.
-    await expect(page.getByTestId('scene-language').getByTestId('scene-page')).toBeVisible();
-    await expect(page.getByTestId('scene-logic').getByTestId('scene-page')).toBeVisible();
+    await expect(page.getByTestId('book-shelf-count-play')).toContainText('0 / 20');
+    // Reading corner, Shape garden and Playground use the Art Director's outline pages.
+    for (const shelf of ['language', 'logic', 'play']) {
+      await expect(page.getByTestId(`scene-${shelf}`).getByTestId('scene-page')).toBeVisible();
+    }
 });
 });

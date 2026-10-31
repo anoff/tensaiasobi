@@ -25,7 +25,8 @@ describe('sticker catalog (manifest driven)', () => {
   it('wires every album manifest entry by id, shelf and file', () => {
     for (const entry of albumManifest.stickers) {
       expect(entry.file).toBe(`${entry.id}.png`);
-      expect(entry.id.startsWith(`${entry.shelf}_`)).toBe(true);
+      // File names use the shelf's art name (the play shelf is "fun").
+      expect(entry.id).toMatch(new RegExp(`^${entry.shelf === 'play' ? 'fun' : entry.shelf}_\\d\\d$`));
       const c = collectibleById(entry.id);
       expect(c?.shelf).toBe(entry.shelf);
       expect(c?.src).toBeTruthy();
@@ -41,8 +42,9 @@ describe('sticker catalog (manifest driven)', () => {
     expect(CHARACTERS).toHaveLength(4);
   });
 
-  it('has 16 moods, 4 per character', () => {
+  it('has 16 moods, 4 per character, all with art', () => {
     expect(MOODS).toHaveLength(16);
+    for (const m of MOODS) expect(m.src, m.id).toBeTruthy();
     for (const shelf of SHELVES) expect(MOODS.filter((m) => m.shelf === shelf)).toHaveLength(4);
   });
 
@@ -52,10 +54,10 @@ describe('sticker catalog (manifest driven)', () => {
         for (const id of ids ?? []) expect(collectibleById(id)?.src, id).toBeTruthy();
       }
     }
-    // Tortoise art has not landed yet: its moods are empty slots, not awards.
-    expect(AWARD_POOLS.moods.logic ?? []).toEqual(
-      MOODS.filter((m) => m.shelf === 'logic' && m.src).map((m) => m.id),
-    );
+    for (const shelf of SHELVES) {
+      expect(AWARD_POOLS.stickers[shelf], shelf).toHaveLength(SHELF_SLOTS);
+      expect(AWARD_POOLS.moods[shelf], shelf).toHaveLength(4);
+    }
   });
 
   it('sells 12 accessories and keeps the thank-you sticker', () => {

@@ -1,6 +1,102 @@
 {
  "stickers": [
   {
+   "id": "fun_01",
+   "shelf": "play",
+   "file": "fun_01.png",
+   "svg": "svg/fun_01.svg",
+   "rim": "pebble",
+   "label": "paint palette (sample)"
+  },
+  {
+   "id": "fun_02",
+   "shelf": "play",
+   "file": "fun_02.png",
+   "svg": "svg/fun_02.svg",
+   "rim": "coal",
+   "label": "panda paints"
+  },
+  {
+   "id": "fun_03",
+   "shelf": "play",
+   "file": "fun_03.png",
+   "svg": "svg/fun_03.svg",
+   "rim": "pebble",
+   "label": "crayons"
+  },
+  {
+   "id": "fun_04",
+   "shelf": "play",
+   "file": "fun_04.png",
+   "svg": "svg/fun_04.svg",
+   "rim": "coal",
+   "label": "kite (sample)"
+  },
+  {
+   "id": "fun_05",
+   "shelf": "play",
+   "file": "fun_05.png",
+   "svg": "svg/fun_05.svg",
+   "rim": "pebble",
+   "label": "beach ball"
+  },
+  {
+   "id": "fun_06",
+   "shelf": "play",
+   "file": "fun_06.png",
+   "svg": "svg/fun_06.svg",
+   "rim": "coal",
+   "label": "panda + ball"
+  },
+  {
+   "id": "fun_07",
+   "shelf": "play",
+   "file": "fun_07.png",
+   "svg": "svg/fun_07.svg",
+   "rim": "pebble",
+   "label": "xylophone"
+  },
+  {
+   "id": "fun_08",
+   "shelf": "play",
+   "file": "fun_08.png",
+   "svg": "svg/fun_08.svg",
+   "rim": "coal",
+   "label": "panda sings"
+  },
+  {
+   "id": "fun_09",
+   "shelf": "play",
+   "file": "fun_09.png",
+   "svg": "svg/fun_09.svg",
+   "rim": "pebble",
+   "label": "sunshine"
+  },
+  {
+   "id": "fun_10",
+   "shelf": "play",
+   "file": "fun_10.png",
+   "svg": "svg/fun_10.svg",
+   "rim": "coal",
+   "label": "panda blows bubbles"
+  },
+  {
+   "id": "fun_11",
+   "shelf": "play",
+   "file": "fun_11.png",
+   "svg": "svg/fun_11.svg",
+   "rim": "pebble",
+   "label": "rainbow"
+  },
+  {
+   "id": "fun_12",
+   "shelf": "play",
+   "file": "fun_12.png",
+   "svg": "svg/fun_12.svg",
+   "rim": "coal",
+   "label": "panda + bucket and spade"
+  },
+  {
    "id": "language_01",
    "shelf": "language",
    "file": "language_01.png",
@@ -512,6 +608,81 @@
       18
      ],
      "svg": "svg/scene_logic_block_steps.svg"
+    }
+   ]
+  },
+  {
+   "shelf": "play",
+   "page": {
+    "file": "scene_fun_outline.png",
+    "ground": 170,
+    "span": [
+     -0.25,
+     623.25
+    ],
+    "set": "playground"
+   },
+   "reward": "general_star",
+   "pieces": [
+    {
+     "id": "scene_fun_slide",
+     "file": "scene_fun_slide.png",
+     "rim": "pebble",
+     "vb": [
+      -0.25,
+      23.75,
+      138.5
+     ],
+     "at": [
+      0,
+      16
+     ],
+     "svg": "svg/scene_fun_slide.svg"
+    },
+    {
+     "id": "scene_fun_panda",
+     "file": "scene_fun_panda.png",
+     "rim": "coal",
+     "vb": [
+      -1.0,
+      10.5,
+      142.0
+     ],
+     "at": [
+      160,
+      24
+     ],
+     "svg": "svg/scene_fun_panda.svg"
+    },
+    {
+     "id": "scene_fun_sandpit",
+     "file": "scene_fun_sandpit.png",
+     "rim": "pebble",
+     "vb": [
+      -3.0,
+      0.62,
+      176.0
+     ],
+     "at": [
+      310,
+      18
+     ],
+     "svg": "svg/scene_fun_sandpit.svg"
+    },
+    {
+     "id": "scene_fun_flowers",
+     "file": "scene_fun_flowers.png",
+     "rim": "coal",
+     "vb": [
+      -0.5,
+      30.5,
+      123.5
+     ],
+     "at": [
+      500,
+      18
+     ],
+     "svg": "svg/scene_fun_flowers.svg"
     }
    ]
   }
