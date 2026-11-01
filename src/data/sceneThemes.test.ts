@@ -14,7 +14,7 @@ import {
   type SceneTheme,
   type SlotId,
 } from './sceneThemes';
-import { backgroundLayout, layerUrl, paintBackground, paintLayout } from './sceneArt';
+import { BLANK_PAGE_FILL, backgroundLayout, layerUrl, paintBackground, paintLayout } from './sceneArt';
 import pages from '../assets/stickers/pages/themes.json';
 import { en } from '../locales/en';
 
@@ -197,10 +197,14 @@ describe('page background composite (screen and print)', () => {
     return { ctx, calls };
   };
 
-  it('paints a blank page as paper', async () => {
+  it('paints a Blank page solid white (screen, thumbnail and print use this composite)', async () => {
     const { ctx, calls } = fakeCtx();
     await paintBackground(ctx as never, 90, 160, 'blank');
-    expect(calls).toEqual(['fill #ffe7c2 0,0,90,160']);
+    expect(calls).toEqual(['fill #ffffff 0,0,90,160']);
+    const thumb = fakeCtx();
+    await paintBackground(thumb.ctx as never, 96, 171, 'blank', true);
+    expect(thumb.calls).toEqual(['fill #ffffff 0,0,96,171']);
+    expect(BLANK_PAGE_FILL).toBe('#ffffff');
   });
 
   it('paints placeholder layers for a theme: its flat sky, then the ground under an ink line at 78 %', async () => {

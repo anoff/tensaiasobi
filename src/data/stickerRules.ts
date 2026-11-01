@@ -41,6 +41,12 @@ export interface StickerCopy {
 
 /** Most My pages a book can hold. */
 export const MAX_PAGES = 20;
+/**
+ * Most pages a stored book can hold: MAX_PAGES plus one per retired scene outline page. Old books convert
+ * every outline page with snapped pieces into a blank page even past MAX_PAGES, so nothing placed is lost;
+ * such a book simply cannot add pages until it is back under MAX_PAGES.
+ */
+export const MAX_STORED_PAGES = MAX_PAGES + LEGACY_SCENE_PAGES.length;
 /** Sticker size steps on a page, as a share of the page width (the size handle cycles them). */
 /** My page shape, width / height: 9:16 portrait (343x610 at 375x812). Placements are 0..1 of it. */
 export const PAGE_ASPECT = 9 / 16;
@@ -73,7 +79,7 @@ export interface StickerSave {
   copies: StickerCopy[];
   /** Capsules earned on `daily.date` (local YYYY-MM-DD); drives the drop curve. */
   daily: { date: string; k: number };
-  /** My pages, at most MAX_PAGES. Autosaved with the rest of the book. */
+  /** My pages: new ones only under MAX_PAGES (converted old books may hold up to MAX_STORED_PAGES). Autosaved with the rest of the book. */
   pages: BookPage[];
   /** Accessories bought with stars; global, usable on every sticker. */
   ownedAccessories: string[];
@@ -124,13 +130,13 @@ function parseBackground(raw: unknown): PageBackground {
 }
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
-/** Keeps well-formed pages (up to MAX_PAGES) and drops placements of unknown or already placed copies. */
+/** Keeps well-formed pages (up to MAX_STORED_PAGES) and drops placements of unknown or already placed copies. */
 function parsePages(raw: unknown, uids: ReadonlySet<string>): BookPage[] {
   if (!Array.isArray(raw)) return [];
   const used = new Set<string>();
   const pages: BookPage[] = [];
   for (const p of raw as Partial<BookPage>[]) {
-    if (pages.length >= MAX_PAGES) break;
+    if (pages.length >= MAX_STORED_PAGES) break;
     if (!p || typeof p.id !== 'string' || !Array.isArray(p.stickers)) continue;
     const stickers: PagePlacement[] = [];
     for (const st of p.stickers as Partial<PagePlacement>[]) {
@@ -147,24 +153,24 @@ function parsePages(raw: unknown, uids: ReadonlySet<string>): BookPage[] {
 
 /**
  * Old v2 books (before the scene themes) kept scene pieces snapped onto per-shelf outline pages in
- * `placedPieces`. Each old scene set with placed pieces becomes a blank page holding those pieces where they
- * sat (a free copy of each; pieces whose every copy is already on a page are left alone). Nothing owned is
- * lost: anything that does not fit (20 pages) simply stays in the tray.
+ * `placedPieces`. A snap only recorded the piece id and never used up a copy: the copy stayed in the My pages
+ * tray (or on a My page) at the same time. So each snapped piece is granted as one new plain copy, placed at
+ * its old slot centre on a blank page made from its outline page (past MAX_PAGES if need be). Existing copies
+ * and placements are untouched, and the grants count as seen (no "new" badge). Nothing is removed.
  */
 function pagesFromPlacedPieces(save: StickerSave, placedPieces: readonly string[]): StickerSave {
-  const placed = new Set(placedPieces);
+  const snapped = new Set(placedPieces);
   let next = save;
   for (const set of LEGACY_SCENE_PAGES) {
-    const pieces = set.filter((p) => placed.has(p.id) && freeCopies(next, p.id).length > 0);
-    if (!pieces.length || next.pages.length >= MAX_PAGES) continue;
-    next = addPage(next, 'blank');
-    const pageId = next.pages[next.pages.length - 1].id;
+    const pieces = set.filter((p) => snapped.has(p.id));
+    if (!pieces.length) continue;
+    const stickers: PagePlacement[] = [];
     for (const p of pieces) {
-      next = placeOnPage(next, pageId, p.id, p.x, p.y);
-      const placedNow = next.pages[next.pages.length - 1].stickers;
-      const uid = placedNow[placedNow.length - 1].uid;
-      next = updatePlacement(next, pageId, uid, { size: p.size });
+      const added = addCopy(next, p.id, false);
+      next = { ...added.save, seenCount: added.save.seenCount + 1 };
+      stickers.push({ uid: added.copy.uid, x: p.x, y: p.y, size: p.size, rotation: 0 });
     }
+    next = { ...next, pages: [...next.pages, { id: nextPageId(next.pages), background: 'blank', stickers }] };
   }
   return next;
 }
@@ -253,7 +259,10 @@ export function drawFromShelf(save: StickerSave, shelf: Shelf, pools: AwardPools
 
 /** Adds one copy (duplicates allowed). */
 export function addCopy(save: StickerSave, id: string, shiny: boolean): { save: StickerSave; copy: StickerCopy } {
-  const copy: StickerCopy = { uid: `c${save.copies.length + 1}`, id, shiny };
+  const taken = new Set(save.copies.map((c) => c.uid));
+  let n = save.copies.length + 1;
+  while (taken.has(`c${n}`)) n++;
+  const copy: StickerCopy = { uid: `c${n}`, id, shiny };
   return { save: { ...save, copies: [...save.copies, copy] }, copy };
 }
 
@@ -313,13 +322,18 @@ export function removeAccessory(save: StickerSave, uid: string, accessoryId: str
   return { ...save, placements };
 }
 
-/** Adds an empty page (no-op at MAX_PAGES). */
+const nextPageId = (pages: readonly BookPage[]) =>
+  `p${Math.max(0, ...pages.map((p) => Number(p.id.slice(1)) || 0)) + 1}`;
+
+/** True while the book has room for a new page (under MAX_PAGES); the New page option shows only then. */
+export const canAddPage = (save: StickerSave) => save.pages.length < MAX_PAGES;
+
+/** Adds an empty page (no-op at MAX_PAGES or more). */
 export function addPage(save: StickerSave, background: PageBackground): StickerSave {
-  if (save.pages.length >= MAX_PAGES) return save;
-  const n = Math.max(0, ...save.pages.map((p) => Number(p.id.slice(1)) || 0)) + 1;
+  if (!canAddPage(save)) return save;
   return {
     ...save,
-    pages: [...save.pages, { id: `p${n}`, background, stickers: [] }],
+    pages: [...save.pages, { id: nextPageId(save.pages), background, stickers: [] }],
   };
 }
 

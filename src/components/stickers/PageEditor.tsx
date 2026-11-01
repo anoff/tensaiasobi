@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import {
-  MAX_PAGES,
+  canAddPage,
   PAGE_ASPECT,
   PAGE_SIZE_STEPS,
   freeCopies,
@@ -12,6 +12,7 @@ import {
 import { collectibleById, stickerLook, stickerTilt } from '../../data/stickers';
 import { useTranslation } from '../../hooks/useTranslation';
 import { BUTTER, CHALK, INK, PAPER, hardShadow } from '../../theme/blockTable';
+import { BLANK_PAGE_FILL } from '../../data/sceneArt';
 import { SceneBackground } from './SceneBackground';
 import { CountBadge, StickerImage } from './StickerImage';
 import { usePointerDrag } from './usePointerDrag';
@@ -131,7 +132,7 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onN
   const trayIds = [...new Set(book.copies.map((c) => c.id))].filter((id) => collectibleById(id)?.src);
   const tray = trayIds.map((id) => ({ id, free: freeCopies(book, id) })).filter((x) => x.free.length > 0);
 
-  const canAdd = book.pages.length < MAX_PAGES;
+  const canAdd = canAddPage(book);
 
   const arrow =
     'absolute top-1/2 z-[3] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border-[3px] text-xl font-black leading-none';
@@ -179,7 +180,8 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onN
             style={{
               width: boardWidth,
               height: boardHeight,
-              backgroundColor: PAPER,
+              // A Blank page is opaque white; a scene page's canvas covers its paper.
+              backgroundColor: page.background === 'blank' ? BLANK_PAGE_FILL : PAPER,
               borderColor: INK,
               boxShadow: hardShadow(3, 4),
             }}

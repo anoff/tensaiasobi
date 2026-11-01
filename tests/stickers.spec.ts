@@ -24,6 +24,23 @@ function save(over: Record<string, unknown> = {}) {
   });
 }
 
+/** One screen pixel as [r, g, b, a], decoded from a 1×1 screenshot. */
+async function pixelAt(page: Page, x: number, y: number): Promise<number[]> {
+  const png = await page.screenshot({ clip: { x: Math.round(x), y: Math.round(y), width: 1, height: 1 } });
+  // A string script: the test tsconfig has no DOM types.
+  return page.evaluate<number[]>(`(async () => {
+    const img = new Image();
+    img.src = 'data:image/png;base64,${png.toString('base64')}';
+    await img.decode();
+    const c = document.createElement('canvas');
+    c.width = 1;
+    c.height = 1;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    return Array.from(ctx.getImageData(0, 0, 1, 1).data);
+  })()`);
+}
+
 async function seed(page: Page, values: Record<string, string>) {
   await page.addInitScript((v) => {
     // Seed only on the first load so reloads keep what the app wrote.
@@ -347,7 +364,7 @@ test.describe('Sticker Book', () => {
         pages: [
           {
             id: 'p1',
-            background: 'numbers',
+            background: { theme: 'park', seed: 3 },
             stickers: [
               { uid: 'c1', x: 0.3, y: 0.4, size: 1, rotation: 20 },
               { uid: 'c2', x: 0.7, y: 0.6, size: 2, rotation: -10 },
@@ -563,12 +580,48 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('page-new')).toHaveCount(0);
     await expect(page.getByTestId('page-next')).toHaveCount(0);
     await expect(page.getByTestId('page-prev')).toBeVisible();
-    // The picker says the book is full and its cards do nothing.
+    // The picker says the book is full and hides the New page cards.
     await page.getByTestId('book-tab-scenes').click();
     await expect(page.getByTestId('scene-picker-full')).toBeVisible();
-    await expect(page.getByTestId('page-bg-park')).toBeDisabled();
+    await expect(page.getByTestId('scene-picker')).toHaveCount(0);
+    await expect(page.getByTestId('page-bg-park')).toHaveCount(0);
     const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
     expect(stored.pages).toHaveLength(20);
+  });
+
+  test('a Blank page and the Blank card are solid white (#ffffff)', async ({ page }) => {
+    const pages = [{ id: 'p1', background: 'blank', stickers: [{ uid: 'c1', x: 0.5, y: 0.35, size: 2, rotation: 0 }] }];
+    await seed(page, { [KEY]: save({ copies: copies(['numbers_01']), pages, seenCount: 1 }) });
+    await page.goto('/');
+    await page.getByTestId('launch-sticker-book').click();
+    await page.getByTestId('book-tab-pages').click();
+    const board = page.getByTestId('page-board');
+    await expect(board).toHaveAttribute('data-background', 'blank');
+    const b = (await board.boundingBox())!;
+    // Bottom middle and a third down on the left: empty page, no sticker.
+    expect(await pixelAt(page, b.x + b.width / 2, b.y + b.height - 40)).toEqual([255, 255, 255, 255]);
+    expect(await pixelAt(page, b.x + 20, b.y + b.height / 3)).toEqual([255, 255, 255, 255]);
+    await page.getByTestId('book-tab-scenes').click();
+    const card = (await page.getByTestId('page-bg-blank').boundingBox())!;
+    expect(await pixelAt(page, card.x + card.width / 2, card.y + card.height / 2)).toEqual([255, 255, 255, 255]);
+  });
+
+  test('an old full book converts past 20 pages: every snapped piece kept, no New page', async ({ page }) => {
+    const pieces = ['scene_fun_slide', 'scene_fun_panda', 'scene_logic_tortoise'];
+    const pages = Array.from({ length: 20 }, (_, i) => ({ id: `p${i + 1}`, background: 'paper', stickers: [] }));
+    await seed(page, { [KEY]: save({ copies: copies(pieces), pages, placedPieces: pieces, seenCount: 3 }) });
+    await page.goto('/');
+    await page.getByTestId('launch-sticker-book').click();
+    await page.getByTestId('book-tab-pages').click();
+    // 20 old pages plus one per outline page with pieces (play, logic).
+    await expect(page.getByTestId('page-label')).toHaveText('22/22');
+    await expect(page.getByTestId('page-board').getByTestId('page-sticker')).toHaveCount(2);
+    await expect(page.getByTestId('page-new')).toHaveCount(0);
+    await page.getByTestId('page-prev').click();
+    await expect(page.getByTestId('page-board').locator('[data-testid="page-sticker"][data-sticker="scene_logic_tortoise"]')).toBeVisible();
+    await page.getByTestId('book-tab-scenes').click();
+    await expect(page.getByTestId('scene-picker-full')).toBeVisible();
+    await expect(page.getByTestId('scene-picker')).toHaveCount(0);
   });
 
   test('an old book: scene pieces snapped on the retired outline pages land on a blank page where they sat, and old pages become blank', async ({
@@ -592,11 +645,15 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('page-label')).toHaveText('1/2');
     await expect(board).toHaveAttribute('data-background', 'blank');
     await expect(board.locator('[data-testid="page-sticker"][data-uid="c5"]')).toBeVisible();
-    // ...and the 3 snapped pieces are on a new blank page; the unplaced engine waits in the tray.
+    // ...and the 3 snapped pieces are on a new blank page (each a new copy, since a snap never used one up);
+    // the copies that were in the tray stay there, and the unsnapped engine waits in the tray too.
     await page.getByTestId('page-next').click();
     await expect(board).toHaveAttribute('data-background', 'blank');
     await expect(board.getByTestId('page-sticker')).toHaveCount(3);
-    for (const id of pieces.slice(1)) await expect(board.locator(`[data-testid="page-sticker"][data-sticker="${id}"]`)).toBeVisible();
+    for (const id of pieces.slice(1)) {
+      await expect(board.locator(`[data-testid="page-sticker"][data-sticker="${id}"]`)).toBeVisible();
+      await expect(page.locator(`[data-testid="tray-sticker"][data-sticker="${id}"]`)).toHaveAttribute('data-free', '1');
+    }
     await expect(page.locator('[data-testid="tray-sticker"][data-sticker="scene_numbers_engine"]')).toHaveAttribute('data-free', '1');
     // A reload gives the same book (the conversion is deterministic); the first edit saves it as a plain v2 book.
     await page.reload();
@@ -608,7 +665,7 @@ test.describe('Sticker Book', () => {
     await expect(board.getByTestId('page-sticker')).toHaveCount(4);
     const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
     expect(stored.version).toBe(2);
-    expect(stored.copies).toHaveLength(5);
+    expect(stored.copies).toHaveLength(8);
     expect(stored).not.toHaveProperty('placedPieces');
     expect(stored.pages.map((p: { background: unknown }) => p.background)).toEqual(['blank', 'blank']);
     expect(stored.pages[1].stickers).toHaveLength(4);

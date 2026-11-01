@@ -1,9 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { emptyStickerSave } from '../data/stickerRules';
 import { ACCESSORIES, GENERAL_STICKERS, MOODS, SCENE_PIECES, SHELF_STICKERS, SHELVES } from '../data/stickers';
-import { hasPrintArt, sheetStickers } from './pdf';
+import { drawPageBackground, hasPrintArt, sheetStickers } from './pdf';
 
 describe('print pdf data', () => {
+  it('prints a Blank page as an exact white fill (#ffffff), not a raster', async () => {
+    const calls: unknown[][] = [];
+    const doc = {
+      setFillColor: (...a: unknown[]) => calls.push(['fill', ...a]),
+      rect: (...a: unknown[]) => calls.push(['rect', ...a]),
+      addImage: (...a: unknown[]) => calls.push(['image', ...a]),
+    };
+    await drawPageBackground(doc as never, { id: 'p1', background: 'blank', stickers: [] }, { x: 10, y: 20, w: 90, h: 160 });
+    expect(calls).toEqual([
+      ['fill', '#ffffff'],
+      ['rect', 10, 20, 90, 160, 'F'],
+    ]);
+  });
+
   it('has vector print art for every sticker, scene piece, mood, general sticker and accessory', () => {
     const ids = [
       ...SHELVES.flatMap((s) => SHELF_STICKERS[s].map((c) => c.id)),

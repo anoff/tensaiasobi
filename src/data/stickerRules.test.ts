@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   MAX_PAGES,
+  MAX_STORED_PAGES,
   MISSING_WEIGHT,
   SHINY_CHANCE,
   STICKER_SAVE_VERSION,
   addCopy,
   addOwnedAccessory,
   addPage,
+  canAddPage,
   canBuyAccessory,
   capsulesToday,
   copyCount,
@@ -29,6 +31,7 @@ import {
   type Rng,
   type StickerSave,
 } from './stickerRules';
+import { LEGACY_SCENE_PAGES } from './legacyScenePages';
 
 const pools: AwardPools = {
   stickers: { numbers: ['n1', 'n2', 'n3'], language: ['l1'] },
@@ -312,7 +315,7 @@ describe('my pages', () => {
       ],
     };
     const loaded = parseStickerSave(JSON.stringify(tampered));
-    expect(loaded.pages).toHaveLength(MAX_PAGES);
+    expect(loaded.pages).toHaveLength(MAX_STORED_PAGES);
     expect(loaded.pages[0].stickers.map((s) => s.uid)).toEqual(['c1']);
     // An unknown theme falls back to a blank page instead of losing the page.
     expect(loaded.pages[1]).toEqual({ id: 'px', background: 'blank', stickers: [] });
@@ -337,40 +340,119 @@ describe('my pages', () => {
     ]);
   });
 
-  it('turns scene pieces snapped onto the old outline pages into a blank page with the pieces where they sat', () => {
+  // Old v2 books: `placedPieces` lists the scene pieces snapped onto the retired per-shelf outline pages.
+  const ALL_PIECES = LEGACY_SCENE_PAGES.flat();
+  const oldBook = (save: StickerSave, placedPieces: string[]) =>
+    JSON.stringify({ ...JSON.parse(JSON.stringify(save)), placedPieces });
+  const placementCount = (save: StickerSave) => save.pages.reduce((n, p) => n + p.stickers.length, 0);
+  const idOf = (save: StickerSave, uid: string) => save.copies.find((c) => c.uid === uid)?.id;
+
+  it('puts every snapped piece on its outline page\'s new blank page at its old slot centre', () => {
     let save = emptyStickerSave();
-    for (const id of ['scene_numbers_engine', 'scene_numbers_car_balls', 'scene_logic_tortoise', 'scene_logic_tortoise'])
-      save = addCopy(save, id, false).save;
-    // The tortoise's first copy is already on a My page; the second copy goes on the converted page.
-    save = placeOnPage(addPage(save, 'blank'), 'p1', 'scene_logic_tortoise', 0.5, 0.5);
-    const old = {
-      ...JSON.parse(JSON.stringify(save)),
-      placedPieces: ['scene_numbers_engine', 'scene_numbers_car_balls', 'scene_logic_tortoise', 'scene_fun_slide'],
-    };
-    const loaded = parseStickerSave(JSON.stringify(old));
+    for (const p of ALL_PIECES) save = addCopy(save, p.id, false).save;
+    const loaded = parseStickerSave(oldBook(save, ALL_PIECES.map((p) => p.id)));
     expect(loaded).not.toHaveProperty('placedPieces');
-    expect(loaded.copies).toEqual(save.copies);
+    // One blank page per old outline page, in shelf order.
     expect(loaded.pages.map((p) => [p.id, p.background])).toEqual([
       ['p1', 'blank'],
       ['p2', 'blank'],
       ['p3', 'blank'],
+      ['p4', 'blank'],
     ]);
-    expect(loaded.pages[1].stickers).toEqual([
-      { uid: 'c1', x: 0.427, y: 0.704, size: 1, rotation: 0 },
-      { uid: 'c2', x: 0.627, y: 0.726, size: 0, rotation: 0 },
-    ]);
-    expect(loaded.pages[2].stickers).toEqual([{ uid: 'c4', x: 0.367, y: 0.741, size: 0, rotation: 0 }]);
-    // Loading again gives the same book (the conversion is deterministic until the next save drops placedPieces).
-    expect(parseStickerSave(JSON.stringify(old))).toEqual(loaded);
+    LEGACY_SCENE_PAGES.forEach((set, i) => {
+      expect(loaded.pages[i].stickers.map((s) => ({ id: idOf(loaded, s.uid), x: s.x, y: s.y, size: s.size }))).toEqual(
+        set.map((p) => ({ id: p.id, x: p.x, y: p.y, size: p.size }))
+      );
+      expect(loaded.pages[i].stickers.every((s) => s.rotation === 0)).toBe(true);
+    });
+    // Slot centres are 0..1 page coordinates.
+    for (const p of ALL_PIECES) {
+      expect(p.x).toBeGreaterThan(0);
+      expect(p.x).toBeLessThan(1);
+      expect(p.y).toBeGreaterThan(0);
+      expect(p.y).toBeLessThan(1);
+    }
+    // Deterministic until the next save drops placedPieces; a converted book loads as is.
+    expect(parseStickerSave(oldBook(save, ALL_PIECES.map((p) => p.id)))).toEqual(loaded);
     expect(parseStickerSave(JSON.stringify(loaded))).toEqual(loaded);
   });
 
-  it('never converts past 20 pages: pieces that do not fit stay in the tray', () => {
-    let save = addCopy(emptyStickerSave(), 'scene_fun_slide', false).save;
+  it('keeps a piece that was both on a My page and snapped on its outline: both stay placed', () => {
+    let save = addCopy(emptyStickerSave(), 'scene_numbers_engine', true).save;
+    save = addCopy(save, 'numbers_01', false).save;
+    save = placeOnPage(addPage(save, 'blank'), 'p1', 'scene_numbers_engine', 0.5, 0.5);
+    save = { ...save, seenCount: 2 };
+    expect(freeCopies(save, 'scene_numbers_engine')).toHaveLength(0);
+    const loaded = parseStickerSave(oldBook(save, ['scene_numbers_engine']));
+    // The original copy (shiny) stays on its My page, untouched.
+    expect(loaded.pages[0]).toEqual(save.pages[0]);
+    expect(loaded.copies.slice(0, 2)).toEqual(save.copies);
+    // The snapped one is a new plain copy on the converted page, counted as seen.
+    expect(loaded.copies[2]).toEqual({ uid: 'c3', id: 'scene_numbers_engine', shiny: false });
+    expect(loaded.pages[1]).toEqual({
+      id: 'p2',
+      background: 'blank',
+      stickers: [{ uid: 'c3', x: 0.427, y: 0.704, size: 1, rotation: 0 }],
+    });
+    expect(copyCount(loaded, 'scene_numbers_engine')).toBe(2);
+    expect(loaded.seenCount).toBe(3);
+    // A free copy in the tray stays in the tray too.
+    const withFree = addCopy(save, 'scene_numbers_engine', false).save;
+    const loaded2 = parseStickerSave(oldBook(withFree, ['scene_numbers_engine']));
+    expect(freeCopies(loaded2, 'scene_numbers_engine').map((c) => c.uid)).toEqual(['c3']);
+    expect(loaded2.pages[1].stickers.map((s) => s.uid)).toEqual(['c4']);
+  });
+
+  it('converts past 20 pages instead of dropping pieces; New page comes back only under 20', () => {
+    let save = emptyStickerSave();
+    for (const p of ALL_PIECES) save = addCopy(save, p.id, false).save;
     for (let i = 0; i < MAX_PAGES; i++) save = addPage(save, 'blank');
-    const loaded = parseStickerSave(JSON.stringify({ ...save, placedPieces: ['scene_fun_slide'] }));
-    expect(loaded.pages).toHaveLength(MAX_PAGES);
-    expect(freeCopies(loaded, 'scene_fun_slide')).toHaveLength(1);
+    expect(canAddPage(save)).toBe(false);
+    const loaded = parseStickerSave(oldBook(save, ALL_PIECES.map((p) => p.id)));
+    expect(loaded.pages).toHaveLength(MAX_PAGES + LEGACY_SCENE_PAGES.length);
+    expect(MAX_STORED_PAGES).toBe(24);
+    expect(loaded.pages.slice(MAX_PAGES).map((p) => p.id)).toEqual(['p21', 'p22', 'p23', 'p24']);
+    expect(placementCount(loaded)).toBe(ALL_PIECES.length);
+    // Every original copy is still free in the tray.
+    for (const p of ALL_PIECES) expect(freeCopies(loaded, p.id)).toHaveLength(1);
+    // The saved book keeps all 24 pages on the next load.
+    expect(parseStickerSave(JSON.stringify(loaded))).toEqual(loaded);
+    // Full: no New page and addPage does nothing.
+    expect(canAddPage(loaded)).toBe(false);
+    expect(addPage(loaded, 'blank')).toBe(loaded);
+    expect(canAddPage({ ...loaded, pages: loaded.pages.slice(0, MAX_PAGES) })).toBe(false);
+    const under = { ...loaded, pages: loaded.pages.slice(0, MAX_PAGES - 1) };
+    expect(canAddPage(under)).toBe(true);
+    expect(addPage(under, 'blank').pages).toHaveLength(MAX_PAGES);
+  });
+
+  it('loses nothing: tray copies plus placed pieces (pages and outlines) match before and after', () => {
+    // A mixed book: duplicates, a shiny, pieces on My pages, free pieces, snapped pieces, unowned junk ids.
+    let save = emptyStickerSave();
+    for (const id of ['scene_numbers_engine', 'scene_numbers_engine', 'scene_logic_tortoise', 'scene_fun_slide', 'numbers_01'])
+      save = addCopy(save, id, id === 'scene_fun_slide').save;
+    save = addPage(addPage(save, 'blank'), { theme: 'park', seed: 7 });
+    save = placeOnPage(save, 'p1', 'scene_numbers_engine', 0.3, 0.3);
+    save = placeOnPage(save, 'p2', 'scene_fun_slide', 0.6, 0.6);
+    save = placeOnPage(save, 'p2', 'numbers_01', 0.1, 0.9);
+    const snapped = ['scene_numbers_engine', 'scene_logic_tortoise', 'scene_fun_slide', 'scene_language_lamp'];
+    const loaded = parseStickerSave(oldBook(save, [...snapped, 'not_a_piece']));
+
+    const free = (b: StickerSave) => {
+      const placed = new Set(b.pages.flatMap((p) => p.stickers.map((s) => s.uid)));
+      return b.copies.filter((c) => !placed.has(c.uid)).length;
+    };
+    expect(free(loaded) + placementCount(loaded)).toBe(free(save) + placementCount(save) + snapped.length);
+    expect(free(loaded)).toBe(free(save));
+    expect(placementCount(loaded)).toBe(placementCount(save) + snapped.length);
+    // Owned copies only grow: every old copy is still there, unchanged.
+    expect(loaded.copies.slice(0, save.copies.length)).toEqual(save.copies);
+    expect(loaded.copies).toHaveLength(save.copies.length + snapped.length);
+    // Every old page and placement is unchanged (park keeps its theme).
+    expect(loaded.pages.slice(0, save.pages.length)).toEqual(save.pages);
+    // Each snapped piece (owned or not) sits once on the converted pages.
+    const converted = loaded.pages.slice(save.pages.length).flatMap((p) => p.stickers.map((s) => idOf(loaded, s.uid)));
+    expect(converted.sort()).toEqual([...snapped].sort());
   });
 });
 

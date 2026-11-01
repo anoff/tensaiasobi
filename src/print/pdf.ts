@@ -6,7 +6,7 @@ import type { jsPDF } from 'jspdf';
 import { Capacitor } from '@capacitor/core';
 import { hasShiny, type BookPage, type StickerSave } from '../data/stickerRules';
 import { SHINY_SPARKLE, collectibleById, stickerTilt } from '../data/stickers';
-import { paintBackground } from '../data/sceneArt';
+import { BLANK_PAGE_FILL, paintBackground } from '../data/sceneArt';
 import { boxPixels, pageLayout, sheetLayout, stickerOnPage, type Box, type PaperSize } from './layout';
 import { paddedSide, printStickerSvg, type PrintLayer } from './printSvg';
 
@@ -56,11 +56,28 @@ async function backgroundImage(page: BookPage, box: Box) {
   return canvas.toDataURL('image/jpeg', 0.92);
 }
 
+/**
+ * The page background in the PDF: a Blank page is an exact white vector fill (no JPEG noise); a scene page
+ * is the same composite as on screen, rasterised at 200 dpi.
+ */
+export async function drawPageBackground(
+  doc: Pick<jsPDF, 'setFillColor' | 'rect' | 'addImage'>,
+  page: BookPage,
+  box: Box
+): Promise<void> {
+  if (page.background === 'blank') {
+    doc.setFillColor(BLANK_PAGE_FILL);
+    doc.rect(box.x, box.y, box.w, box.h, 'F');
+    return;
+  }
+  doc.addImage(await backgroundImage(page, box), 'JPEG', box.x, box.y, box.w, box.h);
+}
+
 /** The current page as on screen: background (optional), then each copy with its accessories, tilt and turn. */
 export async function pagePdf(book: StickerSave, page: BookPage, paper: PaperSize, background: boolean) {
   const { box } = pageLayout(paper);
   const doc = await newDoc(paper);
-  if (background) doc.addImage(await backgroundImage(page, box), 'JPEG', box.x, box.y, box.w, box.h);
+  if (background) await drawPageBackground(doc, page, box);
   const sparkle = SHINY_SPARKLE ? await fetchText(SHINY_SPARKLE) : undefined;
   for (const pl of page.stickers) {
     const copy = book.copies.find((c) => c.uid === pl.uid);

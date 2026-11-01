@@ -2,7 +2,7 @@
  * The one scene-page composite, shared by the screen (a canvas behind the stickers) and the print PDF
  * (the same drawing at 200 dpi), so a page prints exactly as it shows.
  */
-import { PAPER, INK } from '../theme/blockTable';
+import { INK } from '../theme/blockTable';
 import type { PageBackground } from './stickerRules';
 import { CANVAS_W, GROUND_Y, LINE_WIDTH, sceneLayout, sceneThemeById, type SceneLayout } from './sceneThemes';
 
@@ -56,17 +56,20 @@ function drawLayer(ctx: Ctx, img: HTMLImageElement | null, w: number, h: number,
 }
 
 /**
- * Paints a page background into a w×h pixel box: paper for a blank page; for a scene the sky, backdrop,
+ * Paints a page background into a w×h pixel box: solid white for a Blank page; for a scene the sky, backdrop,
  * ground (placeholder: a flat fill under an ink ground line at 78 %) and props on their anchors.
  */
 export async function paintBackground(ctx: Ctx, w: number, h: number, bg: PageBackground, thumbnail = false): Promise<void> {
   await paintLayout(ctx, w, h, backgroundLayout(bg, thumbnail));
 }
 
-/** Paints a layout (null = blank paper): loads its layers, then draws them in order. */
+/** A Blank page is opaque white: on screen, on its picker card and in print (AD). */
+export const BLANK_PAGE_FILL = '#ffffff';
+
+/** Paints a layout (null = a Blank page, solid white): loads its layers, then draws them in order. */
 export async function paintLayout(ctx: Ctx, w: number, h: number, layout: SceneLayout | null): Promise<void> {
   if (!layout) {
-    ctx.fillStyle = PAPER;
+    ctx.fillStyle = BLANK_PAGE_FILL;
     ctx.fillRect(0, 0, w, h);
     return;
   }

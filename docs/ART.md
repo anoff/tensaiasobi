@@ -90,7 +90,7 @@ One shelf, one colour, everywhere: the launcher tile, sticker-book page, sticker
 - **Shiny:** 10% of drops. The same art, with the shelf rim swapped for gold #e08a00 (promoted from parked) plus the sparkle overlay at the top-right. Gold is used only for shiny stickers.
 - **Duplicates** stack. The collection shows an ink "×N" badge at the bottom-right of the sticker, and each copy can be placed on a page.
 - **Book tabs** (tab icons, ink on cream):
-  - My pages: blank paper pages, up to 20. **A page is always 9:16 portrait** (343×610 px at 375×812). Sticker positions are stored as 0..1 of the page, so draw every page background, including the phase 2 scene backgrounds, at 9:16 (for example 900×1600 px). Scene backgrounds follow "Scene pages" below.
+  - My pages: up to 20 (a Blank page is opaque #ffffff on screen, on its picker card and in print, with the same ink outline and hard shadow as scene pages). **A page is always 9:16 portrait** (343×610 px at 375×812). Sticker positions are stored as 0..1 of the page, so draw every page background, including the phase 2 scene backgrounds, at 9:16 (for example 900×1600 px). Scene backgrounds follow "Scene pages" below.
   - Collection: grouped by shelf, with a pebble silhouette per missing sticker as in the §6 outline rule.
   - Scenes: the "New page" picker (see "Scene pages" below).
 - **Editing:** drag from a bottom tray onto the page. Tap a sticker to select it, which shows an ink dashed box with a size handle (3 steps) and a rotate handle. Drag it back to the tray to remove it. Placed stickers keep the −8…+8° base tilt plus the kid's rotation. Accessories still paste on.
@@ -112,7 +112,7 @@ Pages belong to no shelf and no game. "New page" offers **Blank** plus **20 scen
 - Files: `pages/sky_<id>.png`, `pages/<theme>_backdrop_<a|b>.png`, `pages/<theme>_ground.png`, `pages/<theme>_prop_<nn>.png`, plus `pages/themes.json` (theme id, allowed skies, files, anchors). Thumbnails are rendered from seed 1.
 - A "shuffle" dice on a themed page re-rolls the seed; placed stickers keep their positions.
 - **In the app:** approved layers and their `themes.json` are copied to `src/assets/stickers/pages/` by `scripts/import_scene_pages.py --all` (or `<theme ids>`; re-run without arguments to refresh the approved ones; stale files are removed). The app reads every file name, sky, slot and anchor from that `themes.json`; a theme not in it yet shows placeholder layers (flat sky or wall and the ground line).
-- **The 16 former scene-set pieces stay owned stickers** and move into the Collection under their own shelf. Their outline pages are retired. Old scene-set pages with placed pieces become normal blank pages with the pieces where the kid put them. Nothing is taken away.
+- **The 16 former scene-set pieces stay owned stickers** and move into the Collection under their own shelf. Their outline pages are retired. Old scene-set pages with placed pieces become normal blank pages with every snapped piece at its old slot centre (a snap never used up a copy, so each snapped piece is granted as a new plain copy and the tray keeps what it had). These pages may take an old book past 20 pages (at most 24); while a book has 20 or more pages the New page option is hidden. Nothing is taken away.
 
 ## 7. Mascot: Panda
 

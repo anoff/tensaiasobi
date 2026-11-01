@@ -1,7 +1,8 @@
-import { MAX_PAGES, type PageBackground, type StickerSave } from '../../data/stickerRules';
+import { canAddPage, type PageBackground, type StickerSave } from '../../data/stickerRules';
 import { SCENE_THEMES, THUMBNAIL_SEED, newSeed } from '../../data/sceneThemes';
 import { useTranslation } from '../../hooks/useTranslation';
 import { INK, PAPER, hardShadow } from '../../theme/blockTable';
+import { BLANK_PAGE_FILL } from '../../data/sceneArt';
 import { SceneBackground } from './SceneBackground';
 
 interface ScenePickerProps {
@@ -20,8 +21,9 @@ const THUMB_H = Math.round((THUMB_W * 16) / 9);
  */
 export function ScenePicker({ book, onPick }: ScenePickerProps) {
   const { t } = useTranslation();
-  const full = book.pages.length >= MAX_PAGES;
-  const card = 'relative w-full overflow-hidden rounded-xl border-[3px] disabled:opacity-50';
+  // 20 pages or more (old books can convert past 20): no New page cards until the book is under 20 again.
+  const full = !canAddPage(book);
+  const card = 'relative w-full overflow-hidden rounded-xl border-[3px]';
   const cardStyle = { aspectRatio: '9 / 16', backgroundColor: PAPER, borderColor: INK, boxShadow: hardShadow(2, 3) };
   const label = 'mt-1 block text-center text-xs font-black leading-tight';
   return (
@@ -34,44 +36,44 @@ export function ScenePicker({ book, onPick }: ScenePickerProps) {
           {t.stickerBook.pagesFull}
         </p>
       )}
-      <div className="grid grid-cols-3 gap-x-3 gap-y-3 md:grid-cols-5" data-testid="scene-picker">
-        <div>
-          <button
-            type="button"
-            data-testid="page-bg-blank"
-            disabled={full}
-            className={card}
-            style={cardStyle}
-            onClick={() => onPick('blank')}
-            aria-label={t.stickerBook.blank}
-          />
-          <span className={label} style={{ color: INK }}>
-            {t.stickerBook.blank}
-          </span>
-        </div>
-        {SCENE_THEMES.map((theme) => (
-          <div key={theme.id}>
+      {!full && (
+        <div className="grid grid-cols-3 gap-x-3 gap-y-3 md:grid-cols-5" data-testid="scene-picker">
+          <div>
             <button
               type="button"
-              data-testid={`page-bg-${theme.id}`}
-              disabled={full}
+              data-testid="page-bg-blank"
               className={card}
-              style={cardStyle}
-              aria-label={t.stickerBook.themes[theme.id]}
-              // Each new page gets its own seed (semi-random); the thumbnail shows seed 1.
-              onClick={() => onPick({ theme: theme.id, seed: newSeed() })}
-            >
-              <SceneBackground background={{ theme: theme.id, seed: THUMBNAIL_SEED }} width={THUMB_W} height={THUMB_H} thumbnail />
-              <span className="absolute left-1 top-0.5 text-base" aria-hidden>
-                {theme.emoji}
-              </span>
-            </button>
+              style={{ ...cardStyle, backgroundColor: BLANK_PAGE_FILL }}
+              onClick={() => onPick('blank')}
+              aria-label={t.stickerBook.blank}
+            />
             <span className={label} style={{ color: INK }}>
-              {t.stickerBook.themes[theme.id]}
+              {t.stickerBook.blank}
             </span>
           </div>
-        ))}
-      </div>
+          {SCENE_THEMES.map((theme) => (
+            <div key={theme.id}>
+              <button
+                type="button"
+                data-testid={`page-bg-${theme.id}`}
+                  className={card}
+                style={cardStyle}
+                aria-label={t.stickerBook.themes[theme.id]}
+                // Each new page gets its own seed (semi-random); the thumbnail shows seed 1.
+                onClick={() => onPick({ theme: theme.id, seed: newSeed() })}
+              >
+                <SceneBackground background={{ theme: theme.id, seed: THUMBNAIL_SEED }} width={THUMB_W} height={THUMB_H} thumbnail />
+                <span className="absolute left-1 top-0.5 text-base" aria-hidden>
+                  {theme.emoji}
+                </span>
+              </button>
+              <span className={label} style={{ color: INK }}>
+                {t.stickerBook.themes[theme.id]}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
