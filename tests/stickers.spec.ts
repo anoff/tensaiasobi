@@ -441,6 +441,8 @@ test.describe('Sticker Book', () => {
     expect(bb.y - (tabs.y + tabs.height)).toBeCloseTo(8, 0);
     expect(tray.y - (bb.y + bb.height)).toBeCloseTo(8, 0);
     expect(tray.height).toBe(72);
+    expect(tray.width).toBe(343);
+    expect(tray.x).toBe(bb.x);
     expect(tray.y + tray.height).toBeLessThanOrEqual(812);
     // Nothing scrolls on My pages: no scroll container (other than the sideways tray) has hidden content.
     expect(await page.evaluate<number>('document.documentElement.scrollHeight')).toBeLessThanOrEqual(812);
@@ -468,7 +470,7 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('tray-sticker').first()).toBeVisible();
     expect((await page.getByTestId('tray-sticker').first().boundingBox())!.width).toBe(56);
 
-    // 320x568: the same layout shrinks, no sideways scroll.
+    // 320x568: the same layout shrinks, no sideways scroll, tray as wide as the page.
     await page.setViewportSize({ width: 320, height: 568 });
     await expect(async () => {
       const small = (await board.boundingBox())!;
@@ -482,6 +484,10 @@ test.describe('Sticker Book', () => {
       expect(small.y - (tabs2.y + tabs2.height)).toBeCloseTo(8, 0);
       expect(t2.y - (small.y + small.height)).toBeCloseTo(8, 0);
       expect(t2.y + t2.height).toBeLessThanOrEqual(568);
+      // The tray is exactly as wide as the narrower page and centred under it.
+      expect(small.width).toBeLessThan(300);
+      expect(t2.width).toBeCloseTo(small.width, 0);
+      expect(t2.x + t2.width / 2).toBeCloseTo(small.x + small.width / 2, 0);
     }).toPass();
     expect(await page.evaluate<string[]>(SCROLLED)).toEqual([]);
     for (const tab of ['collection', 'scenes', 'pages']) {

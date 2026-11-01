@@ -44,7 +44,7 @@ const GAP = 8;
 /** Tailwind `md`: the tray moves beside the page. */
 const WIDE_QUERY = '(min-width: 768px)';
 
-/** My pages: the biggest A4-portrait page that fits, arrows on its edges, and a docked tray of free copies. */
+/** My pages: the biggest 9:16 page that fits, arrows on its edges, and a docked tray of free copies. */
 export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, playPop }: PageEditorProps) {
   const { t } = useTranslation();
   const index = Math.max(0, Math.min(rawIndex, book.pages.length - 1));
@@ -410,7 +410,7 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, pla
         )}
       </div>
 
-      {/* Docked tray: 72 px under the page (beside it on wide screens); the grab handle folds it to 24 px. */}
+      {/* Docked tray: 72 px tall and page-wide under the page (beside it on wide screens); the grab handle folds it to 24 px. */}
       <div
         ref={trayRef}
         data-testid="page-tray"
@@ -418,7 +418,14 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, pla
         className={`flex w-full shrink-0 overflow-hidden rounded-2xl border-[3px] md:flex-col ${
           trayOpen ? 'h-[72px] md:w-[72px]' : 'h-6 md:w-6'
         }`}
-        style={{ backgroundColor: CHALK, borderColor: INK, height: area.wide ? boardHeight : undefined }}
+        style={{
+          backgroundColor: CHALK,
+          borderColor: INK,
+          // Under the page it is exactly as wide as the page (centred by the column), so a height-bound page
+          // does not sit on a wider tray; beside the page it keeps its fixed width and takes the page height.
+          width: area.wide || !boardWidth ? undefined : boardWidth,
+          height: area.wide ? boardHeight : undefined,
+        }}
       >
         <button
           type="button"
