@@ -232,7 +232,7 @@ export function PageEditor({ book, edits, onDress, playPop }: PageEditorProps) {
                 boxShadow: hardShadow(3, 4),
               }}
             >
-              <img src={s.pageSrc} alt="" aria-hidden className="pointer-events-none h-full w-full object-contain" />
+              <img src={s.blankSrc} alt="" aria-hidden className="pointer-events-none h-full w-full object-contain" />
               <span className="absolute left-1.5 top-1 text-base" aria-hidden>
                 {CATEGORY_EMOJI[s.shelf]}
               </span>
@@ -259,20 +259,12 @@ export function PageEditor({ book, edits, onDress, playPop }: PageEditorProps) {
           >
             {page.background !== 'paper' && (
               <img
-                src={sceneForShelf(page.background)?.pageSrc}
+                src={sceneForShelf(page.background)?.blankSrc}
                 alt=""
                 aria-hidden
                 draggable={false}
                 className="pointer-events-none absolute inset-0 h-full w-full object-contain"
               />
-            )}
-            {page.stickers.length === 0 && (
-              <p
-                className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 px-4 text-center text-sm font-extrabold"
-                style={{ color: '#6b5a4c' }}
-              >
-                {t.stickerBook.pageHint}
-              </p>
             )}
             {page.stickers.map((pl) => {
               const copy = copyOf(pl.uid);

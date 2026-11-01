@@ -71,6 +71,8 @@ export interface SceneSet {
   pieces: ScenePiece[];
   /** The Art Director's faded outline page (paper card, ground line, dashed slots). */
   pageSrc: string;
+  /** The same page card without the slots: the My pages background (and its print). Never the outline page. */
+  blankSrc: string | undefined;
   /** Area the board shows, in scene units: the whole outline page. */
   view: { x: number; y: number; w: number; h: number };
 }
@@ -137,6 +139,7 @@ function buildScene(entry: SceneEntry): SceneSet | null {
   if (!entry.page.file) return null;
   const pageSrc = artUrl('stickers/album', entry.page.file);
   if (!pageSrc) return null;
+  const blankSrc = artUrl('stickers/pages', `page_${entry.shelf}.png`);
   // Same maths the page was drawn with, so pieces land exactly on their dashed slots.
   const s = (PAGE_W - 2 * PAGE_PAD) / spanW;
   const top = Math.min(...entry.pieces.map((p) => p.vb[1] + p.at[1]));
@@ -152,6 +155,7 @@ function buildScene(entry: SceneEntry): SceneSet | null {
     span: [spanX, spanW],
     pieces,
     pageSrc,
+    blankSrc,
     view,
   };
 }

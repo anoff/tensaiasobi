@@ -137,7 +137,11 @@ export default function StickerBook({
           <p className="text-sm font-extrabold" style={{ color: '#6b5a4c' }} data-testid="sticker-book-count">
             {t.stickerBook.count.replace('{n}', String(totals.earned)).replace('{total}', String(totals.total))}
             {' · '}
-            {totals.earned > 0 ? t.stickerBook.tapHint : t.stickerBook.empty}
+            {totals.earned === 0
+              ? t.stickerBook.empty
+              : tab === 'pages'
+                ? t.stickerBook.pageHint
+                : t.stickerBook.tapHint}
           </p>
         </div>
       </div>

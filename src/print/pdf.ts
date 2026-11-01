@@ -63,7 +63,7 @@ async function backgroundImage(page: BookPage, box: Box) {
   const ctx = canvas.getContext('2d')!;
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, w, h);
-  const src = page.background !== 'paper' ? sceneForShelf(page.background)?.pageSrc : undefined;
+  const src = page.background !== 'paper' ? sceneForShelf(page.background)?.blankSrc : undefined;
   if (src) {
     const img = await loadImage(src);
     const k = Math.min(w / img.naturalWidth, h / img.naturalHeight);

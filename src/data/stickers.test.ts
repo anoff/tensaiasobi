@@ -87,6 +87,9 @@ describe('sticker catalog (manifest driven)', () => {
     expect(SCENES.map((s) => s.shelf)).toEqual([...SHELVES]);
     for (const scene of SCENES) {
       expect(scene.pageSrc, scene.id).toBeTruthy();
+      // My pages never shows the dashed slots: its background is the slot-free card.
+      expect(scene.blankSrc, scene.id).toMatch(/page_\w+.*\.png/);
+      expect(scene.blankSrc, scene.id).not.toContain('outline');
       expect(scene.pieces, scene.id).toHaveLength(4);
       for (const p of scene.pieces) expect(p.src, p.id).toBeTruthy();
     }

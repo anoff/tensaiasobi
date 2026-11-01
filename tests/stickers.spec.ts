@@ -146,6 +146,9 @@ test.describe('Sticker Book', () => {
       expect(b.y + b.height).toBeLessThanOrEqual(568);
     }
     expect(caption.y + caption.height).toBeLessThanOrEqual(Math.min(machine.y, panda.y));
+    // A tap after the reveal closes it at once, even on the panda (it never swallows the tap).
+    await page.mouse.click(panda.x + panda.width / 2, panda.y + panda.height / 2);
+    await expect(award).toHaveCount(0, { timeout: 600 });
   });
 
   test('late in the day the drop curve makes a capsule (almost) never drop, with no countdown shown', async ({ page }) => {
@@ -218,10 +221,19 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('accessory-tray')).toHaveCount(0);
     await page.getByTestId('sticker-detail-close').click();
 
+    await expect(page.getByTestId('sticker-book-count')).toContainText('Tap a sticker to see it big');
     await page.getByTestId('book-tab-pages').click();
+    await expect(page.getByTestId('sticker-book-count')).toContainText('Drag stickers onto your page');
+    await expect(page.getByTestId('sticker-book-count')).not.toContainText('Tap a sticker');
+    // Scene backgrounds are the slot-free page card: no dashed placeholder shapes.
+    for (const img of await page.getByTestId('page-backgrounds').locator('img').all()) {
+      expect(await img.getAttribute('src')).not.toContain('outline');
+    }
     await page.getByTestId('page-bg-paper').click();
     const board = page.getByTestId('page-board');
     await expect(board).toHaveAttribute('data-background', 'paper');
+    // A blank page is plain cream: nothing drawn on it.
+    await expect(board.locator('img, p')).toHaveCount(0);
     await expect(page.getByTestId('page-label')).toHaveText('Page 1 of 1');
     const tray1 = page.locator('[data-testid="tray-sticker"][data-sticker="numbers_01"]');
     await expect(tray1).toHaveAttribute('data-free', '2');
@@ -291,6 +303,7 @@ test.describe('Sticker Book', () => {
     await page.getByTestId('page-bg-numbers').click();
     await expect(page.getByTestId('page-label')).toHaveText('Page 2 of 2');
     await expect(board).toHaveAttribute('data-background', 'numbers');
+    await expect(board.locator('img')).toHaveAttribute('src', /page_numbers/);
     await page.getByTestId('page-prev').click();
     await expect(page.getByTestId('page-label')).toHaveText('Page 1 of 2');
     const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
