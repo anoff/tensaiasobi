@@ -3,13 +3,13 @@ import { copyCount, hasShiny, ownedIds, type StickerSave } from '../../data/stic
 import {
   GENERAL_STICKERS,
   SHELF_SLOTS,
+  SCENE_PIECES,
   SHELF_STICKERS,
   SHELVES,
   characterArt,
   characterForShelf,
   collectibleById,
   moodsForShelf,
-  sceneForShelf,
   shelfEarned,
   shelfTotal,
   BOOK_TAB_ICONS,
@@ -21,10 +21,10 @@ import {
 } from '../../data/stickers';
 import { useTranslation } from '../../hooks/useTranslation';
 import { CATEGORY_EMOJI, categoryFill } from '../../theme/categories';
-import { BUTTER, CHALK, INK, PAPER, hardShadow } from '../../theme/blockTable';
+import { BUTTER, CHALK, INK, hardShadow } from '../../theme/blockTable';
 import { EmptySlot, Silhouette, StickerImage } from './StickerImage';
 import { PageEditor, type PageEdits } from './PageEditor';
-import { SceneBoard } from './SceneBoard';
+import { ScenePicker } from './ScenePicker';
 import { StickerDetail } from './StickerDetail';
 import { PrintDialog } from './PrintDialog';
 import { HomeButton } from '../HomeButton';
@@ -38,10 +38,8 @@ interface StickerBookProps {
   onPlaceAccessory: (uid: string, accessoryId: string, x: number, y: number) => void;
   onRemoveAccessory: (uid: string, accessoryId: string) => void;
   pageEdits: PageEdits;
-  onPlaceScenePiece: (pieceId: string) => void;
   onSeen: () => void;
   playPop: () => void;
-  playSuccess: () => void;
   onHome: () => void;
   /** The app's star pill (and session badges), shown at the end of the book's own top bar. */
   status: ReactNode;
@@ -58,10 +56,8 @@ export default function StickerBook({
   onPlaceAccessory,
   onRemoveAccessory,
   pageEdits,
-  onPlaceScenePiece,
   onSeen,
   playPop,
-  playSuccess,
   onHome,
   status,
 }: StickerBookProps) {
@@ -132,8 +128,13 @@ export default function StickerBook({
   const scroll = 'min-h-0 w-full flex-1 space-y-4 overflow-y-auto overscroll-y-contain pb-4 md:mx-auto md:max-w-md';
 
   return (
-    // The book fills the screen under its own 48 px bar and 40 px tabs; only Collection and Special scenes scroll.
-    <div className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col select-none md:max-w-3xl" data-testid="sticker-book">
+    // The book fills the screen under its own 48 px bar and 40 px tabs. Collection scrolls inside; the New page
+    // picker (Scenes) grows instead and the whole screen scrolls (data-page-scroll lets <main> scroll).
+    <div
+      className={`mx-auto flex w-full max-w-md flex-1 flex-col select-none md:max-w-3xl ${tab === 'scenes' ? '' : 'min-h-0'}`}
+      data-testid="sticker-book"
+      data-page-scroll={tab === 'scenes' ? 'true' : undefined}
+    >
       <div className="flex h-12 shrink-0 items-center gap-1.5 narrow:gap-1" data-testid="book-top-bar">
         <HomeButton data-testid="home-button" onClick={onHome} className="!h-10 !w-10 shrink-0 !p-0 !text-lg" />
         <h2
@@ -209,6 +210,7 @@ export default function StickerBook({
           onIndex={setPageIndex}
           playPop={playPop}
           onDress={(uid) => setDressUid(uid)}
+          onNewPage={() => setTab('scenes')}
         />
       )}
 
@@ -247,6 +249,17 @@ export default function StickerBook({
                   <div className="grid grid-cols-4 justify-items-center gap-y-2" data-testid={`book-stickers-${shelf}`}>
                     {Array.from({ length: SHELF_SLOTS }, (_, i) => slot(stickers[i], `${shelf}-${i}`))}
                   </div>
+
+                  {SCENE_PIECES[shelf].length > 0 && (
+                    <div className="border-t-2 border-dashed pt-3" style={{ borderColor: '#d9cfc4' }}>
+                      <div className="mb-1 text-xs font-black" style={{ color: INK }}>
+                        {t.stickerBook.scenePieces}
+                      </div>
+                      <div className="grid grid-cols-4 justify-items-center" data-testid={`book-scene-pieces-${shelf}`}>
+                        {SCENE_PIECES[shelf].map((p) => slot(p, p.id))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="border-t-2 border-dashed pt-3" style={{ borderColor: '#d9cfc4' }}>
                     <div className="mb-1 flex items-center gap-2">
@@ -292,50 +305,15 @@ export default function StickerBook({
       )}
 
       {tab === 'scenes' && (
-        <div className={`${scroll} mt-2`} data-testid="book-scenes">
-          {SHELVES.map((shelf) => {
-            const scene = sceneForShelf(shelf);
-            return (
-              <section
-                key={shelf}
-                data-testid={`book-scenes-${shelf}`}
-                className={shelfCard}
-                style={{ borderColor: INK, boxShadow: hardShadow(), backgroundColor: '#fff8ec' }}
-              >
-                <header
-                  className="flex items-center gap-2 border-b-[3px] px-4 py-2 text-lg font-black"
-                  style={{
-                    backgroundColor: shelf === 'play' ? CHALK : categoryFill(shelf, 0),
-                    borderColor: INK,
-                    color: INK,
-                  }}
-                >
-                  <span aria-hidden>{CATEGORY_EMOJI[shelf]}</span>
-                  {t.menu.categories[shelf]}
-                </header>
-                <div className="p-3">
-                  {scene ? (
-                    <SceneBoard
-                      scene={scene}
-                      book={book}
-                      onPlacePiece={onPlaceScenePiece}
-                      playPop={playPop}
-                      playSuccess={playSuccess}
-                    />
-                  ) : (
-                    <div
-                      className="flex h-20 items-center justify-center rounded-2xl border-2 border-dashed text-sm font-extrabold"
-                      style={{ borderColor: '#b8aea3', backgroundColor: PAPER, color: '#6b5a4c' }}
-                      data-testid={`scene-coming-${shelf}`}
-                    >
-                      {t.stickerBook.comingSoon}
-                    </div>
-                  )}
-                </div>
-              </section>
-            );
-          })}
-        </div>
+        <ScenePicker
+          book={book}
+          onPick={(bg) => {
+            playPop();
+            pageEdits.addPage(bg);
+            setPageIndex(book.pages.length);
+            setTab('pages');
+          }}
+        />
       )}
 
       {printing && (

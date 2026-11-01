@@ -9,7 +9,7 @@ import {
   parseStickerSave,
   placeAccessory,
   placeOnPage,
-  placeScenePiece,
+  setPageSeed,
   removeAccessory,
   removeFromPage,
   updatePlacement,
@@ -22,6 +22,7 @@ import {
   type StickerSave,
 } from '../data/stickerRules';
 import { AWARD_POOLS, THANK_YOU_STICKER_ID } from '../data/stickers';
+import { newSeed } from '../data/sceneThemes';
 
 /** The old My Town save. Read once: a non-empty town becomes the thank-you sticker, then the key is removed. */
 export const LEGACY_TOWN_KEY = 'gamification_town';
@@ -70,8 +71,9 @@ export interface UseStickersReturn {
     place: (pageId: string, stickerId: string, x: number, y: number) => void;
     update: (pageId: string, uid: string, patch: Partial<Pick<PagePlacement, 'x' | 'y' | 'size' | 'rotation'>>) => void;
     remove: (pageId: string, uid: string) => void;
+    /** The dice on a themed page: a new seed, stickers stay put. */
+    reroll: (pageId: string) => void;
   };
-  placeScenePiece: (pieceId: string) => void;
   markSeen: () => void;
   resetStickers: () => void;
 }
@@ -103,6 +105,11 @@ export function useStickers(): UseStickersReturn {
       place: (pageId, id, x, y) => update((s) => placeOnPage(s, pageId, id, x, y)),
       update: (pageId, uid, patch) => update((s) => updatePlacement(s, pageId, uid, patch)),
       remove: (pageId, uid) => update((s) => removeFromPage(s, pageId, uid)),
+      reroll: (pageId) =>
+        update((s) => {
+          const bg = s.pages.find((p) => p.id === pageId)?.background;
+          return bg && bg !== 'blank' ? setPageSeed(s, pageId, newSeed(Math.random, bg.seed)) : s;
+        }),
     }),
     [update]
   );
@@ -121,7 +128,6 @@ export function useStickers(): UseStickersReturn {
       (uid: string, accessoryId: string) => update((s) => removeAccessory(s, uid, accessoryId)),
       [update]
     ),
-    placeScenePiece: useCallback((pieceId: string) => update((s) => placeScenePiece(s, pieceId)), [update]),
     markSeen: useCallback(
       () => update((s) => (s.seenCount === s.copies.length ? s : { ...s, seenCount: s.copies.length })),
       [update]

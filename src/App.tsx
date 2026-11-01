@@ -243,10 +243,8 @@ function AppContent() {
             onPlaceAccessory={stickers.placeAccessory}
             onRemoveAccessory={stickers.removeAccessory}
             pageEdits={stickers.pages}
-            onPlaceScenePiece={stickers.placeScenePiece}
             onSeen={stickers.markSeen}
             playPop={playPop}
-            playSuccess={playSuccess}
             onHome={() => handleScreenChange('menu')}
             status={statusBadges}
           />
@@ -443,7 +441,7 @@ function AppContent() {
       <main
         className={
           currentScreen === 'stickers'
-            ? 'flex-1 flex flex-col min-h-0 overflow-hidden px-4 pt-1.5 pb-2'
+            ? 'flex-1 flex flex-col min-h-0 overflow-hidden [&:has([data-page-scroll])]:overflow-y-auto overscroll-y-contain px-4 pt-1.5 pb-2'
             : 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6 short:pb-2'
         }
       >

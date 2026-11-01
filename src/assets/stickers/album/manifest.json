@@ -577,310 +577,122 @@
    "label": "owl pulls a toy engine on a string"
   }
  ],
- "scenes": [
+ "scenePieces": [
   {
+   "id": "scene_numbers_owl_conductor",
    "shelf": "numbers",
-   "page": {
-    "file": "scene_numbers_outline.png",
-    "ground": 146,
-    "span": [
-     -150.62,
-     438.12
-    ],
-    "set": "train_day"
-   },
-   "reward": "general_star",
-   "pieces": [
-    {
-     "id": "scene_numbers_owl_conductor",
-     "file": "scene_numbers_owl_conductor.png",
-     "rim": "butter",
-     "vb": [
-      -0.62,
-      12.3256,
-      88.04
-     ],
-     "at": [
-      -150,
-      30
-     ],
-     "reused_from": "stickers/variations/scene_owl_conductor.png",
-     "svg": "svg/scene_numbers_owl_conductor.svg"
-    },
-    {
-     "id": "scene_numbers_engine",
-     "file": "scene_numbers_engine.png",
-     "rim": "butter",
-     "vb": [
-      -12.0,
-      8.25,
-      134.0
-     ],
-     "at": [
-      -24,
-      0
-     ],
-     "reused_from": "stickers/variations/scene_engine.png",
-     "svg": "svg/scene_numbers_engine.svg"
-    },
-    {
-     "id": "scene_numbers_car_balls",
-     "file": "scene_numbers_car_balls.png",
-     "rim": "butter",
-     "vb": [
-      -20.38,
-      48.75,
-      92.75
-     ],
-     "at": [
-      108,
-      0
-     ],
-     "reused_from": "stickers/variations/scene_car_balls.png",
-     "svg": "svg/scene_numbers_car_balls.svg"
-    },
-    {
-     "id": "scene_numbers_car_shapes",
-     "file": "scene_numbers_car_shapes.png",
-     "rim": "butter",
-     "vb": [
-      -19.5,
-      51.62,
-      91.0
-     ],
-     "at": [
-      216,
-      0
-     ],
-     "reused_from": "stickers/variations/scene_car_shapes.png",
-     "svg": "svg/scene_numbers_car_shapes.svg"
-    }
-   ]
+   "file": "scene_numbers_owl_conductor.png",
+   "svg": "svg/scene_numbers_owl_conductor.svg",
+   "rim": "butter",
+   "reused_from": "stickers/variations/scene_owl_conductor.png"
   },
   {
+   "id": "scene_numbers_engine",
+   "shelf": "numbers",
+   "file": "scene_numbers_engine.png",
+   "svg": "svg/scene_numbers_engine.svg",
+   "rim": "butter",
+   "reused_from": "stickers/variations/scene_engine.png"
+  },
+  {
+   "id": "scene_numbers_car_balls",
+   "shelf": "numbers",
+   "file": "scene_numbers_car_balls.png",
+   "svg": "svg/scene_numbers_car_balls.svg",
+   "rim": "butter",
+   "reused_from": "stickers/variations/scene_car_balls.png"
+  },
+  {
+   "id": "scene_numbers_car_shapes",
+   "shelf": "numbers",
+   "file": "scene_numbers_car_shapes.png",
+   "svg": "svg/scene_numbers_car_shapes.svg",
+   "rim": "butter",
+   "reused_from": "stickers/variations/scene_car_shapes.png"
+  },
+  {
+   "id": "scene_language_lamp",
    "shelf": "language",
-   "page": {
-    "file": "scene_language_outline.png",
-    "ground": 170,
-    "span": [
-     -32.25,
-     645.0
-    ],
-    "set": "reading_corner"
-   },
-   "reward": "general_star",
-   "pieces": [
-    {
-     "id": "scene_language_lamp",
-     "file": "scene_language_lamp.png",
-     "rim": "coral",
-     "vb": [
-      -32.25,
-      7.25,
-      164.5
-     ],
-     "at": [
-      0,
-      1
-     ],
-     "svg": "svg/scene_language_lamp.svg"
-    },
-    {
-     "id": "scene_language_armchair_fox",
-     "file": "scene_language_armchair_fox.png",
-     "rim": "coral",
-     "vb": [
-      -11.25,
-      -7.38,
-      192.5
-     ],
-     "at": [
-      120,
-      2
-     ],
-     "svg": "svg/scene_language_armchair_fox.svg"
-    },
-    {
-     "id": "scene_language_book_stack",
-     "file": "scene_language_book_stack.png",
-     "rim": "coral",
-     "vb": [
-      -2.25,
-      -0.12,
-      128.5
-     ],
-     "at": [
-      318,
-      46
-     ],
-     "svg": "svg/scene_language_book_stack.svg"
-    },
-    {
-     "id": "scene_language_reading_rug",
-     "file": "scene_language_reading_rug.png",
-     "rim": "coral",
-     "vb": [
-      -2.75,
-      39.12,
-      155.5
-     ],
-     "at": [
-      460,
-      22
-     ],
-     "svg": "svg/scene_language_reading_rug.svg"
-    }
-   ]
+   "file": "scene_language_lamp.png",
+   "svg": "svg/scene_language_lamp.svg",
+   "rim": "coral"
   },
   {
+   "id": "scene_language_armchair_fox",
+   "shelf": "language",
+   "file": "scene_language_armchair_fox.png",
+   "svg": "svg/scene_language_armchair_fox.svg",
+   "rim": "coral"
+  },
+  {
+   "id": "scene_language_book_stack",
+   "shelf": "language",
+   "file": "scene_language_book_stack.png",
+   "svg": "svg/scene_language_book_stack.svg",
+   "rim": "coral"
+  },
+  {
+   "id": "scene_language_reading_rug",
+   "shelf": "language",
+   "file": "scene_language_reading_rug.png",
+   "svg": "svg/scene_language_reading_rug.svg",
+   "rim": "coral"
+  },
+  {
+   "id": "scene_logic_circle_tree",
    "shelf": "logic",
-   "page": {
-    "file": "scene_logic_outline.png",
-    "ground": 170,
-    "span": [
-     -12.5,
-     623.0
-    ],
-    "set": "shape_garden"
-   },
-   "reward": "general_star",
-   "pieces": [
-    {
-     "id": "scene_logic_circle_tree",
-     "file": "scene_logic_circle_tree.png",
-     "rim": "leaf",
-     "vb": [
-      -12.5,
-      9.5,
-      151.0
-     ],
-     "at": [
-      0,
-      12
-     ],
-     "svg": "svg/scene_logic_circle_tree.svg"
-    },
-    {
-     "id": "scene_logic_tortoise",
-     "file": "scene_logic_tortoise.png",
-     "rim": "leaf",
-     "vb": [
-      -5.5,
-      25.0,
-      145.0
-     ],
-     "at": [
-      136,
-      20
-     ],
-     "svg": "svg/scene_logic_tortoise.svg"
-    },
-    {
-     "id": "scene_logic_triangle_tent",
-     "file": "scene_logic_triangle_tent.png",
-     "rim": "leaf",
-     "vb": [
-      -11.38,
-      -10.0,
-      162.75
-     ],
-     "at": [
-      300,
-      20
-     ],
-     "svg": "svg/scene_logic_triangle_tent.svg"
-    },
-    {
-     "id": "scene_logic_block_steps",
-     "file": "scene_logic_block_steps.png",
-     "rim": "leaf",
-     "vb": [
-      -2.5,
-      11.5,
-      143.0
-     ],
-     "at": [
-      470,
-      18
-     ],
-     "svg": "svg/scene_logic_block_steps.svg"
-    }
-   ]
+   "file": "scene_logic_circle_tree.png",
+   "svg": "svg/scene_logic_circle_tree.svg",
+   "rim": "leaf"
   },
   {
+   "id": "scene_logic_tortoise",
+   "shelf": "logic",
+   "file": "scene_logic_tortoise.png",
+   "svg": "svg/scene_logic_tortoise.svg",
+   "rim": "leaf"
+  },
+  {
+   "id": "scene_logic_triangle_tent",
+   "shelf": "logic",
+   "file": "scene_logic_triangle_tent.png",
+   "svg": "svg/scene_logic_triangle_tent.svg",
+   "rim": "leaf"
+  },
+  {
+   "id": "scene_logic_block_steps",
+   "shelf": "logic",
+   "file": "scene_logic_block_steps.png",
+   "svg": "svg/scene_logic_block_steps.svg",
+   "rim": "leaf"
+  },
+  {
+   "id": "scene_fun_slide",
    "shelf": "play",
-   "page": {
-    "file": "scene_fun_outline.png",
-    "ground": 170,
-    "span": [
-     -0.25,
-     623.25
-    ],
-    "set": "playground"
-   },
-   "reward": "general_star",
-   "pieces": [
-    {
-     "id": "scene_fun_slide",
-     "file": "scene_fun_slide.png",
-     "rim": "pebble",
-     "vb": [
-      -0.25,
-      23.75,
-      138.5
-     ],
-     "at": [
-      0,
-      16
-     ],
-     "svg": "svg/scene_fun_slide.svg"
-    },
-    {
-     "id": "scene_fun_panda",
-     "file": "scene_fun_panda.png",
-     "rim": "coal",
-     "vb": [
-      -1.0,
-      10.5,
-      142.0
-     ],
-     "at": [
-      160,
-      24
-     ],
-     "svg": "svg/scene_fun_panda.svg"
-    },
-    {
-     "id": "scene_fun_sandpit",
-     "file": "scene_fun_sandpit.png",
-     "rim": "pebble",
-     "vb": [
-      -3.0,
-      0.62,
-      176.0
-     ],
-     "at": [
-      310,
-      18
-     ],
-     "svg": "svg/scene_fun_sandpit.svg"
-    },
-    {
-     "id": "scene_fun_flowers",
-     "file": "scene_fun_flowers.png",
-     "rim": "coal",
-     "vb": [
-      -0.5,
-      30.5,
-      123.5
-     ],
-     "at": [
-      500,
-      18
-     ],
-     "svg": "svg/scene_fun_flowers.svg"
-    }
-   ]
+   "file": "scene_fun_slide.png",
+   "svg": "svg/scene_fun_slide.svg",
+   "rim": "pebble"
+  },
+  {
+   "id": "scene_fun_panda",
+   "shelf": "play",
+   "file": "scene_fun_panda.png",
+   "svg": "svg/scene_fun_panda.svg",
+   "rim": "coal"
+  },
+  {
+   "id": "scene_fun_sandpit",
+   "shelf": "play",
+   "file": "scene_fun_sandpit.png",
+   "svg": "svg/scene_fun_sandpit.svg",
+   "rim": "pebble"
+  },
+  {
+   "id": "scene_fun_flowers",
+   "shelf": "play",
+   "file": "scene_fun_flowers.png",
+   "svg": "svg/scene_fun_flowers.svg",
+   "rim": "coal"
   }
  ]
 }

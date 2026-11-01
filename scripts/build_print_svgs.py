@@ -43,9 +43,8 @@ def entries():
     album = json.load(open(f'{A}/album/manifest.json'))
     for s in album['stickers']:
         yield s['id'], 'album', s['svg'], s['file'], s.get('rim')
-    for sc in album['scenes']:
-        for p in sc['pieces']:
-            yield p['id'], 'album', p['svg'], p['file'], p.get('rim')
+    for p in album['scenePieces']:
+        yield p['id'], 'album', p['svg'], p['file'], p.get('rim')
     for m in json.load(open(f'{A}/moods/manifest.json'))['moods']:
         yield m['id'], 'moods', m['svg'], m['file'], m.get('rim')
     for g in json.load(open(f'{A}/general/manifest.json'))['stickers']:

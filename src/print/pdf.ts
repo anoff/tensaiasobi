@@ -5,8 +5,8 @@
 import type { jsPDF } from 'jspdf';
 import { Capacitor } from '@capacitor/core';
 import { hasShiny, type BookPage, type StickerSave } from '../data/stickerRules';
-import { SHINY_SPARKLE, collectibleById, sceneForShelf, stickerTilt } from '../data/stickers';
-import { PAPER } from '../theme/blockTable';
+import { SHINY_SPARKLE, collectibleById, stickerTilt } from '../data/stickers';
+import { paintBackground } from '../data/sceneArt';
 import { boxPixels, pageLayout, sheetLayout, stickerOnPage, type Box, type PaperSize } from './layout';
 import { paddedSide, printStickerSvg, type PrintLayer } from './printSvg';
 
@@ -46,31 +46,13 @@ async function drawSvg(doc: jsPDF, svg: string, box: Box) {
   }
 }
 
-const loadImage = (src: string) =>
-  new Promise<HTMLImageElement>((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-
-/** Paper colour plus the scene drawn "contain", at 200 dpi, as one JPEG. */
+/** The page background at 200 dpi as one JPEG: the same composite as on screen (paper, or the seeded scene). */
 async function backgroundImage(page: BookPage, box: Box) {
   const { w, h } = boxPixels(box);
   const canvas = document.createElement('canvas');
   canvas.width = w;
   canvas.height = h;
-  const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = PAPER;
-  ctx.fillRect(0, 0, w, h);
-  const src = page.background !== 'paper' ? sceneForShelf(page.background)?.blankSrc : undefined;
-  if (src) {
-    const img = await loadImage(src);
-    const k = Math.min(w / img.naturalWidth, h / img.naturalHeight);
-    const iw = img.naturalWidth * k;
-    const ih = img.naturalHeight * k;
-    ctx.drawImage(img, (w - iw) / 2, (h - ih) / 2, iw, ih);
-  }
+  await paintBackground(canvas.getContext('2d')!, w, h, page.background);
   return canvas.toDataURL('image/jpeg', 0.92);
 }
 

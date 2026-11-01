@@ -5,6 +5,8 @@
  * No React and no art imports, so every rule is unit-testable.
  */
 import type { GameCategory } from '../games/catalog';
+import { LEGACY_SCENE_PAGES } from './legacyScenePages';
+import { isSceneThemeId, type SceneThemeId } from './sceneThemes';
 
 export type Shelf = GameCategory;
 
@@ -56,14 +58,14 @@ export interface PagePlacement {
   rotation: number;
 }
 
-/** A My pages page: blank paper or a scene outline page as background. */
+/** A My pages page: blank paper or a scene theme drawn from its seed. */
 export interface BookPage {
   id: string;
-  /** 'paper', or the shelf whose scene outline page is the background. */
   background: PageBackground;
   stickers: PagePlacement[];
 }
-export type PageBackground = 'paper' | Shelf;
+/** 'blank' paper, or a scene theme whose layers the seed picks (same seed = same page, on screen and in print). */
+export type PageBackground = 'blank' | { theme: SceneThemeId; seed: number };
 
 export interface StickerSave {
   version: number;
@@ -73,8 +75,6 @@ export interface StickerSave {
   daily: { date: string; k: number };
   /** My pages, at most MAX_PAGES. Autosaved with the rest of the book. */
   pages: BookPage[];
-  /** Scene pieces the kid has dragged onto their outline. */
-  placedPieces: string[];
   /** Accessories bought with stars; global, usable on every sticker. */
   ownedAccessories: string[];
   /** Copy uid → accessories on that copy (each copy is placed at most once, so this is per placement). */
@@ -96,7 +96,6 @@ export function emptyStickerSave(): StickerSave {
     copies: [],
     daily: { date: '', k: 0 },
     pages: [],
-    placedPieces: [],
     ownedAccessories: [],
     placements: {},
     seenCount: 0,
@@ -110,7 +109,19 @@ const isCopy = (c: unknown): c is StickerCopy =>
   typeof (c as StickerCopy).id === 'string' &&
   typeof (c as StickerCopy).shiny === 'boolean';
 
-const BACKGROUNDS: readonly string[] = ['paper', 'numbers', 'language', 'logic', 'play'];
+const isSeed = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n > 0 && n < 2 ** 31;
+
+/**
+ * A stored background. Pages from before the scene themes ('paper', or a shelf's scene card) and anything
+ * unknown become blank pages, so their stickers stay where the kid put them.
+ */
+function parseBackground(raw: unknown): PageBackground {
+  if (raw && typeof raw === 'object') {
+    const { theme, seed } = raw as { theme?: unknown; seed?: unknown };
+    if (isSceneThemeId(theme) && isSeed(seed)) return { theme, seed };
+  }
+  return 'blank';
+}
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 /** Keeps well-formed pages (up to MAX_PAGES) and drops placements of unknown or already placed copies. */
@@ -120,8 +131,7 @@ function parsePages(raw: unknown, uids: ReadonlySet<string>): BookPage[] {
   const pages: BookPage[] = [];
   for (const p of raw as Partial<BookPage>[]) {
     if (pages.length >= MAX_PAGES) break;
-    if (!p || typeof p.id !== 'string' || !BACKGROUNDS.includes(p.background as string) || !Array.isArray(p.stickers))
-      continue;
+    if (!p || typeof p.id !== 'string' || !Array.isArray(p.stickers)) continue;
     const stickers: PagePlacement[] = [];
     for (const st of p.stickers as Partial<PagePlacement>[]) {
       if (!st || typeof st.uid !== 'string' || !uids.has(st.uid) || used.has(st.uid)) continue;
@@ -130,9 +140,33 @@ function parsePages(raw: unknown, uids: ReadonlySet<string>): BookPage[] {
       const size = ([0, 1, 2] as const).includes(st.size as SizeStep) ? (st.size as SizeStep) : 1;
       stickers.push({ uid: st.uid, x: clamp01(st.x), y: clamp01(st.y), size, rotation: st.rotation });
     }
-    pages.push({ id: p.id, background: p.background as PageBackground, stickers });
+    pages.push({ id: p.id, background: parseBackground(p.background), stickers });
   }
   return pages;
+}
+
+/**
+ * Old v2 books (before the scene themes) kept scene pieces snapped onto per-shelf outline pages in
+ * `placedPieces`. Each old scene set with placed pieces becomes a blank page holding those pieces where they
+ * sat (a free copy of each; pieces whose every copy is already on a page are left alone). Nothing owned is
+ * lost: anything that does not fit (20 pages) simply stays in the tray.
+ */
+function pagesFromPlacedPieces(save: StickerSave, placedPieces: readonly string[]): StickerSave {
+  const placed = new Set(placedPieces);
+  let next = save;
+  for (const set of LEGACY_SCENE_PAGES) {
+    const pieces = set.filter((p) => placed.has(p.id) && freeCopies(next, p.id).length > 0);
+    if (!pieces.length || next.pages.length >= MAX_PAGES) continue;
+    next = addPage(next, 'blank');
+    const pageId = next.pages[next.pages.length - 1].id;
+    for (const p of pieces) {
+      next = placeOnPage(next, pageId, p.id, p.x, p.y);
+      const placedNow = next.pages[next.pages.length - 1].stickers;
+      const uid = placedNow[placedNow.length - 1].uid;
+      next = updatePlacement(next, pageId, uid, { size: p.size });
+    }
+  }
+  return next;
 }
 
 /** Reads a stored book. Anything unreadable or from another save version (v1 too) starts a fresh book. */
@@ -141,7 +175,8 @@ export function parseStickerSave(raw: string | null): StickerSave {
   try {
     const v = JSON.parse(raw) as Partial<StickerSave>;
     if (!v || v.version !== STICKER_SAVE_VERSION) return emptyStickerSave();
-    if (!Array.isArray(v.copies) || !isStringArray(v.placedPieces) || !isStringArray(v.ownedAccessories)) {
+    const legacy = v as { placedPieces?: unknown };
+    if (!Array.isArray(v.copies) || !isStringArray(v.ownedAccessories)) {
       return emptyStickerSave();
     }
     const placements: Record<string, AccessoryPlacement[]> = {};
@@ -154,16 +189,16 @@ export function parseStickerSave(raw: string | null): StickerSave {
     }
     const daily =
       v.daily && typeof v.daily.date === 'string' && typeof v.daily.k === 'number' ? v.daily : { date: '', k: 0 };
-    return {
+    const book: StickerSave = {
       version: STICKER_SAVE_VERSION,
       copies: v.copies.filter(isCopy),
       daily: { date: daily.date, k: daily.k },
       pages: parsePages(v.pages, new Set(v.copies.filter(isCopy).map((c) => c.uid))),
-      placedPieces: [...new Set(v.placedPieces)],
       ownedAccessories: [...new Set(v.ownedAccessories)],
       placements,
       seenCount: typeof v.seenCount === 'number' ? v.seenCount : 0,
     };
+    return isStringArray(legacy.placedPieces) ? pagesFromPlacedPieces(book, legacy.placedPieces) : book;
   } catch {
     return emptyStickerSave();
   }
@@ -288,6 +323,14 @@ export function addPage(save: StickerSave, background: PageBackground): StickerS
   };
 }
 
+/** A new seed for a themed page (the dice): its stickers keep their positions. No-op on a blank page. */
+export function setPageSeed(save: StickerSave, pageId: string, seed: number): StickerSave {
+  const page = save.pages.find((p) => p.id === pageId);
+  if (!page || page.background === 'blank' || !isSeed(seed) || page.background.seed === seed) return save;
+  const background = { theme: page.background.theme, seed };
+  return { ...save, pages: save.pages.map((p) => (p === page ? { ...p, background } : p)) };
+}
+
 /** Copy uids already stuck on some page. */
 export const placedUids = (save: StickerSave) => new Set(save.pages.flatMap((p) => p.stickers.map((s) => s.uid)));
 
@@ -345,17 +388,6 @@ export function updatePlacement(
 /** Peels a copy off its page (back to the tray). Its accessories stay on the copy. */
 export function removeFromPage(save: StickerSave, pageId: string, uid: string): StickerSave {
   return editPage(save, pageId, (list) => (list.some((s) => s.uid === uid) ? list.filter((s) => s.uid !== uid) : list));
-}
-
-/** Snaps an earned scene piece onto its outline. */
-export function placeScenePiece(save: StickerSave, pieceId: string): StickerSave {
-  if (!owns(save, pieceId) || save.placedPieces.includes(pieceId)) return save;
-  return { ...save, placedPieces: [...save.placedPieces, pieceId] };
-}
-
-/** True when every piece of a scene sits on its outline (the reward star pops). */
-export function isSceneComplete(save: StickerSave, pieceIds: readonly string[]): boolean {
-  return pieceIds.length > 0 && pieceIds.every((id) => save.placedPieces.includes(id));
 }
 
 /** True when an old My Town save has at least one placed item. */

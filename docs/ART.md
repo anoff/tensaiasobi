@@ -81,9 +81,8 @@ One shelf, one colour, everywhere: the launcher tile, sticker-book page, sticker
 | General | `general_thank_you` (+ the reward star) | 1 | butter | panda waving at a little house |
 
 - **One character per shelf.** A shelf's stickers show only its own character, or objects with no character. Other animals (a crocodile, say) count as characters, so they don't go on a shelf either. Game mechanics are never shown.
-- **4 scene sets**, one per shelf: Numbers train, Language reading corner, Logic shape garden, Fun playground. Each has 4 pieces at true relative size and an outline page. **Outline slots** are one shared rule (`album/src/outline.py`): pebble `#b8aea3` at 35 % over paper, with a 2 px dashed pebble edge per slot. The ground line sits on top of the slots.
 - **Accessories are global** (crown, party hat, bow, cape, flower, headphones, heart, moustache, scarf, star clip, sunglasses, wizard hat). They fit every character and belong to no shelf.
-- Totals (phase 1): 72 shelf stickers (18 per shelf, `<shelf>_01`..`_18`) + 16 moods + 4 scene sets (16 pieces) + 1 thank-you sticker.
+- Totals (phase 1): 72 shelf stickers (18 per shelf, `<shelf>_01`..`_18`) + 16 moods + 16 scene stickers (the former scene-set pieces, 4 per shelf) + 1 thank-you sticker.
 
 ### Capsules, duplicates and the free book
 - **Drops:** after every finished round there's a roll for one capsule, with p = 1/(2^(k+1)−1), where k is the capsules earned that day (100%, then 1/3, 1/7 and so on), resetting each morning. A capsule holds a sticker from the shelf just played. Capsules are earned only by playing; they're never bought with stars. Stars buy accessories.
@@ -91,11 +90,29 @@ One shelf, one colour, everywhere: the launcher tile, sticker-book page, sticker
 - **Shiny:** 10% of drops. The same art, with the shelf rim swapped for gold #e08a00 (promoted from parked) plus the sparkle overlay at the top-right. Gold is used only for shiny stickers.
 - **Duplicates** stack. The collection shows an ink "×N" badge at the bottom-right of the sticker, and each copy can be placed on a page.
 - **Book tabs** (tab icons, ink on cream):
-  - My pages: blank paper pages, up to 20. **A page is always 9:16 portrait** (343×610 px at 375×812). Sticker positions are stored as 0..1 of the page, so draw every page background, including the phase 2 scene backgrounds, at 9:16 (for example 900×1600 px). The 4 scene backgrounds for now are plain cards: paper, ink outline, hard shadow and a ground line (`scripts/build_page_backgrounds.py`).
+  - My pages: blank paper pages, up to 20. **A page is always 9:16 portrait** (343×610 px at 375×812). Sticker positions are stored as 0..1 of the page, so draw every page background, including the phase 2 scene backgrounds, at 9:16 (for example 900×1600 px). Scene backgrounds follow "Scene pages" below.
   - Collection: grouped by shelf, with a pebble silhouette per missing sticker as in the §6 outline rule.
-  - Special scenes: the 4 scene sets, unchanged.
+  - Scenes: the "New page" picker (see "Scene pages" below).
 - **Editing:** drag from a bottom tray onto the page. Tap a sticker to select it, which shows an ink dashed box with a size handle (3 steps) and a rotate handle. Drag it back to the tray to remove it. Placed stickers keep the −8…+8° base tilt plus the kid's rotation. Accessories still paste on.
 - **Print** is behind a 2-second parent hold. It gives a PDF of the current page (A4 or Letter portrait: the 9:16 page fitted to the sheet height inside 10 mm margins and centred, with white side margins; vector stickers, 200 dpi background, paper background on) and a sticker sheet PDF of all owned stickers at 5 cm with their die-cut rims, on white, with no shadows.
+
+### Scene pages (replaces "Special scenes", PR 99)
+Pages belong to no shelf and no game. "New page" offers **Blank** plus **20 scene themes**:
+1 Playground · 2 Living room · 3 Park · 4 Beach · 5 Forest · 6 Farm · 7 Town street · 8 Kitchen · 9 Bedroom · 10 Garden · 11 Classroom · 12 Train station · 13 Harbour · 14 Campsite · 15 Snowy hill · 16 Under the sea · 17 Space · 18 Castle · 19 Market · 20 Summer festival (shrine, lanterns, stalls)
+
+**A scene page is built from layers, picked by a seed stored on the page** (same seed = same page, on screen and in print):
+1. **Sky / wall** – shared: outdoor day, evening, night; indoor cream, mint, peach wall. Seed picks 1 of the theme's allowed ones.
+2. **Backdrop** – 2 per theme (far hills, skyline, shelves, waves…). Seed picks 1, may mirror it.
+3. **Ground / floor** – 1 per theme. Ground line at 78 % of page height.
+4. **Props** – 5 per theme, placed on the theme's 6 anchor slots (left, right, back-left, back-right, low-left, low-right). Seed picks 3–4 props, may mirror each.
+- **Sticker room:** the middle of the page (x 15–85 %, y 30–76 %) stays free of props.
+- **No characters and no animals** in scenes (one character per shelf). Objects only.
+- **Backgrounds are quieter than stickers:** flat fills from the palette, ink line 3 px at 900 px wide (no hard shadow, no white cut, no rim), sky and wall at about 70 % saturation and light enough to print. Stickers must always pop on top.
+- **Size:** every layer is drawn on the 9:16 canvas (900×1600 px PNG, transparent except the sky/wall); props as separate transparent PNGs at true size on that canvas.
+- Files: `pages/sky_<id>.png`, `pages/<theme>_backdrop_<a|b>.png`, `pages/<theme>_ground.png`, `pages/<theme>_prop_<nn>.png`, plus `pages/themes.json` (theme id, allowed skies, files, anchors). Thumbnails are rendered from seed 1.
+- A "shuffle" dice on a themed page re-rolls the seed; placed stickers keep their positions.
+- **In the app:** approved layers and their `themes.json` are copied to `src/assets/stickers/pages/` by `scripts/import_scene_pages.py --all` (or `<theme ids>`; re-run without arguments to refresh the approved ones; stale files are removed). The app reads every file name, sky, slot and anchor from that `themes.json`; a theme not in it yet shows placeholder layers (flat sky or wall and the ground line).
+- **The 16 former scene-set pieces stay owned stickers** and move into the Collection under their own shelf. Their outline pages are retired. Old scene-set pages with placed pieces become normal blank pages with the pieces where the kid put them. Nothing is taken away.
 
 ## 7. Mascot: Panda
 

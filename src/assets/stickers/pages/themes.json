@@ -1,0 +1,2524 @@
+{
+ "canvas": [
+  900,
+  1600
+ ],
+ "ground_line": 0.78,
+ "sticker_room": {
+  "x": [
+   0.15,
+   0.85
+  ],
+  "y": [
+   0.3,
+   0.76
+  ]
+ },
+ "prop_anchor": "x,y = bottom-centre of the prop PNG, as 0..1 of the page; draw the PNG at its pixel size x scale (900 px page); mirror about its centre",
+ "skies": {
+  "day": {
+   "file": "sky_day.png",
+   "kind": "outdoor"
+  },
+  "evening": {
+   "file": "sky_evening.png",
+   "kind": "outdoor"
+  },
+  "night": {
+   "file": "sky_night.png",
+   "kind": "outdoor"
+  },
+  "wall_cream": {
+   "file": "wall_cream.png",
+   "kind": "indoor"
+  },
+  "wall_mint": {
+   "file": "wall_mint.png",
+   "kind": "indoor"
+  },
+  "wall_peach": {
+   "file": "wall_peach.png",
+   "kind": "indoor"
+  },
+  "underwater": {
+   "file": "sky_underwater.png",
+   "kind": "theme",
+   "themeOnly": [
+    "under_the_sea"
+   ]
+  }
+ },
+ "themes": [
+  {
+   "id": "playground",
+   "n": 1,
+   "name": "Playground",
+   "skies": [
+    "day",
+    "evening",
+    "night"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "playground_backdrop_a.png",
+    "playground_backdrop_b.png"
+   ],
+   "ground": "playground_ground.png",
+   "props": [
+    {
+     "file": "playground_prop_01.png",
+     "id": "tree",
+     "size": [
+      142,
+      341
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "playground_prop_02.png",
+     "id": "lamp_post",
+     "size": [
+      98,
+      405
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "playground_prop_03.png",
+     "id": "flower_bush",
+     "size": [
+      146,
+      103
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "playground_prop_04.png",
+     "id": "swing_set",
+     "size": [
+      330,
+      301
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "playground_prop_05.png",
+     "id": "seesaw",
+     "size": [
+      346,
+      151
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "living_room",
+   "n": 2,
+   "name": "Living room",
+   "skies": [
+    "wall_cream",
+    "wall_mint",
+    "wall_peach"
+   ],
+   "thumbSky": "wall_cream",
+   "backdrops": [
+    "living_room_backdrop_a.png",
+    "living_room_backdrop_b.png"
+   ],
+   "ground": "living_room_ground.png",
+   "props": [
+    {
+     "file": "living_room_prop_01.png",
+     "id": "floor_lamp",
+     "size": [
+      122,
+      407
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "living_room_prop_02.png",
+     "id": "house_plant",
+     "size": [
+      130,
+      265
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "living_room_prop_03.png",
+     "id": "side_table_teapot",
+     "size": [
+      130,
+      167
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "living_room_prop_04.png",
+     "id": "armchair",
+     "size": [
+      346,
+      237
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "living_room_prop_05.png",
+     "id": "toy_box",
+     "size": [
+      250,
+      211
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "park",
+   "n": 3,
+   "name": "Park",
+   "skies": [
+    "day",
+    "evening",
+    "night"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "park_backdrop_a.png",
+    "park_backdrop_b.png"
+   ],
+   "ground": "park_ground.png",
+   "props": [
+    {
+     "file": "park_prop_01.png",
+     "id": "oak_tree",
+     "size": [
+      138,
+      345
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "park_prop_02.png",
+     "id": "signpost",
+     "size": [
+      134,
+      352
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "park_prop_03.png",
+     "id": "tulip_planter",
+     "size": [
+      130,
+      129
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "park_prop_04.png",
+     "id": "bench",
+     "size": [
+      322,
+      141
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "park_prop_05.png",
+     "id": "fountain",
+     "size": [
+      272,
+      255
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "beach",
+   "n": 4,
+   "name": "Beach",
+   "skies": [
+    "day",
+    "evening"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "beach_backdrop_a.png",
+    "beach_backdrop_b.png"
+   ],
+   "ground": "beach_ground.png",
+   "props": [
+    {
+     "file": "beach_prop_01.png",
+     "id": "palm_tree",
+     "size": [
+      130,
+      373
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "beach_prop_02.png",
+     "id": "flag_pole",
+     "size": [
+      120,
+      380
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "beach_prop_03.png",
+     "id": "bucket_spade",
+     "size": [
+      148,
+      147
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "beach_prop_04.png",
+     "id": "beach_umbrella",
+     "size": [
+      290,
+      299
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "beach_prop_05.png",
+     "id": "sandcastle",
+     "size": [
+      230,
+      237
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "forest",
+   "n": 5,
+   "name": "Forest",
+   "skies": [
+    "day",
+    "evening",
+    "night"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "forest_backdrop_a.png",
+    "forest_backdrop_b.png"
+   ],
+   "ground": "forest_ground.png",
+   "props": [
+    {
+     "file": "forest_prop_01.png",
+     "id": "pine_tree",
+     "size": [
+      136,
+      367
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "forest_prop_02.png",
+     "id": "birch_tree",
+     "size": [
+      130,
+      379
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "forest_prop_03.png",
+     "id": "mushrooms",
+     "size": [
+      142,
+      105
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "forest_prop_04.png",
+     "id": "tree_stump",
+     "size": [
+      218,
+      181
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "forest_prop_05.png",
+     "id": "log_pile",
+     "size": [
+      272,
+      135
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "farm",
+   "n": 6,
+   "name": "Farm",
+   "skies": [
+    "day",
+    "evening"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "farm_backdrop_a.png",
+    "farm_backdrop_b.png"
+   ],
+   "ground": "farm_ground.png",
+   "props": [
+    {
+     "file": "farm_prop_01.png",
+     "id": "sunflowers",
+     "size": [
+      138,
+      329
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "farm_prop_02.png",
+     "id": "mailbox",
+     "size": [
+      132,
+      269
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "farm_prop_03.png",
+     "id": "milk_churn",
+     "size": [
+      122,
+      155
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "farm_prop_04.png",
+     "id": "tractor",
+     "size": [
+      298,
+      217
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "farm_prop_05.png",
+     "id": "hay_bales",
+     "size": [
+      320,
+      169
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "town_street",
+   "n": 7,
+   "name": "Town street",
+   "skies": [
+    "day",
+    "evening",
+    "night"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "town_street_backdrop_a.png",
+    "town_street_backdrop_b.png"
+   ],
+   "ground": "town_street_ground.png",
+   "props": [
+    {
+     "file": "town_street_prop_01.png",
+     "id": "street_lamp",
+     "size": [
+      126,
+      359
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "town_street_prop_02.png",
+     "id": "traffic_light",
+     "size": [
+      78,
+      387
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "town_street_prop_03.png",
+     "id": "postbox",
+     "size": [
+      102,
+      157
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "town_street_prop_04.png",
+     "id": "car",
+     "size": [
+      296,
+      167
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "town_street_prop_05.png",
+     "id": "bicycle",
+     "size": [
+      286,
+      179
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "kitchen",
+   "n": 8,
+   "name": "Kitchen",
+   "skies": [
+    "wall_cream",
+    "wall_mint",
+    "wall_peach"
+   ],
+   "thumbSky": "wall_cream",
+   "backdrops": [
+    "kitchen_backdrop_a.png",
+    "kitchen_backdrop_b.png"
+   ],
+   "ground": "kitchen_ground.png",
+   "props": [
+    {
+     "file": "kitchen_prop_01.png",
+     "id": "fridge",
+     "size": [
+      134,
+      347
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "kitchen_prop_02.png",
+     "id": "broom",
+     "size": [
+      102,
+      377
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "kitchen_prop_03.png",
+     "id": "stool",
+     "size": [
+      102,
+      147
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "kitchen_prop_04.png",
+     "id": "table_fruit_bowl",
+     "size": [
+      310,
+      201
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "kitchen_prop_05.png",
+     "id": "veg_basket",
+     "size": [
+      218,
+      155
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "bedroom",
+   "n": 9,
+   "name": "Bedroom",
+   "skies": [
+    "wall_cream",
+    "wall_mint",
+    "wall_peach"
+   ],
+   "thumbSky": "wall_cream",
+   "backdrops": [
+    "bedroom_backdrop_a.png",
+    "bedroom_backdrop_b.png"
+   ],
+   "ground": "bedroom_ground.png",
+   "props": [
+    {
+     "file": "bedroom_prop_01.png",
+     "id": "bookcase",
+     "size": [
+      126,
+      347
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "bedroom_prop_02.png",
+     "id": "nightstand_lamp",
+     "size": [
+      130,
+      297
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "bedroom_prop_03.png",
+     "id": "toy_rocket",
+     "size": [
+      122,
+      239
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "bedroom_prop_04.png",
+     "id": "bed",
+     "size": [
+      324,
+      237
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "bedroom_prop_05.png",
+     "id": "toy_train",
+     "size": [
+      298,
+      119
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "garden",
+   "n": 10,
+   "name": "Garden",
+   "skies": [
+    "day",
+    "evening",
+    "night"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "garden_backdrop_a.png",
+    "garden_backdrop_b.png"
+   ],
+   "ground": "garden_ground.png",
+   "props": [
+    {
+     "file": "garden_prop_01.png",
+     "id": "bean_poles",
+     "size": [
+      122,
+      341
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "garden_prop_02.png",
+     "id": "hollyhocks",
+     "size": [
+      106,
+      323
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "garden_prop_03.png",
+     "id": "watering_can",
+     "size": [
+      146,
+      133
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "garden_prop_04.png",
+     "id": "wheelbarrow",
+     "size": [
+      278,
+      185
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "garden_prop_05.png",
+     "id": "flower_pots",
+     "size": [
+      256,
+      173
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "classroom",
+   "n": 11,
+   "name": "Classroom",
+   "skies": [
+    "wall_cream",
+    "wall_mint",
+    "wall_peach"
+   ],
+   "thumbSky": "wall_cream",
+   "backdrops": [
+    "classroom_backdrop_a.png",
+    "classroom_backdrop_b.png"
+   ],
+   "ground": "classroom_ground.png",
+   "props": [
+    {
+     "file": "classroom_prop_01.png",
+     "id": "easel",
+     "size": [
+      130,
+      341
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "classroom_prop_02.png",
+     "id": "abacus",
+     "size": [
+      150,
+      277
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "classroom_prop_03.png",
+     "id": "globe",
+     "size": [
+      128,
+      193
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "classroom_prop_04.png",
+     "id": "desk_chair",
+     "size": [
+      318,
+      211
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "classroom_prop_05.png",
+     "id": "blocks_books",
+     "size": [
+      264,
+      127
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "train_station",
+   "n": 12,
+   "name": "Train station",
+   "skies": [
+    "day",
+    "evening",
+    "night"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "train_station_backdrop_a.png",
+    "train_station_backdrop_b.png"
+   ],
+   "ground": "train_station_ground.png",
+   "props": [
+    {
+     "file": "train_station_prop_01.png",
+     "id": "station_clock",
+     "size": [
+      102,
+      405
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "train_station_prop_02.png",
+     "id": "signal",
+     "size": [
+      122,
+      391
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "train_station_prop_03.png",
+     "id": "suitcases",
+     "size": [
+      126,
+      147
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "train_station_prop_04.png",
+     "id": "luggage_trolley",
+     "size": [
+      292,
+      189
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "train_station_prop_05.png",
+     "id": "buffer_stop",
+     "size": [
+      230,
+      139
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "harbour",
+   "n": 13,
+   "name": "Harbour",
+   "skies": [
+    "day",
+    "evening"
+   ],
+   "thumbSky": "evening",
+   "backdrops": [
+    "harbour_backdrop_a.png",
+    "harbour_backdrop_b.png"
+   ],
+   "ground": "harbour_ground.png",
+   "props": [
+    {
+     "file": "harbour_prop_01.png",
+     "id": "crate_stack",
+     "size": [
+      147,
+      277
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "harbour_prop_02.png",
+     "id": "life_ring_post",
+     "size": [
+      110,
+      315
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "harbour_prop_03.png",
+     "id": "bollard",
+     "size": [
+      114,
+      105
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "harbour_prop_04.png",
+     "id": "rowing_boat",
+     "size": [
+      340,
+      157
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "harbour_prop_05.png",
+     "id": "barrels",
+     "size": [
+      220,
+      127
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "campsite",
+   "n": 14,
+   "name": "Campsite",
+   "skies": [
+    "day",
+    "evening",
+    "night"
+   ],
+   "thumbSky": "night",
+   "backdrops": [
+    "campsite_backdrop_a.png",
+    "campsite_backdrop_b.png"
+   ],
+   "ground": "campsite_ground.png",
+   "props": [
+    {
+     "file": "campsite_prop_01.png",
+     "id": "lantern_pole",
+     "size": [
+      112,
+      337
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "campsite_prop_02.png",
+     "id": "canoe",
+     "size": [
+      112,
+      329
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "campsite_prop_03.png",
+     "id": "camp_lantern",
+     "size": [
+      70,
+      127
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "campsite_prop_04.png",
+     "id": "tent",
+     "size": [
+      370,
+      257
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "campsite_prop_05.png",
+     "id": "campfire",
+     "size": [
+      234,
+      157
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "snowy_hill",
+   "n": 15,
+   "name": "Snowy hill",
+   "skies": [
+    "day",
+    "evening",
+    "night"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "snowy_hill_backdrop_a.png",
+    "snowy_hill_backdrop_b.png"
+   ],
+   "ground": "snowy_hill_ground.png",
+   "props": [
+    {
+     "file": "snowy_hill_prop_01.png",
+     "id": "snowy_pine",
+     "size": [
+      136,
+      365
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "snowy_hill_prop_02.png",
+     "id": "skis",
+     "size": [
+      130,
+      353
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "snowy_hill_prop_03.png",
+     "id": "snowball_pile",
+     "size": [
+      138,
+      117
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "snowy_hill_prop_04.png",
+     "id": "sled",
+     "size": [
+      324,
+      135
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "snowy_hill_prop_05.png",
+     "id": "igloo",
+     "size": [
+      310,
+      177
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "under_the_sea",
+   "n": 16,
+   "name": "Under the sea",
+   "skies": [
+    "underwater"
+   ],
+   "thumbSky": "underwater",
+   "backdrops": [
+    "under_the_sea_backdrop_a.png",
+    "under_the_sea_backdrop_b.png"
+   ],
+   "ground": "under_the_sea_ground.png",
+   "props": [
+    {
+     "file": "under_the_sea_prop_01.png",
+     "id": "seaweed",
+     "size": [
+      106,
+      347
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "under_the_sea_prop_02.png",
+     "id": "coral",
+     "size": [
+      134,
+      305
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "under_the_sea_prop_03.png",
+     "id": "shells",
+     "size": [
+      130,
+      81
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "under_the_sea_prop_04.png",
+     "id": "treasure_chest",
+     "size": [
+      230,
+      207
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "under_the_sea_prop_05.png",
+     "id": "sunken_boat",
+     "size": [
+      320,
+      235
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "space",
+   "n": 17,
+   "name": "Space",
+   "skies": [
+    "night"
+   ],
+   "thumbSky": "night",
+   "backdrops": [
+    "space_backdrop_a.png",
+    "space_backdrop_b.png"
+   ],
+   "ground": "space_ground.png",
+   "props": [
+    {
+     "file": "space_prop_01.png",
+     "id": "rocket",
+     "size": [
+      138,
+      367
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "space_prop_02.png",
+     "id": "satellite_dish",
+     "size": [
+      150,
+      295
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "space_prop_03.png",
+     "id": "moon_rocks",
+     "size": [
+      132,
+      71
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "space_prop_04.png",
+     "id": "moon_base",
+     "size": [
+      310,
+      213
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "space_prop_05.png",
+     "id": "rover",
+     "size": [
+      230,
+      183
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "castle",
+   "n": 18,
+   "name": "Castle",
+   "skies": [
+    "day",
+    "evening",
+    "night"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "castle_backdrop_a.png",
+    "castle_backdrop_b.png"
+   ],
+   "ground": "castle_ground.png",
+   "props": [
+    {
+     "file": "castle_prop_01.png",
+     "id": "banner_pole",
+     "size": [
+      97,
+      402
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "castle_prop_02.png",
+     "id": "torch",
+     "size": [
+      58,
+      363
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "castle_prop_03.png",
+     "id": "shield_stand",
+     "size": [
+      110,
+      157
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "castle_prop_04.png",
+     "id": "cannon",
+     "size": [
+      340,
+      155
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "castle_prop_05.png",
+     "id": "well",
+     "size": [
+      230,
+      297
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "market",
+   "n": 19,
+   "name": "Market",
+   "skies": [
+    "day",
+    "evening"
+   ],
+   "thumbSky": "day",
+   "backdrops": [
+    "market_backdrop_a.png",
+    "market_backdrop_b.png"
+   ],
+   "ground": "market_ground.png",
+   "props": [
+    {
+     "file": "market_prop_01.png",
+     "id": "banner",
+     "size": [
+      118,
+      388
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "market_prop_02.png",
+     "id": "fruit_crates",
+     "size": [
+      130,
+      277
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "market_prop_03.png",
+     "id": "apple_basket",
+     "size": [
+      158,
+      139
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "market_prop_04.png",
+     "id": "fruit_stall",
+     "size": [
+      310,
+      297
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "market_prop_05.png",
+     "id": "flower_cart",
+     "size": [
+      282,
+      183
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "summer_festival",
+   "n": 20,
+   "name": "Summer festival",
+   "skies": [
+    "evening",
+    "night"
+   ],
+   "thumbSky": "evening",
+   "backdrops": [
+    "summer_festival_backdrop_a.png",
+    "summer_festival_backdrop_b.png"
+   ],
+   "ground": "summer_festival_ground.png",
+   "props": [
+    {
+     "file": "summer_festival_prop_01.png",
+     "id": "lantern_stand",
+     "size": [
+      116,
+      390
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "summer_festival_prop_02.png",
+     "id": "nobori_banner",
+     "size": [
+      101,
+      397
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right"
+     ]
+    },
+    {
+     "file": "summer_festival_prop_03.png",
+     "id": "taiko_drum",
+     "size": [
+      144,
+      197
+     ],
+     "slots": [
+      "left",
+      "right",
+      "back-left",
+      "back-right",
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "summer_festival_prop_04.png",
+     "id": "yatai_stall",
+     "size": [
+      346,
+      303
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    },
+    {
+     "file": "summer_festival_prop_05.png",
+     "id": "yoyo_balloon_tub",
+     "size": [
+      242,
+      119
+     ],
+     "slots": [
+      "low-left",
+      "low-right"
+     ]
+    }
+   ],
+   "anchors": [
+    {
+     "slot": "left",
+     "x": 0.065,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "right",
+     "x": 0.935,
+     "y": 0.8,
+     "scale": 1.0
+    },
+    {
+     "slot": "back-left",
+     "x": 0.09,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "back-right",
+     "x": 0.91,
+     "y": 0.78,
+     "scale": 0.7
+    },
+    {
+     "slot": "low-left",
+     "x": 0.25,
+     "y": 0.95,
+     "scale": 1.0
+    },
+    {
+     "slot": "low-right",
+     "x": 0.75,
+     "y": 0.95,
+     "scale": 1.0
+    }
+   ]
+  }
+ ]
+}

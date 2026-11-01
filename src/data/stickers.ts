@@ -55,28 +55,6 @@ export interface Mood extends Collectible {
   mood: string;
 }
 
-/** A scene piece box in scene units (left/top/size of the 256 px sticker PNG). */
-export interface ScenePiece extends Collectible {
-  kind: 'scene';
-  box: { x: number; y: number; size: number };
-}
-
-export interface SceneSet {
-  id: string;
-  shelf: Shelf;
-  rewardId: string;
-  ground: number;
-  /** Ground line [min x, width] in scene units. */
-  span: [number, number];
-  pieces: ScenePiece[];
-  /** The Art Director's faded outline page (paper card, ground line, dashed slots). */
-  pageSrc: string;
-  /** The same page card without the slots: the My pages background (and its print). Never the outline page. */
-  blankSrc: string | undefined;
-  /** Area the board shows, in scene units: the whole outline page. */
-  view: { x: number; y: number; w: number; h: number };
-}
-
 export interface Accessory {
   id: string;
   src: string | undefined;
@@ -84,11 +62,6 @@ export interface Accessory {
 }
 
 const isShelf = (s: string): s is Shelf => (SHELVES as readonly string[]).includes(s);
-
-/* Sticker PNG geometry (Art Director): 256 px canvas, art box 205 px at offset 22 px. */
-const PNG_SIDE = 256;
-const ART_BOX = 205;
-const ART_OFFSET = 22;
 
 export const SHELF_STICKERS: Record<Shelf, Collectible[]> = Object.fromEntries(
   SHELVES.map((shelf) => [
@@ -100,72 +73,18 @@ export const SHELF_STICKERS: Record<Shelf, Collectible[]> = Object.fromEntries(
   ]),
 ) as Record<Shelf, Collectible[]>;
 
-interface ScenePieceEntry {
-  id: string;
-  file: string;
-  vb: number[];
-  at: number[];
-  scale?: number;
-}
-interface SceneEntry {
-  shelf: string;
-  page: { set: string; ground: number; span: number[]; file?: string };
-  reward?: string;
-  pieces: ScenePieceEntry[];
-}
-
-/* Outline page geometry (Art Director, alib.scene_page): 900 px card, 60 px side pad, +8/+9 px hard shadow. */
-const PAGE_W = 900;
-const PAGE_PAD = 60;
-
-function buildScene(entry: SceneEntry): SceneSet | null {
-  if (!isShelf(entry.shelf)) return null;
-  const pieces = entry.pieces.map((p): ScenePiece => {
-    const [x0, y0, side] = p.vb;
-    const [ax, ay] = p.at;
-    const k = p.scale ?? 1;
-    const f = (k * side) / ART_BOX;
-    return {
-      id: p.id,
-      kind: 'scene',
-      shelf: entry.shelf as Shelf,
-      src: artUrl('stickers/album', p.file),
-      box: { x: ax + k * x0 - ART_OFFSET * f, y: ay + k * y0 - ART_OFFSET * f, size: PNG_SIDE * f },
-    };
-  });
-  const { ground } = entry.page;
-  const [spanX, spanW] = entry.page.span;
-  // A scene is only playable on its outline page; one without a page waits for the art.
-  if (!entry.page.file) return null;
-  const pageSrc = artUrl('stickers/album', entry.page.file);
-  if (!pageSrc) return null;
-  const blankSrc = artUrl('stickers/pages', `page_${entry.shelf}.png`);
-  // Same maths the page was drawn with, so pieces land exactly on their dashed slots.
-  const s = (PAGE_W - 2 * PAGE_PAD) / spanW;
-  const top = Math.min(...entry.pieces.map((p) => p.vb[1] + p.at[1]));
-  const H = Math.round(s * (ground - top) + 150);
-  const ox = PAGE_PAD - s * spanX;
-  const oy = H - 70 - s * ground;
-  const view = { x: -ox / s, y: -oy / s, w: (PAGE_W + 8) / s, h: (H + 9) / s };
-  return {
-    id: entry.page.set,
-    shelf: entry.shelf,
-    rewardId: entry.reward ?? 'general_star',
-    ground,
-    span: [spanX, spanW],
-    pieces,
-    pageSrc,
-    blankSrc,
-    view,
-  };
-}
-
-/** One scene set per shelf; shelves without a scene in the manifest yet show a "coming soon" page. */
-export const SCENES: SceneSet[] = (albumManifest.scenes as SceneEntry[])
-  .map(buildScene)
-  .filter((s): s is SceneSet => s !== null);
-
-export const sceneForShelf = (shelf: Shelf): SceneSet | undefined => SCENES.find((s) => s.shelf === shelf);
+/**
+ * The 16 former scene-set pieces (ART.md §6): normal stickers on their own shelf, earned from that shelf's
+ * capsules like any other sticker. Their outline pages are retired.
+ */
+export const SCENE_PIECES: Record<Shelf, Collectible[]> = Object.fromEntries(
+  SHELVES.map((shelf) => [
+    shelf,
+    albumManifest.scenePieces
+      .filter((p) => p.shelf === shelf)
+      .map((p): Collectible => ({ id: p.id, kind: 'scene', shelf, src: artUrl('stickers/album', p.file) })),
+  ]),
+) as Record<Shelf, Collectible[]>;
 
 export const CHARACTERS: CharacterInfo[] = characterManifest.characters
   .filter((c) => isShelf(c.shelf))
@@ -264,7 +183,7 @@ export const GENERAL_STICKERS: Collectible[] = generalManifest.stickers.map((s) 
 
 const ALL: Collectible[] = [
   ...SHELVES.flatMap((s) => SHELF_STICKERS[s]),
-  ...SCENES.flatMap((s) => s.pieces),
+  ...SHELVES.flatMap((s) => SCENE_PIECES[s]),
   ...MOODS,
   ...GENERAL_STICKERS,
 ];
@@ -277,24 +196,21 @@ const ready = (list: Collectible[]) => list.filter((c) => c.src).map((c) => c.id
 
 export const AWARD_POOLS: AwardPools = {
   stickers: Object.fromEntries(SHELVES.map((s) => [s, ready(SHELF_STICKERS[s])])),
-  scenePieces: Object.fromEntries(SHELVES.map((s) => [s, ready(sceneForShelf(s)?.pieces ?? [])])),
+  scenePieces: Object.fromEntries(SHELVES.map((s) => [s, ready(SCENE_PIECES[s])])),
   moods: Object.fromEntries(SHELVES.map((s) => [s, ready(moodsForShelf(s))])),
 };
 
 /** Slots a shelf page shows: its stickers, the character's moods and the scene pieces. */
 export function shelfTotal(shelf: Shelf): number {
-  return SHELF_SLOTS + moodsForShelf(shelf).length + (sceneForShelf(shelf)?.pieces.length ?? 0);
+  return SHELF_SLOTS + moodsForShelf(shelf).length + SCENE_PIECES[shelf].length;
 }
-
-/** Collectibles on one shelf page that can be decorated (stickers, moods, general). */
-export const isDecoratable = (c: Collectible) => c.kind !== 'scene';
 
 /** Distinct owned ids that count toward a shelf page: its stickers, its character's moods and its scene pieces. */
 export function shelfEarned(book: StickerSave, shelf: Shelf): number {
   const ids = new Set([
     ...SHELF_STICKERS[shelf].map((s) => s.id),
     ...moodsForShelf(shelf).map((m) => m.id),
-    ...(sceneForShelf(shelf)?.pieces.map((p) => p.id) ?? []),
+    ...SCENE_PIECES[shelf].map((p) => p.id),
   ]);
   return ownedIds(book).filter((id) => ids.has(id)).length;
 }

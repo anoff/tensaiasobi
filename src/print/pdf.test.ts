@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { emptyStickerSave } from '../data/stickerRules';
-import { ACCESSORIES, GENERAL_STICKERS, MOODS, SCENES, SHELF_STICKERS, SHELVES } from '../data/stickers';
+import { ACCESSORIES, GENERAL_STICKERS, MOODS, SCENE_PIECES, SHELF_STICKERS, SHELVES } from '../data/stickers';
 import { hasPrintArt, sheetStickers } from './pdf';
 
 describe('print pdf data', () => {
   it('has vector print art for every sticker, scene piece, mood, general sticker and accessory', () => {
     const ids = [
       ...SHELVES.flatMap((s) => SHELF_STICKERS[s].map((c) => c.id)),
-      ...SCENES.flatMap((s) => s.pieces.map((p) => p.id)),
+      ...SHELVES.flatMap((s) => SCENE_PIECES[s].map((p) => p.id)),
       ...MOODS.map((m) => m.id),
       ...GENERAL_STICKERS.map((g) => g.id),
       ...ACCESSORIES.map((a) => `acc_${a.id}`),

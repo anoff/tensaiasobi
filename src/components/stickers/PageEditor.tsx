@@ -9,10 +9,10 @@ import {
   type SizeStep,
   type StickerSave,
 } from '../../data/stickerRules';
-import { SHELVES, collectibleById, sceneForShelf, stickerLook, stickerTilt } from '../../data/stickers';
+import { collectibleById, stickerLook, stickerTilt } from '../../data/stickers';
 import { useTranslation } from '../../hooks/useTranslation';
-import { CATEGORY_EMOJI } from '../../theme/categories';
 import { BUTTER, CHALK, INK, PAPER, hardShadow } from '../../theme/blockTable';
+import { SceneBackground } from './SceneBackground';
 import { CountBadge, StickerImage } from './StickerImage';
 import { usePointerDrag } from './usePointerDrag';
 
@@ -21,6 +21,7 @@ export interface PageEdits {
   place: (pageId: string, stickerId: string, x: number, y: number) => void;
   update: (pageId: string, uid: string, patch: Partial<Pick<PagePlacement, 'x' | 'y' | 'size' | 'rotation'>>) => void;
   remove: (pageId: string, uid: string) => void;
+  reroll: (pageId: string) => void;
 }
 
 interface PageEditorProps {
@@ -31,6 +32,8 @@ interface PageEditorProps {
   onIndex: (index: number) => void;
   /** Opens the accessory editor for one placed copy. */
   onDress: (uid: string) => void;
+  /** Opens the New page picker. */
+  onNewPage: () => void;
   playPop: () => void;
 }
 
@@ -45,10 +48,9 @@ const GAP = 8;
 const WIDE_QUERY = '(min-width: 768px)';
 
 /** My pages: the biggest 9:16 page that fits, arrows on its edges, and a docked tray of free copies. */
-export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, playPop }: PageEditorProps) {
+export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onNewPage, playPop }: PageEditorProps) {
   const { t } = useTranslation();
   const index = Math.max(0, Math.min(rawIndex, book.pages.length - 1));
-  const [choosing, setChoosing] = useState(book.pages.length === 0);
   const [selected, setSelected] = useState<string | null>(null);
   const [trayOpen, setTrayOpen] = useState(true);
   const areaRef = useRef<HTMLDivElement>(null);
@@ -129,14 +131,6 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, pla
   const trayIds = [...new Set(book.copies.map((c) => c.id))].filter((id) => collectibleById(id)?.src);
   const tray = trayIds.map((id) => ({ id, free: freeCopies(book, id) })).filter((x) => x.free.length > 0);
 
-  const pickBackground = (bg: PageBackground) => {
-    playPop();
-    edits.addPage(bg);
-    onIndex(book.pages.length);
-    setChoosing(false);
-    setSelected(null);
-  };
-  const scenes = SHELVES.map((s) => sceneForShelf(s)).filter((s) => s !== undefined);
   const canAdd = book.pages.length < MAX_PAGES;
 
   const arrow =
@@ -155,77 +149,32 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, pla
       data-testid="my-pages"
     >
       <div className="relative shrink-0">
-        {choosing || !page ? (
+        {!page ? (
+          // No page yet: an empty page that leads to the New page picker (Scenes tab).
           <div
-            className="relative flex flex-col gap-2 overflow-y-auto rounded-2xl border-[3px] p-3"
+            className="relative flex flex-col items-center justify-center gap-3 rounded-2xl border-[3px] border-dashed p-4"
             style={{ width: boardWidth, height: boardHeight, backgroundColor: PAPER, borderColor: INK }}
             data-testid="page-choose"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-black" style={{ color: INK }}>
-                {t.stickerBook.newPage}
-              </span>
-              {page && (
-                <button
-                  type="button"
-                  data-testid="page-choose-cancel"
-                  aria-label="✕"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border-[3px] text-sm font-black"
-                  style={arrowStyle}
-                  onClick={() => {
-                    playPop();
-                    setChoosing(false);
-                  }}
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-            <div className="grid grid-cols-3 gap-2" data-testid="page-backgrounds">
-              <button
-                type="button"
-                data-testid="page-bg-paper"
-                onClick={() => pickBackground('paper')}
-                className="flex items-center justify-center rounded-xl border-[3px] text-xs font-black"
-                style={{
-                  aspectRatio: PAGE_ASPECT,
-                  backgroundColor: PAPER,
-                  borderColor: INK,
-                  color: INK,
-                  boxShadow: hardShadow(2, 3),
-                }}
-              >
-                {t.stickerBook.paper}
-              </button>
-              {scenes.map((s) => (
-                <button
-                  key={s.shelf}
-                  type="button"
-                  data-testid={`page-bg-${s.shelf}`}
-                  aria-label={t.menu.categories[s.shelf]}
-                  onClick={() => pickBackground(s.shelf)}
-                  className="relative overflow-hidden rounded-xl border-[3px]"
-                  style={{
-                    aspectRatio: PAGE_ASPECT,
-                    backgroundColor: PAPER,
-                    borderColor: INK,
-                    boxShadow: hardShadow(2, 3),
-                  }}
-                >
-                  <img src={s.blankSrc} alt="" aria-hidden className="pointer-events-none h-full w-full object-fill" />
-                  <span className="absolute left-1.5 top-1 text-base" aria-hidden>
-                    {CATEGORY_EMOJI[s.shelf]}
-                  </span>
-                </button>
-              ))}
-            </div>
+            <button
+              type="button"
+              data-testid="page-new"
+              onClick={() => {
+                playPop();
+                onNewPage();
+              }}
+              className="flex items-center gap-2 rounded-full border-[3px] px-5 py-3 text-lg font-black"
+              style={{ backgroundColor: BUTTER, borderColor: INK, color: INK, boxShadow: hardShadow(3, 4) }}
+            >
+              + {t.stickerBook.newPage}
+            </button>
           </div>
         ) : (
           <div
             ref={boardRef}
             data-testid="page-board"
             data-page={page.id}
-            data-background={page.background}
+            data-background={page.background === 'blank' ? 'blank' : page.background.theme}
             className="relative overflow-hidden rounded-2xl border-[3px] touch-none"
             style={{
               width: boardWidth,
@@ -236,14 +185,23 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, pla
             }}
             onPointerDown={(e) => e.target === e.currentTarget && setSelected(null)}
           >
-            {page.background !== 'paper' && (
-              <img
-                src={sceneForShelf(page.background)?.blankSrc}
-                alt=""
-                aria-hidden
-                draggable={false}
-                className="pointer-events-none absolute inset-0 h-full w-full object-fill"
-              />
+            {page.background !== 'blank' && (
+              <>
+                <SceneBackground background={page.background} width={boardWidth - 6} height={boardHeight - 6} />
+                <button
+                  type="button"
+                  data-testid="page-reroll"
+                  aria-label={t.stickerBook.reroll}
+                  className="absolute right-1.5 top-1.5 z-[3] flex h-9 w-9 items-center justify-center rounded-full border-[3px] text-lg leading-none"
+                  style={arrowStyle}
+                  onClick={() => {
+                    playPop();
+                    edits.reroll(page.id);
+                  }}
+                >
+                  🎲
+                </button>
+              </>
             )}
             {page.stickers.length === 0 && (
               <p
@@ -389,7 +347,7 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, pla
                   onClick={() => {
                     playPop();
                     setSelected(null);
-                    setChoosing(true);
+                    onNewPage();
                   }}
                 >
                   +

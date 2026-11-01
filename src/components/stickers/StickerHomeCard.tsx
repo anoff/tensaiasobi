@@ -18,7 +18,7 @@ export function StickerHomeCard({ book, totals, onClick }: StickerHomeCardProps)
   const latest = book.copies
     .slice(-3)
     .map((copy) => ({ copy, c: collectibleById(copy.id) }))
-    .filter(({ c }) => c?.src && c.kind !== 'scene');
+    .filter(({ c }) => c?.src);
 
   return (
     <button

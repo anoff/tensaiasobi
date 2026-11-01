@@ -15,14 +15,13 @@ import {
   emptyStickerSave,
   freeCopies,
   grantOnce,
-  isSceneComplete,
   ownedIds,
   parseStickerSave,
   placeAccessory,
   placeOnPage,
-  placeScenePiece,
   removeAccessory,
   removeFromPage,
+  setPageSeed,
   rollCapsule,
   townHasItems,
   updatePlacement,
@@ -191,7 +190,7 @@ describe('parseStickerSave', () => {
     save = rollCapsule(save, 'numbers', DAY, pools, seq(0, 0, 0.5)).save;
     save = addOwnedAccessory(save, 'acc_hat');
     save = placeAccessory(save, 'c1', 'acc_hat', 0.3, 0.2);
-    save = placeOnPage(addPage(save, 'paper'), 'p1', 'n1', 0.5, 0.5);
+    save = placeOnPage(addPage(save, 'blank'), 'p1', 'n1', 0.5, 0.5);
     expect(parseStickerSave(JSON.stringify(save))).toEqual(save);
   });
 });
@@ -240,20 +239,31 @@ describe('my pages', () => {
   let owned = grantOnce(emptyStickerSave(), 'n1');
   owned = addCopy(addCopy(owned, 'n1', false).save, 'n1', true).save;
   owned = addCopy(owned, 'n2', false).save;
-  const withPage = addPage(owned, 'paper');
+  const withPage = addPage(owned, 'blank');
 
-  it('adds blank paper or scene pages, up to 20', () => {
+  it('adds blank or scene-theme pages, up to 20', () => {
     let save = emptyStickerSave();
-    for (let i = 0; i < 25; i++) save = addPage(save, i % 2 ? 'numbers' : 'paper');
+    for (let i = 0; i < 25; i++) save = addPage(save, i % 2 ? { theme: 'beach', seed: i } : 'blank');
     expect(MAX_PAGES).toBe(20);
     expect(save.pages).toHaveLength(20);
     expect(new Set(save.pages.map((p) => p.id)).size).toBe(20);
-    expect(save.pages[1]).toEqual({ id: 'p2', background: 'numbers', stickers: [] });
-    expect(addPage(save, 'paper')).toBe(save);
+    expect(save.pages[1]).toEqual({ id: 'p2', background: { theme: 'beach', seed: 1 }, stickers: [] });
+    expect(addPage(save, 'blank')).toBe(save);
+  });
+
+  it('re-rolls a themed page with a new seed; its stickers keep their positions', () => {
+    let save = placeOnPage(addPage(owned, { theme: 'park', seed: 5 }), 'p1', 'n1', 0.3, 0.6);
+    const before = save.pages[0].stickers;
+    save = setPageSeed(save, 'p1', 99);
+    expect(save.pages[0]).toEqual({ id: 'p1', background: { theme: 'park', seed: 99 }, stickers: before });
+    expect(setPageSeed(save, 'p1', 99)).toBe(save);
+    expect(setPageSeed(save, 'p1', 0)).toBe(save);
+    expect(setPageSeed(withPage, 'p1', 3)).toBe(withPage);
+    expect(parseStickerSave(JSON.stringify(save))).toEqual(save);
   });
 
   it('places each copy once: a sticker owned ×3 allows exactly 3 placements, across pages', () => {
-    let save = addPage(withPage, 'logic');
+    let save = addPage(withPage, { theme: 'space', seed: 1 });
     save = placeOnPage(save, 'p1', 'n1', 0.2, 0.2);
     save = placeOnPage(save, 'p2', 'n1', 0.5, 0.5);
     save = placeOnPage(save, 'p1', 'n1', 0.8, 0.8);
@@ -278,7 +288,7 @@ describe('my pages', () => {
   });
 
   it('autosaves: a decorated page survives a save/load round trip as v2, and bad data is dropped', () => {
-    let save = placeOnPage(addPage(withPage, 'play'), 'p1', 'n1', 0.3, 0.4);
+    let save = placeOnPage(addPage(withPage, { theme: 'castle', seed: 42 }), 'p1', 'n1', 0.3, 0.4);
     save = updatePlacement(save, 'p1', 'c1', { rotation: -30, size: 0 });
     save = placeOnPage(save, 'p2', 'n1', 0.5, 0.5);
     save = placeAccessory(addOwnedAccessory(save, 'acc_hat'), 'c1', 'acc_hat', 0.5, 0.2);
@@ -293,10 +303,10 @@ describe('my pages', () => {
           ...stored.pages[0],
           stickers: [...stored.pages[0].stickers, { uid: 'c1', x: 0, y: 0, size: 1, rotation: 0 }],
         },
-        { id: 'px', background: 'moon', stickers: [] },
+        { id: 'px', background: { theme: 'moon', seed: 1 }, stickers: [] },
         ...Array.from({ length: 30 }, (_, i) => ({
           id: `q${i}`,
-          background: 'paper',
+          background: 'blank',
           stickers: [{ uid: 'zz', x: 0, y: 0, size: 1, rotation: 0 }],
         })),
       ],
@@ -304,22 +314,67 @@ describe('my pages', () => {
     const loaded = parseStickerSave(JSON.stringify(tampered));
     expect(loaded.pages).toHaveLength(MAX_PAGES);
     expect(loaded.pages[0].stickers.map((s) => s.uid)).toEqual(['c1']);
-    expect(loaded.pages.some((p) => p.id === 'px')).toBe(false);
-    expect(loaded.pages[1].stickers).toEqual([]);
+    // An unknown theme falls back to a blank page instead of losing the page.
+    expect(loaded.pages[1]).toEqual({ id: 'px', background: 'blank', stickers: [] });
+    expect(loaded.pages[2].stickers).toEqual([]);
+  });
+
+  it('turns pages from before the scene themes into blank pages, stickers where they were', () => {
+    const old = {
+      ...JSON.parse(JSON.stringify(owned)),
+      pages: [
+        { id: 'p1', background: 'paper', stickers: [{ uid: 'c1', x: 0.2, y: 0.3, size: 2, rotation: 12 }] },
+        { id: 'p2', background: 'numbers', stickers: [{ uid: 'c2', x: 0.7, y: 0.8, size: 0, rotation: 0 }] },
+        { id: 'p3', background: { theme: 'park', seed: 1.5 }, stickers: [] },
+      ],
+    };
+    const loaded = parseStickerSave(JSON.stringify(old));
+    expect(loaded.version).toBe(STICKER_SAVE_VERSION);
+    expect(loaded.pages).toEqual([
+      { id: 'p1', background: 'blank', stickers: [{ uid: 'c1', x: 0.2, y: 0.3, size: 2, rotation: 12 }] },
+      { id: 'p2', background: 'blank', stickers: [{ uid: 'c2', x: 0.7, y: 0.8, size: 0, rotation: 0 }] },
+      { id: 'p3', background: 'blank', stickers: [] },
+    ]);
+  });
+
+  it('turns scene pieces snapped onto the old outline pages into a blank page with the pieces where they sat', () => {
+    let save = emptyStickerSave();
+    for (const id of ['scene_numbers_engine', 'scene_numbers_car_balls', 'scene_logic_tortoise', 'scene_logic_tortoise'])
+      save = addCopy(save, id, false).save;
+    // The tortoise's first copy is already on a My page; the second copy goes on the converted page.
+    save = placeOnPage(addPage(save, 'blank'), 'p1', 'scene_logic_tortoise', 0.5, 0.5);
+    const old = {
+      ...JSON.parse(JSON.stringify(save)),
+      placedPieces: ['scene_numbers_engine', 'scene_numbers_car_balls', 'scene_logic_tortoise', 'scene_fun_slide'],
+    };
+    const loaded = parseStickerSave(JSON.stringify(old));
+    expect(loaded).not.toHaveProperty('placedPieces');
+    expect(loaded.copies).toEqual(save.copies);
+    expect(loaded.pages.map((p) => [p.id, p.background])).toEqual([
+      ['p1', 'blank'],
+      ['p2', 'blank'],
+      ['p3', 'blank'],
+    ]);
+    expect(loaded.pages[1].stickers).toEqual([
+      { uid: 'c1', x: 0.427, y: 0.704, size: 1, rotation: 0 },
+      { uid: 'c2', x: 0.627, y: 0.726, size: 0, rotation: 0 },
+    ]);
+    expect(loaded.pages[2].stickers).toEqual([{ uid: 'c4', x: 0.367, y: 0.741, size: 0, rotation: 0 }]);
+    // Loading again gives the same book (the conversion is deterministic until the next save drops placedPieces).
+    expect(parseStickerSave(JSON.stringify(old))).toEqual(loaded);
+    expect(parseStickerSave(JSON.stringify(loaded))).toEqual(loaded);
+  });
+
+  it('never converts past 20 pages: pieces that do not fit stay in the tray', () => {
+    let save = addCopy(emptyStickerSave(), 'scene_fun_slide', false).save;
+    for (let i = 0; i < MAX_PAGES; i++) save = addPage(save, 'blank');
+    const loaded = parseStickerSave(JSON.stringify({ ...save, placedPieces: ['scene_fun_slide'] }));
+    expect(loaded.pages).toHaveLength(MAX_PAGES);
+    expect(freeCopies(loaded, 'scene_fun_slide')).toHaveLength(1);
   });
 });
 
-describe('scenes and the thank-you grant', () => {
-  it('only places earned pieces and completes when all are on their outline', () => {
-    let save = placeScenePiece(emptyStickerSave(), 'p1');
-    expect(save.placedPieces).toEqual([]);
-    save = placeScenePiece(grantOnce(grantOnce(save, 'p1'), 'p2'), 'p1');
-    expect(isSceneComplete(save, ['p1', 'p2'])).toBe(false);
-    save = placeScenePiece(save, 'p2');
-    expect(isSceneComplete(save, ['p1', 'p2'])).toBe(true);
-    expect(isSceneComplete(save, [])).toBe(false);
-  });
-
+describe('the thank-you grant', () => {
   it('detects an old town with items', () => {
     expect(townHasItems(null)).toBe(false);
     expect(townHasItems('[[null,null],[null,null]]')).toBe(false);

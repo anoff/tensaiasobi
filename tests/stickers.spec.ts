@@ -225,15 +225,18 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('sticker-book-count')).toHaveText('2/105');
     await expect(page.getByTestId('book-panda')).toHaveCount(0);
     await page.getByTestId('book-tab-pages').click();
-    // Scene backgrounds are the slot-free page card: no dashed placeholder shapes.
-    for (const img of await page.getByTestId('page-backgrounds').locator('img').all()) {
-      expect(await img.getAttribute('src')).not.toContain('outline');
-    }
-    await page.getByTestId('page-bg-paper').click();
+    // No page yet: "New page" opens the Scenes picker, which starts with Blank.
+    await expect(page.getByTestId('page-choose')).toBeVisible();
+    await page.getByTestId('page-new').click();
+    await expect(page.getByTestId('book-tab-scenes')).toHaveAttribute('aria-selected', 'true');
+    await page.getByTestId('page-bg-blank').click();
+    await expect(page.getByTestId('book-tab-pages')).toHaveAttribute('aria-selected', 'true');
     const board = page.getByTestId('page-board');
-    await expect(board).toHaveAttribute('data-background', 'paper');
-    // A blank page is plain cream with only a faint hint: no placeholder shapes.
+    await expect(board).toHaveAttribute('data-background', 'blank');
+    // A blank page is plain cream with only a faint hint: no placeholder shapes, no dice.
     await expect(board.locator('img')).toHaveCount(0);
+    await expect(board.getByTestId('scene-background')).toHaveCount(0);
+    await expect(page.getByTestId('page-reroll')).toHaveCount(0);
     await expect(board.getByTestId('page-empty-hint')).toHaveText('Drag stickers onto your page');
     await expect(page.getByTestId('page-label')).toHaveText('1/1');
     await expect(page.getByTestId('page-prev')).toHaveCount(0);
@@ -301,20 +304,34 @@ test.describe('Sticker Book', () => {
     await expect(board.getByTestId('page-sticker')).toHaveCount(1);
     await expect(tray1).toHaveAttribute('data-free', '1');
 
-    // On the last page the right arrow is "+": a second page on a scene background.
+    // On the last page the right arrow is "+": the picker again, then a second page on a scene theme.
     await expect(page.getByTestId('page-next')).toHaveCount(0);
     await page.getByTestId('page-new').click();
-    await page.getByTestId('page-bg-numbers').click();
+    await page.getByTestId('page-bg-playground').click();
     await expect(page.getByTestId('page-label')).toHaveText('2/2');
-    await expect(board).toHaveAttribute('data-background', 'numbers');
-    await expect(board.locator('img')).toHaveAttribute('src', /page_numbers/);
+    await expect(board).toHaveAttribute('data-background', 'playground');
+    const scene = board.getByTestId('scene-background');
+    await expect(scene).toHaveAttribute('data-scene', /^playground:\d+$/);
+    // Dice: a new seed, a new scene; the stickers stay where they are.
+    await page.locator('[data-testid="tray-sticker"][data-sticker="numbers_02"]').click();
+    const placed = board.getByTestId('page-sticker');
+    const before = (await placed.boundingBox())!;
+    const seedBefore = await scene.getAttribute('data-scene');
+    await page.getByTestId('page-reroll').click();
+    await expect(scene).not.toHaveAttribute('data-scene', seedBefore!);
+    await expect(scene).toHaveAttribute('data-scene', /^playground:\d+$/);
+    expect((await placed.boundingBox())!).toEqual(before);
+    const rolled = Number((await scene.getAttribute('data-scene'))!.split(':')[1]);
     await page.getByTestId('page-prev').click();
     await expect(page.getByTestId('page-label')).toHaveText('1/2');
     await expect(page.getByTestId('page-next')).toBeVisible();
     await expect(page.getByTestId('page-new')).toHaveCount(0);
     const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
     expect(stored.version).toBe(2);
-    expect(stored.pages.map((p: { background: string }) => p.background)).toEqual(['paper', 'numbers']);
+    expect(stored.pages.map((p: { background: unknown }) => p.background)).toEqual([
+      'blank',
+      { theme: 'playground', seed: rolled },
+    ]);
     expect(stored.placements.c1).toEqual([expect.objectContaining({ accessoryId: 'crown' })]);
 
     await page.getByTestId('home-button').click();
@@ -400,6 +417,25 @@ test.describe('Sticker Book', () => {
   const SCROLLED =
     "[...document.querySelectorAll('main, [data-testid=sticker-book] *')].filter((e) => !e.closest('[data-testid=page-tray]') && /auto|scroll/.test(getComputedStyle(e).overflowY) && e.scrollHeight > e.clientHeight + 1).map((e) => e.outerHTML.slice(0, 120))";
 
+  /** On the Scenes tab only the whole page (main) scrolls; the last theme card scrolls into view inside the screen. */
+  async function pickerScrollsAsOnePage(page: Page, height: number) {
+    await page.getByTestId('book-tab-scenes').click();
+    await expect(page.getByTestId('page-bg-blank')).toBeVisible();
+    await expect(page.locator('[data-testid^="page-bg-"]')).toHaveCount(21);
+    const scrollers = await page.evaluate<string[]>(SCROLLED);
+    expect(scrollers).toHaveLength(1);
+    expect(scrollers[0]).toMatch(/^<main/);
+    const last = page.getByTestId('page-bg-summer_festival');
+    await last.scrollIntoViewIfNeeded();
+    const lb = (await last.boundingBox())!;
+    expect(lb.y + lb.height).toBeLessThanOrEqual(height);
+    expect(lb.y).toBeGreaterThanOrEqual(0);
+    expect(await page.evaluate<number>("document.querySelector('main').scrollTop")).toBeGreaterThan(0);
+    expect(await page.evaluate<number>('document.documentElement.scrollHeight')).toBeLessThanOrEqual(height);
+    // Back at the top for the next check.
+    await page.evaluate("document.querySelector('main').scrollTop = 0");
+  }
+
   test('my pages is mostly page: 48 px bar, 40 px tabs, a 9:16 page (343x610), 8 px gaps, 72 px tray, no scroll; fits 320x568', async ({
     page,
   }) => {
@@ -462,6 +498,10 @@ test.describe('Sticker Book', () => {
     await page.getByTestId('page-prev').click();
     await expect(page.getByTestId('page-empty-hint')).toHaveCount(0);
 
+    // The Scenes tab (the "New page" picker) scrolls as one page: no inner scroll bar.
+    await pickerScrollsAsOnePage(page, 812);
+    await page.getByTestId('book-tab-pages').click();
+
     // The grab handle folds the tray to 24 px and the page keeps its size.
     await page.getByTestId('tray-handle').click();
     await expect(page.getByTestId('page-tray')).toHaveAttribute('data-open', 'false');
@@ -499,6 +539,9 @@ test.describe('Sticker Book', () => {
     expect(star.x + star.width).toBeLessThanOrEqual(320);
     expect(await page.evaluate<number>('document.documentElement.scrollWidth')).toBeLessThanOrEqual(320);
     expect(await page.evaluate<number>('document.documentElement.scrollHeight')).toBeLessThanOrEqual(568);
+    await pickerScrollsAsOnePage(page, 568);
+    await page.getByTestId('book-tab-pages').click();
+    await expect(board).toBeVisible();
 
     // Wide screens: the same portrait page, centred, with the tray beside it.
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -520,61 +563,84 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('page-new')).toHaveCount(0);
     await expect(page.getByTestId('page-next')).toHaveCount(0);
     await expect(page.getByTestId('page-prev')).toBeVisible();
+    // The picker says the book is full and its cards do nothing.
+    await page.getByTestId('book-tab-scenes').click();
+    await expect(page.getByTestId('scene-picker-full')).toBeVisible();
+    await expect(page.getByTestId('page-bg-park')).toBeDisabled();
+    const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
+    expect(stored.pages).toHaveLength(20);
   });
 
-  test('the Numbers train scene snaps onto its outline page and a full scene shows the reward', async ({ page }) => {
+  test('an old book: scene pieces snapped on the retired outline pages land on a blank page where they sat, and old pages become blank', async ({
+    page,
+  }) => {
     const pieces = ['scene_numbers_engine', 'scene_numbers_car_balls', 'scene_numbers_car_shapes', 'scene_numbers_owl_conductor'];
-    await seed(page, { [KEY]: save({ copies: copies(pieces), placedPieces: pieces.slice(1), seenCount: 4 }) });
+    await seed(page, {
+      [KEY]: save({
+        copies: copies([...pieces, 'numbers_01']),
+        pages: [{ id: 'p1', background: 'numbers', stickers: [{ uid: 'c5', x: 0.3, y: 0.4, size: 1, rotation: 0 }] }],
+        placedPieces: pieces.slice(1),
+        seenCount: 5,
+      }),
+    });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
-    await page.getByTestId('book-tab-scenes').click();
-    const scene = page.getByTestId('scene-numbers');
-    await expect(scene).toHaveAttribute('data-complete', 'false');
-    // The Train day scene draws on the Art Director's outline page.
-    await expect(scene.getByTestId('scene-page')).toBeVisible();
-    const piece = scene.locator('[data-testid="scene-piece"][data-piece="scene_numbers_engine"]');
-    await piece.scrollIntoViewIfNeeded();
-    await dragTo(page, piece, scene.locator('[data-testid="scene-ghost"][data-piece="scene_numbers_engine"]'));
-    await expect(scene).toHaveAttribute('data-complete', 'true');
-    await expect(scene.getByTestId('scene-reward')).toBeVisible();
-  });
-
-  test('an outline-page scene snaps a piece onto its dashed slot', async ({ page }) => {
-    const garden = ['scene_logic_circle_tree', 'scene_logic_tortoise', 'scene_logic_triangle_tent', 'scene_logic_block_steps'];
-    await seed(page, { [KEY]: save({ copies: copies(garden), placedPieces: garden.slice(0, 3), seenCount: 4 }) });
-    await page.goto('/');
+    await page.getByTestId('book-tab-pages').click();
+    const board = page.getByTestId('page-board');
+    // The old Numbers page is a blank page with its sticker...
+    await page.getByTestId('page-prev').click();
+    await expect(page.getByTestId('page-label')).toHaveText('1/2');
+    await expect(board).toHaveAttribute('data-background', 'blank');
+    await expect(board.locator('[data-testid="page-sticker"][data-uid="c5"]')).toBeVisible();
+    // ...and the 3 snapped pieces are on a new blank page; the unplaced engine waits in the tray.
+    await page.getByTestId('page-next').click();
+    await expect(board).toHaveAttribute('data-background', 'blank');
+    await expect(board.getByTestId('page-sticker')).toHaveCount(3);
+    for (const id of pieces.slice(1)) await expect(board.locator(`[data-testid="page-sticker"][data-sticker="${id}"]`)).toBeVisible();
+    await expect(page.locator('[data-testid="tray-sticker"][data-sticker="scene_numbers_engine"]')).toHaveAttribute('data-free', '1');
+    // A reload gives the same book (the conversion is deterministic); the first edit saves it as a plain v2 book.
+    await page.reload();
     await page.getByTestId('launch-sticker-book').click();
-    await page.getByTestId('book-tab-scenes').click();
-    const scene = page.getByTestId('scene-logic');
-    const piece = scene.locator('[data-testid="scene-piece"][data-piece="scene_logic_block_steps"]');
-    await piece.scrollIntoViewIfNeeded();
-    // A drop far from the slot does not snap.
-    await dragTo(page, piece, scene.getByTestId('scene-piece-placed').first());
-    await expect(scene).toHaveAttribute('data-complete', 'false');
-    await dragTo(page, piece, scene.locator('[data-testid="scene-ghost"][data-piece="scene_logic_block_steps"]'));
-    await expect(scene).toHaveAttribute('data-complete', 'true');
-    await expect(scene.getByTestId('scene-piece-placed')).toHaveCount(4);
+    await page.getByTestId('book-tab-pages').click();
+    await expect(page.getByTestId('page-label')).toHaveText('2/2');
+    await expect(board.getByTestId('page-sticker')).toHaveCount(3);
+    await page.locator('[data-testid="tray-sticker"][data-sticker="scene_numbers_engine"]').click();
+    await expect(board.getByTestId('page-sticker')).toHaveCount(4);
+    const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
+    expect(stored.version).toBe(2);
+    expect(stored.copies).toHaveLength(5);
+    expect(stored).not.toHaveProperty('placedPieces');
+    expect(stored.pages.map((p: { background: unknown }) => p.background)).toEqual(['blank', 'blank']);
+    expect(stored.pages[1].stickers).toHaveLength(4);
   });
 
-  test('one character per shelf, 4 moods each and an outline-page scene on every shelf', async ({ page }) => {
+  test('one character per shelf, 4 moods and 4 scene stickers each in the Collection; Scenes is Blank plus 20 themes', async ({ page }) => {
+    await seed(page, { [KEY]: save({ copies: copies(['scene_logic_tortoise']), seenCount: 1 }) });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
     for (const c of ['owl', 'fox', 'tortoise', 'panda']) {
       await expect(page.getByTestId(`book-character-${c}`)).toHaveAttribute('data-has-art', 'true');
     }
-    // Nothing earned yet: every slot waits as a pebble silhouette of its sticker.
+    // Missing slots wait as pebble silhouettes of their sticker.
     for (const shelf of ['numbers', 'language', 'logic', 'play']) {
       await expect(page.getByTestId(`book-moods-${shelf}`).getByTestId('sticker-slot-empty')).toHaveCount(4);
+      await expect(page.getByTestId(`book-scene-pieces-${shelf}`).locator('[data-testid^="sticker-slot"]')).toHaveCount(4);
     }
+    await expect(page.getByTestId('book-scene-pieces-logic').getByTestId('sticker-slot')).toHaveAttribute('data-sticker', 'scene_logic_tortoise');
     await expect(page.getByTestId('book-stickers-play').getByTestId('sticker-slot-empty')).toHaveCount(18);
     await expect(page.getByTestId('book-stickers-play').locator('[data-silhouette="true"]')).toHaveCount(18);
     await expect(page.getByTestId('book-shelf-count-play')).toContainText('0 / 26');
-    // Special scenes, one per category: Reading corner, Shape garden and Playground use the outline pages.
+    await expect(page.getByTestId('book-shelf-count-logic')).toContainText('1 / 26');
+    // Scenes belong to no shelf: Blank plus 20 themes, each card drawn from seed 1.
     await page.getByTestId('book-tab-scenes').click();
     await expect(page.getByTestId('book-tab-scenes')).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByTestId('book-shelf-numbers')).toHaveCount(0);
-    for (const shelf of ['language', 'logic', 'play']) {
-      await expect(page.getByTestId(`book-scenes-${shelf}`).getByTestId(`scene-${shelf}`).getByTestId('scene-page')).toBeVisible();
-    }
+    await expect(page.getByTestId('book-scenes').locator('[data-testid^="page-bg-"]')).toHaveCount(21);
+    await expect(page.getByTestId('page-bg-park').getByTestId('scene-background')).toHaveAttribute('data-scene', 'park:1');
+    await expect(page.getByTestId('page-bg-park')).toHaveAccessibleName('Park');
+    // A pick adds a page and opens it.
+    await page.getByTestId('page-bg-under_the_sea').click();
+    await expect(page.getByTestId('page-board')).toHaveAttribute('data-background', 'under_the_sea');
+    await expect(page.getByTestId('page-label')).toHaveText('1/1');
   });
 });

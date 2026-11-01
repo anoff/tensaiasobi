@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  SCENES,
+  SCENE_PIECES,
   ACCESSORIES,
   AWARD_POOLS,
   CHARACTERS,
@@ -13,6 +13,7 @@ import {
   capsuleArt,
   characterForShelf,
   collectibleById,
+  shelfTotal,
   stickerLook,
   stickerTilt,
 } from './stickers';
@@ -83,17 +84,19 @@ describe('sticker catalog (manifest driven)', () => {
     }
   });
 
-  it('has one scene per shelf, each drawn on its outline page with 4 pieces', () => {
-    expect(SCENES.map((s) => s.shelf)).toEqual([...SHELVES]);
-    for (const scene of SCENES) {
-      expect(scene.pageSrc, scene.id).toBeTruthy();
-      // My pages never shows the dashed slots: its background is the slot-free card.
-      expect(scene.blankSrc, scene.id).toMatch(/page_\w+.*\.png/);
-      expect(scene.blankSrc, scene.id).not.toContain('outline');
-      expect(scene.pieces, scene.id).toHaveLength(4);
-      for (const p of scene.pieces) expect(p.src, p.id).toBeTruthy();
+  it('keeps the 16 former scene pieces as normal stickers, 4 per shelf, each still earned from its shelf', () => {
+    for (const shelf of SHELVES) {
+      expect(SCENE_PIECES[shelf], shelf).toHaveLength(4);
+      for (const p of SCENE_PIECES[shelf]) {
+        expect(p.src, p.id).toBeTruthy();
+        expect(p.src, p.id).not.toContain('outline');
+        expect(collectibleById(p.id)).toBe(p);
+      }
+      // Same pool, same odds as before: only the outline page and its slots are gone.
+      expect(AWARD_POOLS.scenePieces[shelf]).toEqual(SCENE_PIECES[shelf].map((p) => p.id));
+      expect(shelfTotal(shelf)).toBe(SHELF_SLOTS + 4 + 4);
     }
-    expect(SCENES[0].id).toBe('train_day');
+    expect(SCENE_PIECES.numbers.map((p) => p.id)).toContain('scene_numbers_engine');
   });
 
   it('sells 12 accessories and keeps the thank-you sticker', () => {
