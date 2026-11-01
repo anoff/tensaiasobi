@@ -302,6 +302,78 @@ test.describe('Sticker Book', () => {
     expect(await stars(page)).toBe(5);
   });
 
+  test('print: a 2 s grown-up hold opens print; the page and the sticker sheet download as PDFs on web', async ({
+    page,
+  }) => {
+    await seed(page, {
+      [KEY]: save({
+        copies: copies(['numbers_01', 'numbers_02', 'logic_01'], ['numbers_02']),
+        pages: [
+          {
+            id: 'p1',
+            background: 'numbers',
+            stickers: [
+              { uid: 'c1', x: 0.3, y: 0.4, size: 1, rotation: 20 },
+              { uid: 'c2', x: 0.7, y: 0.6, size: 2, rotation: -10 },
+            ],
+          },
+        ],
+        ownedAccessories: ['crown'],
+        placements: { c1: [{ accessoryId: 'crown', x: 0.5, y: 0.2 }] },
+        seenCount: 3,
+      }),
+    });
+    await page.goto('/');
+    await page.getByTestId('launch-sticker-book').click();
+    await page.getByTestId('book-tab-pages').click();
+    await expect(page.getByTestId('page-board').getByTestId('page-sticker')).toHaveCount(2);
+
+    // A quick tap is not enough: the print button sits behind the 2 s parent gate.
+    const print = page.getByTestId('page-print');
+    await print.click();
+    await page.waitForTimeout(300);
+    await expect(page.getByTestId('print-dialog')).toHaveCount(0);
+    const pb = (await print.boundingBox())!;
+    await page.mouse.move(pb.x + pb.width / 2, pb.y + pb.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(2300);
+    await page.mouse.up();
+    const dialog = page.getByTestId('print-dialog');
+    await expect(dialog).toBeVisible();
+    await expect(page.getByTestId('print-background')).toBeChecked();
+    await expect(page.getByTestId('print-sheet-count')).toContainText('3');
+
+    const pdfOf = async (button: string) => {
+      const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId(button).click()]);
+      const path = await download.path();
+      const { readFileSync } = await import('node:fs');
+      const bytes = readFileSync(path!);
+      return {
+        name: download.suggestedFilename(),
+        head: bytes.subarray(0, 5).toString(),
+        text: bytes.toString('latin1'),
+      };
+    };
+    await page.getByTestId('print-paper-letter').click();
+    await expect(page.getByTestId('print-paper-letter')).toHaveAttribute('aria-pressed', 'true');
+    const pagePdf = await pdfOf('print-page');
+    expect(pagePdf.name).toBe('tensaiasobi-page-1.pdf');
+    expect(pagePdf.head).toBe('%PDF-');
+    // Letter landscape (792 x 612 pt) with the 200 dpi background image.
+    expect(pagePdf.text).toMatch(/\/MediaBox \[0 0 792\.?\d* 612\.?\d*\]/);
+    expect(pagePdf.text).toContain('/Subtype /Image');
+
+    await page.getByTestId('print-paper-a4').click();
+    const sheet = await pdfOf('print-sheet');
+    expect(sheet.name).toBe('tensaiasobi-stickers.pdf');
+    expect(sheet.head).toBe('%PDF-');
+    // A4 portrait, vector only: no images on the sheet.
+    expect(sheet.text).toMatch(/\/MediaBox \[0 0 595\.\d+ 841\.\d+\]/);
+    expect(sheet.text).not.toContain('/Subtype /Image');
+    await page.getByTestId('print-close').click();
+    await expect(dialog).toHaveCount(0);
+  });
+
   test('the book fits a 320x568 phone: tabs, page board and tray, no sideways scroll', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 568 });
     await seed(page, { [KEY]: save({ copies: copies(['numbers_01', 'numbers_02', 'logic_01']), seenCount: 3 }) });

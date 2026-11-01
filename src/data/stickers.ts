@@ -200,6 +200,9 @@ export function capsuleArt(shelf: Shelf | null) {
   };
 }
 
+/** Print button icon (My pages). */
+export const PRINT_ICON = svgUrl('icons', 'print');
+
 /** Shiny sparkle overlay (256 px, same box as a sticker, stars at the top right). */
 export const SHINY_SPARKLE = svgUrl('shiny', 'shiny_sparkle');
 

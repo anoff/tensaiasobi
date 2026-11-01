@@ -8,12 +8,14 @@ import {
   type SizeStep,
   type StickerSave,
 } from '../../data/stickerRules';
-import { SHELVES, collectibleById, sceneForShelf, stickerLook, stickerTilt } from '../../data/stickers';
+import { PRINT_ICON, SHELVES, collectibleById, sceneForShelf, stickerLook, stickerTilt } from '../../data/stickers';
 import { useTranslation } from '../../hooks/useTranslation';
 import { CATEGORY_EMOJI } from '../../theme/categories';
 import { BUTTER, CHALK, INK, PAPER, hardShadow } from '../../theme/blockTable';
 import { CountBadge, StickerImage } from './StickerImage';
 import { usePointerDrag } from './usePointerDrag';
+import { HoldToConfirmButton } from '../HoldToConfirmButton';
+import { PrintDialog } from './PrintDialog';
 
 export interface PageEdits {
   addPage: (background: PageBackground) => void;
@@ -42,6 +44,7 @@ export function PageEditor({ book, edits, onDress, playPop }: PageEditorProps) {
   const [index, setIndex] = useState(Math.max(0, book.pages.length - 1));
   const [choosing, setChoosing] = useState(book.pages.length === 0);
   const [selected, setSelected] = useState<string | null>(null);
+  const [printing, setPrinting] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
   const trayRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth] = useState(0);
@@ -150,6 +153,22 @@ export function PageEditor({ book, edits, onDress, playPop }: PageEditorProps) {
             : t.stickerBook.newPage}
         </span>
         <div className="flex gap-2">
+          {/* Parent gate: the same 2 s hold as the other grown-up actions. */}
+          <HoldToConfirmButton
+            data-testid="page-print"
+            aria-label={t.stickerBook.printHold}
+            duration={2000}
+            onConfirm={() => {
+              setSelected(null);
+              setPrinting(true);
+            }}
+            className={`${pagerButton} border-[#2a1c14] bg-white shadow-[2px_3px_0_0_#2a1c14]`}
+            progressClassName="bg-[#ffc21a]"
+          >
+            {() => (
+              <img src={PRINT_ICON} alt="" aria-hidden draggable={false} className="pointer-events-none h-6 w-6" />
+            )}
+          </HoldToConfirmButton>
           <button
             type="button"
             data-testid="page-next"
@@ -427,6 +446,14 @@ export function PageEditor({ book, edits, onDress, playPop }: PageEditorProps) {
             </div>
           );
         })()}
+      {printing && (
+        <PrintDialog
+          book={book}
+          page={choosing ? undefined : page}
+          pageNumber={index + 1}
+          onClose={() => setPrinting(false)}
+        />
+      )}
     </div>
   );
 }
