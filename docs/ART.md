@@ -91,11 +91,11 @@ One shelf, one colour, everywhere: the launcher tile, sticker-book page, sticker
 - **Shiny:** 10% of drops. The same art, with the shelf rim swapped for gold #e08a00 (promoted from parked) plus the sparkle overlay at the top-right. Gold is used only for shiny stickers.
 - **Duplicates** stack. The collection shows an ink "×N" badge at the bottom-right of the sticker, and each copy can be placed on a page.
 - **Book tabs** (tab icons, ink on cream):
-  - My pages: blank paper pages, up to 20.
+  - My pages: blank paper pages, up to 20. **A page is always 9:16 portrait** (343×610 px at 375×812). Sticker positions are stored as 0..1 of the page, so draw every page background, including the phase 2 scene backgrounds, at 9:16 (for example 900×1600 px). The 4 scene backgrounds for now are plain cards: paper, ink outline, hard shadow and a ground line (`scripts/build_page_backgrounds.py`).
   - Collection: grouped by shelf, with a pebble silhouette per missing sticker as in the §6 outline rule.
   - Special scenes: the 4 scene sets, unchanged.
 - **Editing:** drag from a bottom tray onto the page. Tap a sticker to select it, which shows an ink dashed box with a size handle (3 steps) and a rotate handle. Drag it back to the tray to remove it. Placed stickers keep the −8…+8° base tilt plus the kid's rotation. Accessories still paste on.
-- **Print** is behind a 2-second parent hold. It gives a PDF of the current page (A4 or Letter, vector stickers, 200 dpi background, paper background on) and a sticker sheet PDF of all owned stickers at 5 cm with their die-cut rims, on white, with no shadows.
+- **Print** is behind a 2-second parent hold. It gives a PDF of the current page (A4 or Letter portrait: the 9:16 page fitted to the sheet height inside 10 mm margins and centred, with white side margins; vector stickers, 200 dpi background, paper background on) and a sticker sheet PDF of all owned stickers at 5 cm with their die-cut rims, on white, with no shadows.
 
 ## 7. Mascot: Panda
 

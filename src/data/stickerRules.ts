@@ -40,8 +40,8 @@ export interface StickerCopy {
 /** Most My pages a book can hold. */
 export const MAX_PAGES = 20;
 /** Sticker size steps on a page, as a share of the page width (the size handle cycles them). */
-/** My page shape, width / height: A4 portrait (1 : √2), so a page prints 1:1. Placements are 0..1 of it. */
-export const PAGE_ASPECT = Math.SQRT1_2;
+/** My page shape, width / height: 9:16 portrait (343x610 at 375x812). Placements are 0..1 of it. */
+export const PAGE_ASPECT = 9 / 16;
 
 export const PAGE_SIZE_STEPS = [0.22, 0.3, 0.4] as const;
 export type SizeStep = 0 | 1 | 2;

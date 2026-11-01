@@ -396,7 +396,11 @@ test.describe('Sticker Book', () => {
   /** Tab labels or the book title cut short with an ellipsis. */
   const TRUNCATED_TABS = "[...document.querySelectorAll('[role=tab] span, [data-testid=book-top-bar] h2')].filter((e) => e.scrollWidth > e.clientWidth).length";
 
-  test('my pages is mostly page: 48 px bar, 40 px tabs, an A4 page of 480+ px, 72 px tray, no scroll; fits 320x568', async ({
+  /** Scroll containers (other than the sideways tray) with hidden content. */
+  const SCROLLED =
+    "[...document.querySelectorAll('main, [data-testid=sticker-book] *')].filter((e) => !e.closest('[data-testid=page-tray]') && /auto|scroll/.test(getComputedStyle(e).overflowY) && e.scrollHeight > e.clientHeight + 1).map((e) => e.outerHTML.slice(0, 120))";
+
+  test('my pages is mostly page: 48 px bar, 40 px tabs, a 9:16 page (343x610), 8 px gaps, 72 px tray, no scroll; fits 320x568', async ({
     page,
   }) => {
     const pages = Array.from({ length: 3 }, (_, i) => ({
@@ -429,19 +433,18 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('page-label')).toHaveText('3/3');
     const bb = (await board.boundingBox())!;
     const tray = (await page.getByTestId('page-tray').boundingBox())!;
-    expect(bb.height).toBeGreaterThanOrEqual(480);
-    expect(bb.height / bb.width).toBeCloseTo(Math.SQRT2, 1);
+    expect(bb.width).toBe(343);
+    expect(bb.height).toBe(610);
+    expect(bb.height / bb.width).toBeCloseTo(16 / 9, 2);
     expect(Math.abs(bb.x + bb.width / 2 - 375 / 2)).toBeLessThanOrEqual(1);
+    // 8 px under the tabs, the tray 8 px under the page, and the spare space below the tray.
+    expect(bb.y - (tabs.y + tabs.height)).toBeCloseTo(8, 0);
+    expect(tray.y - (bb.y + bb.height)).toBeCloseTo(8, 0);
     expect(tray.height).toBe(72);
-    expect(tray.y).toBeGreaterThanOrEqual(bb.y + bb.height);
     expect(tray.y + tray.height).toBeLessThanOrEqual(812);
     // Nothing scrolls on My pages: no scroll container (other than the sideways tray) has hidden content.
     expect(await page.evaluate<number>('document.documentElement.scrollHeight')).toBeLessThanOrEqual(812);
-    expect(
-      await page.evaluate<string[]>(
-        "[...document.querySelectorAll('main, [data-testid=sticker-book] *')].filter((e) => !e.closest('[data-testid=page-tray]') && /auto|scroll/.test(getComputedStyle(e).overflowY) && e.scrollHeight > e.clientHeight + 1).map((e) => e.outerHTML.slice(0, 120))",
-      ),
-    ).toEqual([]);
+    expect(await page.evaluate<string[]>(SCROLLED)).toEqual([]);
     // Arrows sit on the page edges, mid-height, with the "n/N" label inside the bottom corner.
     const prev = (await page.getByTestId('page-prev').boundingBox())!;
     const plus = (await page.getByTestId('page-new').boundingBox())!;
@@ -470,12 +473,17 @@ test.describe('Sticker Book', () => {
     await expect(async () => {
       const small = (await board.boundingBox())!;
       const t2 = (await page.getByTestId('page-tray').boundingBox())!;
+      const tabs2 = (await page.getByRole('tablist').boundingBox())!;
       expect(small.x).toBeGreaterThanOrEqual(0);
       expect(small.x + small.width).toBeLessThanOrEqual(320);
+      // Height-bound here: the page shrinks but stays 9:16.
       expect(small.height).toBeGreaterThan(300);
-      expect(t2.y).toBeGreaterThanOrEqual(small.y + small.height);
+      expect(small.height / small.width).toBeCloseTo(16 / 9, 1);
+      expect(small.y - (tabs2.y + tabs2.height)).toBeCloseTo(8, 0);
+      expect(t2.y - (small.y + small.height)).toBeCloseTo(8, 0);
       expect(t2.y + t2.height).toBeLessThanOrEqual(568);
     }).toPass();
+    expect(await page.evaluate<string[]>(SCROLLED)).toEqual([]);
     for (const tab of ['collection', 'scenes', 'pages']) {
       const box = (await page.getByTestId(`book-tab-${tab}`).boundingBox())!;
       expect(box.x + box.width).toBeLessThanOrEqual(320);
@@ -491,7 +499,7 @@ test.describe('Sticker Book', () => {
     await expect(async () => {
       const wide = (await board.boundingBox())!;
       const t3 = (await page.getByTestId('page-tray').boundingBox())!;
-      expect(wide.height / wide.width).toBeCloseTo(Math.SQRT2, 1);
+      expect(wide.height / wide.width).toBeCloseTo(16 / 9, 1);
       expect(t3.x).toBeGreaterThanOrEqual(wide.x + wide.width);
     }).toPass();
   });

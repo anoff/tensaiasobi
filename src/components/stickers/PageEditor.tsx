@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import {
   MAX_PAGES,
   PAGE_ASPECT,
@@ -37,6 +37,12 @@ interface PageEditorProps {
 type DragItem = { kind: 'tray'; id: string } | { kind: 'placed'; uid: string } | { kind: 'rotate'; uid: string };
 
 const TRAY_PX = 56;
+const TRAY_OPEN = 72;
+const TRAY_SHUT = 24;
+/** Space between tabs, page and tray. */
+const GAP = 8;
+/** Tailwind `md`: the tray moves beside the page. */
+const WIDE_QUERY = '(min-width: 768px)';
 
 /** My pages: the biggest A4-portrait page that fits, arrows on its edges, and a docked tray of free copies. */
 export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, playPop }: PageEditorProps) {
@@ -48,16 +54,22 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, pla
   const areaRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const trayRef = useRef<HTMLDivElement>(null);
-  /** Page box: the largest 1:√2 portrait rectangle inside the free area. */
-  const [area, setArea] = useState({ w: 0, h: 0 });
-  const boardWidth = Math.floor(Math.min(area.w, area.h * PAGE_ASPECT));
-  const boardHeight = Math.floor(boardWidth / PAGE_ASPECT);
+  /** Free space under the tabs; on wide screens the tray stands beside the page instead of under it. */
+  const [area, setArea] = useState({ w: 0, h: 0, wide: false });
+  // The 9:16 page takes whatever the tray and the 8 px gap leave, limited by width or height, whichever bites first.
+  const trayExtent = (trayOpen ? TRAY_OPEN : TRAY_SHUT) + GAP;
+  const fitW = area.wide ? area.w - trayExtent : area.w;
+  const fitH = area.wide ? area.h : area.h - trayExtent;
+  const boardWidth = Math.max(0, Math.floor(Math.min(fitW, fitH * PAGE_ASPECT)));
+  const boardHeight = Math.max(0, Math.min(Math.round(boardWidth / PAGE_ASPECT), Math.floor(fitH)));
   const page = book.pages[index];
 
-  useEffect(() => {
+  // Measured before paint, so the page never shows at 0 px for a frame.
+  useLayoutEffect(() => {
     const el = areaRef.current;
     if (!el) return;
-    const measure = () => setArea({ w: el.clientWidth, h: el.clientHeight });
+    const measure = () =>
+      setArea({ w: el.clientWidth, h: el.clientHeight, wide: window.matchMedia(WIDE_QUERY).matches });
     measure();
     if (typeof ResizeObserver === 'undefined') return;
     const ro = new ResizeObserver(measure);
@@ -136,8 +148,13 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, pla
   const draggedPlaced = drag?.moved && drag.item.kind === 'placed' ? drag.item.uid : null;
 
   return (
-    <div className="mt-2 flex min-h-0 flex-1 flex-col gap-2 md:flex-row" data-testid="my-pages">
-      <div ref={areaRef} className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center">
+    // 8 px under the tabs: the page, 8 px, the tray; any space left over stays below the tray.
+    <div
+      ref={areaRef}
+      className="mt-2 flex min-h-0 flex-1 flex-col items-center gap-2 md:flex-row md:items-start md:justify-center"
+      data-testid="my-pages"
+    >
+      <div className="relative shrink-0">
         {choosing || !page ? (
           <div
             className="relative flex flex-col gap-2 overflow-y-auto rounded-2xl border-[3px] p-3"
@@ -398,10 +415,10 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, pla
         ref={trayRef}
         data-testid="page-tray"
         data-open={String(trayOpen)}
-        className={`flex shrink-0 overflow-hidden rounded-2xl border-[3px] md:flex-col ${
-          trayOpen ? 'h-[72px] md:h-auto md:w-[72px]' : 'h-6 md:h-auto md:w-6'
+        className={`flex w-full shrink-0 overflow-hidden rounded-2xl border-[3px] md:flex-col ${
+          trayOpen ? 'h-[72px] md:w-[72px]' : 'h-6 md:w-6'
         }`}
-        style={{ backgroundColor: CHALK, borderColor: INK }}
+        style={{ backgroundColor: CHALK, borderColor: INK, height: area.wide ? boardHeight : undefined }}
       >
         <button
           type="button"

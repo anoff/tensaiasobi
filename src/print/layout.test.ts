@@ -10,23 +10,25 @@ describe('print layout', () => {
     expect(paperForLocale(undefined)).toBe('a4');
   });
 
-  it('fits the portrait page on portrait paper inside the margins, centred, 1:1 on A4', () => {
+  it('fits the 9:16 page to the sheet height inside the margins, centred, with wider white side margins', () => {
     for (const paper of ['a4', 'letter'] as const) {
       const { width, height, box } = pageLayout(paper);
       expect(width).toBe(PAPER_MM[paper].w);
       expect(height).toBe(PAPER_MM[paper].h);
-      expect(box.h / box.w).toBeCloseTo(Math.SQRT2, 6);
-      expect(box.x).toBeGreaterThanOrEqual(10 - 1e-9);
-      expect(box.y).toBeGreaterThanOrEqual(10 - 1e-9);
+      expect(box.h / box.w).toBeCloseTo(16 / 9, 6);
+      // Height-bound: 10 mm top and bottom, the rest of the width split evenly left and right.
+      expect(box.y).toBeCloseTo(10, 6);
+      expect(box.h).toBeCloseTo(height - 20, 6);
+      expect(box.x).toBeGreaterThan(10);
       expect(box.x * 2 + box.w).toBeCloseTo(width, 6);
-      expect(box.y * 2 + box.h).toBeCloseTo(height, 6);
     }
-    // A4 is the page shape itself: 190 x 268.7 mm inside 10 mm side margins.
     const a4 = pageLayout('a4').box;
-    expect(a4.w).toBeCloseTo(190, 6);
-    expect(a4.h).toBeCloseTo(268.7, 1);
-    // Letter is wider: height-bound, 259.4 mm tall.
-    expect(pageLayout('letter').box.h).toBeCloseTo(259.4, 6);
+    expect(a4.h).toBeCloseTo(277, 6);
+    expect(a4.w).toBeCloseTo(155.81, 2);
+    expect(a4.x).toBeCloseTo(27.09, 2);
+    const letter = pageLayout('letter').box;
+    expect(letter.h).toBeCloseTo(259.4, 6);
+    expect(letter.w).toBeCloseTo(145.91, 2);
   });
 
   it('rasterises the background at 200 dpi', () => {

@@ -28,7 +28,10 @@ export const SHEET_STICKER_MM = 50;
 export const PAGE_MARGIN_MM = 10;
 export const SHEET_GAP_MM = 6;
 
-/** A My page (A4 portrait shape) on portrait paper: the biggest centred box inside the margins. */
+/**
+ * A 9:16 My page on portrait paper: fitted to the sheet height inside the margins and centred, so the sides stay
+ * white. Only the box gets the page's paper colour.
+ */
 export function pageLayout(paper: PaperSize, aspect = PAGE_ASPECT, margin = PAGE_MARGIN_MM) {
   const { w: pw, h: ph } = PAPER_MM[paper];
   const aw = pw - 2 * margin;

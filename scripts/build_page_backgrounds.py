@@ -3,7 +3,7 @@ blank page shows only cream or the chosen background, no placeholder shapes, so 
 
 Same card recipe as the album outline page (alib.scene_page in the art workspace, read-only: paper card, 32 px corners,
 4 px ink outline, (8, 9) hard ink shadow, 4 px ink-soft ground line 70 px above the bottom, 60 px side pad), drawn in the
-My pages shape (A4 portrait, 1:sqrt 2) so it fills the page and its print 1:1.
+My pages shape (9:16 portrait, docs/ART.md §6) so it fills the page and its print 1:1.
 
 Usage: python3 scripts/build_page_backgrounds.py [/path/to/tensaiasobi-art]   (default /workspace/tensaiasobi-art)
 """
@@ -18,7 +18,7 @@ import outline  # noqa: E402
 from PIL import Image, ImageDraw  # noqa: E402
 
 W = 900
-H = round(W * 2 ** 0.5)
+H = W * 16 // 9
 PAD = 60
 OUT = os.path.join(REPO, 'src', 'assets', 'stickers', 'pages')
 os.makedirs(OUT, exist_ok=True)
