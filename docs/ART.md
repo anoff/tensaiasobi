@@ -83,7 +83,19 @@ One shelf, one colour, everywhere: the launcher tile, sticker-book page, sticker
 - **One character per shelf.** A shelf's stickers show only its own character, or objects with no character. Other animals (a crocodile, say) count as characters, so they don't go on a shelf either. Game mechanics are never shown.
 - **4 scene sets**, one per shelf: Numbers train, Language reading corner, Logic shape garden, Fun playground. Each has 4 pieces at true relative size and an outline page. **Outline slots** are one shared rule (`album/src/outline.py`): pebble `#b8aea3` at 35 % over paper, with a 2 px dashed pebble edge per slot. The ground line sits on top of the slots.
 - **Accessories are global** (crown, party hat, bow, cape, flower, headphones, heart, moustache, scarf, star clip, sunglasses, wizard hat). They fit every character and belong to no shelf.
-- Totals: 48 shelf stickers + 16 moods + 4 scene sets (16 pieces) + 1 thank-you sticker.
+- Totals (phase 1): 72 shelf stickers (18 per shelf, `<shelf>_01`..`_18`) + 16 moods + 4 scene sets (16 pieces) + 1 thank-you sticker.
+
+### Capsules, duplicates and the free book
+- **Drops:** after every finished round there's a roll for one capsule, with p = 1/(2^(k+1)−1), where k is the capsules earned that day (100%, then 1/3, 1/7 and so on), resetting each morning. A capsule holds a sticker from the shelf just played. Capsules are earned only by playing; they're never bought with stars. Stars buy accessories.
+- **Reveal:** the drawn capsule machine (capsule_machine) sits next to the 120 px panda on the award overlay. The knob turns, a capsule in the shelf colour rolls out, the kid taps it, it splits, and the sticker pops with the existing butter rays and card-in. That takes about 3 s. With reduced motion it's a static reveal. Sounds: capsule_twist, capsule_pop, plus shiny_sparkle for shiny stickers. No near-miss effects, no countdowns, no coin or slot visuals.
+- **Shiny:** 10% of drops. The same art, with the shelf rim swapped for gold #e08a00 (promoted from parked) plus the sparkle overlay at the top-right. Gold is used only for shiny stickers.
+- **Duplicates** stack. The collection shows an ink "×N" badge at the bottom-right of the sticker, and each copy can be placed on a page.
+- **Book tabs** (tab icons, ink on cream):
+  - My pages: blank paper pages, up to 20.
+  - Collection: grouped by shelf, with a pebble silhouette per missing sticker as in the §6 outline rule.
+  - Special scenes: the 4 scene sets, unchanged.
+- **Editing:** drag from a bottom tray onto the page. Tap a sticker to select it, which shows an ink dashed box with a size handle (3 steps) and a rotate handle. Drag it back to the tray to remove it. Placed stickers keep the −8…+8° base tilt plus the kid's rotation. Accessories still paste on.
+- **Print** is behind a 2-second parent hold. It gives a PDF of the current page (A4 or Letter, vector stickers, 200 dpi background, paper background on) and a sticker sheet PDF of all owned stickers at 5 cm with their die-cut rims, on white, with no shadows.
 
 ## 7. Mascot: Panda
 

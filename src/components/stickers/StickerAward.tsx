@@ -1,47 +1,149 @@
-import { useEffect } from 'react';
-import { characterArt, type Collectible } from '../../data/stickers';
+import { useEffect, useRef, useState } from 'react';
+import { CAPSULE_MACHINE, KNOB_PIVOT, capsuleArt, characterArt, stickerLook, type Collectible } from '../../data/stickers';
+import type { SoundCue } from '../../hooks/useSound';
 import { useTranslation } from '../../hooks/useTranslation';
 import { CHALK } from '../../theme/blockTable';
+import { CountBadge, SparkleOverlay } from './StickerImage';
 
-/** Total award time (ART.md §8: about 2.5 s, no tap needed). */
-export const AWARD_MS = 2500;
+/** Knob turns and the capsule rolls out (ms). */
+export const TWIST_MS = 900;
+/** If the kid has not tapped the capsule by then, it opens itself, so the overlay never waits forever. */
+export const SELF_OPEN_MS = 1700;
+/** Capsule split + sticker pop + butter rays, then the overlay closes. */
+export const REVEAL_MS = 1400;
+/** Reduced motion: how long the static reveal stays. */
+export const STATIC_REVEAL_MS = 2000;
+
+type Phase = 'twist' | 'ready' | 'reveal';
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+/** Small-item hard shadow (ART.md), on each capsule half so they separate cleanly. */
+const HALF_SHADOW = 'drop-shadow(3px 4px 0 #2a1c14)';
+
+/** The Art Director's capsule machine (240 px box) at 150 CSS px: knob layer on the body, turning about its pivot. */
+function Machine({ twisting }: { twisting: boolean }) {
+  return (
+    <span className="relative block h-[150px] w-[150px]" data-testid="capsule-machine">
+      <img src={CAPSULE_MACHINE.body} alt="" aria-hidden className="absolute inset-0 h-full w-full" />
+      <img
+        src={CAPSULE_MACHINE.knob}
+        alt=""
+        aria-hidden
+        data-testid="capsule-knob"
+        className={`absolute inset-0 h-full w-full ${twisting ? 'capsule-knob-twist' : ''}`}
+        style={{ transformOrigin: KNOB_PIVOT }}
+      />
+    </span>
+  );
+}
+
+/** The played shelf's capsule (96 px). Opening lifts and tips the top about the centre; the bottom stays. */
+function Capsule({ shelf, open }: { shelf: Collectible['shelf']; open: boolean }) {
+  const art = capsuleArt(shelf);
+  if (!open) return <img src={art.closed} alt="" className="block h-24 w-24" style={{ filter: HALF_SHADOW }} />;
+  return (
+    <span className="relative block h-24 w-24">
+      <img src={art.bottom} alt="" className="capsule-split-bottom absolute inset-0 h-full w-full" style={{ filter: HALF_SHADOW }} />
+      <img src={art.top} alt="" className="capsule-split-top absolute inset-0 h-full w-full" style={{ filter: HALF_SHADOW }} />
+    </span>
+  );
+}
+
+interface StickerAwardProps {
+  sticker: Collectible;
+  shiny: boolean;
+  /** Copies of this sticker owned now; 2+ shows "×N". */
+  count: number;
+  onDone: () => void;
+  playCue?: (cue: SoundCue) => void;
+}
 
 /**
- * Sticker won: Panda cheers, the sticker pops in over butter rays on a 45 % ink scrim, then flies
- * to the book. Pure decoration: pointer-events none, so it never blocks the game underneath.
+ * Capsule won (ART.md §6 capsules, §8): the machine's knob turns and the played shelf's capsule
+ * rolls out next to the cheering panda; a tap splits it (it opens itself if nobody taps) and the
+ * sticker pops with butter rays and card-in, about 3 s in all. Taps are never ignored: a tap during
+ * the twist opens the capsule right away, a tap on the reveal closes it. Reduced motion shows the
+ * sticker statically.
  */
-export function StickerAward({ sticker, onDone }: { sticker: Collectible; onDone: () => void }) {
+export function StickerAward({ sticker, shiny, count, onDone, playCue }: StickerAwardProps) {
   const { t } = useTranslation();
   const panda = characterArt('panda', 'cheer');
+  const [reduced] = useState(prefersReducedMotion);
+  const [phase, setPhase] = useState<Phase>(reduced ? 'reveal' : 'twist');
+  const look = stickerLook(sticker, shiny);
+  // App re-renders hand in a fresh playCue; keep it out of the phase effect so timers never restart.
+  const cue = useRef(playCue);
   useEffect(() => {
-    const id = window.setTimeout(onDone, AWARD_MS);
+    cue.current = playCue;
+  }, [playCue]);
+
+  useEffect(() => {
+    if (phase === 'twist') {
+      cue.current?.('capsule_twist');
+      const id = window.setTimeout(() => setPhase('ready'), TWIST_MS);
+      return () => window.clearTimeout(id);
+    }
+    if (phase === 'ready') {
+      const id = window.setTimeout(() => setPhase('reveal'), SELF_OPEN_MS - TWIST_MS);
+      return () => window.clearTimeout(id);
+    }
+    cue.current?.('capsule_pop');
+    if (shiny) cue.current?.('shiny_sparkle');
+    const id = window.setTimeout(onDone, reduced ? STATIC_REVEAL_MS : REVEAL_MS);
     return () => window.clearTimeout(id);
-  }, [onDone]);
+  }, [phase, onDone, reduced, shiny]);
+
+  const tap = () => (phase === 'reveal' ? onDone() : setPhase('reveal'));
 
   return (
     <div
       data-testid="sticker-award"
       data-sticker={sticker.id}
+      data-shelf={sticker.shelf ?? 'general'}
+      data-shiny={String(shiny)}
+      data-count={count}
+      data-phase={phase}
       aria-live="polite"
-      className="pointer-events-none fixed inset-0 z-[70] flex items-center justify-center sticker-award-scrim"
+      role="button"
+      tabIndex={0}
+      aria-label={t.stickerBook.newSticker}
+      onClick={tap}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && tap()}
+      className="fixed inset-0 z-[70] flex flex-col items-center justify-center outline-none select-none"
       style={{ backgroundColor: 'rgba(42,28,20,0.45)' }}
     >
-      <div className="relative flex flex-col items-center sticker-award-fly">
-        <span aria-hidden className="sticker-award-rays absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full" />
-        {sticker.src && <img src={sticker.src} alt="" className="relative h-44 w-44 animate-card-in" />}
-        <p className="relative mt-2 text-2xl font-black" style={{ color: CHALK, textShadow: '2px 3px 0 #2a1c14' }}>
+      <div className="relative flex h-56 w-56 items-center justify-center">
+        {phase === 'reveal' ? (
+          <>
+            <span aria-hidden className="sticker-award-rays absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full" />
+            {!reduced && (
+              <span aria-hidden className="absolute" data-testid="capsule-open">
+                <Capsule shelf={sticker.shelf} open />
+              </span>
+            )}
+            <span className="relative h-44 w-44 animate-card-in" data-testid="award-sticker">
+              {look.src && <img src={look.src} alt="" className="block h-full w-full" />}
+              {look.sparkle && <SparkleOverlay />}
+              {count > 1 && <CountBadge count={count} testId="award-count" />}
+            </span>
+          </>
+        ) : (
+          <span className={phase === 'twist' ? 'capsule-roll-out' : 'capsule-wiggle'} data-testid="capsule">
+            <Capsule shelf={sticker.shelf} open={false} />
+          </span>
+        )}
+      </div>
+      {phase === 'reveal' && (
+        <p className="relative mt-1 text-2xl font-black" style={{ color: CHALK, textShadow: '2px 3px 0 #2a1c14' }}>
           {t.stickerBook.newSticker}
         </p>
-      </div>
-      {panda && (
-        <img
-          src={panda}
-          alt=""
-          aria-hidden
-          className="absolute bottom-6 left-4 h-32 w-32 animate-card-in"
-          data-testid="sticker-award-panda"
-        />
       )}
+      <div className="pointer-events-none absolute bottom-6 left-4 flex items-end gap-1">
+        {panda && <img src={panda} alt="" aria-hidden className="h-[120px] w-[120px] animate-card-in" data-testid="sticker-award-panda" />}
+        <Machine twisting={phase === 'twist'} />
+      </div>
     </div>
   );
 }

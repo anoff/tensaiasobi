@@ -10,6 +10,10 @@ function getAudioContext(): AudioContext {
   return audioCtx;
 }
 
+import { playSoundFile, type SoundCue } from '../utils/soundFiles';
+
+export type { SoundCue };
+
 export function useSound(soundEnabled: boolean, vibrationEnabled: boolean) {
   const playPop = () => {
     if (vibrationEnabled && navigator.vibrate) {
@@ -131,5 +135,8 @@ export function useSound(soundEnabled: boolean, vibrationEnabled: boolean) {
     }
   };
 
-  return { playPop, playSuccess, playError, playSimonTone };
+  /** Award overlay cues (capsule twist / pop / shiny sparkle) from their files; silent when sound is off. */
+  const playCue = (cue: SoundCue) => playSoundFile(cue, soundEnabled);
+
+  return { playPop, playSuccess, playError, playSimonTone, playCue };
 }

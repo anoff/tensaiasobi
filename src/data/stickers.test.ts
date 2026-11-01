@@ -10,15 +10,17 @@ import {
   SHELF_STICKERS,
   SHELVES,
   THANK_YOU_STICKER_ID,
+  capsuleArt,
   characterForShelf,
   collectibleById,
+  stickerLook,
   stickerTilt,
 } from './stickers';
 import { GAME_CATEGORIES } from '../games/catalog';
 import albumManifest from '../assets/stickers/album/manifest.json';
 
 describe('sticker catalog (manifest driven)', () => {
-  it('has one shelf per game category with at most 12 stickers each', () => {
+  it('has one shelf per game category with at most SHELF_SLOTS stickers each', () => {
     expect([...SHELVES].sort()).toEqual([...GAME_CATEGORIES].sort());
     for (const shelf of SHELVES) expect(SHELF_STICKERS[shelf].length).toBeLessThanOrEqual(SHELF_SLOTS);
   });
@@ -32,6 +34,26 @@ describe('sticker catalog (manifest driven)', () => {
       expect(c?.shelf).toBe(entry.shelf);
       expect(c?.src).toBeTruthy();
     }
+  });
+
+  it('fills every shelf with 18 drawn stickers _01.._18, each with a baked shiny variant', () => {
+    for (const shelf of SHELVES) {
+      const prefix = shelf === 'play' ? 'fun' : shelf;
+      expect(SHELF_STICKERS[shelf].map((c) => c.id)).toEqual(
+        Array.from({ length: SHELF_SLOTS }, (_, i) => `${prefix}_${String(i + 1).padStart(2, '0')}`),
+      );
+      for (const c of SHELF_STICKERS[shelf]) {
+        expect(c.src).toBeTruthy();
+        expect(stickerLook(c, true)).toEqual({ src: expect.stringContaining(`${c.id}_shiny`), sparkle: false });
+      }
+    }
+  });
+
+  it("gives each shelf its own capsule (closed, top, bottom); Just for fun uses the fun capsule", () => {
+    const closed = SHELVES.map((s) => capsuleArt(s).closed);
+    for (const s of SHELVES) expect(Object.values(capsuleArt(s)).every(Boolean)).toBe(true);
+    expect(new Set(closed).size).toBe(4);
+    expect(capsuleArt(null)).toEqual(capsuleArt('numbers'));
   });
 
   it('casts one character per shelf with Panda as host', () => {

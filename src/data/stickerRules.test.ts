@@ -1,20 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DAILY_STICKER_CAP,
+  MISSING_WEIGHT,
+  SHINY_CHANCE,
   STICKER_SAVE_VERSION,
+  addCopy,
   addOwnedAccessory,
-  awardRound,
   canBuyAccessory,
+  capsulesToday,
+  copyCount,
+  drawFromShelf,
+  dropChance,
   emptyStickerSave,
   grantOnce,
   isSceneComplete,
-  nextMissing,
+  ownedIds,
   parseStickerSave,
   placeAccessory,
   placeScenePiece,
   removeAccessory,
+  rollCapsule,
   townHasItems,
   type AwardPools,
+  type Rng,
+  type StickerSave,
 } from './stickerRules';
 
 const pools: AwardPools = {
@@ -24,46 +32,123 @@ const pools: AwardPools = {
 };
 const DAY = '2026-10-31';
 
-function earnAll(shelf: 'numbers' | 'language', times: number) {
-  let save = emptyStickerSave();
-  const got: (string | null)[] = [];
-  for (let i = 0; i < times; i++) {
-    const r = awardRound({ ...save, dayCount: 0 }, shelf, DAY, pools);
-    save = r.save;
-    got.push(r.awarded);
-  }
-  return { save, got };
+/** Plays back fixed rolls, then repeats the last one. */
+const seq = (...values: number[]): Rng => {
+  let i = 0;
+  return () => values[Math.min(i++, values.length - 1)];
+};
+
+/** Small seeded PRNG (mulberry32) for the rate tests. */
+function seeded(seed: number): Rng {
+  let a = seed;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-describe('awardRound', () => {
-  it('fills a shelf page in the sticker, scene piece, sticker, mood rhythm', () => {
-    expect(earnAll('numbers', 6).got).toEqual(['n1', 'p1', 'n2', 'm1', 'n3', null]);
+const own = (...ids: string[]): StickerSave => ids.reduce((s, id) => addCopy(s, id, false).save, emptyStickerSave());
+
+describe('drop curve', () => {
+  it('is 1 / (2^(k+1) - 1): 100 %, 1/3, 1/7, 1/15, with no floor or cap', () => {
+    expect([0, 1, 2, 3].map(dropChance)).toEqual([1, 1 / 3, 1 / 7, 1 / 15]);
+    expect(dropChance(20)).toBeGreaterThan(0);
   });
 
-  it('only earns from the shelf of the game that was played', () => {
-    const { got } = earnAll('language', 3);
-    expect(got).toEqual(['l1', null, null]);
+  it('always drops the first capsule of the day and counts k up', () => {
+    const r = rollCapsule(emptyStickerSave(), 'numbers', DAY, pools, seq(0.999999, 0, 0.5));
+    expect(r.copy).not.toBeNull();
+    expect(r.save.daily).toEqual({ date: DAY, k: 1 });
   });
 
-  it('skips empty pools (a shelf without moods or scenes still fills its stickers)', () => {
-    expect(nextMissing(emptyStickerSave(), 'logic', pools)).toBeNull();
-    const only = { stickers: { logic: ['g1', 'g2'] }, scenePieces: {}, moods: {} };
+  it('rolls against 1/3 for the second capsule, then 1/7', () => {
+    const one = rollCapsule(emptyStickerSave(), 'numbers', DAY, pools, seq(0, 0, 0.5)).save;
+    expect(rollCapsule(one, 'numbers', DAY, pools, seq(0.34)).copy).toBeNull();
+    const two = rollCapsule(one, 'numbers', DAY, pools, seq(0.33, 0, 0.5));
+    expect(two.copy).not.toBeNull();
+    expect(two.save.daily.k).toBe(2);
+    expect(rollCapsule(two.save, 'numbers', DAY, pools, seq(1 / 7 + 0.001)).copy).toBeNull();
+    expect(rollCapsule(two.save, 'numbers', DAY, pools, seq(1 / 7 - 0.001, 0, 0.5)).copy).not.toBeNull();
+  });
+
+  it('a miss changes nothing', () => {
+    const one = rollCapsule(emptyStickerSave(), 'numbers', DAY, pools, seq(0, 0, 0.5)).save;
+    const miss = rollCapsule(one, 'numbers', DAY, pools, seq(0.9));
+    expect(miss.save).toBe(one);
+  });
+
+  it('resets k on a new local day', () => {
     let save = emptyStickerSave();
-    save = awardRound(save, 'logic', DAY, only).save;
-    expect(awardRound(save, 'logic', DAY, only).awarded).toBe('g2');
+    for (let i = 0; i < 4; i++) save = rollCapsule(save, 'numbers', DAY, pools, seq(0, 0, 0.5)).save;
+    expect(capsulesToday(save, DAY)).toBe(4);
+    expect(capsulesToday(save, '2026-11-01')).toBe(0);
+    const next = rollCapsule(save, 'numbers', '2026-11-01', pools, seq(0.999999, 0, 0.5));
+    expect(next.copy).not.toBeNull();
+    expect(next.save.daily).toEqual({ date: '2026-11-01', k: 1 });
   });
 
-  it(`stops at ${DAILY_STICKER_CAP} a day and starts again the next day`, () => {
-    const big: AwardPools = { stickers: { numbers: Array.from({ length: 12 }, (_, i) => `s${i}`) }, scenePieces: {}, moods: {} };
-    let save = emptyStickerSave();
-    for (let i = 0; i < DAILY_STICKER_CAP; i++) save = awardRound(save, 'numbers', DAY, big).save;
-    expect(save.earned).toHaveLength(DAILY_STICKER_CAP);
-    const capped = awardRound(save, 'numbers', DAY, big);
-    expect(capped.awarded).toBeNull();
-    expect(capped.save).toBe(save);
-    const tomorrow = awardRound(save, 'numbers', '2026-11-01', big);
-    expect(tomorrow.awarded).toBe(`s${DAILY_STICKER_CAP}`);
-    expect(tomorrow.save.dayCount).toBe(1);
+  it('only draws from the shelf of the game that was played, and nothing from an empty shelf', () => {
+    const r = rollCapsule(emptyStickerSave(), 'language', DAY, pools, seq(0, 0.9, 0.5));
+    expect(r.copy?.id).toBe('l1');
+    const empty = rollCapsule(emptyStickerSave(), 'logic', DAY, pools, seq(0));
+    expect(empty.copy).toBeNull();
+    expect(empty.save.daily.k).toBe(0);
+  });
+
+  it('matches the curve over many rounds (k = 1 hits about 1/3 of the time)', () => {
+    const rng = seeded(7);
+    const one = rollCapsule(emptyStickerSave(), 'numbers', DAY, pools, seq(0, 0, 0.5)).save;
+    let hits = 0;
+    const N = 30_000;
+    for (let i = 0; i < N; i++) if (rollCapsule(one, 'numbers', DAY, pools, rng).copy) hits++;
+    expect(hits / N).toBeCloseTo(1 / 3, 1);
+  });
+});
+
+describe('drawing from a shelf', () => {
+  it('weights 70 % to stickers the kid does not own yet', () => {
+    const save = own('n1', 'n2');
+    const rng = seeded(11);
+    let missing = 0;
+    const N = 20_000;
+    for (let i = 0; i < N; i++) {
+      const id = drawFromShelf(save, 'numbers', pools, rng)!;
+      if (!['n1', 'n2'].includes(id)) missing++;
+    }
+    expect(missing / N).toBeCloseTo(MISSING_WEIGHT, 1);
+  });
+
+  it('picks the missing group below 0.7 and the owned group above', () => {
+    const save = own('n1');
+    expect(drawFromShelf(save, 'numbers', pools, seq(0.69, 0))).toBe('n2');
+    expect(drawFromShelf(save, 'numbers', pools, seq(0.71, 0.99))).toBe('n1');
+  });
+
+  it('is uniform when nothing or everything is owned', () => {
+    const all = ['n1', 'n2', 'n3', 'p1', 'm1'];
+    expect(drawFromShelf(emptyStickerSave(), 'numbers', pools, seq(0))).toBe('n1');
+    expect(drawFromShelf(emptyStickerSave(), 'numbers', pools, seq(0.99))).toBe('m1');
+    expect(drawFromShelf(own(...all), 'numbers', pools, seq(0.5))).toBe('n3');
+  });
+
+  it('keeps duplicates as separate copies with counts', () => {
+    let save = own('l1');
+    save = rollCapsule(save, 'language', DAY, pools, seq(0, 0, 0.5)).save;
+    expect(copyCount(save, 'l1')).toBe(2);
+    expect(ownedIds(save)).toEqual(['l1']);
+    expect(new Set(save.copies.map((c) => c.uid)).size).toBe(2);
+  });
+
+  it('makes about 10 % of copies shiny, flagged per copy', () => {
+    const rng = seeded(3);
+    let shiny = 0;
+    const N = 20_000;
+    for (let i = 0; i < N; i++) if (rollCapsule(emptyStickerSave(), 'numbers', DAY, pools, rng).copy?.shiny) shiny++;
+    expect(shiny / N).toBeCloseTo(SHINY_CHANCE, 1);
+    expect(rollCapsule(emptyStickerSave(), 'numbers', DAY, pools, seq(0, 0, 0.05)).copy?.shiny).toBe(true);
+    expect(rollCapsule(emptyStickerSave(), 'numbers', DAY, pools, seq(0, 0, 0.15)).copy?.shiny).toBe(false);
   });
 });
 
@@ -71,13 +156,31 @@ describe('parseStickerSave', () => {
   it('starts a fresh book for missing, broken or other-version saves', () => {
     expect(parseStickerSave(null)).toEqual(emptyStickerSave());
     expect(parseStickerSave('{oops')).toEqual(emptyStickerSave());
-    expect(parseStickerSave(JSON.stringify({ ...emptyStickerSave(), version: STICKER_SAVE_VERSION + 1, earned: ['n1'] }))).toEqual(
-      emptyStickerSave(),
-    );
+    expect(parseStickerSave(JSON.stringify({ ...own('n1'), version: STICKER_SAVE_VERSION + 1 }))).toEqual(emptyStickerSave());
+  });
+
+  it('discards a v1 book (no migration, by design) and starts an empty v2 book', () => {
+    const v1 = JSON.stringify({
+      version: 1,
+      earned: ['numbers_01', 'numbers_02', 'general_thank_you'],
+      day: DAY,
+      dayCount: 5,
+      placedPieces: ['scene_numbers_engine'],
+      ownedAccessories: ['crown'],
+      placements: { numbers_01: [{ accessoryId: 'crown', x: 0.5, y: 0.2 }] },
+      seenCount: 3,
+    });
+    const save = parseStickerSave(v1);
+    expect(STICKER_SAVE_VERSION).toBe(2);
+    expect(save).toEqual(emptyStickerSave());
+    expect(save.version).toBe(2);
+    expect(save.copies).toEqual([]);
   });
 
   it('round-trips a valid save', () => {
     let save = grantOnce(emptyStickerSave(), 'n1');
+    save = addCopy(save, 'n1', true).save;
+    save = rollCapsule(save, 'numbers', DAY, pools, seq(0, 0, 0.5)).save;
     save = addOwnedAccessory(save, 'acc_hat');
     save = placeAccessory(save, 'n1', 'acc_hat', 0.3, 0.2);
     expect(parseStickerSave(JSON.stringify(save))).toEqual(save);
@@ -138,6 +241,7 @@ describe('scenes and the thank-you grant', () => {
   it('grants once', () => {
     const once = grantOnce(emptyStickerSave(), 'general_thank_you');
     expect(grantOnce(once, 'general_thank_you')).toBe(once);
-    expect(once.dayCount).toBe(0);
+    expect(once.daily.k).toBe(0);
+    expect(once.copies).toEqual([{ uid: 'c1', id: 'general_thank_you', shiny: false }]);
   });
 });

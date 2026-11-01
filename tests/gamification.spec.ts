@@ -51,12 +51,12 @@ test.describe('tensaiasobi Gamification Checks', () => {
     await expect(bookLauncher).toBeVisible();
     await bookLauncher.click();
 
-    // Verify the book shows one page per shelf with 12 sticker slots each
+    // Verify the book shows one page per shelf with 18 sticker slots each
     await expect(page.getByTestId('sticker-book')).toBeVisible();
     for (const shelf of ['numbers', 'language', 'logic', 'play']) {
       await expect(page.getByTestId(`book-shelf-${shelf}`)).toBeVisible();
     }
-    await expect(page.getByTestId('book-stickers-numbers').getByTestId('sticker-slot-empty')).toHaveCount(12);
+    await expect(page.getByTestId('book-stickers-numbers').getByTestId('sticker-slot-empty')).toHaveCount(18);
 
     // Return to menu
     await page.getByTestId('home-button').click();

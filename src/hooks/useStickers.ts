@@ -2,15 +2,17 @@ import { useCallback, useState } from 'react';
 import {
   STICKER_STORAGE_KEY,
   addOwnedAccessory,
-  awardRound,
+  copyCount,
   grantOnce,
   localDay,
   parseStickerSave,
   placeAccessory,
   placeScenePiece,
   removeAccessory,
+  rollCapsule,
   townHasItems,
   type Shelf,
+  type StickerCopy,
   type StickerSave,
 } from '../data/stickerRules';
 import { AWARD_POOLS, THANK_YOU_STICKER_ID } from '../data/stickers';
@@ -42,10 +44,16 @@ function loadStickers(): StickerSave {
   return save;
 }
 
+/** A capsule won after a round: the drawn copy and how many copies of that sticker the kid now owns. */
+export interface CapsuleAward {
+  copy: StickerCopy;
+  count: number;
+}
+
 export interface UseStickersReturn {
   book: StickerSave;
-  /** A finished round on a shelf; returns the earned collectible id, or null (page full or daily cap). */
-  completeRound: (shelf: Shelf) => string | null;
+  /** A finished round on a shelf; rolls for a capsule. Returns the award, or null when the roll missed. */
+  completeRound: (shelf: Shelf) => CapsuleAward | null;
   buyAccessory: (accessoryId: string) => void;
   placeAccessory: (stickerId: string, accessoryId: string, x: number, y: number) => void;
   removeAccessory: (stickerId: string, accessoryId: string) => void;
@@ -68,12 +76,11 @@ export function useStickers(): UseStickersReturn {
   const completeRound = useCallback((shelf: Shelf) => {
     // Read the latest save synchronously so the caller learns what was earned right away.
     const current = parseStickerSave(localStorage.getItem(STICKER_STORAGE_KEY));
-    const { save, awarded } = awardRound(current, shelf, localDay(new Date()), AWARD_POOLS);
-    if (awarded) {
-      persist(save);
-      setBook(save);
-    }
-    return awarded;
+    const { save, copy } = rollCapsule(current, shelf, localDay(new Date()), AWARD_POOLS);
+    if (!copy) return null;
+    persist(save);
+    setBook(save);
+    return { copy, count: copyCount(save, copy.id) };
   }, []);
 
   return {
@@ -91,7 +98,7 @@ export function useStickers(): UseStickersReturn {
     ),
     placeScenePiece: useCallback((pieceId: string) => update((s) => placeScenePiece(s, pieceId)), [update]),
     markSeen: useCallback(
-      () => update((s) => (s.seenCount === s.earned.length ? s : { ...s, seenCount: s.earned.length })),
+      () => update((s) => (s.seenCount === s.copies.length ? s : { ...s, seenCount: s.copies.length })),
       [update],
     ),
     resetStickers: useCallback(() => {

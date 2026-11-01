@@ -1,5 +1,5 @@
 import type { StickerSave } from '../../data/stickerRules';
-import { characterArt, collectibleById, stickerTilt } from '../../data/stickers';
+import { characterArt, collectibleById, stickerLook, stickerTilt } from '../../data/stickers';
 import { useTranslation } from '../../hooks/useTranslation';
 import { CHALK, CORAL, INK, hardShadow } from '../../theme/blockTable';
 import { StickerImage } from './StickerImage';
@@ -14,11 +14,11 @@ interface StickerHomeCardProps {
 export function StickerHomeCard({ book, totals, onClick }: StickerHomeCardProps) {
   const { t } = useTranslation();
   const panda = characterArt('panda', 'idle');
-  const unseen = Math.max(0, book.earned.length - book.seenCount);
-  const latest = book.earned
+  const unseen = Math.max(0, book.copies.length - book.seenCount);
+  const latest = book.copies
     .slice(-3)
-    .map((id) => collectibleById(id))
-    .filter((c) => c?.src && c.kind !== 'scene');
+    .map((copy) => ({ copy, c: collectibleById(copy.id) }))
+    .filter(({ c }) => c?.src && c.kind !== 'scene');
 
   return (
     <button
@@ -38,9 +38,16 @@ export function StickerHomeCard({ book, totals, onClick }: StickerHomeCardProps)
         </span>
       </span>
       <span className="flex shrink-0 -space-x-4 pr-1">
-        {latest.map((c) =>
+        {latest.map(({ copy, c }) =>
           c ? (
-            <StickerImage key={c.id} src={c.src} size={48} placements={book.placements[c.id]} tilt={stickerTilt(c.id)} />
+            <StickerImage
+              key={copy.uid}
+              {...stickerLook(c, copy.shiny)}
+              size={48}
+              placements={book.placements[c.id]}
+              tilt={stickerTilt(c.id)}
+              shiny={copy.shiny}
+            />
           ) : null,
         )}
       </span>

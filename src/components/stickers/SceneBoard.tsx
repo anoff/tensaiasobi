@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { StickerSave } from '../../data/stickerRules';
+import { owns, type StickerSave } from '../../data/stickerRules';
 import { collectibleById, type SceneSet } from '../../data/stickers';
 import { useTranslation } from '../../hooks/useTranslation';
 import { INK } from '../../theme/blockTable';
@@ -38,7 +38,7 @@ export function SceneBoard({ scene, book, onPlacePiece, playPop, playSuccess }: 
   });
 
   const placed = new Set(book.placedPieces);
-  const waiting = scene.pieces.filter((p) => p.src && book.earned.includes(p.id) && !placed.has(p.id));
+  const waiting = scene.pieces.filter((p) => p.src && owns(book, p.id) && !placed.has(p.id));
   const complete = scene.pieces.length > 0 && scene.pieces.every((p) => placed.has(p.id));
   const reward = collectibleById(scene.rewardId);
 

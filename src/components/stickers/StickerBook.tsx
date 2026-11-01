@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { StickerSave } from '../../data/stickerRules';
+import { copyCount, hasShiny, ownedIds, type StickerSave } from '../../data/stickerRules';
 import {
   GENERAL_STICKERS,
   SHELF_SLOTS,
@@ -13,6 +13,7 @@ import {
   shelfEarned,
   shelfTotal,
   bookTotals,
+  stickerLook,
   stickerTilt,
   type Collectible,
 } from '../../data/stickers';
@@ -51,12 +52,12 @@ export default function StickerBook({
   const { t } = useTranslation();
   const [openId, setOpenId] = useState<string | null>(null);
   // Remember what was new when the book opened, then mark it seen.
-  const [newIds] = useState(() => new Set(book.earned.slice(book.seenCount)));
+  const [newIds] = useState(() => new Set(book.copies.slice(book.seenCount).map((c) => c.id)));
   useEffect(() => {
     onSeen();
   }, [onSeen]);
 
-  const earned = new Set(book.earned);
+  const earned = new Set(ownedIds(book));
   const totals = bookTotals(book);
   const open = openId ? collectibleById(openId) : undefined;
   const panda = characterArt('panda', 'idle');
@@ -82,7 +83,14 @@ export default function StickerBook({
         className="relative flex items-center justify-center outline-none focus-visible:ring-4 focus-visible:ring-amber-400/70"
         style={{ width: SLOT_PX, height: SLOT_PX }}
       >
-        <StickerImage src={c.src} size={SLOT_PX} placements={book.placements[c.id]} tilt={stickerTilt(c.id)} />
+        <StickerImage
+          {...stickerLook(c, hasShiny(book, c.id))}
+          size={SLOT_PX}
+          placements={book.placements[c.id]}
+          tilt={stickerTilt(c.id)}
+          shiny={hasShiny(book, c.id)}
+          count={copyCount(book, c.id)}
+        />
         {newIds.has(c.id) && (
           <span
             className="absolute -right-1 -top-1 rounded-full border-2 px-1.5 text-[10px] font-black leading-4"

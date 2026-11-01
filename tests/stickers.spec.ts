@@ -7,12 +7,15 @@ function today() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+/** Owned copies for a v2 save: one plain copy per id (repeat an id for duplicates). */
+const copies = (ids: string[], shiny: string[] = []) => ids.map((id, i) => ({ uid: `c${i + 1}`, id, shiny: shiny.includes(id) }));
+
 function save(over: Record<string, unknown> = {}) {
   return JSON.stringify({
-    version: 1,
-    earned: [],
-    day: '',
-    dayCount: 0,
+    version: 2,
+    copies: [],
+    daily: { date: '', k: 0 },
+    pages: [],
     placedPieces: [],
     ownedAccessories: [],
     placements: {},
@@ -66,7 +69,7 @@ async function dragTo(page: Page, from: Locator, to: Locator) {
 }
 
 test.describe('Sticker Book', () => {
-  test('a finished round earns the next sticker on that game\'s shelf, with the award and a home badge', async ({ page }) => {
+  test('the first round of the day always drops a capsule from that game\'s shelf; a tap opens it', async ({ page }) => {
     test.setTimeout(60_000);
     await page.goto('/');
     await page.getByTestId('age-mode-little').click();
@@ -77,17 +80,22 @@ test.describe('Sticker Book', () => {
     await answerMath(page);
     const award = page.getByTestId('sticker-award');
     await expect(award).toBeVisible();
-    await expect(award).toHaveAttribute('data-sticker', 'numbers_01');
+    await expect(award).toHaveAttribute('data-shelf', 'numbers');
+    await expect(award).toHaveAttribute('data-count', '1');
+    await expect(page.getByTestId('capsule-machine')).toBeVisible();
+    await expect(page.getByTestId('capsule').locator('img')).toBeVisible();
     await expect(page.getByTestId('sticker-award-panda')).toBeVisible();
-    // The award never blocks play and leaves on its own.
+    // A tap is never ignored: it splits the capsule right away, even mid-twist.
+    await page.getByTestId('capsule').click();
+    await expect(award).toHaveAttribute('data-phase', 'reveal');
+    await expect(page.getByTestId('award-sticker')).toBeVisible();
+    // The reveal leaves on its own.
     await expect(award).toHaveCount(0, { timeout: 4000 });
+    expect(await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).daily.k, KEY)).toBe(1);
 
     await page.getByTestId('home-button').click();
     await expect(page.getByTestId('home-sticker-new')).toHaveText('+1');
     await page.getByTestId('launch-sticker-book').click();
-    const numbers = page.getByTestId('book-stickers-numbers');
-    await expect(numbers.getByTestId('sticker-slot')).toHaveCount(1);
-    await expect(numbers.getByTestId('sticker-slot')).toHaveAttribute('data-sticker', 'numbers_01');
     await expect(page.getByTestId('book-shelf-count-numbers')).toContainText('1 /');
     await expect(page.getByTestId('book-stickers-language').getByTestId('sticker-slot')).toHaveCount(0);
 
@@ -95,9 +103,10 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('home-sticker-new')).toHaveCount(0);
   });
 
-  test('the daily cap stops new stickers', async ({ page }) => {
+  test('late in the day the drop curve makes a capsule (almost) never drop, with no countdown shown', async ({ page }) => {
     test.setTimeout(60_000);
-    await seed(page, { [KEY]: save({ day: today(), dayCount: 5 }) });
+    // k = 40 → p = 1 / (2^41 − 1): effectively no drop, without any cap in the code.
+    await seed(page, { [KEY]: save({ daily: { date: today(), k: 40 } }) });
     await page.goto('/');
     await page.getByTestId('age-mode-little').click();
     await page.getByTestId('launch-math').click();
@@ -105,6 +114,41 @@ test.describe('Sticker Book', () => {
     for (let i = 0; i < 5; i++) await answerMath(page);
     await page.waitForTimeout(500);
     await expect(page.getByTestId('sticker-award')).toHaveCount(0);
+  });
+
+  test('an old v1 book is discarded without a crash and the kid starts with an empty v2 book', async ({ page }) => {
+    const v1 = JSON.stringify({
+      version: 1,
+      earned: ['numbers_01', 'numbers_02'],
+      day: today(),
+      dayCount: 5,
+      placedPieces: [],
+      ownedAccessories: ['crown'],
+      placements: {},
+      seenCount: 0,
+    });
+    await seed(page, { [KEY]: v1 });
+    await page.goto('/');
+    await expect(page.getByTestId('home-sticker-new')).toHaveCount(0);
+    await page.getByTestId('launch-sticker-book').click();
+    await expect(page.getByTestId('sticker-book')).toBeVisible();
+    await expect(page.getByTestId('sticker-slot')).toHaveCount(0);
+  });
+
+  test('duplicates stack with a ×N badge and shiny copies wear the gold rim', async ({ page }) => {
+    await seed(page, {
+      [KEY]: save({ copies: copies(['numbers_01', 'numbers_01', 'numbers_02'], ['numbers_02']), seenCount: 3 }),
+    });
+    await page.goto('/');
+    await page.getByTestId('launch-sticker-book').click();
+    const dup = page.locator('[data-testid="sticker-slot"][data-sticker="numbers_01"]');
+    await expect(dup.getByTestId('sticker-count')).toHaveText('×2');
+    await expect(dup.locator('[data-shiny="true"]')).toHaveCount(0);
+    const shiny = page.locator('[data-testid="sticker-slot"][data-sticker="numbers_02"]');
+    // The Art Director's pre-built shiny PNG: gold rim, sparkle baked in.
+    await expect(shiny.locator('[data-shiny="true"] img').first()).toHaveAttribute('src', /numbers_02_shiny/);
+    await expect(shiny.getByTestId('sticker-count')).toHaveCount(0);
+    await expect(page.getByTestId('book-shelf-count-numbers')).toContainText('2 /');
   });
 
   test('an old town with items becomes the thank-you sticker and the town save is removed', async ({ page }) => {
@@ -116,7 +160,7 @@ test.describe('Sticker Book', () => {
   });
 
   test('accessories are bought once with stars and stay on the sticker after a reload', async ({ page }) => {
-    await seed(page, { [KEY]: save({ earned: ['numbers_01', 'numbers_02'], seenCount: 2 }), gamification_stars: '15' });
+    await seed(page, { [KEY]: save({ copies: copies(['numbers_01', 'numbers_02']), seenCount: 2 }), gamification_stars: '15' });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
     await page.locator('[data-testid="sticker-slot"][data-sticker="numbers_01"]').click();
@@ -148,7 +192,7 @@ test.describe('Sticker Book', () => {
 
   test('the Numbers train scene snaps onto its outline page and a full scene shows the reward', async ({ page }) => {
     const pieces = ['scene_numbers_engine', 'scene_numbers_car_balls', 'scene_numbers_car_shapes', 'scene_numbers_owl_conductor'];
-    await seed(page, { [KEY]: save({ earned: pieces, placedPieces: pieces.slice(1), seenCount: 4 }) });
+    await seed(page, { [KEY]: save({ copies: copies(pieces), placedPieces: pieces.slice(1), seenCount: 4 }) });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
     const scene = page.getByTestId('scene-numbers');
@@ -164,7 +208,7 @@ test.describe('Sticker Book', () => {
 
   test('an outline-page scene snaps a piece onto its dashed slot', async ({ page }) => {
     const garden = ['scene_logic_circle_tree', 'scene_logic_tortoise', 'scene_logic_triangle_tent', 'scene_logic_block_steps'];
-    await seed(page, { [KEY]: save({ earned: garden, placedPieces: garden.slice(0, 3), seenCount: 4 }) });
+    await seed(page, { [KEY]: save({ copies: copies(garden), placedPieces: garden.slice(0, 3), seenCount: 4 }) });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
     const scene = page.getByTestId('scene-logic');
@@ -188,8 +232,8 @@ test.describe('Sticker Book', () => {
     for (const shelf of ['numbers', 'language', 'logic', 'play']) {
       await expect(page.getByTestId(`book-moods-${shelf}`).getByTestId('sticker-slot-empty')).toHaveCount(4);
     }
-    await expect(page.getByTestId('book-stickers-play').getByTestId('sticker-slot-empty')).toHaveCount(12);
-    await expect(page.getByTestId('book-shelf-count-play')).toContainText('0 / 20');
+    await expect(page.getByTestId('book-stickers-play').getByTestId('sticker-slot-empty')).toHaveCount(18);
+    await expect(page.getByTestId('book-shelf-count-play')).toContainText('0 / 26');
     // Reading corner, Shape garden and Playground use the Art Director's outline pages.
     for (const shelf of ['language', 'logic', 'play']) {
       await expect(page.getByTestId(`scene-${shelf}`).getByTestId('scene-page')).toBeVisible();

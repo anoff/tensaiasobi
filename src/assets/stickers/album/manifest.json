@@ -97,6 +97,54 @@
    "label": "panda + bucket and spade"
   },
   {
+   "id": "fun_13",
+   "shelf": "play",
+   "file": "fun_13.png",
+   "svg": "svg/fun_13.svg",
+   "rim": "pebble",
+   "label": "ice-cream cone, two scoops"
+  },
+  {
+   "id": "fun_14",
+   "shelf": "play",
+   "file": "fun_14.png",
+   "svg": "svg/fun_14.svg",
+   "rim": "coal",
+   "label": "panda flies a kite"
+  },
+  {
+   "id": "fun_15",
+   "shelf": "play",
+   "file": "fun_15.png",
+   "svg": "svg/fun_15.svg",
+   "rim": "pebble",
+   "label": "pinwheel in the wind"
+  },
+  {
+   "id": "fun_16",
+   "shelf": "play",
+   "file": "fun_16.png",
+   "svg": "svg/fun_16.svg",
+   "rim": "coal",
+   "label": "panda holds a rice ball"
+  },
+  {
+   "id": "fun_17",
+   "shelf": "play",
+   "file": "fun_17.png",
+   "svg": "svg/fun_17.svg",
+   "rim": "pebble",
+   "label": "toy car with a face"
+  },
+  {
+   "id": "fun_18",
+   "shelf": "play",
+   "file": "fun_18.png",
+   "svg": "svg/fun_18.svg",
+   "rim": "coal",
+   "label": "panda under an umbrella in the rain"
+  },
+  {
    "id": "language_01",
    "shelf": "language",
    "file": "language_01.png",
@@ -191,6 +239,54 @@
    "svg": "svg/language_12.svg",
    "rim": "coral",
    "label": "fox reads on tummy"
+  },
+  {
+   "id": "language_13",
+   "shelf": "language",
+   "file": "language_13.png",
+   "svg": "svg/language_13.svg",
+   "rim": "coral",
+   "label": "mailbox, flag up, letter in the door"
+  },
+  {
+   "id": "language_14",
+   "shelf": "language",
+   "file": "language_14.png",
+   "svg": "svg/language_14.svg",
+   "rim": "coral",
+   "label": "fox holds a heart letter"
+  },
+  {
+   "id": "language_15",
+   "shelf": "language",
+   "file": "language_15.png",
+   "svg": "svg/language_15.svg",
+   "rim": "coral",
+   "label": "pencil cup with a face"
+  },
+  {
+   "id": "language_16",
+   "shelf": "language",
+   "file": "language_16.png",
+   "svg": "svg/language_16.svg",
+   "rim": "coral",
+   "label": "fox shows a chalk slate"
+  },
+  {
+   "id": "language_17",
+   "shelf": "language",
+   "file": "language_17.png",
+   "svg": "svg/language_17.svg",
+   "rim": "coral",
+   "label": "letter blocks with shapes, stacked"
+  },
+  {
+   "id": "language_18",
+   "shelf": "language",
+   "file": "language_18.png",
+   "svg": "svg/language_18.svg",
+   "rim": "coral",
+   "label": "fox launches a paper plane"
   },
   {
    "id": "logic_01",
@@ -289,6 +385,54 @@
    "label": "pattern card"
   },
   {
+   "id": "logic_13",
+   "shelf": "logic",
+   "file": "logic_13.png",
+   "svg": "svg/logic_13.svg",
+   "rim": "leaf",
+   "label": "two gears turning together"
+  },
+  {
+   "id": "logic_14",
+   "shelf": "logic",
+   "file": "logic_14.png",
+   "svg": "svg/logic_14.svg",
+   "rim": "leaf",
+   "label": "tortoise holds up a gear"
+  },
+  {
+   "id": "logic_15",
+   "shelf": "logic",
+   "file": "logic_15.png",
+   "svg": "svg/logic_15.svg",
+   "rim": "leaf",
+   "label": "magnifier makes a star big"
+  },
+  {
+   "id": "logic_16",
+   "shelf": "logic",
+   "file": "logic_16.png",
+   "svg": "svg/logic_16.svg",
+   "rim": "leaf",
+   "label": "tortoise holds a toy cube"
+  },
+  {
+   "id": "logic_17",
+   "shelf": "logic",
+   "file": "logic_17.png",
+   "svg": "svg/logic_17.svg",
+   "rim": "leaf",
+   "label": "4-piece jigsaw, last piece dropping in"
+  },
+  {
+   "id": "logic_18",
+   "shelf": "logic",
+   "file": "logic_18.png",
+   "svg": "svg/logic_18.svg",
+   "rim": "leaf",
+   "label": "tortoise + ring stacker"
+  },
+  {
    "id": "numbers_01",
    "shelf": "numbers",
    "file": "numbers_01.png",
@@ -383,6 +527,54 @@
    "svg": "svg/numbers_12.svg",
    "rim": "butter",
    "label": "owl balances"
+  },
+  {
+   "id": "numbers_13",
+   "shelf": "numbers",
+   "file": "numbers_13.png",
+   "svg": "svg/numbers_13.svg",
+   "rim": "butter",
+   "label": "alarm clock with a face"
+  },
+  {
+   "id": "numbers_14",
+   "shelf": "numbers",
+   "file": "numbers_14.png",
+   "svg": "svg/numbers_14.svg",
+   "rim": "butter",
+   "label": "owl shows a pocket watch"
+  },
+  {
+   "id": "numbers_15",
+   "shelf": "numbers",
+   "file": "numbers_15.png",
+   "svg": "svg/numbers_15.svg",
+   "rim": "butter",
+   "label": "engine peeks out of a tunnel"
+  },
+  {
+   "id": "numbers_16",
+   "shelf": "numbers",
+   "file": "numbers_16.png",
+   "svg": "svg/numbers_16.svg",
+   "rim": "butter",
+   "label": "owl + sand timer"
+  },
+  {
+   "id": "numbers_17",
+   "shelf": "numbers",
+   "file": "numbers_17.png",
+   "svg": "svg/numbers_17.svg",
+   "rim": "butter",
+   "label": "dominoes toppling"
+  },
+  {
+   "id": "numbers_18",
+   "shelf": "numbers",
+   "file": "numbers_18.png",
+   "svg": "svg/numbers_18.svg",
+   "rim": "butter",
+   "label": "owl pulls a toy engine on a string"
   }
  ],
  "scenes": [

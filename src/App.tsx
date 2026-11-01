@@ -23,7 +23,7 @@ import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedee
 import { couponLabel, type Coupon } from './types/gamification';
 import { GAMES, GAME_CATEGORIES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, gamesInCategory, isGameId, type AgeBand, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
-import { useStickers } from './hooks/useStickers';
+import { useStickers, type CapsuleAward } from './hooks/useStickers';
 import StickerBook from './components/stickers/StickerBook';
 import { StickerAward } from './components/stickers/StickerAward';
 import { StickerHomeCard } from './components/stickers/StickerHomeCard';
@@ -42,7 +42,7 @@ function AppContent() {
   const [showParentGate, setShowParentGate] = useState(false);
   const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
 
-  const { playPop, playSuccess, playError, playSimonTone } = useSound(soundEnabled, vibrationEnabled);
+  const { playPop, playSuccess, playError, playSimonTone, playCue } = useSound(soundEnabled, vibrationEnabled);
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -50,8 +50,8 @@ function AppContent() {
   const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
   const stickers = useStickers();
   const { completeRound, buyAccessory } = stickers;
-  /** Stickers won and waiting for their award overlay, oldest first. */
-  const [awardQueue, setAwardQueue] = useState<string[]>([]);
+  /** Capsules won and waiting for their award overlay, oldest first. */
+  const [awardQueue, setAwardQueue] = useState<CapsuleAward[]>([]);
   const finishAward = useCallback(() => setAwardQueue((q) => q.slice(1)), []);
   const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
   const [storedAgeBand, setAgeBand] = useLocalStorage<string>('settings_age_band', 'little');
@@ -86,7 +86,7 @@ function AppContent() {
     else addStars(amount);
   };
 
-  /** A finished round earns the next missing sticker on that game's shelf (5 a day, never removed). */
+  /** A finished round rolls for a capsule from that game's shelf (daily curve, pure chance, never removed). */
   const handleRoundComplete = (gameId: GameId) => {
     const shelf = GAMES.find((game) => game.id === gameId)?.category;
     if (!shelf) return;
@@ -649,8 +649,11 @@ function AppContent() {
       )}
 
       {awardQueue.length > 0 && (() => {
-        const sticker = collectibleById(awardQueue[0]);
-        return sticker ? <StickerAward key={awardQueue[0]} sticker={sticker} onDone={finishAward} /> : null;
+        const { copy, count } = awardQueue[0];
+        const sticker = collectibleById(copy.id);
+        return sticker ? (
+          <StickerAward key={copy.uid} sticker={sticker} shiny={copy.shiny} count={count} onDone={finishAward} playCue={playCue} />
+        ) : null;
       })()}
 
       {sessionLocked && currentScreen !== 'settings' && currentScreen !== 'session' && (
