@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { copyCount, hasShiny, ownedIds, type StickerSave } from '../../data/stickerRules';
 import {
   GENERAL_STICKERS,
@@ -13,6 +13,7 @@ import {
   shelfEarned,
   shelfTotal,
   BOOK_TAB_ICONS,
+  PRINT_ICON,
   bookTotals,
   stickerLook,
   stickerTilt,
@@ -25,6 +26,9 @@ import { EmptySlot, Silhouette, StickerImage } from './StickerImage';
 import { PageEditor, type PageEdits } from './PageEditor';
 import { SceneBoard } from './SceneBoard';
 import { StickerDetail } from './StickerDetail';
+import { PrintDialog } from './PrintDialog';
+import { HomeButton } from '../HomeButton';
+import { HoldToConfirmButton } from '../HoldToConfirmButton';
 
 interface StickerBookProps {
   book: StickerSave;
@@ -38,6 +42,9 @@ interface StickerBookProps {
   onSeen: () => void;
   playPop: () => void;
   playSuccess: () => void;
+  onHome: () => void;
+  /** The app's star pill (and session badges), shown at the end of the book's own top bar. */
+  status: ReactNode;
 }
 
 const SLOT_PX = 68;
@@ -55,12 +62,16 @@ export default function StickerBook({
   onSeen,
   playPop,
   playSuccess,
+  onHome,
+  status,
 }: StickerBookProps) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>('collection');
   const [openId, setOpenId] = useState<string | null>(null);
   /** Placed copy whose accessories are being edited. */
   const [dressUid, setDressUid] = useState<string | null>(null);
+  const [pageIndex, setPageIndex] = useState(Math.max(0, book.pages.length - 1));
+  const [printing, setPrinting] = useState(false);
   // Remember what was new when the book opened, then mark it seen.
   const [newIds] = useState(() => new Set(book.copies.slice(book.seenCount).map((c) => c.id)));
   useEffect(() => {
@@ -72,7 +83,6 @@ export default function StickerBook({
   const open = openId ? collectibleById(openId) : undefined;
   const dressCopy = dressUid ? book.copies.find((c) => c.uid === dressUid) : undefined;
   const dressed = dressCopy ? collectibleById(dressCopy.id) : undefined;
-  const panda = characterArt('panda', 'idle');
 
   const slot = (c: Collectible | undefined, key: string) => {
     if (!c || !earned.has(c.id) || !c.src) {
@@ -118,36 +128,45 @@ export default function StickerBook({
     );
   };
 
+  const shelfCard = 'overflow-hidden rounded-[2rem] border-[3px]';
+  const scroll = 'min-h-0 w-full flex-1 space-y-4 overflow-y-auto overscroll-y-contain pb-4 md:mx-auto md:max-w-md';
+
   return (
-    <div className="mx-auto w-full max-w-md space-y-5 short:space-y-3 pb-8 short:pb-2 select-none" data-testid="sticker-book">
-      <div className="flex items-center gap-3">
-        {panda && (
-          <img
-            src={panda}
-            alt=""
-            aria-hidden
-            className="pointer-events-none h-20 w-20 shrink-0 short:h-14 short:w-14"
-            data-testid="book-panda"
-          />
-        )}
-        <div>
-          <h2 className="text-3xl short:text-2xl font-black tracking-tight" style={{ color: INK }}>
-            {t.stickerBook.title}
-          </h2>
-          <p className="text-sm font-extrabold" style={{ color: '#6b5a4c' }} data-testid="sticker-book-count">
-            {t.stickerBook.count.replace('{n}', String(totals.earned)).replace('{total}', String(totals.total))}
-            {' · '}
-            {totals.earned === 0
-              ? t.stickerBook.empty
-              : tab === 'pages'
-                ? t.stickerBook.pageHint
-                : t.stickerBook.tapHint}
-          </p>
-        </div>
+    // The book fills the screen under its own 48 px bar and 40 px tabs; only Collection and Special scenes scroll.
+    <div className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col select-none md:max-w-3xl" data-testid="sticker-book">
+      <div className="flex h-12 shrink-0 items-center gap-1.5 narrow:gap-1" data-testid="book-top-bar">
+        <HomeButton data-testid="home-button" onClick={onHome} className="!h-10 !w-10 shrink-0 !p-0 !text-lg" />
+        <h2
+          className="ml-1 min-w-0 truncate text-lg font-black tracking-tight narrow:ml-0 narrow:text-sm narrow:tracking-tighter"
+          style={{ color: INK }}
+        >
+          {t.stickerBook.title}
+        </h2>
+        <span
+          className="shrink-0 text-xs font-extrabold tabular-nums narrow:text-[11px]"
+          style={{ color: '#6b5a4c' }}
+          data-testid="sticker-book-count"
+          aria-label={t.stickerBook.count.replace('{n}', String(totals.earned)).replace('{total}', String(totals.total))}
+        >
+          {totals.earned}/{totals.total}
+        </span>
+        <span className="flex-1" />
+        {/* Parent gate: the same 2 s hold as the other grown-up actions. */}
+        <HoldToConfirmButton
+          data-testid="page-print"
+          aria-label={t.stickerBook.printHold}
+          duration={2000}
+          onConfirm={() => setPrinting(true)}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-[3px] border-[#2a1c14] bg-white shadow-[2px_3px_0_0_#2a1c14] narrow:h-9 narrow:w-9"
+          progressClassName="bg-[#ffc21a]"
+        >
+          {() => <img src={PRINT_ICON} alt="" aria-hidden draggable={false} className="pointer-events-none h-6 w-6" />}
+        </HoldToConfirmButton>
+        <div className="flex shrink-0 items-center gap-1.5">{status}</div>
       </div>
 
       <div
-        className="grid grid-cols-3 gap-1.5 rounded-full border-[3px] p-1"
+        className="grid h-10 shrink-0 grid-cols-3 gap-1 rounded-full border-[3px] p-0.5"
         role="tablist"
         style={{ borderColor: INK, backgroundColor: CHALK }}
       >
@@ -164,18 +183,17 @@ export default function StickerBook({
                 if (!on) playPop();
                 setTab(id);
               }}
-              className="flex items-center justify-center gap-1 rounded-full border-[3px] px-1 py-1 text-xs font-black leading-tight"
+              className="flex min-w-0 items-center justify-center gap-1 rounded-full border-2 px-1 text-xs font-black leading-none narrow:gap-0.5 narrow:px-0.5 narrow:text-[11px] narrow:tracking-tight"
               style={{
                 backgroundColor: on ? BUTTER : 'transparent',
                 borderColor: on ? INK : 'transparent',
-                boxShadow: on ? hardShadow(2, 3) : 'none',
                 color: INK,
               }}
             >
               {BOOK_TAB_ICONS[id] && (
-                <img src={BOOK_TAB_ICONS[id]} alt="" aria-hidden className="pointer-events-none h-7 w-7 shrink-0" />
+                <img src={BOOK_TAB_ICONS[id]} alt="" aria-hidden className="pointer-events-none h-6 w-6 shrink-0 narrow:h-[18px] narrow:w-[18px]" />
               )}
-              <span className="min-w-0">
+              <span className="min-w-0 truncate">
                 {t.stickerBook[id === 'pages' ? 'tabPages' : id === 'collection' ? 'tabCollection' : 'tabScenes']}
               </span>
             </button>
@@ -184,130 +202,150 @@ export default function StickerBook({
       </div>
 
       {tab === 'pages' && (
-        <PageEditor book={book} edits={pageEdits} playPop={playPop} onDress={(uid) => setDressUid(uid)} />
+        <PageEditor
+          book={book}
+          edits={pageEdits}
+          index={pageIndex}
+          onIndex={setPageIndex}
+          playPop={playPop}
+          onDress={(uid) => setDressUid(uid)}
+        />
       )}
 
-      {tab === 'collection' &&
-        SHELVES.map((shelf) => {
-          const fill = shelf === 'play' ? CHALK : categoryFill(shelf, 0);
-          const stickers = SHELF_STICKERS[shelf];
-          const moods = moodsForShelf(shelf);
-          const character = characterForShelf(shelf);
-          const characterSrc = character ? characterArt(character.id, 'idle') : undefined;
-          return (
+      {tab === 'collection' && (
+        <div className={`${scroll} mt-2`} data-testid="book-collection">
+          {SHELVES.map((shelf) => {
+            const fill = shelf === 'play' ? CHALK : categoryFill(shelf, 0);
+            const stickers = SHELF_STICKERS[shelf];
+            const moods = moodsForShelf(shelf);
+            const character = characterForShelf(shelf);
+            const characterSrc = character ? characterArt(character.id, 'idle') : undefined;
+            return (
+              <section
+                key={shelf}
+                data-testid={`book-shelf-${shelf}`}
+                className={shelfCard}
+                style={{ borderColor: INK, boxShadow: hardShadow(), backgroundColor: '#fff8ec' }}
+              >
+                <header
+                  className="flex items-center justify-between border-b-[3px] px-4 py-2"
+                  style={{ backgroundColor: fill, borderColor: INK }}
+                >
+                  <span className="flex items-center gap-2 text-lg font-black" style={{ color: INK }}>
+                    <span aria-hidden>{CATEGORY_EMOJI[shelf]}</span>
+                    {t.menu.categories[shelf]}
+                  </span>
+                  <span
+                    className="rounded-full border-2 px-2.5 text-sm font-black tabular-nums"
+                    style={{ backgroundColor: '#fff', borderColor: INK, color: INK }}
+                    data-testid={`book-shelf-count-${shelf}`}
+                  >
+                    {shelfEarned(book, shelf)} / {shelfTotal(shelf)}
+                  </span>
+                </header>
+                <div className="space-y-3 p-3">
+                  <div className="grid grid-cols-4 justify-items-center gap-y-2" data-testid={`book-stickers-${shelf}`}>
+                    {Array.from({ length: SHELF_SLOTS }, (_, i) => slot(stickers[i], `${shelf}-${i}`))}
+                  </div>
+
+                  <div className="border-t-2 border-dashed pt-3" style={{ borderColor: '#d9cfc4' }}>
+                    <div className="mb-1 flex items-center gap-2">
+                      <span
+                        className="flex h-10 w-10 shrink-0 items-center justify-center"
+                        data-testid={`book-character-${character?.id ?? shelf}`}
+                        data-has-art={String(Boolean(characterSrc))}
+                      >
+                        {characterSrc ? (
+                          <img src={characterSrc} alt="" aria-hidden className="pointer-events-none h-10 w-10" />
+                        ) : (
+                          <EmptySlot size={34} />
+                        )}
+                      </span>
+                      <span className="text-xs font-black" style={{ color: INK }}>
+                        {character ? `${t.stickerBook.characters[character.id]} · ` : ''}
+                        {t.stickerBook.moods}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 justify-items-center" data-testid={`book-moods-${shelf}`}>
+                      {moods.map((m) => slot(m, m.id))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            );
+          })}
+          {GENERAL_STICKERS.some((g) => g.id !== 'general_star' && earned.has(g.id)) && (
             <section
-              key={shelf}
-              data-testid={`book-shelf-${shelf}`}
-              className="overflow-hidden rounded-[2rem] border-[3px]"
+              data-testid="book-specials"
+              className="rounded-[2rem] border-[3px] p-3"
               style={{ borderColor: INK, boxShadow: hardShadow(), backgroundColor: '#fff8ec' }}
             >
-              <header
-                className="flex items-center justify-between border-b-[3px] px-4 py-2"
-                style={{ backgroundColor: fill, borderColor: INK }}
+              <h3 className="mb-2 text-lg font-black" style={{ color: INK }}>
+                ✨ {t.stickerBook.specials}
+              </h3>
+              <div className="grid grid-cols-4 justify-items-center">
+                {GENERAL_STICKERS.filter((g) => g.id !== 'general_star' && earned.has(g.id)).map((g) => slot(g, g.id))}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
+
+      {tab === 'scenes' && (
+        <div className={`${scroll} mt-2`} data-testid="book-scenes">
+          {SHELVES.map((shelf) => {
+            const scene = sceneForShelf(shelf);
+            return (
+              <section
+                key={shelf}
+                data-testid={`book-scenes-${shelf}`}
+                className={shelfCard}
+                style={{ borderColor: INK, boxShadow: hardShadow(), backgroundColor: '#fff8ec' }}
               >
-                <span className="flex items-center gap-2 text-lg font-black" style={{ color: INK }}>
+                <header
+                  className="flex items-center gap-2 border-b-[3px] px-4 py-2 text-lg font-black"
+                  style={{
+                    backgroundColor: shelf === 'play' ? CHALK : categoryFill(shelf, 0),
+                    borderColor: INK,
+                    color: INK,
+                  }}
+                >
                   <span aria-hidden>{CATEGORY_EMOJI[shelf]}</span>
                   {t.menu.categories[shelf]}
-                </span>
-                <span
-                  className="rounded-full border-2 px-2.5 text-sm font-black tabular-nums"
-                  style={{ backgroundColor: '#fff', borderColor: INK, color: INK }}
-                  data-testid={`book-shelf-count-${shelf}`}
-                >
-                  {shelfEarned(book, shelf)} / {shelfTotal(shelf)}
-                </span>
-              </header>
-              <div className="space-y-3 p-3">
-                <div className="grid grid-cols-4 justify-items-center gap-y-2" data-testid={`book-stickers-${shelf}`}>
-                  {Array.from({ length: SHELF_SLOTS }, (_, i) => slot(stickers[i], `${shelf}-${i}`))}
-                </div>
-
-                <div className="border-t-2 border-dashed pt-3" style={{ borderColor: '#d9cfc4' }}>
-                  <div className="mb-1 flex items-center gap-2">
-                    <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center"
-                      data-testid={`book-character-${character?.id ?? shelf}`}
-                      data-has-art={String(Boolean(characterSrc))}
+                </header>
+                <div className="p-3">
+                  {scene ? (
+                    <SceneBoard
+                      scene={scene}
+                      book={book}
+                      onPlacePiece={onPlaceScenePiece}
+                      playPop={playPop}
+                      playSuccess={playSuccess}
+                    />
+                  ) : (
+                    <div
+                      className="flex h-20 items-center justify-center rounded-2xl border-2 border-dashed text-sm font-extrabold"
+                      style={{ borderColor: '#b8aea3', backgroundColor: PAPER, color: '#6b5a4c' }}
+                      data-testid={`scene-coming-${shelf}`}
                     >
-                      {characterSrc ? (
-                        <img src={characterSrc} alt="" aria-hidden className="pointer-events-none h-10 w-10" />
-                      ) : (
-                        <EmptySlot size={34} />
-                      )}
-                    </span>
-                    <span className="text-xs font-black" style={{ color: INK }}>
-                      {character ? `${t.stickerBook.characters[character.id]} · ` : ''}
-                      {t.stickerBook.moods}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 justify-items-center" data-testid={`book-moods-${shelf}`}>
-                    {moods.map((m) => slot(m, m.id))}
-                  </div>
+                      {t.stickerBook.comingSoon}
+                    </div>
+                  )}
                 </div>
-              </div>
-            </section>
-          );
-        })}
-
-      {tab === 'scenes' &&
-        SHELVES.map((shelf) => {
-          const scene = sceneForShelf(shelf);
-          return (
-            <section
-              key={shelf}
-              data-testid={`book-scenes-${shelf}`}
-              className="overflow-hidden rounded-[2rem] border-[3px]"
-              style={{ borderColor: INK, boxShadow: hardShadow(), backgroundColor: '#fff8ec' }}
-            >
-              <header
-                className="flex items-center gap-2 border-b-[3px] px-4 py-2 text-lg font-black"
-                style={{
-                  backgroundColor: shelf === 'play' ? CHALK : categoryFill(shelf, 0),
-                  borderColor: INK,
-                  color: INK,
-                }}
-              >
-                <span aria-hidden>{CATEGORY_EMOJI[shelf]}</span>
-                {t.menu.categories[shelf]}
-              </header>
-              <div className="p-3">
-                {scene ? (
-                  <SceneBoard
-                    scene={scene}
-                    book={book}
-                    onPlacePiece={onPlaceScenePiece}
-                    playPop={playPop}
-                    playSuccess={playSuccess}
-                  />
-                ) : (
-                  <div
-                    className="flex h-20 items-center justify-center rounded-2xl border-2 border-dashed text-sm font-extrabold"
-                    style={{ borderColor: '#b8aea3', backgroundColor: PAPER, color: '#6b5a4c' }}
-                    data-testid={`scene-coming-${shelf}`}
-                  >
-                    {t.stickerBook.comingSoon}
-                  </div>
-                )}
-              </div>
-            </section>
-          );
-        })}
-
-      {tab === 'collection' && GENERAL_STICKERS.some((g) => g.id !== 'general_star' && earned.has(g.id)) && (
-        <section
-          data-testid="book-specials"
-          className="rounded-[2rem] border-[3px] p-3"
-          style={{ borderColor: INK, boxShadow: hardShadow(), backgroundColor: '#fff8ec' }}
-        >
-          <h3 className="mb-2 text-lg font-black" style={{ color: INK }}>
-            ✨ {t.stickerBook.specials}
-          </h3>
-          <div className="grid grid-cols-4 justify-items-center">
-            {GENERAL_STICKERS.filter((g) => g.id !== 'general_star' && earned.has(g.id)).map((g) => slot(g, g.id))}
-          </div>
-        </section>
+              </section>
+            );
+          })}
+        </div>
       )}
 
+      {printing && (
+        <PrintDialog
+          book={book}
+          page={book.pages[Math.min(pageIndex, book.pages.length - 1)]}
+          pageNumber={Math.min(pageIndex, book.pages.length - 1) + 1}
+          onClose={() => setPrinting(false)}
+        />
+      )}
       {open && (
         <StickerDetail
           sticker={open}

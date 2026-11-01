@@ -221,10 +221,10 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('accessory-tray')).toHaveCount(0);
     await page.getByTestId('sticker-detail-close').click();
 
-    await expect(page.getByTestId('sticker-book-count')).toContainText('Tap a sticker to see it big');
+    // No subtitle in the slim top bar: just the count; the hint lives inside an empty page.
+    await expect(page.getByTestId('sticker-book-count')).toHaveText('2/105');
+    await expect(page.getByTestId('book-panda')).toHaveCount(0);
     await page.getByTestId('book-tab-pages').click();
-    await expect(page.getByTestId('sticker-book-count')).toContainText('Drag stickers onto your page');
-    await expect(page.getByTestId('sticker-book-count')).not.toContainText('Tap a sticker');
     // Scene backgrounds are the slot-free page card: no dashed placeholder shapes.
     for (const img of await page.getByTestId('page-backgrounds').locator('img').all()) {
       expect(await img.getAttribute('src')).not.toContain('outline');
@@ -232,9 +232,11 @@ test.describe('Sticker Book', () => {
     await page.getByTestId('page-bg-paper').click();
     const board = page.getByTestId('page-board');
     await expect(board).toHaveAttribute('data-background', 'paper');
-    // A blank page is plain cream: nothing drawn on it.
-    await expect(board.locator('img, p')).toHaveCount(0);
-    await expect(page.getByTestId('page-label')).toHaveText('Page 1 of 1');
+    // A blank page is plain cream with only a faint hint: no placeholder shapes.
+    await expect(board.locator('img')).toHaveCount(0);
+    await expect(board.getByTestId('page-empty-hint')).toHaveText('Drag stickers onto your page');
+    await expect(page.getByTestId('page-label')).toHaveText('1/1');
+    await expect(page.getByTestId('page-prev')).toHaveCount(0);
     const tray1 = page.locator('[data-testid="tray-sticker"][data-sticker="numbers_01"]');
     await expect(tray1).toHaveAttribute('data-free', '2');
     await expect(tray1.getByTestId('tray-count')).toHaveText('×2');
@@ -242,6 +244,7 @@ test.describe('Sticker Book', () => {
     // ×2 means two placements: one dragged, one tapped (lands in the middle), then it leaves the tray.
     await dragTo(page, tray1, board);
     await expect(board.getByTestId('page-sticker')).toHaveCount(1);
+    await expect(board.getByTestId('page-empty-hint')).toHaveCount(0);
     await expect(tray1).toHaveAttribute('data-free', '1');
     await tray1.click();
     await expect(board.locator('[data-testid="page-sticker"][data-sticker="numbers_01"]')).toHaveCount(2);
@@ -298,14 +301,17 @@ test.describe('Sticker Book', () => {
     await expect(board.getByTestId('page-sticker')).toHaveCount(1);
     await expect(tray1).toHaveAttribute('data-free', '1');
 
-    // A second page on a scene background.
+    // On the last page the right arrow is "+": a second page on a scene background.
+    await expect(page.getByTestId('page-next')).toHaveCount(0);
     await page.getByTestId('page-new').click();
     await page.getByTestId('page-bg-numbers').click();
-    await expect(page.getByTestId('page-label')).toHaveText('Page 2 of 2');
+    await expect(page.getByTestId('page-label')).toHaveText('2/2');
     await expect(board).toHaveAttribute('data-background', 'numbers');
     await expect(board.locator('img')).toHaveAttribute('src', /page_numbers/);
     await page.getByTestId('page-prev').click();
-    await expect(page.getByTestId('page-label')).toHaveText('Page 1 of 2');
+    await expect(page.getByTestId('page-label')).toHaveText('1/2');
+    await expect(page.getByTestId('page-next')).toBeVisible();
+    await expect(page.getByTestId('page-new')).toHaveCount(0);
     const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
     expect(stored.version).toBe(2);
     expect(stored.pages.map((p: { background: string }) => p.background)).toEqual(['paper', 'numbers']);
@@ -372,8 +378,8 @@ test.describe('Sticker Book', () => {
     const pagePdf = await pdfOf('print-page');
     expect(pagePdf.name).toBe('tensaiasobi-page-1.pdf');
     expect(pagePdf.head).toBe('%PDF-');
-    // Letter landscape (792 x 612 pt) with the 200 dpi background image.
-    expect(pagePdf.text).toMatch(/\/MediaBox \[0 0 792\.?\d* 612\.?\d*\]/);
+    // Letter portrait (612 x 792 pt), like the page on screen, with the 200 dpi background image.
+    expect(pagePdf.text).toMatch(/\/MediaBox \[0 0 612\.?\d* 792\.?\d*\]/);
     expect(pagePdf.text).toContain('/Subtype /Image');
 
     await page.getByTestId('print-paper-a4').click();
@@ -387,28 +393,119 @@ test.describe('Sticker Book', () => {
     await expect(dialog).toHaveCount(0);
   });
 
-  test('the book fits a 320x568 phone: tabs, page board and tray, no sideways scroll', async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 568 });
-    await seed(page, { [KEY]: save({ copies: copies(['numbers_01', 'numbers_02', 'logic_01']), seenCount: 3 }) });
+  /** Tab labels or the book title cut short with an ellipsis. */
+  const TRUNCATED_TABS = "[...document.querySelectorAll('[role=tab] span, [data-testid=book-top-bar] h2')].filter((e) => e.scrollWidth > e.clientWidth).length";
+
+  test('my pages is mostly page: 48 px bar, 40 px tabs, an A4 page of 480+ px, 72 px tray, no scroll; fits 320x568', async ({
+    page,
+  }) => {
+    const pages = Array.from({ length: 3 }, (_, i) => ({
+      id: `p${i + 1}`,
+      background: 'paper',
+      stickers: i === 0 ? [{ uid: 'c1', x: 0.5, y: 0.5, size: 1, rotation: 0 }] : [],
+    }));
+    await seed(page, {
+      [KEY]: save({ copies: copies(['numbers_01', 'numbers_02', 'logic_01']), pages, seenCount: 3 }),
+    });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
+    const bar = (await page.getByTestId('book-top-bar').boundingBox())!;
+    expect(bar.height).toBe(48);
+    for (const id of ['home-button', 'page-print', 'stars-total']) {
+      const b = (await page.getByTestId(id).boundingBox())!;
+      expect(b.y).toBeGreaterThanOrEqual(bar.y);
+      expect(b.y + b.height).toBeLessThanOrEqual(bar.y + bar.height);
+    }
+    const tabs = (await page.getByRole('tablist').boundingBox())!;
+    expect(tabs.height).toBe(40);
+    expect(await page.evaluate<number>(TRUNCATED_TABS)).toBe(0);
+    expect(tabs.y).toBeCloseTo(bar.y + bar.height, 0);
+    // Collection starts right under the same header.
+    const shelf = (await page.getByTestId('book-shelf-numbers').boundingBox())!;
+    expect(shelf.y - (tabs.y + tabs.height)).toBeLessThanOrEqual(12);
+
+    await page.getByTestId('book-tab-pages').click();
+    const board = page.getByTestId('page-board');
+    await expect(page.getByTestId('page-label')).toHaveText('3/3');
+    const bb = (await board.boundingBox())!;
+    const tray = (await page.getByTestId('page-tray').boundingBox())!;
+    expect(bb.height).toBeGreaterThanOrEqual(480);
+    expect(bb.height / bb.width).toBeCloseTo(Math.SQRT2, 1);
+    expect(Math.abs(bb.x + bb.width / 2 - 375 / 2)).toBeLessThanOrEqual(1);
+    expect(tray.height).toBe(72);
+    expect(tray.y).toBeGreaterThanOrEqual(bb.y + bb.height);
+    expect(tray.y + tray.height).toBeLessThanOrEqual(812);
+    // Nothing scrolls on My pages: no scroll container (other than the sideways tray) has hidden content.
+    expect(await page.evaluate<number>('document.documentElement.scrollHeight')).toBeLessThanOrEqual(812);
+    expect(
+      await page.evaluate<string[]>(
+        "[...document.querySelectorAll('main, [data-testid=sticker-book] *')].filter((e) => !e.closest('[data-testid=page-tray]') && /auto|scroll/.test(getComputedStyle(e).overflowY) && e.scrollHeight > e.clientHeight + 1).map((e) => e.outerHTML.slice(0, 120))",
+      ),
+    ).toEqual([]);
+    // Arrows sit on the page edges, mid-height, with the "n/N" label inside the bottom corner.
+    const prev = (await page.getByTestId('page-prev').boundingBox())!;
+    const plus = (await page.getByTestId('page-new').boundingBox())!;
+    const label = (await page.getByTestId('page-label').boundingBox())!;
+    expect(prev.width).toBe(36);
+    expect(prev.x).toBeGreaterThanOrEqual(bb.x);
+    expect(plus.x + plus.width).toBeLessThanOrEqual(bb.x + bb.width);
+    expect(Math.abs(prev.y + prev.height / 2 - (bb.y + bb.height / 2))).toBeLessThanOrEqual(2);
+    expect(label.y + label.height).toBeLessThanOrEqual(bb.y + bb.height);
+    expect(label.y).toBeGreaterThan(bb.y + bb.height - 30);
+    await page.getByTestId('page-prev').click();
+    await expect(page.getByTestId('page-label')).toHaveText('2/3');
+    await page.getByTestId('page-prev').click();
+    await expect(page.getByTestId('page-empty-hint')).toHaveCount(0);
+
+    // The grab handle folds the tray to 24 px and the page keeps its size.
+    await page.getByTestId('tray-handle').click();
+    await expect(page.getByTestId('page-tray')).toHaveAttribute('data-open', 'false');
+    expect((await page.getByTestId('page-tray').boundingBox())!.height).toBe(24);
+    await page.getByTestId('tray-handle').click();
+    await expect(page.getByTestId('tray-sticker').first()).toBeVisible();
+    expect((await page.getByTestId('tray-sticker').first().boundingBox())!.width).toBe(56);
+
+    // 320x568: the same layout shrinks, no sideways scroll.
+    await page.setViewportSize({ width: 320, height: 568 });
+    await expect(async () => {
+      const small = (await board.boundingBox())!;
+      const t2 = (await page.getByTestId('page-tray').boundingBox())!;
+      expect(small.x).toBeGreaterThanOrEqual(0);
+      expect(small.x + small.width).toBeLessThanOrEqual(320);
+      expect(small.height).toBeGreaterThan(300);
+      expect(t2.y).toBeGreaterThanOrEqual(small.y + small.height);
+      expect(t2.y + t2.height).toBeLessThanOrEqual(568);
+    }).toPass();
     for (const tab of ['collection', 'scenes', 'pages']) {
       const box = (await page.getByTestId(`book-tab-${tab}`).boundingBox())!;
-      expect(box.x).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width).toBeLessThanOrEqual(320);
     }
-    await page.getByTestId('book-tab-pages').click();
-    await page.getByTestId('page-bg-paper').click();
-    await page.locator('[data-testid="tray-sticker"][data-sticker="numbers_01"]').click();
-    const board = (await page.getByTestId('page-board').boundingBox())!;
-    const tray = (await page.getByTestId('page-tray').boundingBox())!;
-    expect(board.x).toBeGreaterThanOrEqual(0);
-    expect(board.x + board.width).toBeLessThanOrEqual(320);
-    expect(board.width).toBeGreaterThan(200);
-    // Board and tray are both on screen together, without scrolling.
-    expect(tray.y).toBeGreaterThanOrEqual(board.y + board.height);
-    expect(tray.y + tray.height).toBeLessThanOrEqual(568);
+    expect(await page.evaluate<number>(TRUNCATED_TABS)).toBe(0);
+    const star = (await page.getByTestId('stars-total').boundingBox())!;
+    expect(star.x + star.width).toBeLessThanOrEqual(320);
     expect(await page.evaluate<number>('document.documentElement.scrollWidth')).toBeLessThanOrEqual(320);
+    expect(await page.evaluate<number>('document.documentElement.scrollHeight')).toBeLessThanOrEqual(568);
+
+    // Wide screens: the same portrait page, centred, with the tray beside it.
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(async () => {
+      const wide = (await board.boundingBox())!;
+      const t3 = (await page.getByTestId('page-tray').boundingBox())!;
+      expect(wide.height / wide.width).toBeCloseTo(Math.SQRT2, 1);
+      expect(t3.x).toBeGreaterThanOrEqual(wide.x + wide.width);
+    }).toPass();
+  });
+
+  test('my pages stop at 20: no "+" on the last page', async ({ page }) => {
+    const pages = Array.from({ length: 20 }, (_, i) => ({ id: `p${i + 1}`, background: 'paper', stickers: [] }));
+    await seed(page, { [KEY]: save({ copies: copies(['numbers_01']), pages, seenCount: 1 }) });
+    await page.goto('/');
+    await page.getByTestId('launch-sticker-book').click();
+    await page.getByTestId('book-tab-pages').click();
+    await expect(page.getByTestId('page-label')).toHaveText('20/20');
+    await expect(page.getByTestId('page-new')).toHaveCount(0);
+    await expect(page.getByTestId('page-next')).toHaveCount(0);
+    await expect(page.getByTestId('page-prev')).toBeVisible();
   });
 
   test('the Numbers train scene snaps onto its outline page and a full scene shows the reward', async ({ page }) => {

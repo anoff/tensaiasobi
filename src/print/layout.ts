@@ -1,5 +1,5 @@
 /** Print layout maths in millimetres (pure; unit-tested). */
-import { PAGE_SIZE_STEPS, type PagePlacement } from '../data/stickerRules';
+import { PAGE_ASPECT, PAGE_SIZE_STEPS, type PagePlacement } from '../data/stickerRules';
 
 export type PaperSize = 'a4' | 'letter';
 
@@ -28,11 +28,9 @@ export const SHEET_STICKER_MM = 50;
 export const PAGE_MARGIN_MM = 10;
 export const SHEET_GAP_MM = 6;
 
-/** A My page (4:3) on landscape paper: the biggest centred box inside the margins. */
-export function pageLayout(paper: PaperSize, aspect = 4 / 3, margin = PAGE_MARGIN_MM) {
-  const { w: short, h: long } = PAPER_MM[paper];
-  const pw = long;
-  const ph = short;
+/** A My page (A4 portrait shape) on portrait paper: the biggest centred box inside the margins. */
+export function pageLayout(paper: PaperSize, aspect = PAGE_ASPECT, margin = PAGE_MARGIN_MM) {
+  const { w: pw, h: ph } = PAPER_MM[paper];
   const aw = pw - 2 * margin;
   const ah = ph - 2 * margin;
   const w = Math.min(aw, ah * aspect);

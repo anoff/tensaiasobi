@@ -28,9 +28,9 @@ const fetchText = (url: string) => {
   return text.get(url)!;
 };
 
-async function newDoc(paper: PaperSize, orientation: 'portrait' | 'landscape') {
+async function newDoc(paper: PaperSize) {
   const [{ jsPDF }] = await Promise.all([import('jspdf'), import('svg2pdf.js')]);
-  return new jsPDF({ unit: 'mm', format: paper, orientation, compress: true });
+  return new jsPDF({ unit: 'mm', format: paper, orientation: 'portrait', compress: true });
 }
 
 /** svg2pdf reads computed styles, so each SVG sits in the DOM (off-screen) while it is drawn. */
@@ -77,7 +77,7 @@ async function backgroundImage(page: BookPage, box: Box) {
 /** The current page as on screen: background (optional), then each copy with its accessories, tilt and turn. */
 export async function pagePdf(book: StickerSave, page: BookPage, paper: PaperSize, background: boolean) {
   const { box } = pageLayout(paper);
-  const doc = await newDoc(paper, 'landscape');
+  const doc = await newDoc(paper);
   if (background) doc.addImage(await backgroundImage(page, box), 'JPEG', box.x, box.y, box.w, box.h);
   const sparkle = SHINY_SPARKLE ? await fetchText(SHINY_SPARKLE) : undefined;
   for (const pl of page.stickers) {
@@ -112,7 +112,7 @@ export function sheetStickers(book: StickerSave) {
 export async function sheetPdf(book: StickerSave, paper: PaperSize) {
   const items = sheetStickers(book);
   const { pages } = sheetLayout(paper, items.length);
-  const doc = await newDoc(paper, 'portrait');
+  const doc = await newDoc(paper);
   const sparkle = SHINY_SPARKLE ? await fetchText(SHINY_SPARKLE) : undefined;
   let i = 0;
   for (const [p, boxes] of pages.entries()) {
