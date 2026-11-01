@@ -14,6 +14,47 @@ export function EmptySlot({ size, testId }: { size: number | string; testId?: st
   );
 }
 
+/**
+ * Missing sticker in the collection: its own shape as a pebble silhouette, the §6 outline rule
+ * (pebble 35 % over the page, here as the solid mix so layers don't stack) with a 2 px pebble
+ * edge. A masked shape can't carry a dashed stroke, so the edge is solid.
+ */
+export function Silhouette({
+  src,
+  size,
+  tilt = 0,
+  testId,
+}: {
+  src: string;
+  size: number;
+  tilt?: number;
+  testId?: string;
+}) {
+  const mask = {
+    mask: `url("${src}") center / contain no-repeat`,
+    WebkitMask: `url("${src}") center / contain no-repeat`,
+  };
+  const edge = ['2px 0', '-2px 0', '0 2px', '0 -2px'].map((o) => `drop-shadow(${o} 0 ${PEBBLE})`).join(' ');
+  return (
+    <span
+      data-testid={testId}
+      data-silhouette="true"
+      aria-hidden
+      className="relative block"
+      style={{ width: size, height: size, transform: `rotate(${tilt}deg)` }}
+    >
+      {/* Filter on a wrapper: on the masked span itself the mask would clip the edge away. */}
+      <span className="absolute inset-0" style={{ filter: edge }}>
+        <span className="block h-full w-full" style={{ backgroundColor: PEBBLE, ...mask }} />
+      </span>
+      <span className="absolute inset-0" style={{ backgroundColor: SLOT_TINT, ...mask }} />
+    </span>
+  );
+}
+
+/** Pebble #b8aea3 at 35 % over the collection page #fff8ec. */
+const SLOT_TINT = '#e6ddd2';
+
 interface StickerImageProps {
   src: string | undefined;
   /** Rendered size in px. Accessories render at the same size, centred on their placement point. */

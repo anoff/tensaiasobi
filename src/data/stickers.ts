@@ -17,7 +17,7 @@ const PNG = import.meta.glob<string>('../assets/{stickers,characters}/**/*.png',
 });
 const artUrl = (folder: string, file: string): string | undefined => PNG[`../assets/${folder}/${file}`];
 /* Capsule machine, capsules and the shiny sparkle as SVG: crisp at any size on the award overlay. */
-const SVG = import.meta.glob<string>('../assets/stickers/{capsule,shiny}/svg/*.svg', {
+const SVG = import.meta.glob<string>('../assets/stickers/{capsule,shiny,icons}/svg/*.svg', {
   eager: true,
   query: '?url',
   import: 'default',
@@ -176,6 +176,13 @@ export const CHARACTERS: CharacterInfo[] = characterManifest.characters
   }));
 
 /** Capsule machine layers (240 px box): the knob stacks on the body and turns about KNOB_PIVOT. */
+/** Sticker book tab icons. */
+export const BOOK_TAB_ICONS = {
+  pages: svgUrl('icons', 'tab_my_pages'),
+  collection: svgUrl('icons', 'tab_collection'),
+  scenes: svgUrl('icons', 'tab_scenes'),
+};
+
 export const CAPSULE_MACHINE = {
   body: svgUrl('capsule', 'capsule_machine_body'),
   knob: svgUrl('capsule', 'capsule_machine_knob'),

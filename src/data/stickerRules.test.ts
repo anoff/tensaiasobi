@@ -1,25 +1,31 @@
 import { describe, expect, it } from 'vitest';
 import {
+  MAX_PAGES,
   MISSING_WEIGHT,
   SHINY_CHANCE,
   STICKER_SAVE_VERSION,
   addCopy,
   addOwnedAccessory,
+  addPage,
   canBuyAccessory,
   capsulesToday,
   copyCount,
   drawFromShelf,
   dropChance,
   emptyStickerSave,
+  freeCopies,
   grantOnce,
   isSceneComplete,
   ownedIds,
   parseStickerSave,
   placeAccessory,
+  placeOnPage,
   placeScenePiece,
   removeAccessory,
+  removeFromPage,
   rollCapsule,
   townHasItems,
+  updatePlacement,
   type AwardPools,
   type Rng,
   type StickerSave,
@@ -156,7 +162,9 @@ describe('parseStickerSave', () => {
   it('starts a fresh book for missing, broken or other-version saves', () => {
     expect(parseStickerSave(null)).toEqual(emptyStickerSave());
     expect(parseStickerSave('{oops')).toEqual(emptyStickerSave());
-    expect(parseStickerSave(JSON.stringify({ ...own('n1'), version: STICKER_SAVE_VERSION + 1 }))).toEqual(emptyStickerSave());
+    expect(parseStickerSave(JSON.stringify({ ...own('n1'), version: STICKER_SAVE_VERSION + 1 }))).toEqual(
+      emptyStickerSave()
+    );
   });
 
   it('discards a v1 book (no migration, by design) and starts an empty v2 book', () => {
@@ -182,13 +190,18 @@ describe('parseStickerSave', () => {
     save = addCopy(save, 'n1', true).save;
     save = rollCapsule(save, 'numbers', DAY, pools, seq(0, 0, 0.5)).save;
     save = addOwnedAccessory(save, 'acc_hat');
-    save = placeAccessory(save, 'n1', 'acc_hat', 0.3, 0.2);
+    save = placeAccessory(save, 'c1', 'acc_hat', 0.3, 0.2);
+    save = placeOnPage(addPage(save, 'paper'), 'p1', 'n1', 0.5, 0.5);
     expect(parseStickerSave(JSON.stringify(save))).toEqual(save);
   });
 });
 
 describe('accessories', () => {
-  const base = addOwnedAccessory(grantOnce(grantOnce(emptyStickerSave(), 'n1'), 'n2'), 'acc_hat');
+  // Two copies of n1 (uids c1, c2) and one n2 (c3).
+  const base = addOwnedAccessory(
+    addCopy(addCopy(grantOnce(emptyStickerSave(), 'n1'), 'n1', false).save, 'n2', false).save,
+    'acc_hat'
+  );
 
   it('are bought once and owned globally', () => {
     expect(canBuyAccessory(emptyStickerSave(), 'acc_hat', 10, 10)).toBe(true);
@@ -197,26 +210,102 @@ describe('accessories', () => {
     expect(addOwnedAccessory(base, 'acc_hat')).toBe(base);
   });
 
-  it('can sit on every earned sticker, one of each per sticker, clamped to the sticker box', () => {
-    let save = placeAccessory(base, 'n1', 'acc_hat', 0.5, 0.5);
-    save = placeAccessory(save, 'n2', 'acc_hat', 1.4, -0.2);
-    save = placeAccessory(save, 'n1', 'acc_hat', 0.4, 0.1);
+  it('attach per copy (two copies of one sticker dress apart), one of each per copy, clamped to the box', () => {
+    let save = placeAccessory(base, 'c1', 'acc_hat', 0.5, 0.5);
+    save = placeAccessory(save, 'c3', 'acc_hat', 1.4, -0.2);
+    save = placeAccessory(save, 'c1', 'acc_hat', 0.4, 0.1);
     expect(save.placements).toEqual({
-      n1: [{ accessoryId: 'acc_hat', x: 0.4, y: 0.1 }],
-      n2: [{ accessoryId: 'acc_hat', x: 1, y: 0 }],
+      c1: [{ accessoryId: 'acc_hat', x: 0.4, y: 0.1 }],
+      c3: [{ accessoryId: 'acc_hat', x: 1, y: 0 }],
     });
+    expect(save.placements.c2).toBeUndefined();
     expect(save.ownedAccessories).toEqual(['acc_hat']);
   });
 
-  it('needs an earned sticker and an owned accessory', () => {
-    expect(placeAccessory(base, 'n9', 'acc_hat', 0.5, 0.5)).toBe(base);
-    expect(placeAccessory(base, 'n1', 'acc_bow', 0.5, 0.5)).toBe(base);
+  it('needs an owned copy and an owned accessory', () => {
+    expect(placeAccessory(base, 'c9', 'acc_hat', 0.5, 0.5)).toBe(base);
+    expect(placeAccessory(base, 'n1', 'acc_hat', 0.5, 0.5)).toBe(base);
+    expect(placeAccessory(base, 'c1', 'acc_bow', 0.5, 0.5)).toBe(base);
   });
 
   it('can be taken off again', () => {
-    const save = removeAccessory(placeAccessory(base, 'n1', 'acc_hat', 0.5, 0.5), 'n1', 'acc_hat');
+    const save = removeAccessory(placeAccessory(base, 'c1', 'acc_hat', 0.5, 0.5), 'c1', 'acc_hat');
     expect(save.placements).toEqual({});
     expect(save.ownedAccessories).toEqual(['acc_hat']);
+  });
+});
+
+describe('my pages', () => {
+  // n1 ×3 (c1..c3), n2 ×1 (c4).
+  let owned = grantOnce(emptyStickerSave(), 'n1');
+  owned = addCopy(addCopy(owned, 'n1', false).save, 'n1', true).save;
+  owned = addCopy(owned, 'n2', false).save;
+  const withPage = addPage(owned, 'paper');
+
+  it('adds blank paper or scene pages, up to 20', () => {
+    let save = emptyStickerSave();
+    for (let i = 0; i < 25; i++) save = addPage(save, i % 2 ? 'numbers' : 'paper');
+    expect(MAX_PAGES).toBe(20);
+    expect(save.pages).toHaveLength(20);
+    expect(new Set(save.pages.map((p) => p.id)).size).toBe(20);
+    expect(save.pages[1]).toEqual({ id: 'p2', background: 'numbers', stickers: [] });
+    expect(addPage(save, 'paper')).toBe(save);
+  });
+
+  it('places each copy once: a sticker owned ×3 allows exactly 3 placements, across pages', () => {
+    let save = addPage(withPage, 'logic');
+    save = placeOnPage(save, 'p1', 'n1', 0.2, 0.2);
+    save = placeOnPage(save, 'p2', 'n1', 0.5, 0.5);
+    save = placeOnPage(save, 'p1', 'n1', 0.8, 0.8);
+    expect(freeCopies(save, 'n1')).toEqual([]);
+    expect(placeOnPage(save, 'p1', 'n1', 0.5, 0.5)).toBe(save);
+    expect(save.pages[0].stickers.map((s) => s.uid)).toEqual(['c1', 'c3']);
+    expect(save.pages[1].stickers.map((s) => s.uid)).toEqual(['c2']);
+    // Unowned stickers and unknown pages are no-ops.
+    expect(placeOnPage(save, 'p1', 'n9', 0.5, 0.5)).toBe(save);
+    expect(placeOnPage(owned, 'p1', 'n2', 0.5, 0.5)).toBe(owned);
+    // Peeling one back to the tray frees that copy again.
+    save = removeFromPage(save, 'p1', 'c1');
+    expect(freeCopies(save, 'n1').map((c) => c.uid)).toEqual(['c1']);
+  });
+
+  it('moves, resizes (3 steps) and turns a placed copy, clamped to the page', () => {
+    let save = placeOnPage(withPage, 'p1', 'n2', 0.5, 0.5);
+    expect(save.pages[0].stickers[0]).toEqual({ uid: 'c4', x: 0.5, y: 0.5, size: 1, rotation: 0 });
+    save = updatePlacement(save, 'p1', 'c4', { x: 1.3, y: -1, size: 2, rotation: 370 });
+    expect(save.pages[0].stickers[0]).toEqual({ uid: 'c4', x: 1, y: 0, size: 2, rotation: 10 });
+    expect(updatePlacement(save, 'p1', 'c9', { x: 0 })).toBe(save);
+  });
+
+  it('autosaves: a decorated page survives a save/load round trip as v2, and bad data is dropped', () => {
+    let save = placeOnPage(addPage(withPage, 'play'), 'p1', 'n1', 0.3, 0.4);
+    save = updatePlacement(save, 'p1', 'c1', { rotation: -30, size: 0 });
+    save = placeOnPage(save, 'p2', 'n1', 0.5, 0.5);
+    save = placeAccessory(addOwnedAccessory(save, 'acc_hat'), 'c1', 'acc_hat', 0.5, 0.2);
+    const stored = JSON.parse(JSON.stringify(save)) as StickerSave;
+    expect(stored.version).toBe(2);
+    expect(parseStickerSave(JSON.stringify(stored))).toEqual(save);
+
+    const tampered = {
+      ...stored,
+      pages: [
+        {
+          ...stored.pages[0],
+          stickers: [...stored.pages[0].stickers, { uid: 'c1', x: 0, y: 0, size: 1, rotation: 0 }],
+        },
+        { id: 'px', background: 'moon', stickers: [] },
+        ...Array.from({ length: 30 }, (_, i) => ({
+          id: `q${i}`,
+          background: 'paper',
+          stickers: [{ uid: 'zz', x: 0, y: 0, size: 1, rotation: 0 }],
+        })),
+      ],
+    };
+    const loaded = parseStickerSave(JSON.stringify(tampered));
+    expect(loaded.pages).toHaveLength(MAX_PAGES);
+    expect(loaded.pages[0].stickers.map((s) => s.uid)).toEqual(['c1']);
+    expect(loaded.pages.some((p) => p.id === 'px')).toBe(false);
+    expect(loaded.pages[1].stickers).toEqual([]);
   });
 });
 

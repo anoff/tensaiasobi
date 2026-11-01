@@ -242,6 +242,7 @@ function AppContent() {
             onBuyAccessory={handleBuyAccessory}
             onPlaceAccessory={stickers.placeAccessory}
             onRemoveAccessory={stickers.removeAccessory}
+            pageEdits={stickers.pages}
             onPlaceScenePiece={stickers.placeScenePiece}
             onSeen={stickers.markSeen}
             playPop={playPop}

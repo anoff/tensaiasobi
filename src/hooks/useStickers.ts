@@ -1,14 +1,20 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   STICKER_STORAGE_KEY,
   addOwnedAccessory,
+  addPage,
   copyCount,
   grantOnce,
   localDay,
   parseStickerSave,
   placeAccessory,
+  placeOnPage,
   placeScenePiece,
   removeAccessory,
+  removeFromPage,
+  updatePlacement,
+  type PageBackground,
+  type PagePlacement,
   rollCapsule,
   townHasItems,
   type Shelf,
@@ -55,8 +61,16 @@ export interface UseStickersReturn {
   /** A finished round on a shelf; rolls for a capsule. Returns the award, or null when the roll missed. */
   completeRound: (shelf: Shelf) => CapsuleAward | null;
   buyAccessory: (accessoryId: string) => void;
-  placeAccessory: (stickerId: string, accessoryId: string, x: number, y: number) => void;
-  removeAccessory: (stickerId: string, accessoryId: string) => void;
+  /** Accessories go on one copy (by uid). */
+  placeAccessory: (uid: string, accessoryId: string, x: number, y: number) => void;
+  removeAccessory: (uid: string, accessoryId: string) => void;
+  /** My pages edits; every change is saved straight away. */
+  pages: {
+    addPage: (background: PageBackground) => void;
+    place: (pageId: string, stickerId: string, x: number, y: number) => void;
+    update: (pageId: string, uid: string, patch: Partial<Pick<PagePlacement, 'x' | 'y' | 'size' | 'rotation'>>) => void;
+    remove: (pageId: string, uid: string) => void;
+  };
   placeScenePiece: (pieceId: string) => void;
   markSeen: () => void;
   resetStickers: () => void;
@@ -83,23 +97,34 @@ export function useStickers(): UseStickersReturn {
     return { copy, count: copyCount(save, copy.id) };
   }, []);
 
+  const pages = useMemo<UseStickersReturn['pages']>(
+    () => ({
+      addPage: (bg) => update((s) => addPage(s, bg)),
+      place: (pageId, id, x, y) => update((s) => placeOnPage(s, pageId, id, x, y)),
+      update: (pageId, uid, patch) => update((s) => updatePlacement(s, pageId, uid, patch)),
+      remove: (pageId, uid) => update((s) => removeFromPage(s, pageId, uid)),
+    }),
+    [update]
+  );
+
   return {
     book,
     completeRound,
+    pages,
     buyAccessory: useCallback((id: string) => update((s) => addOwnedAccessory(s, id)), [update]),
     placeAccessory: useCallback(
-      (stickerId: string, accessoryId: string, x: number, y: number) =>
-        update((s) => placeAccessory(s, stickerId, accessoryId, x, y)),
-      [update],
+      (uid: string, accessoryId: string, x: number, y: number) =>
+        update((s) => placeAccessory(s, uid, accessoryId, x, y)),
+      [update]
     ),
     removeAccessory: useCallback(
-      (stickerId: string, accessoryId: string) => update((s) => removeAccessory(s, stickerId, accessoryId)),
-      [update],
+      (uid: string, accessoryId: string) => update((s) => removeAccessory(s, uid, accessoryId)),
+      [update]
     ),
     placeScenePiece: useCallback((pieceId: string) => update((s) => placeScenePiece(s, pieceId)), [update]),
     markSeen: useCallback(
       () => update((s) => (s.seenCount === s.copies.length ? s : { ...s, seenCount: s.copies.length })),
-      [update],
+      [update]
     ),
     resetStickers: useCallback(() => {
       const fresh = parseStickerSave(null);

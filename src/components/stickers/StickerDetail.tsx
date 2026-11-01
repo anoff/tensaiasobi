@@ -23,6 +23,10 @@ interface StickerDetailProps {
   onRemove: (accessoryId: string) => void;
   onClose: () => void;
   playPop: () => void;
+  /** Art to show (e.g. the shiny look of this copy); defaults to the sticker's art. */
+  src?: string;
+  /** Collection view: just the big sticker, no accessory tray (accessories go on placed copies). */
+  viewOnly?: boolean;
 }
 
 /** Big sticker plus the accessory tray: buy with stars, drag on, move, drag off. */
@@ -36,6 +40,8 @@ export function StickerDetail({
   onRemove,
   onClose,
   playPop,
+  src,
+  viewOnly = false,
 }: StickerDetailProps) {
   const { t } = useTranslation();
   const boxRef = useRef<HTMLDivElement>(null);
@@ -122,10 +128,10 @@ export function StickerDetail({
             data-testid="sticker-detail-box"
             className="relative touch-none"
             style={{ width: size, height: size }}
-            onPointerDown={grabPlaced}
+            onPointerDown={viewOnly ? undefined : grabPlaced}
           >
             <StickerImage
-              src={sticker.src}
+              src={src ?? sticker.src}
               size={size}
               placements={placements}
               hiddenAccessory={drag?.moved && drag.item.from === 'sticker' ? drag.item.accessoryId : null}
@@ -134,66 +140,70 @@ export function StickerDetail({
           </div>
         </div>
 
-        <p className="text-center text-sm font-extrabold" style={{ color: '#6b5a4c' }}>
-          {t.stickerBook.dragHint}
-        </p>
+        {!viewOnly && (
+          <>
+            <p className="text-center text-sm font-extrabold" style={{ color: '#6b5a4c' }}>
+              {t.stickerBook.dragHint}
+            </p>
 
-        <h3 className="mt-2 mb-2 text-lg font-black" style={{ color: INK }}>
-          {t.stickerBook.accessories}
-        </h3>
-        <div className="grid grid-cols-4 gap-3" data-testid="accessory-tray">
-          {ACCESSORIES.map((acc) => {
-            const owned = ownedAccessories.includes(acc.id);
-            const affordable = stars >= acc.price;
-            return (
-              <div key={acc.id} className="flex flex-col items-center gap-1">
-                <button
-                  type="button"
-                  data-testid={`accessory-${acc.id}`}
-                  data-owned={String(owned)}
-                  aria-label={acc.id}
-                  disabled={!owned}
-                  onPointerDown={owned ? (e) => start({ accessoryId: acc.id, from: 'tray' }, e) : undefined}
-                  className={`flex aspect-square w-full items-center justify-center rounded-2xl border-[3px] touch-none ${
-                    shake === acc.id ? 'animate-shake' : ''
-                  }`}
-                  style={{
-                    backgroundColor: owned ? '#fff' : 'rgba(184,174,163,0.25)',
-                    borderColor: INK,
-                    boxShadow: owned ? hardShadow(3, 4) : 'none',
-                    cursor: owned ? 'grab' : 'default',
-                  }}
-                >
-                  {acc.src && (
-                    <img
-                      src={acc.src}
-                      alt=""
-                      draggable={false}
-                      className="pointer-events-none h-[140%] w-[140%] max-w-none"
-                      style={{ opacity: owned ? 1 : 0.45 }}
-                    />
-                  )}
-                </button>
-                {!owned && (
-                  <KidButton
-                    size="sm"
-                    color="yellow"
-                    data-testid={`buy-${acc.id}`}
-                    aria-label={`${t.stickerBook.buy} ${acc.price}`}
-                    onClick={() => buy(acc.id)}
-                    className={`!px-2 !py-1 !text-sm ${affordable ? '' : 'opacity-60'}`}
-                  >
-                    ⭐ {acc.price}
-                  </KidButton>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        {shake && (
-          <p className="mt-2 text-center text-sm font-black" style={{ color: INK }} data-testid="not-enough-stars">
-            {t.stickerBook.notEnough}
-          </p>
+            <h3 className="mt-2 mb-2 text-lg font-black" style={{ color: INK }}>
+              {t.stickerBook.accessories}
+            </h3>
+            <div className="grid grid-cols-4 gap-3" data-testid="accessory-tray">
+              {ACCESSORIES.map((acc) => {
+                const owned = ownedAccessories.includes(acc.id);
+                const affordable = stars >= acc.price;
+                return (
+                  <div key={acc.id} className="flex flex-col items-center gap-1">
+                    <button
+                      type="button"
+                      data-testid={`accessory-${acc.id}`}
+                      data-owned={String(owned)}
+                      aria-label={acc.id}
+                      disabled={!owned}
+                      onPointerDown={owned ? (e) => start({ accessoryId: acc.id, from: 'tray' }, e) : undefined}
+                      className={`flex aspect-square w-full items-center justify-center rounded-2xl border-[3px] touch-none ${
+                        shake === acc.id ? 'animate-shake' : ''
+                      }`}
+                      style={{
+                        backgroundColor: owned ? '#fff' : 'rgba(184,174,163,0.25)',
+                        borderColor: INK,
+                        boxShadow: owned ? hardShadow(3, 4) : 'none',
+                        cursor: owned ? 'grab' : 'default',
+                      }}
+                    >
+                      {acc.src && (
+                        <img
+                          src={acc.src}
+                          alt=""
+                          draggable={false}
+                          className="pointer-events-none h-[140%] w-[140%] max-w-none"
+                          style={{ opacity: owned ? 1 : 0.45 }}
+                        />
+                      )}
+                    </button>
+                    {!owned && (
+                      <KidButton
+                        size="sm"
+                        color="yellow"
+                        data-testid={`buy-${acc.id}`}
+                        aria-label={`${t.stickerBook.buy} ${acc.price}`}
+                        onClick={() => buy(acc.id)}
+                        className={`!px-2 !py-1 !text-sm ${affordable ? '' : 'opacity-60'}`}
+                      >
+                        ⭐ {acc.price}
+                      </KidButton>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {shake && (
+              <p className="mt-2 text-center text-sm font-black" style={{ color: INK }} data-testid="not-enough-stars">
+                {t.stickerBook.notEnough}
+              </p>
+            )}
+          </>
         )}
       </div>
 

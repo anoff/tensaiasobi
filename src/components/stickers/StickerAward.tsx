@@ -99,7 +99,7 @@ export function StickerAward({ sticker, shiny, count, onDone, playCue }: Sticker
       aria-label={t.stickerBook.newSticker}
       onClick={tap}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && tap()}
-      className="fixed inset-0 z-[70] flex flex-col items-center justify-center outline-none select-none"
+      className="fixed inset-0 z-[70] flex flex-col items-center justify-center short:pb-[174px] outline-none select-none"
       // Cream scrim (AD): the game board must not show through; panda and machine sit on top of it.
       style={{ backgroundColor: 'rgba(255,248,236,0.85)' }}
     >

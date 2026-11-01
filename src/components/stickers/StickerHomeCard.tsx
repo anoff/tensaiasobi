@@ -44,7 +44,7 @@ export function StickerHomeCard({ book, totals, onClick }: StickerHomeCardProps)
               key={copy.uid}
               {...stickerLook(c, copy.shiny)}
               size={48}
-              placements={book.placements[c.id]}
+              placements={book.placements[copy.uid]}
               tilt={stickerTilt(c.id)}
               shiny={copy.shiny}
             />

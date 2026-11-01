@@ -59,12 +59,16 @@ async function answerMath(page: Page) {
 }
 
 async function dragTo(page: Page, from: Locator, to: Locator) {
-  const a = (await from.boundingBox())!;
   const b = (await to.boundingBox())!;
+  await dragToPoint(page, from, b.x + b.width / 2, b.y + b.height / 2);
+}
+
+async function dragToPoint(page: Page, from: Locator, x: number, y: number) {
+  const a = (await from.boundingBox())!;
   await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
   await page.mouse.down();
   await page.mouse.move(a.x + a.width / 2 + 10, a.y + a.height / 2 + 10, { steps: 3 });
-  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 8 });
+  await page.mouse.move(x, y, { steps: 8 });
   await page.mouse.up();
 }
 
@@ -108,8 +112,9 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('home-sticker-new')).toHaveCount(0);
   });
 
-  test('a duplicate says "Again!" with a ×2 badge; an untapped capsule opens itself at 4 s', async ({ page }) => {
+  test('a duplicate says "Again!" with a ×2 badge; an untapped capsule opens itself at 4 s; fits 320x568', async ({ page }) => {
     test.setTimeout(60_000);
+    await page.setViewportSize({ width: 320, height: 568 });
     // Every id on the Numbers shelf is owned once, so the first capsule of the day is a duplicate.
     const pool = [
       ...Array.from({ length: 18 }, (_, i) => `numbers_${String(i + 1).padStart(2, '0')}`),
@@ -129,6 +134,18 @@ test.describe('Sticker Book', () => {
     await expect(award).toHaveAttribute('data-phase', 'reveal', { timeout: 6000 });
     await expect(page.getByTestId('award-caption')).toHaveText('Again!');
     await expect(page.getByTestId('award-count')).toHaveText('×2');
+    // On a 320x568 phone the sticker and caption clear the panda and machine and stay on screen.
+    const caption = (await page.getByTestId('award-caption').boundingBox())!;
+    const sticker = (await page.getByTestId('award-sticker').boundingBox())!;
+    const machine = (await page.getByTestId('capsule-machine').boundingBox())!;
+    const panda = (await page.getByTestId('sticker-award-panda').boundingBox())!;
+    for (const b of [caption, sticker, machine, panda]) {
+      expect(b.x).toBeGreaterThanOrEqual(0);
+      expect(b.x + b.width).toBeLessThanOrEqual(320);
+      expect(b.y).toBeGreaterThanOrEqual(0);
+      expect(b.y + b.height).toBeLessThanOrEqual(568);
+    }
+    expect(caption.y + caption.height).toBeLessThanOrEqual(Math.min(machine.y, panda.y));
   });
 
   test('late in the day the drop curve makes a capsule (almost) never drop, with no countdown shown', async ({ page }) => {
@@ -187,35 +204,126 @@ test.describe('Sticker Book', () => {
     expect(await page.evaluate(() => localStorage.getItem('gamification_town'))).toBeNull();
   });
 
-  test('accessories are bought once with stars and stay on the sticker after a reload', async ({ page }) => {
-    await seed(page, { [KEY]: save({ copies: copies(['numbers_01', 'numbers_02']), seenCount: 2 }), gamification_stars: '15' });
+  test('my pages: drag copies from the tray, one placement per copy, size, turn, dress one copy, autosave', async ({ page }) => {
+    await seed(page, {
+      [KEY]: save({ copies: copies(['numbers_01', 'numbers_01', 'numbers_02']), seenCount: 3 }),
+      gamification_stars: '15',
+    });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
+    // The collection opens by default; a slot shows the sticker big, without the accessory tray.
+    await expect(page.getByTestId('book-tab-collection')).toHaveAttribute('aria-selected', 'true');
     await page.locator('[data-testid="sticker-slot"][data-sticker="numbers_01"]').click();
     await expect(page.getByTestId('sticker-detail')).toBeVisible();
+    await expect(page.getByTestId('accessory-tray')).toHaveCount(0);
+    await page.getByTestId('sticker-detail-close').click();
 
+    await page.getByTestId('book-tab-pages').click();
+    await page.getByTestId('page-bg-paper').click();
+    const board = page.getByTestId('page-board');
+    await expect(board).toHaveAttribute('data-background', 'paper');
+    await expect(page.getByTestId('page-label')).toHaveText('Page 1 of 1');
+    const tray1 = page.locator('[data-testid="tray-sticker"][data-sticker="numbers_01"]');
+    await expect(tray1).toHaveAttribute('data-free', '2');
+    await expect(tray1.getByTestId('tray-count')).toHaveText('×2');
+
+    // ×2 means two placements: one dragged, one tapped (lands in the middle), then it leaves the tray.
+    await dragTo(page, tray1, board);
+    await expect(board.getByTestId('page-sticker')).toHaveCount(1);
+    await expect(tray1).toHaveAttribute('data-free', '1');
+    await tray1.click();
+    await expect(board.locator('[data-testid="page-sticker"][data-sticker="numbers_01"]')).toHaveCount(2);
+    await expect(tray1).toHaveCount(0);
+    await expect(page.locator('[data-testid="tray-sticker"][data-sticker="numbers_02"]')).toHaveAttribute('data-free', '1');
+
+    // Tap to select: dashed box with size, turn and accessory handles.
+    const first = board.locator('[data-testid="page-sticker"][data-uid="c1"]');
+    const second = board.locator('[data-testid="page-sticker"][data-uid="c2"]');
+    // Both start near the middle: move the second copy aside.
+    const bb = (await board.boundingBox())!;
+    await dragToPoint(page, second, bb.x + bb.width * 0.8, bb.y + bb.height * 0.7);
+    await first.click();
+    await expect(first).toHaveAttribute('data-selected', 'true');
+    await expect(first.getByTestId('page-selection')).toBeVisible();
+    await expect(first).toHaveAttribute('data-size', '1');
+    await first.getByTestId('handle-size').click();
+    await expect(first).toHaveAttribute('data-size', '2');
+    const handle = first.getByTestId('handle-rotate');
+    const fb = (await first.boundingBox())!;
+    await dragToPoint(page, handle, fb.x + fb.width + 30, fb.y + fb.height / 2);
+    await expect(first).not.toHaveAttribute('data-rotation', '0');
+
+    // Accessories go on this copy only.
+    await first.getByTestId('handle-accessory').click();
+    await expect(page.getByTestId('sticker-detail')).toBeVisible();
     await page.getByTestId('buy-crown').click();
     await expect(page.getByTestId('accessory-crown')).toHaveAttribute('data-owned', 'true');
     // 5 stars left: the next one is too dear and just shakes.
     await page.getByTestId('buy-party_hat').click();
     await expect(page.getByTestId('not-enough-stars')).toBeVisible();
-    await expect(page.getByTestId('accessory-party_hat')).toHaveAttribute('data-owned', 'false');
-
     await dragTo(page, page.getByTestId('accessory-crown'), page.getByTestId('sticker-detail-box'));
     await expect(page.getByTestId('sticker-detail-box').getByTestId('placed-accessory')).toHaveAttribute('data-accessory', 'crown');
     await page.getByTestId('sticker-detail-close').click();
+    await expect(first.getByTestId('placed-accessory')).toHaveAttribute('data-accessory', 'crown');
+    await expect(second.getByTestId('placed-accessory')).toHaveCount(0);
 
+    // Autosaved: everything is back after a reload.
     await page.reload();
     await page.getByTestId('launch-sticker-book').click();
-    const first = page.locator('[data-testid="sticker-slot"][data-sticker="numbers_01"]');
+    await page.getByTestId('book-tab-pages').click();
+    await expect(board.getByTestId('page-sticker')).toHaveCount(2);
+    await expect(first).toHaveAttribute('data-size', '2');
     await expect(first.getByTestId('placed-accessory')).toHaveAttribute('data-accessory', 'crown');
-    // Owned globally: the second sticker can wear it without buying again.
-    await page.locator('[data-testid="sticker-slot"][data-sticker="numbers_02"]').click();
+    // Owned globally: the other copy can wear it without buying again.
+    await second.click();
+    await second.getByTestId('handle-accessory').click();
     await expect(page.getByTestId('accessory-crown')).toHaveAttribute('data-owned', 'true');
     await expect(page.getByTestId('buy-crown')).toHaveCount(0);
     await page.getByTestId('sticker-detail-close').click();
+
+    // Dragging a placed copy back onto the tray peels it off.
+    await dragTo(page, second, page.getByTestId('page-tray'));
+    await expect(board.getByTestId('page-sticker')).toHaveCount(1);
+    await expect(tray1).toHaveAttribute('data-free', '1');
+
+    // A second page on a scene background.
+    await page.getByTestId('page-new').click();
+    await page.getByTestId('page-bg-numbers').click();
+    await expect(page.getByTestId('page-label')).toHaveText('Page 2 of 2');
+    await expect(board).toHaveAttribute('data-background', 'numbers');
+    await page.getByTestId('page-prev').click();
+    await expect(page.getByTestId('page-label')).toHaveText('Page 1 of 2');
+    const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
+    expect(stored.version).toBe(2);
+    expect(stored.pages.map((p: { background: string }) => p.background)).toEqual(['paper', 'numbers']);
+    expect(stored.placements.c1).toEqual([expect.objectContaining({ accessoryId: 'crown' })]);
+
     await page.getByTestId('home-button').click();
     expect(await stars(page)).toBe(5);
+  });
+
+  test('the book fits a 320x568 phone: tabs, page board and tray, no sideways scroll', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await seed(page, { [KEY]: save({ copies: copies(['numbers_01', 'numbers_02', 'logic_01']), seenCount: 3 }) });
+    await page.goto('/');
+    await page.getByTestId('launch-sticker-book').click();
+    for (const tab of ['collection', 'scenes', 'pages']) {
+      const box = (await page.getByTestId(`book-tab-${tab}`).boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(320);
+    }
+    await page.getByTestId('book-tab-pages').click();
+    await page.getByTestId('page-bg-paper').click();
+    await page.locator('[data-testid="tray-sticker"][data-sticker="numbers_01"]').click();
+    const board = (await page.getByTestId('page-board').boundingBox())!;
+    const tray = (await page.getByTestId('page-tray').boundingBox())!;
+    expect(board.x).toBeGreaterThanOrEqual(0);
+    expect(board.x + board.width).toBeLessThanOrEqual(320);
+    expect(board.width).toBeGreaterThan(200);
+    // Board and tray are both on screen together, without scrolling.
+    expect(tray.y).toBeGreaterThanOrEqual(board.y + board.height);
+    expect(tray.y + tray.height).toBeLessThanOrEqual(568);
+    expect(await page.evaluate<number>('document.documentElement.scrollWidth')).toBeLessThanOrEqual(320);
   });
 
   test('the Numbers train scene snaps onto its outline page and a full scene shows the reward', async ({ page }) => {
@@ -223,6 +331,7 @@ test.describe('Sticker Book', () => {
     await seed(page, { [KEY]: save({ copies: copies(pieces), placedPieces: pieces.slice(1), seenCount: 4 }) });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
+    await page.getByTestId('book-tab-scenes').click();
     const scene = page.getByTestId('scene-numbers');
     await expect(scene).toHaveAttribute('data-complete', 'false');
     // The Train day scene draws on the Art Director's outline page.
@@ -239,6 +348,7 @@ test.describe('Sticker Book', () => {
     await seed(page, { [KEY]: save({ copies: copies(garden), placedPieces: garden.slice(0, 3), seenCount: 4 }) });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
+    await page.getByTestId('book-tab-scenes').click();
     const scene = page.getByTestId('scene-logic');
     const piece = scene.locator('[data-testid="scene-piece"][data-piece="scene_logic_block_steps"]');
     await piece.scrollIntoViewIfNeeded();
@@ -256,15 +366,19 @@ test.describe('Sticker Book', () => {
     for (const c of ['owl', 'fox', 'tortoise', 'panda']) {
       await expect(page.getByTestId(`book-character-${c}`)).toHaveAttribute('data-has-art', 'true');
     }
-    // Nothing earned yet: every slot waits as a dashed outline.
+    // Nothing earned yet: every slot waits as a pebble silhouette of its sticker.
     for (const shelf of ['numbers', 'language', 'logic', 'play']) {
       await expect(page.getByTestId(`book-moods-${shelf}`).getByTestId('sticker-slot-empty')).toHaveCount(4);
     }
     await expect(page.getByTestId('book-stickers-play').getByTestId('sticker-slot-empty')).toHaveCount(18);
+    await expect(page.getByTestId('book-stickers-play').locator('[data-silhouette="true"]')).toHaveCount(18);
     await expect(page.getByTestId('book-shelf-count-play')).toContainText('0 / 26');
-    // Reading corner, Shape garden and Playground use the Art Director's outline pages.
+    // Special scenes, one per category: Reading corner, Shape garden and Playground use the outline pages.
+    await page.getByTestId('book-tab-scenes').click();
+    await expect(page.getByTestId('book-tab-scenes')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('book-shelf-numbers')).toHaveCount(0);
     for (const shelf of ['language', 'logic', 'play']) {
-      await expect(page.getByTestId(`scene-${shelf}`).getByTestId('scene-page')).toBeVisible();
+      await expect(page.getByTestId(`book-scenes-${shelf}`).getByTestId(`scene-${shelf}`).getByTestId('scene-page')).toBeVisible();
     }
-});
+  });
 });
