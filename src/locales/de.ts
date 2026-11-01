@@ -297,7 +297,7 @@ export const de: TranslationSchema = {
     moods: "Stimmungen",
     blank: "Leer",
     reroll: "Szene neu würfeln",
-    pagesFull: "Dein Buch ist voll (20 Seiten)",
+    pagesFull: "Dein Buch ist voll",
     scenePieces: "Szenen-Sticker",
     themes: {
       playground: "Spielplatz",

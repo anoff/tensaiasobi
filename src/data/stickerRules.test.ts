@@ -32,6 +32,11 @@ import {
   type StickerSave,
 } from './stickerRules';
 import { LEGACY_SCENE_PAGES } from './legacyScenePages';
+import { de } from '../locales/de';
+import { en } from '../locales/en';
+import { fr } from '../locales/fr';
+import { ja } from '../locales/ja';
+import { ko } from '../locales/ko';
 
 const pools: AwardPools = {
   stickers: { numbers: ['n1', 'n2', 'n3'], language: ['l1'] },
@@ -424,6 +429,11 @@ describe('my pages', () => {
     const under = { ...loaded, pages: loaded.pages.slice(0, MAX_PAGES - 1) };
     expect(canAddPage(under)).toBe(true);
     expect(addPage(under, 'blank').pages).toHaveLength(MAX_PAGES);
+  });
+
+  it('says the book is full without a page number (true at 20 to 24 pages)', () => {
+    for (const t of [de, en, fr, ja, ko]) expect(t.stickerBook.pagesFull).not.toMatch(/[0-9０-９]/);
+    expect(en.stickerBook.pagesFull).toBe('Your book is full');
   });
 
   it('loses nothing: tray copies plus placed pieces (pages and outlines) match before and after', () => {

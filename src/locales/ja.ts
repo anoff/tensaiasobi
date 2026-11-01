@@ -297,7 +297,7 @@ export const ja: TranslationSchema = {
     moods: "きもち",
     blank: "まっしろ",
     reroll: "シーンを まぜる",
-    pagesFull: "ページが いっぱい（20まい）",
+    pagesFull: "ページが いっぱい",
     scenePieces: "シーンの シール",
     themes: {
       playground: "こうえんの あそびば",

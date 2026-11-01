@@ -295,7 +295,7 @@ export const en = {
     moods: "Moods",
     blank: "Blank",
     reroll: "Shuffle the scene",
-    pagesFull: "Your book is full (20 pages)",
+    pagesFull: "Your book is full",
     scenePieces: "Scene stickers",
     themes: {
       playground: "Playground",

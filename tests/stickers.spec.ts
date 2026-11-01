@@ -582,7 +582,7 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('page-prev')).toBeVisible();
     // The picker says the book is full and hides the New page cards.
     await page.getByTestId('book-tab-scenes').click();
-    await expect(page.getByTestId('scene-picker-full')).toBeVisible();
+    await expect(page.getByTestId('scene-picker-full')).toHaveText('Your book is full');
     await expect(page.getByTestId('scene-picker')).toHaveCount(0);
     await expect(page.getByTestId('page-bg-park')).toHaveCount(0);
     const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
@@ -620,7 +620,8 @@ test.describe('Sticker Book', () => {
     await page.getByTestId('page-prev').click();
     await expect(page.getByTestId('page-board').locator('[data-testid="page-sticker"][data-sticker="scene_logic_tortoise"]')).toBeVisible();
     await page.getByTestId('book-tab-scenes').click();
-    await expect(page.getByTestId('scene-picker-full')).toBeVisible();
+    // No page number in the note: it is true at 22 pages too.
+    await expect(page.getByTestId('scene-picker-full')).toHaveText('Your book is full');
     await expect(page.getByTestId('scene-picker')).toHaveCount(0);
   });
 

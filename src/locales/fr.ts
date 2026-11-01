@@ -297,7 +297,7 @@ export const fr: TranslationSchema = {
     moods: "Humeurs",
     blank: "Vide",
     reroll: "Mélanger la scène",
-    pagesFull: "Ton album est plein (20 pages)",
+    pagesFull: "Ton album est plein",
     scenePieces: "Autocollants de scène",
     themes: {
       playground: "Aire de jeux",

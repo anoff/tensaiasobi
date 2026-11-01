@@ -297,7 +297,7 @@ export const ko: TranslationSchema = {
     moods: "기분",
     blank: "빈 페이지",
     reroll: "장면 섞기",
-    pagesFull: "책이 가득 찼어요 (20쪽)",
+    pagesFull: "책이 가득 찼어요",
     scenePieces: "장면 스티커",
     themes: {
       playground: "놀이터",
