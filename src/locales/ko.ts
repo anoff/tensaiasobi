@@ -289,6 +289,7 @@ export const ko: TranslationSchema = {
     newBadge: "NEW",
     specials: "스페셜",
     newSticker: "새 스티커!",
+    again: "또 나왔어!",
     close: "닫기",
     empty: "게임을 하면 첫 스티커를 받아요!",
     characters: {

@@ -289,6 +289,7 @@ export const ja: TranslationSchema = {
     newBadge: "NEW",
     specials: "とくべつ",
     newSticker: "あたらしい シール！",
+    again: "また でた！",
     close: "とじる",
     empty: "ゲームで あそぶと はじめての シールが もらえるよ！",
     characters: {

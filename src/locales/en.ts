@@ -287,6 +287,7 @@ export const en = {
     newBadge: "NEW",
     specials: "Specials",
     newSticker: "New sticker!",
+    again: "Again!",
     close: "Close",
     empty: "Play a game to earn your first sticker!",
     characters: {

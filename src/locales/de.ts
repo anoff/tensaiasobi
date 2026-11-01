@@ -289,6 +289,7 @@ export const de: TranslationSchema = {
     newBadge: "NEU",
     specials: "Extras",
     newSticker: "Neuer Sticker!",
+    again: "Nochmal!",
     close: "Schließen",
     empty: "Spiel ein Spiel für deinen ersten Sticker!",
     characters: {

@@ -85,10 +85,15 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('capsule-machine')).toBeVisible();
     await expect(page.getByTestId('capsule').locator('img')).toBeVisible();
     await expect(page.getByTestId('sticker-award-panda')).toBeVisible();
-    // A tap is never ignored: it splits the capsule right away, even mid-twist.
+    // The capsule waits for a tap: a wiggle hint from 1.5 s, no self-open before 4 s.
+    await expect(award).toHaveAttribute('data-phase', 'hint', { timeout: 3000 });
+    await expect(page.getByTestId('capsule')).toHaveClass(/capsule-wiggle/);
+    await page.waitForTimeout(1000);
+    await expect(award).toHaveAttribute('data-phase', 'hint');
     await page.getByTestId('capsule').click();
     await expect(award).toHaveAttribute('data-phase', 'reveal');
     await expect(page.getByTestId('award-sticker')).toBeVisible();
+    await expect(page.getByTestId('award-caption')).toHaveText('New sticker!');
     // The reveal leaves on its own.
     await expect(award).toHaveCount(0, { timeout: 4000 });
     expect(await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).daily.k, KEY)).toBe(1);
@@ -101,6 +106,29 @@ test.describe('Sticker Book', () => {
 
     await page.getByTestId('home-button').click();
     await expect(page.getByTestId('home-sticker-new')).toHaveCount(0);
+  });
+
+  test('a duplicate says "Again!" with a ×2 badge; an untapped capsule opens itself at 4 s', async ({ page }) => {
+    test.setTimeout(60_000);
+    // Every id on the Numbers shelf is owned once, so the first capsule of the day is a duplicate.
+    const pool = [
+      ...Array.from({ length: 18 }, (_, i) => `numbers_${String(i + 1).padStart(2, '0')}`),
+      ...['owl_conductor', 'engine', 'car_balls', 'car_shapes'].map((p) => `scene_numbers_${p}`),
+      ...['cheer', 'surprised', 'sleepy', 'proud'].map((m) => `mood_owl_${m}`),
+    ];
+    await seed(page, { [KEY]: save({ copies: copies(pool), seenCount: pool.length }) });
+    await page.goto('/');
+    await page.getByTestId('age-mode-little').click();
+    await page.getByTestId('launch-math').click();
+    await page.getByTestId('difficulty-easy').click();
+    for (let i = 0; i < 5; i++) await answerMath(page);
+    const award = page.getByTestId('sticker-award');
+    await expect(award).toHaveAttribute('data-count', '2');
+    await expect(award).not.toHaveAttribute('data-phase', 'reveal');
+    // Fallback only: nobody taps, so it opens itself (never stuck).
+    await expect(award).toHaveAttribute('data-phase', 'reveal', { timeout: 6000 });
+    await expect(page.getByTestId('award-caption')).toHaveText('Again!');
+    await expect(page.getByTestId('award-count')).toHaveText('×2');
   });
 
   test('late in the day the drop curve makes a capsule (almost) never drop, with no countdown shown', async ({ page }) => {
