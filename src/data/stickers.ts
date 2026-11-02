@@ -8,7 +8,7 @@ import moodManifest from '../assets/stickers/moods/manifest.json';
 import accessoryManifest from '../assets/stickers/accessories/manifest.json';
 import generalManifest from '../assets/stickers/general/manifest.json';
 import characterManifest from '../assets/characters/manifest.json';
-import type { AwardPools, Shelf, StickerSave } from './stickerRules';
+import { ownedIds, type AwardPools, type Shelf, type StickerSave } from './stickerRules';
 
 const PNG = import.meta.glob<string>('../assets/{stickers,characters}/**/*.png', {
   eager: true,
@@ -16,11 +16,18 @@ const PNG = import.meta.glob<string>('../assets/{stickers,characters}/**/*.png',
   import: 'default',
 });
 const artUrl = (folder: string, file: string): string | undefined => PNG[`../assets/${folder}/${file}`];
+/* Capsule machine, capsules and the shiny sparkle as SVG: crisp at any size on the award overlay. */
+const SVG = import.meta.glob<string>('../assets/stickers/{capsule,shiny,icons}/svg/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+const svgUrl = (folder: string, name: string): string | undefined => SVG[`../assets/stickers/${folder}/svg/${name}.svg`];
 
 /** Same order as GAME_CATEGORIES (kept literal so games can import this file without a cycle). */
 export const SHELVES: readonly Shelf[] = ['numbers', 'language', 'logic', 'play'];
-/** Slots on one shelf page (Art Director: 12 drawn stickers per shelf). */
-export const SHELF_SLOTS = 12;
+/** Slots on one shelf page (ART.md §6, phase 1: _01.._12 plus delivery 2's _13.._18). */
+export const SHELF_SLOTS = 18;
 
 export type CollectibleKind = 'sticker' | 'scene' | 'mood' | 'general';
 
@@ -30,6 +37,7 @@ export interface Collectible {
   shelf: Shelf | null;
   /** PNG url, or undefined while the art has not landed yet. */
   src: string | undefined;
+  /** True while `src` is the generated stand-in (art pending). */
 }
 
 export type CharacterId = 'owl' | 'fox' | 'tortoise' | 'panda';
@@ -47,26 +55,6 @@ export interface Mood extends Collectible {
   mood: string;
 }
 
-/** A scene piece box in scene units (left/top/size of the 256 px sticker PNG). */
-export interface ScenePiece extends Collectible {
-  kind: 'scene';
-  box: { x: number; y: number; size: number };
-}
-
-export interface SceneSet {
-  id: string;
-  shelf: Shelf;
-  rewardId: string;
-  ground: number;
-  /** Ground line [min x, width] in scene units. */
-  span: [number, number];
-  pieces: ScenePiece[];
-  /** The Art Director's faded outline page (paper card, ground line, dashed slots). */
-  pageSrc: string;
-  /** Area the board shows, in scene units: the whole outline page. */
-  view: { x: number; y: number; w: number; h: number };
-}
-
 export interface Accessory {
   id: string;
   src: string | undefined;
@@ -74,11 +62,6 @@ export interface Accessory {
 }
 
 const isShelf = (s: string): s is Shelf => (SHELVES as readonly string[]).includes(s);
-
-/* Sticker PNG geometry (Art Director): 256 px canvas, art box 205 px at offset 22 px. */
-const PNG_SIDE = 256;
-const ART_BOX = 205;
-const ART_OFFSET = 22;
 
 export const SHELF_STICKERS: Record<Shelf, Collectible[]> = Object.fromEntries(
   SHELVES.map((shelf) => [
@@ -90,70 +73,18 @@ export const SHELF_STICKERS: Record<Shelf, Collectible[]> = Object.fromEntries(
   ]),
 ) as Record<Shelf, Collectible[]>;
 
-interface ScenePieceEntry {
-  id: string;
-  file: string;
-  vb: number[];
-  at: number[];
-  scale?: number;
-}
-interface SceneEntry {
-  shelf: string;
-  page: { set: string; ground: number; span: number[]; file?: string };
-  reward?: string;
-  pieces: ScenePieceEntry[];
-}
-
-/* Outline page geometry (Art Director, alib.scene_page): 900 px card, 60 px side pad, +8/+9 px hard shadow. */
-const PAGE_W = 900;
-const PAGE_PAD = 60;
-
-function buildScene(entry: SceneEntry): SceneSet | null {
-  if (!isShelf(entry.shelf)) return null;
-  const pieces = entry.pieces.map((p): ScenePiece => {
-    const [x0, y0, side] = p.vb;
-    const [ax, ay] = p.at;
-    const k = p.scale ?? 1;
-    const f = (k * side) / ART_BOX;
-    return {
-      id: p.id,
-      kind: 'scene',
-      shelf: entry.shelf as Shelf,
-      src: artUrl('stickers/album', p.file),
-      box: { x: ax + k * x0 - ART_OFFSET * f, y: ay + k * y0 - ART_OFFSET * f, size: PNG_SIDE * f },
-    };
-  });
-  const { ground } = entry.page;
-  const [spanX, spanW] = entry.page.span;
-  // A scene is only playable on its outline page; one without a page waits for the art.
-  if (!entry.page.file) return null;
-  const pageSrc = artUrl('stickers/album', entry.page.file);
-  if (!pageSrc) return null;
-  // Same maths the page was drawn with, so pieces land exactly on their dashed slots.
-  const s = (PAGE_W - 2 * PAGE_PAD) / spanW;
-  const top = Math.min(...entry.pieces.map((p) => p.vb[1] + p.at[1]));
-  const H = Math.round(s * (ground - top) + 150);
-  const ox = PAGE_PAD - s * spanX;
-  const oy = H - 70 - s * ground;
-  const view = { x: -ox / s, y: -oy / s, w: (PAGE_W + 8) / s, h: (H + 9) / s };
-  return {
-    id: entry.page.set,
-    shelf: entry.shelf,
-    rewardId: entry.reward ?? 'general_star',
-    ground,
-    span: [spanX, spanW],
-    pieces,
-    pageSrc,
-    view,
-  };
-}
-
-/** One scene set per shelf; shelves without a scene in the manifest yet show a "coming soon" page. */
-export const SCENES: SceneSet[] = (albumManifest.scenes as SceneEntry[])
-  .map(buildScene)
-  .filter((s): s is SceneSet => s !== null);
-
-export const sceneForShelf = (shelf: Shelf): SceneSet | undefined => SCENES.find((s) => s.shelf === shelf);
+/**
+ * The 16 former scene-set pieces (ART.md §6): normal stickers on their own shelf, earned from that shelf's
+ * capsules like any other sticker. Their outline pages are retired.
+ */
+export const SCENE_PIECES: Record<Shelf, Collectible[]> = Object.fromEntries(
+  SHELVES.map((shelf) => [
+    shelf,
+    albumManifest.scenePieces
+      .filter((p) => p.shelf === shelf)
+      .map((p): Collectible => ({ id: p.id, kind: 'scene', shelf, src: artUrl('stickers/album', p.file) })),
+  ]),
+) as Record<Shelf, Collectible[]>;
 
 export const CHARACTERS: CharacterInfo[] = characterManifest.characters
   .filter((c) => isShelf(c.shelf))
@@ -166,6 +97,49 @@ export const CHARACTERS: CharacterInfo[] = characterManifest.characters
         .filter(([, url]) => url),
     ),
   }));
+
+/** Capsule machine layers (240 px box): the knob stacks on the body and turns about KNOB_PIVOT. */
+/** Sticker book tab icons. */
+export const BOOK_TAB_ICONS = {
+  pages: svgUrl('icons', 'tab_my_pages'),
+  collection: svgUrl('icons', 'tab_collection'),
+  scenes: svgUrl('icons', 'tab_scenes'),
+};
+
+export const CAPSULE_MACHINE = {
+  body: svgUrl('capsule', 'capsule_machine_body'),
+  knob: svgUrl('capsule', 'capsule_machine_knob'),
+};
+/** Knob pivot (117.11, 154.46) in the 240 px source box, as a CSS transform-origin. */
+export const KNOB_PIVOT = `${(117.11 / 240) * 100}% ${(154.46 / 240) * 100}%`;
+
+/** The played shelf's capsule (96 px box, seam at y = 48). General stickers use the butter Numbers capsule. */
+export function capsuleArt(shelf: Shelf | null) {
+  const name = `capsule_${shelf === 'play' ? 'fun' : (shelf ?? 'numbers')}`;
+  return {
+    closed: svgUrl('capsule', `${name}_closed`),
+    top: svgUrl('capsule', `${name}_top`),
+    bottom: svgUrl('capsule', `${name}_bottom`),
+  };
+}
+
+/** Print button icon (My pages). */
+export const PRINT_ICON = svgUrl('icons', 'print');
+
+/** Shiny sparkle overlay (256 px, same box as a sticker, stars at the top right). */
+export const SHINY_SPARKLE = svgUrl('shiny', 'shiny_sparkle');
+
+/**
+ * How a copy looks. Shiny copies use the Art Director's pre-built shiny PNG (rim path recoloured to
+ * gold with make_shiny.py, sparkle baked in) from stickers/shiny/<id>_shiny.png; anything without a
+ * shiny PNG keeps its art and gets the sparkle overlay.
+ */
+export function stickerLook(c: Collectible, shiny: boolean): { src: string | undefined; sparkle: boolean } {
+  if (!shiny) return { src: c.src, sparkle: false };
+  const baked = artUrl('stickers/shiny', `${c.id}_shiny.png`);
+  if (baked) return { src: baked, sparkle: false };
+  return { src: c.src, sparkle: true };
+}
 
 export const HOST_CHARACTER = characterManifest.host as CharacterId;
 
@@ -209,7 +183,7 @@ export const GENERAL_STICKERS: Collectible[] = generalManifest.stickers.map((s) 
 
 const ALL: Collectible[] = [
   ...SHELVES.flatMap((s) => SHELF_STICKERS[s]),
-  ...SCENES.flatMap((s) => s.pieces),
+  ...SHELVES.flatMap((s) => SCENE_PIECES[s]),
   ...MOODS,
   ...GENERAL_STICKERS,
 ];
@@ -222,33 +196,31 @@ const ready = (list: Collectible[]) => list.filter((c) => c.src).map((c) => c.id
 
 export const AWARD_POOLS: AwardPools = {
   stickers: Object.fromEntries(SHELVES.map((s) => [s, ready(SHELF_STICKERS[s])])),
-  scenePieces: Object.fromEntries(SHELVES.map((s) => [s, ready(sceneForShelf(s)?.pieces ?? [])])),
+  scenePieces: Object.fromEntries(SHELVES.map((s) => [s, ready(SCENE_PIECES[s])])),
   moods: Object.fromEntries(SHELVES.map((s) => [s, ready(moodsForShelf(s))])),
 };
 
-/** Slots a shelf page shows: 12 stickers, the character's moods and the scene pieces. */
+/** Slots a shelf page shows: its stickers, the character's moods and the scene pieces. */
 export function shelfTotal(shelf: Shelf): number {
-  return SHELF_SLOTS + moodsForShelf(shelf).length + (sceneForShelf(shelf)?.pieces.length ?? 0);
+  return SHELF_SLOTS + moodsForShelf(shelf).length + SCENE_PIECES[shelf].length;
 }
 
-/** Collectibles on one shelf page that can be decorated (stickers, moods, general). */
-export const isDecoratable = (c: Collectible) => c.kind !== 'scene';
-
-/** Earned ids that count toward a shelf page: its stickers, its character's moods and its scene pieces. */
+/** Distinct owned ids that count toward a shelf page: its stickers, its character's moods and its scene pieces. */
 export function shelfEarned(book: StickerSave, shelf: Shelf): number {
   const ids = new Set([
     ...SHELF_STICKERS[shelf].map((s) => s.id),
     ...moodsForShelf(shelf).map((m) => m.id),
-    ...(sceneForShelf(shelf)?.pieces.map((p) => p.id) ?? []),
+    ...SCENE_PIECES[shelf].map((p) => p.id),
   ]);
-  return book.earned.filter((id) => ids.has(id)).length;
+  return ownedIds(book).filter((id) => ids.has(id)).length;
 }
 
 export function bookTotals(book: StickerSave): { earned: number; total: number } {
   const general = GENERAL_STICKERS.filter((g) => g.id !== 'general_star');
+  const owned = new Set(ownedIds(book));
   return {
     earned:
-      SHELVES.reduce((n, s) => n + shelfEarned(book, s), 0) + general.filter((g) => book.earned.includes(g.id)).length,
+      SHELVES.reduce((n, s) => n + shelfEarned(book, s), 0) + general.filter((g) => owned.has(g.id)).length,
     total: SHELVES.reduce((n, s) => n + shelfTotal(s), 0) + general.length,
   };
 }

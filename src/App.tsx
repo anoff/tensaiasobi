@@ -23,7 +23,7 @@ import { RedeemConfirmDialog, CouponCelebration } from './components/CouponRedee
 import { couponLabel, type Coupon } from './types/gamification';
 import { GAMES, GAME_CATEGORIES, clearPersistedProgress, gameVisibleForAge, gameVisibleInChallenge, gamesInCategory, isGameId, type AgeBand, type GameId } from './games/catalog';
 import { useStars } from './hooks/useStars';
-import { useStickers } from './hooks/useStickers';
+import { useStickers, type CapsuleAward } from './hooks/useStickers';
 import StickerBook from './components/stickers/StickerBook';
 import { StickerAward } from './components/stickers/StickerAward';
 import { StickerHomeCard } from './components/stickers/StickerHomeCard';
@@ -42,7 +42,7 @@ function AppContent() {
   const [showParentGate, setShowParentGate] = useState(false);
   const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
 
-  const { playPop, playSuccess, playError, playSimonTone } = useSound(soundEnabled, vibrationEnabled);
+  const { playPop, playSuccess, playError, playSimonTone, playCue } = useSound(soundEnabled, vibrationEnabled);
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -50,8 +50,8 @@ function AppContent() {
   const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
   const stickers = useStickers();
   const { completeRound, buyAccessory } = stickers;
-  /** Stickers won and waiting for their award overlay, oldest first. */
-  const [awardQueue, setAwardQueue] = useState<string[]>([]);
+  /** Capsules won and waiting for their award overlay, oldest first. */
+  const [awardQueue, setAwardQueue] = useState<CapsuleAward[]>([]);
   const finishAward = useCallback(() => setAwardQueue((q) => q.slice(1)), []);
   const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
   const [storedAgeBand, setAgeBand] = useLocalStorage<string>('settings_age_band', 'little');
@@ -86,7 +86,7 @@ function AppContent() {
     else addStars(amount);
   };
 
-  /** A finished round earns the next missing sticker on that game's shelf (5 a day, never removed). */
+  /** A finished round rolls for a capsule from that game's shelf (daily curve, pure chance, never removed). */
   const handleRoundComplete = (gameId: GameId) => {
     const shelf = GAMES.find((game) => game.id === gameId)?.category;
     if (!shelf) return;
@@ -242,10 +242,11 @@ function AppContent() {
             onBuyAccessory={handleBuyAccessory}
             onPlaceAccessory={stickers.placeAccessory}
             onRemoveAccessory={stickers.removeAccessory}
-            onPlaceScenePiece={stickers.placeScenePiece}
+            pageEdits={stickers.pages}
             onSeen={stickers.markSeen}
             playPop={playPop}
-            playSuccess={playSuccess}
+            onHome={() => handleScreenChange('menu')}
+            status={statusBadges}
           />
         );
       case 'coupons':
@@ -297,6 +298,58 @@ function AppContent() {
     }
   };
 
+  /** Session time, challenge badges and the star pill: in the app header, or in the sticker book's own top bar. */
+  const statusBadges = (
+    <>
+    {sessionMinutes > 0 && remainingMs > 0 && !sessionLocked && (
+      <div className="flex items-center gap-1.5 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5" data-testid="session-remaining">
+        <span className="text-sm">⏱️</span>
+        <span className="text-sm font-black text-slate-700 tabular-nums">{formatRemaining(remainingMs)}</span>
+      </div>
+    )}
+
+    {challengeFocusActive && (
+      <div className="relative" data-testid="challenge-countdown-badge">
+        <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300 rounded-full px-3 py-1.5 shadow-sm select-none justify-center">
+          <span className="text-lg">🎯</span>
+          <span className="text-xs font-black text-purple-800 uppercase tracking-wider hidden xs:inline">
+            {t.challenge.starsToGo}
+          </span>
+          <span className="text-base font-black text-pink-600 tabular-nums animate-pulse" data-testid="challenge-stars-remaining">
+            {challengeStarsRemaining}
+          </span>
+        </div>
+        {pendingChallengeAnimations.map((anim) => (
+          <FlyUpStar key={anim.id} onDone={() => clearChallengeAnimation(anim.id)}>
+            <span className="text-sm font-black text-pink-600 whitespace-nowrap drop-shadow-sm">
+              -{anim.amount} ⭐
+            </span>
+          </FlyUpStar>
+        ))}
+      </div>
+    )}
+
+    {challengeActive && challengePlayUnlocked && (
+      <div
+        className="flex items-center gap-1.5 bg-emerald-100 border-2 border-emerald-300 rounded-full px-3 py-1.5 shadow-sm select-none"
+        data-testid="challenge-play-unlocked-badge"
+      >
+        <span className="text-lg">🎉</span>
+        <span className="text-xs font-black text-emerald-800 uppercase tracking-wider">
+          {t.challenge.playUnlockedBadge}
+        </span>
+      </div>
+    )}
+
+    <StarCounter
+      stars={stars}
+      pendingAnimations={pendingAnimations}
+      clearAnimation={clearAnimation}
+      compact={currentScreen === 'stickers'}
+    />
+    </>
+  );
+
   return (
     <div className="w-screen h-[100dvh] flex flex-col relative pt-safe pb-safe text-[#2a1c14]" style={PLAY_MAT_STYLE}>
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-40 flex h-1.5">
@@ -304,130 +357,94 @@ function AppContent() {
         <span className="flex-1" style={{ backgroundColor: LEAF }} />
         <span className="flex-1" style={{ backgroundColor: BUTTER }} />
       </div>
-      <header className="flex justify-between items-center p-4 short:p-2 tiny:p-1.5 z-50">
-        <div>
-          {currentScreen !== 'menu' && currentScreen !== 'settings' && currentScreen !== 'session' && (
-            <HomeButton data-testid="home-button" onClick={() => handleScreenChange('menu')} />
-          )}
-        </div>
+      {currentScreen !== 'stickers' && (
+        <header className="flex justify-between items-center p-4 short:p-2 tiny:p-1.5 z-50">
+          <div>
+            {currentScreen !== 'menu' && currentScreen !== 'settings' && currentScreen !== 'session' && (
+              <HomeButton data-testid="home-button" onClick={() => handleScreenChange('menu')} />
+            )}
+          </div>
 
-        <div className="flex items-center gap-3 ml-auto">
-          {sessionMinutes > 0 && remainingMs > 0 && !sessionLocked && (
-            <div className="flex items-center gap-1.5 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5" data-testid="session-remaining">
-              <span className="text-sm">⏱️</span>
-              <span className="text-sm font-black text-slate-700 tabular-nums">{formatRemaining(remainingMs)}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3 ml-auto">
+            {statusBadges}
 
-          {challengeFocusActive && (
-            <div className="relative" data-testid="challenge-countdown-badge">
-              <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300 rounded-full px-3 py-1.5 shadow-sm select-none justify-center">
-                <span className="text-lg">🎯</span>
-                <span className="text-xs font-black text-purple-800 uppercase tracking-wider hidden xs:inline">
-                  {t.challenge.starsToGo}
-                </span>
-                <span className="text-base font-black text-pink-600 tabular-nums animate-pulse" data-testid="challenge-stars-remaining">
-                  {challengeStarsRemaining}
-                </span>
+            {currentScreen === 'menu' && (
+              <div className="flex items-center gap-3">
+                <div className="relative" ref={langRef}>
+                  {(() => {
+                    const labelMap = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵', fr: '🇫🇷', ko: '🇰🇷' } as const;
+                    const options = (['en', 'de', 'ja', 'fr', 'ko'] as const).filter((l) => l !== language);
+                    return (
+                      <>
+                        <button
+                          data-testid="lang-dropdown-trigger"
+                          type="button"
+                          aria-label={t.menu.language}
+                          aria-expanded={langOpen}
+                          aria-haspopup="listbox"
+                          onClick={() => { playPop(); setLangOpen((o) => !o); }}
+                          className="flex items-center gap-1 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5 text-base shadow-sm cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-indigo-300 hover:bg-slate-50 transition-all"
+                        >
+                          {labelMap[language]}
+                          <span className="text-slate-400 text-xs">{langOpen ? '▲' : '▼'}</span>
+                        </button>
+                        {langOpen && (
+                          <div className="absolute left-0 top-full mt-1 bg-white border-2 border-slate-200 rounded-2xl shadow-lg py-1 flex flex-col z-50 min-w-full">
+                            {options.map((lang) => (
+                              <button
+                                key={lang}
+                                data-testid={`lang-select-${lang}`}
+                                onClick={() => { playPop(); setLanguage(lang); setLangOpen(false); }}
+                                className="px-3 py-1.5 text-base hover:bg-slate-50 cursor-pointer outline-none transition-colors"
+                              >
+                                {labelMap[lang]}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+
+                <button
+                  type="button"
+                  data-testid="open-session"
+                  onClick={() => {
+                    playPop();
+                    setParentGateNext('session');
+                    setShowParentGate(true);
+                  }}
+                  className="bg-purple-500 text-white border-2 border-purple-700 rounded-full px-4 py-2 text-sm font-extrabold hover:bg-purple-600 cursor-pointer shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-purple-300"
+                >
+                  ▶️ {t.menu.session}
+                </button>
+                <button
+                  type="button"
+                  data-testid="open-settings"
+                  onClick={() => {
+                    playPop();
+                    setParentGateNext('settings');
+                    setShowParentGate(true);
+                  }}
+                  className="bg-white/90 border-2 border-slate-300 rounded-full px-3 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-indigo-300"
+                  aria-label={t.menu.parents}
+                >
+                  ⚙️
+                </button>
               </div>
-              {pendingChallengeAnimations.map((anim) => (
-                <FlyUpStar key={anim.id} onDone={() => clearChallengeAnimation(anim.id)}>
-                  <span className="text-sm font-black text-pink-600 whitespace-nowrap drop-shadow-sm">
-                    -{anim.amount} ⭐
-                  </span>
-                </FlyUpStar>
-              ))}
-            </div>
-          )}
+            )}
+          </div>
+        </header>
+      )}
 
-          {challengeActive && challengePlayUnlocked && (
-            <div
-              className="flex items-center gap-1.5 bg-emerald-100 border-2 border-emerald-300 rounded-full px-3 py-1.5 shadow-sm select-none"
-              data-testid="challenge-play-unlocked-badge"
-            >
-              <span className="text-lg">🎉</span>
-              <span className="text-xs font-black text-emerald-800 uppercase tracking-wider">
-                {t.challenge.playUnlockedBadge}
-              </span>
-            </div>
-          )}
-
-          <StarCounter
-            stars={stars}
-            pendingAnimations={pendingAnimations}
-            clearAnimation={clearAnimation}
-          />
-
-          {currentScreen === 'menu' && (
-            <div className="flex items-center gap-3">
-              <div className="relative" ref={langRef}>
-                {(() => {
-                  const labelMap = { en: '🇬🇧', de: '🇩🇪', ja: '🇯🇵', fr: '🇫🇷', ko: '🇰🇷' } as const;
-                  const options = (['en', 'de', 'ja', 'fr', 'ko'] as const).filter((l) => l !== language);
-                  return (
-                    <>
-                      <button
-                        data-testid="lang-dropdown-trigger"
-                        type="button"
-                        aria-label={t.menu.language}
-                        aria-expanded={langOpen}
-                        aria-haspopup="listbox"
-                        onClick={() => { playPop(); setLangOpen((o) => !o); }}
-                        className="flex items-center gap-1 bg-white/90 border-2 border-slate-300 rounded-full px-3 py-1.5 text-base shadow-sm cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-indigo-300 hover:bg-slate-50 transition-all"
-                      >
-                        {labelMap[language]}
-                        <span className="text-slate-400 text-xs">{langOpen ? '▲' : '▼'}</span>
-                      </button>
-                      {langOpen && (
-                        <div className="absolute left-0 top-full mt-1 bg-white border-2 border-slate-200 rounded-2xl shadow-lg py-1 flex flex-col z-50 min-w-full">
-                          {options.map((lang) => (
-                            <button
-                              key={lang}
-                              data-testid={`lang-select-${lang}`}
-                              onClick={() => { playPop(); setLanguage(lang); setLangOpen(false); }}
-                              className="px-3 py-1.5 text-base hover:bg-slate-50 cursor-pointer outline-none transition-colors"
-                            >
-                              {labelMap[lang]}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-              </div>
-
-              <button
-                type="button"
-                data-testid="open-session"
-                onClick={() => {
-                  playPop();
-                  setParentGateNext('session');
-                  setShowParentGate(true);
-                }}
-                className="bg-purple-500 text-white border-2 border-purple-700 rounded-full px-4 py-2 text-sm font-extrabold hover:bg-purple-600 cursor-pointer shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-purple-300"
-              >
-                ▶️ {t.menu.session}
-              </button>
-              <button
-                type="button"
-                data-testid="open-settings"
-                onClick={() => {
-                  playPop();
-                  setParentGateNext('settings');
-                  setShowParentGate(true);
-                }}
-                className="bg-white/90 border-2 border-slate-300 rounded-full px-3 py-2 text-sm font-extrabold text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-indigo-300"
-                aria-label={t.menu.parents}
-              >
-                ⚙️
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
-
-      <main className="flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6 short:pb-2">
+      <main
+        className={
+          currentScreen === 'stickers'
+            ? 'flex-1 flex flex-col min-h-0 overflow-hidden [&:has([data-page-scroll])]:overflow-y-auto overscroll-y-contain px-4 pt-1.5 pb-2'
+            : 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6 short:pb-2'
+        }
+      >
         {currentScreen === 'menu' ? (
           <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
             <div className="text-center space-y-2 mt-4">
@@ -649,8 +666,11 @@ function AppContent() {
       )}
 
       {awardQueue.length > 0 && (() => {
-        const sticker = collectibleById(awardQueue[0]);
-        return sticker ? <StickerAward key={awardQueue[0]} sticker={sticker} onDone={finishAward} /> : null;
+        const { copy, count } = awardQueue[0];
+        const sticker = collectibleById(copy.id);
+        return sticker ? (
+          <StickerAward key={copy.uid} sticker={sticker} shiny={copy.shiny} count={count} onDone={finishAward} playCue={playCue} />
+        ) : null;
       })()}
 
       {sessionLocked && currentScreen !== 'settings' && currentScreen !== 'session' && (

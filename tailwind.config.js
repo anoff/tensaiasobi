@@ -12,6 +12,8 @@ export default {
       screens: {
         short: { raw: '(max-height: 700px)' },
         tiny: { raw: '(max-height: 600px)' },
+        // Width: phones narrower than 360 px (320x568), where a one-row bar has to slim down.
+        narrow: { raw: '(max-width: 359px)' },
       },
       colors: {
         'candy-pink':   '#FF6EB4',

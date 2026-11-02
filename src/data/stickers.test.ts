@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  SCENES,
+  SCENE_PIECES,
   ACCESSORIES,
   AWARD_POOLS,
   CHARACTERS,
@@ -10,15 +10,18 @@ import {
   SHELF_STICKERS,
   SHELVES,
   THANK_YOU_STICKER_ID,
+  capsuleArt,
   characterForShelf,
   collectibleById,
+  shelfTotal,
+  stickerLook,
   stickerTilt,
 } from './stickers';
 import { GAME_CATEGORIES } from '../games/catalog';
 import albumManifest from '../assets/stickers/album/manifest.json';
 
 describe('sticker catalog (manifest driven)', () => {
-  it('has one shelf per game category with at most 12 stickers each', () => {
+  it('has one shelf per game category with at most SHELF_SLOTS stickers each', () => {
     expect([...SHELVES].sort()).toEqual([...GAME_CATEGORIES].sort());
     for (const shelf of SHELVES) expect(SHELF_STICKERS[shelf].length).toBeLessThanOrEqual(SHELF_SLOTS);
   });
@@ -32,6 +35,26 @@ describe('sticker catalog (manifest driven)', () => {
       expect(c?.shelf).toBe(entry.shelf);
       expect(c?.src).toBeTruthy();
     }
+  });
+
+  it('fills every shelf with 18 drawn stickers _01.._18, each with a baked shiny variant', () => {
+    for (const shelf of SHELVES) {
+      const prefix = shelf === 'play' ? 'fun' : shelf;
+      expect(SHELF_STICKERS[shelf].map((c) => c.id)).toEqual(
+        Array.from({ length: SHELF_SLOTS }, (_, i) => `${prefix}_${String(i + 1).padStart(2, '0')}`),
+      );
+      for (const c of SHELF_STICKERS[shelf]) {
+        expect(c.src).toBeTruthy();
+        expect(stickerLook(c, true)).toEqual({ src: expect.stringContaining(`${c.id}_shiny`), sparkle: false });
+      }
+    }
+  });
+
+  it("gives each shelf its own capsule (closed, top, bottom); Just for fun uses the fun capsule", () => {
+    const closed = SHELVES.map((s) => capsuleArt(s).closed);
+    for (const s of SHELVES) expect(Object.values(capsuleArt(s)).every(Boolean)).toBe(true);
+    expect(new Set(closed).size).toBe(4);
+    expect(capsuleArt(null)).toEqual(capsuleArt('numbers'));
   });
 
   it('casts one character per shelf with Panda as host', () => {
@@ -61,14 +84,19 @@ describe('sticker catalog (manifest driven)', () => {
     }
   });
 
-  it('has one scene per shelf, each drawn on its outline page with 4 pieces', () => {
-    expect(SCENES.map((s) => s.shelf)).toEqual([...SHELVES]);
-    for (const scene of SCENES) {
-      expect(scene.pageSrc, scene.id).toBeTruthy();
-      expect(scene.pieces, scene.id).toHaveLength(4);
-      for (const p of scene.pieces) expect(p.src, p.id).toBeTruthy();
+  it('keeps the 16 former scene pieces as normal stickers, 4 per shelf, each still earned from its shelf', () => {
+    for (const shelf of SHELVES) {
+      expect(SCENE_PIECES[shelf], shelf).toHaveLength(4);
+      for (const p of SCENE_PIECES[shelf]) {
+        expect(p.src, p.id).toBeTruthy();
+        expect(p.src, p.id).not.toContain('outline');
+        expect(collectibleById(p.id)).toBe(p);
+      }
+      // Same pool, same odds as before: only the outline page and its slots are gone.
+      expect(AWARD_POOLS.scenePieces[shelf]).toEqual(SCENE_PIECES[shelf].map((p) => p.id));
+      expect(shelfTotal(shelf)).toBe(SHELF_SLOTS + 4 + 4);
     }
-    expect(SCENES[0].id).toBe('train_day');
+    expect(SCENE_PIECES.numbers.map((p) => p.id)).toContain('scene_numbers_engine');
   });
 
   it('sells 12 accessories and keeps the thank-you sticker', () => {

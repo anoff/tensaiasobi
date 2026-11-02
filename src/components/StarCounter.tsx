@@ -5,9 +5,11 @@ interface StarCounterProps {
   stars: number;
   pendingAnimations: { id: number; amount: number }[];
   clearAnimation: (id: number) => void;
+  /** Slimmer pill for a crowded bar (the sticker book's 48 px top bar). */
+  compact?: boolean;
 }
 
-export function StarCounter({ stars, pendingAnimations, clearAnimation }: StarCounterProps) {
+export function StarCounter({ stars, pendingAnimations, clearAnimation, compact = false }: StarCounterProps) {
   const counterRef = useRef<HTMLDivElement>(null);
   const prevStars = useRef(stars);
 
@@ -24,8 +26,12 @@ export function StarCounter({ stars, pendingAnimations, clearAnimation }: StarCo
 
   return (
     <div className="relative" ref={counterRef}>
-      <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-100 to-yellow-100 border-2 border-amber-300 rounded-full px-3 py-1.5 shadow-sm select-none min-w-[4rem] justify-center">
-        <span className="text-lg">⭐</span>
+      <div
+        className={`flex items-center bg-gradient-to-r from-amber-100 to-yellow-100 border-2 border-amber-300 rounded-full py-1.5 shadow-sm select-none justify-center ${
+          compact ? 'gap-1 px-2' : 'gap-1.5 px-3 min-w-[4rem]'
+        }`}
+      >
+        <span className={compact ? 'text-base' : 'text-lg'}>⭐</span>
         <span className="text-base font-black text-amber-800 tabular-nums" data-testid="stars-total">{stars}</span>
       </div>
 

@@ -78,24 +78,57 @@
   @keyframes sticker-rays-spin {
     to { transform: translate(-50%, -50%) rotate(360deg); }
   }
-  .sticker-award-fly {
-    animation: sticker-award-fly 0.6s ease-in 1.8s forwards;
+
+  /* ── Capsule machine (ART.md §6 capsules) ── */
+  .capsule-knob-twist {
+    animation: capsule-knob-twist 0.7s ease-in-out 0.05s;
   }
-  @keyframes sticker-award-fly {
-    to { transform: translate(-30vw, -40vh) scale(0.25); opacity: 0; }
+  @keyframes capsule-knob-twist {
+    to { transform: rotate(360deg); }
   }
-  .sticker-award-scrim {
-    animation: sticker-award-scrim 0.3s ease-out 2.2s forwards;
+  .capsule-roll-out {
+    animation: capsule-roll-out 0.8s cubic-bezier(0.34, 1.3, 0.64, 1) 0.1s both;
   }
-  @keyframes sticker-award-scrim {
+  @keyframes capsule-roll-out {
+    from { transform: translate(-30vw, 30vh) rotate(-540deg) scale(0.5); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  .capsule-wiggle {
+    animation: capsule-wiggle 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes capsule-wiggle {
+    from { transform: rotate(-6deg); }
+    to { transform: rotate(6deg); }
+  }
+  .capsule-split-top {
+    animation: capsule-split-top 0.45s ease-out forwards;
+  }
+  .capsule-split-bottom {
+    animation: capsule-split-bottom 0.45s ease-out forwards;
+  }
+  /* The top tips open about the capsule centre (48, 48); the bottom stays, then both fade. */
+  @keyframes capsule-split-top {
+    40% { transform: translateY(-34px) rotate(-35deg); opacity: 1; }
+    to { transform: translateY(-60px) rotate(-50deg); opacity: 0; }
+  }
+  @keyframes capsule-split-bottom {
+    40% { opacity: 1; }
     to { opacity: 0; }
   }
+  .shiny-sparkle {
+    animation: shiny-sparkle 1.2s ease-in-out infinite;
+  }
+  @keyframes shiny-sparkle {
+    50% { opacity: 0.55; }
+  }
 
-  /* Reduced motion: the sticker and panda just appear and stay until the overlay closes. */
+  /* Reduced motion: the sticker and panda just appear (static reveal) until the overlay closes. */
   @media (prefers-reduced-motion: reduce) {
-    .sticker-award-fly,
-    .sticker-award-scrim,
-    .sticker-award-rays {
+    .sticker-award-rays,
+    .capsule-knob-twist,
+    .capsule-roll-out,
+    .capsule-wiggle,
+    .shiny-sparkle {
       animation: none !important;
     }
   }

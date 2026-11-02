@@ -5,6 +5,17 @@ import { VitePWA } from 'vite-plugin-pwa'
 const rawHash = process.env.GIT_HASH || 'UNKNOWN'
 const gitHash = rawHash !== 'UNKNOWN' ? rawHash.slice(0, 7) : 'UNKNOWN'
 
+/** Print-only build output: the print SVGs (print_*.svg) and the lazily loaded jsPDF/svg2pdf chunks. */
+const PRINT_ASSETS = [
+  '**/assets/print_*',
+  '**/assets/jspdf.es*',
+  '**/assets/svg2pdf.es*',
+  '**/assets/html2canvas*',
+  '**/assets/purify.es*',
+  '**/assets/index.es-*',
+]
+const PRINT_ASSET_RE = /\/assets\/(print_|jspdf\.es|svg2pdf\.es|html2canvas|purify\.es|index\.es-)/
+
 // https://vite.dev/config/
 // `vite build --mode ios` builds the bundle for the Capacitor iOS shell (see AppStore.md).
 export default defineConfig(({ mode }) => ({
@@ -20,6 +31,16 @@ export default defineConfig(({ mode }) => ({
       injectRegister: 'inline',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Printing is a rare grown-up action: keep its art and the PDF libraries out of the install-time
+        // precache and cache them on first use instead.
+        globIgnores: PRINT_ASSETS,
+        runtimeCaching: [
+          {
+            urlPattern: PRINT_ASSET_RE,
+            handler: 'CacheFirst',
+            options: { cacheName: 'print-assets', expiration: { maxEntries: 200 } },
+          },
+        ],
       },
       manifest: {
         name: 'tensaiasobi Kids Games',
