@@ -1,0 +1,347 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Sky & Atmosphere Gradients -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="40%" stop-color="#bae6fd" />
+      <stop offset="100%" stop-color="#e0f2fe" />
+    </linearGradient>
+    
+    <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#facc15" />
+    </linearGradient>
+
+    <!-- Hill Gradients for Depth -->
+    <linearGradient id="hillFarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#86efac" />
+      <stop offset="100%" stop-color="#4ade80" />
+    </linearGradient>
+    
+    <linearGradient id="hillMidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="100%" stop-color="#22c55e" />
+    </linearGradient>
+
+    <linearGradient id="groundGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a7f3d0" />
+      <stop offset="20%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <!-- Sandpit Gradient -->
+    <linearGradient id="sandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fde047" />
+    </linearGradient>
+
+    <!-- Slide Tube & Tower Gradients -->
+    <linearGradient id="slideGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" />
+      <stop offset="50%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#e11d48" />
+    </linearGradient>
+
+    <linearGradient id="roofGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+
+    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b45309" />
+      <stop offset="100%" stop-color="#78350f" />
+    </linearGradient>
+  </defs>
+
+  <!-- SKY BACKGROUND -->
+  <rect width="400" height="400" fill="url(#skyGrad)" />
+
+  <!-- SUN & RAYS -->
+  <g transform="translate(340, 60)">
+    <circle cx="0" cy="0" r="45" fill="#fef08a" opacity="0.3" />
+    <circle cx="0" cy="0" r="32" fill="url(#sunGrad)" />
+    <!-- Sun Rays -->
+    <path d="M 0,-40 L 0,-35 M 0,35 L 0,40 M -40,0 L -35,0 M 35,0 L 40,0 M -25,-25 L -22,-22 M 22,22 L 25,25 M -25,25 L -22,22 M 22,-22 L 25,-25" 
+          stroke="#facc15" stroke-width="3.5" stroke-linecap="round" />
+  </g>
+
+  <!-- CLOUDS -->
+  <!-- Cloud 1 (Left) -->
+  <g fill="#ffffff" opacity="0.9" transform="translate(30, 50)">
+    <path d="M 20,20 Q 20,5 35,5 Q 45,-5 60,5 Q 75,0 80,15 Q 90,20 85,30 Q 75,40 20,40 Z" />
+  </g>
+  <!-- Cloud 2 (Center-Right) -->
+  <g fill="#ffffff" opacity="0.85" transform="translate(200, 40) scale(0.8)">
+    <path d="M 20,20 Q 20,5 35,5 Q 45,-5 60,5 Q 75,0 80,15 Q 90,20 85,30 Q 75,40 20,40 Z" />
+  </g>
+
+  <!-- BACKGROUND HILLS -->
+  <path d="M -20,220 Q 80,160 200,190 T 420,170 L 420,400 L -20,400 Z" fill="url(#hillFarGrad)" />
+  <path d="M -20,230 Q 130,200 260,230 T 430,210 L 430,400 L -20,400 Z" fill="url(#hillMidGrad)" />
+
+  <!-- BACKGROUND TREES -->
+  <g transform="translate(40, 150)">
+    <rect x="12" y="30" width="6" height="20" fill="#78350f" rx="2" />
+    <circle cx="15" cy="20" r="16" fill="#15803d" />
+    <circle cx="8" cy="22" r="12" fill="#22c55e" />
+    <circle cx="22" cy="22" r="12" fill="#22c55e" />
+  </g>
+  <g transform="translate(320, 135) scale(1.2)">
+    <rect x="12" y="30" width="6" height="20" fill="#78350f" rx="2" />
+    <circle cx="15" cy="18" r="18" fill="#166534" />
+    <circle cx="22" cy="18" r="12" fill="#15803d" />
+  </g>
+
+  <!-- MAIN FOREGROUND GROUND -->
+  <path d="M -10,250 Q 100,235 200,245 T 410,240 L 410,410 L -10,410 Z" fill="url(#groundGrad)" />
+
+  <!-- SANDPIT (Right Side Visual Interest) -->
+  <g>
+    <!-- Sand Area -->
+    <ellipse cx="320" cy="330" rx="65" ry="35" fill="#ca8a04" />
+    <ellipse cx="320" cy="328" rx="60" ry="30" fill="url(#sandGrad)" />
+    <!-- Sand Toys -->
+    <!-- Bucket -->
+    <path d="M 335,315 L 345,315 L 342,330 L 338,330 Z" fill="#06b6d4" stroke="#0891b2" stroke-width="1" />
+    <ellipse cx="340" cy="315" rx="5" ry="1.5" fill="#67e8f9" />
+    <!-- Spade -->
+    <path d="M 310,335 L 320,325" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M 307,338 L 313,332 L 309,328 L 303,334 Z" fill="#ef4444" />
+  </g>
+
+  <!-- PLAYGROUND TOWER & SLIDE STRUCTURE (Back-Left/Center) -->
+  <g id="play-tower">
+    <!-- Tower Wooden Legs -->
+    <rect x="55" y="200" width="8" height="100" fill="url(#woodGrad)" rx="3" />
+    <rect x="115" y="200" width="8" height="100" fill="url(#woodGrad)" rx="3" />
+    
+    <!-- Platform -->
+    <rect x="45" y="195" width="90" height="12" fill="#d97706" rx="2" stroke="#b45309" stroke-width="1" />
+
+    <!-- Roof Supports & Roof -->
+    <rect x="60" y="120" width="6" height="80" fill="url(#woodGrad)" />
+    <rect x="112" y="120" width="6" height="80" fill="url(#woodGrad)" />
+    <polygon points="40,125 90,80 140,125" fill="url(#roofGrad)" stroke="#d97706" stroke-width="2" />
+    <polygon points="40,125 90,80 90,125" fill="#ffffff" opacity="0.15" /> <!-- Roof Highlight -->
+
+    <!-- Bunting / Flags on Tower -->
+    <path d="M 45,130 Q 90,140 135,130" fill="none" stroke="#475569" stroke-width="1.5" />
+    <polygon points="55,133 65,134 60,145" fill="#ef4444" />
+    <polygon points="75,136 85,137 80,148" fill="#3b82f6" />
+    <polygon points="95,136 105,135 100,147" fill="#facc15" />
+    <polygon points="115,133 125,131 120,143" fill="#10b981" />
+
+    <!-- Ladder -->
+    <rect x="118" y="195" width="16" height="90" fill="none" stroke="#64748b" stroke-width="2.5" />
+    <line x1="118" y1="210" x2="134" y2="210" stroke="#64748b" stroke-width="2.5" />
+    <line x1="118" y1="230" x2="134" y2="230" stroke="#64748b" stroke-width="2.5" />
+    <line x1="118" y1="250" x2="134" y2="250" stroke="#64748b" stroke-width="2.5" />
+    <line x1="118" y1="270" x2="134" y2="270" stroke="#64748b" stroke-width="2.5" />
+
+    <!-- RED SLIDE -->
+    <!-- Slide Outer Wall/Swoosh -->
+    <path d="M 50,200 Q 10,260 5,310 Q 2,330 25,330 Q 45,330 40,310 Q 40,280 60,200 Z" fill="#be123c" />
+    <!-- Slide Inner Chute -->
+    <path d="M 50,195 Q 15,260 10,310 Q 8,323 25,323 Q 38,323 35,310 Q 32,280 55,195 Z" fill="url(#slideGrad)" />
+    <!-- Slide Highlight -->
+    <path d="M 45,200 Q 18,260 14,305" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.4" stroke-linecap="round" />
+  </g>
+
+  <!-- FRIEND 1: GIRL SLIDING DOWN (Top of Slide) -->
+  <g id="girl-sliding" transform="translate(18, 210) rotate(-15)">
+    <!-- Body/Outfit -->
+    <path d="M 12,18 L 24,38 L 5,42 Z" fill="#ec4899" /> <!-- Pink Dress -->
+    <!-- Legs extended -->
+    <rect x="20" y="32" width="16" height="6" rx="3" fill="#fbcfe8" />
+    <rect x="32" y="31" width="8" height="7" rx="3" fill="#06b6d4" /> <!-- Shoe -->
+    <!-- Arms Up in Joy -->
+    <path d="M 10,20 Q -2,5 0,0" fill="none" stroke="#fbcfe8" stroke-width="4" stroke-linecap="round" />
+    <path d="M 15,20 Q 10,2 18,-2" fill="none" stroke="#fbcfe8" stroke-width="4" stroke-linecap="round" />
+    <!-- Head & Hair -->
+    <circle cx="12" cy="12" r="8" fill="#fbcfe8" />
+    <!-- Brown Pigtails -->
+    <circle cx="5" cy="10" r="5" fill="#78350f" />
+    <circle cx="19" cy="10" r="5" fill="#78350f" />
+    <circle cx="12" cy="10" r="8" fill="#78350f" /> <!-- Main hair -->
+    <!-- Happy Face -->
+    <circle cx="9" cy="12" r="1" fill="#000" />
+    <circle cx="15" cy="12" r="1" fill="#000" />
+    <path d="M 10,15 Q 12,18 14,15" fill="none" stroke="#000" stroke-width="1" stroke-linecap="round" />
+  </g>
+
+  <!-- SWING SET (Center-Right) -->
+  <g id="swingset">
+    <!-- A-Frame Left -->
+    <line x1="160" y1="310" x2="190" y2="180" stroke="#0284c7" stroke-width="5" stroke-linecap="round" />
+    <line x1="220" y1="310" x2="190" y2="180" stroke="#0369a1" stroke-width="5" stroke-linecap="round" />
+    <line x1="172" y1="250" x2="208" y2="250" stroke="#0284c7" stroke-width="3" />
+    
+    <!-- A-Frame Right -->
+    <line x1="260" y1="310" x2="280" y2="180" stroke="#0284c7" stroke-width="5" stroke-linecap="round" />
+    <line x1="310" y1="310" x2="280" y2="180" stroke="#0369a1" stroke-width="5" stroke-linecap="round" />
+    <line x1="270" y1="250" x2="298" y2="250" stroke="#0284c7" stroke-width="3" />
+
+    <!-- Top Crossbar -->
+    <line x1="180" y1="180" x2="290" y2="180" stroke="#0284c7" stroke-width="6" stroke-linecap="round" />
+    <!-- Joint Caps -->
+    <circle cx="190" cy="180" r="5" fill="#facc15" />
+    <circle cx="280" cy="180" r="5" fill="#facc15" />
+
+    <!-- SWING 1: EMPTY (Left Swing) -->
+    <line x1="205" y1="180" x2="200" y2="260" stroke="#94a3b8" stroke-width="1.5" />
+    <line x1="225" y1="180" x2="220" y2="260" stroke="#94a3b8" stroke-width="1.5" />
+    <rect x="196" y="260" width="31" height="5" fill="#ea580c" rx="2" />
+
+    <!-- SWING 2: FRIEND 2 SWINGING (Right Swing - Girl with blonde hair) -->
+    <!-- Ropes tilted (swinging motion) -->
+    <line x1="245" y1="180" x2="255" y2="240" stroke="#64748b" stroke-width="1.5" />
+    <line x1="265" y1="180" x2="275" y2="240" stroke="#64748b" stroke-width="1.5" />
+    
+    <!-- Girl on Swing -->
+    <g transform="translate(242, 215) rotate(-10)">
+      <!-- Legs flying out -->
+      <path d="M 20,32 L 35,28" stroke="#fed7aa" stroke-width="4" stroke-linecap="round" />
+      <path d="M 18,34 L 33,33" stroke="#fed7aa" stroke-width="4" stroke-linecap="round" />
+      <!-- Shoes -->
+      <circle cx="36" cy="28" r="3" fill="#a855f7" />
+      <circle cx="34" cy="33" r="3" fill="#a855f7" />
+      <!-- Body / Purple Shirt -->
+      <rect x="10" y="18" width="14" height="18" rx="4" fill="#a855f7" />
+      <!-- Swing Seat -->
+      <rect x="5" y="33" width="22" height="4" fill="#ea580c" rx="1" />
+      <!-- Head & Ponytail -->
+      <circle cx="17" cy="10" r="7.5" fill="#fed7aa" />
+      <path d="M 10,8 Q 5,2 0,5 Q 5,12 10,10" fill="#facc15" /> <!-- Ponytail swinging back -->
+      <path d="M 11,8 A 7.5,7.5 0 0,1 24,8 Z" fill="#facc15" /> <!-- Hair top -->
+      <!-- Face profile/joy -->
+      <circle cx="21" cy="9" r="1" fill="#000" />
+      <path d="M 20,13 Q 23,13 22,11" fill="none" stroke="#000" stroke-width="1" />
+      <!-- Arms holding ropes -->
+      <path d="M 14,20 L 16,10" stroke="#fed7aa" stroke-width="3.5" stroke-linecap="round" />
+      <path d="M 18,20 L 25,11" stroke="#fed7aa" stroke-width="3.5" stroke-linecap="round" />
+    </g>
+  </g>
+
+  <!-- MAIN CHARACTER: BOY RUNNING / PLAYING IN FOREGROUND -->
+  <!-- Situated proudly in the center foreground, full of energy -->
+  <g id="main-boy" transform="translate(120, 240)">
+    <!-- Motion Lines under feet -->
+    <path d="M -10,115 Q 10,112 30,115" stroke="#22c55e" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <path d="M 40,118 Q 60,116 70,118" stroke="#22c55e" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+
+    <!-- Shadow -->
+    <ellipse cx="45" cy="112" rx="35" ry="8" fill="#047857" opacity="0.3" />
+
+    <!-- LEFT LEG (Back) -->
+    <path d="M 35,75 L 20,95 L 8,93" fill="none" stroke="#ffedd5" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Left Shoe (Red Sneaker) -->
+    <path d="M 12,93 L 2,93 C 0,93 0,100 5,100 L 15,100 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="1.5" />
+    <ellipse cx="6" cy="95" rx="2" ry="1" fill="#fff" />
+
+    <!-- RIGHT LEG (Front - Bent Running) -->
+    <path d="M 50,75 L 65,92 L 80,88" fill="none" stroke="#ffedd5" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Right Shoe -->
+    <path d="M 75,88 L 86,84 C 88,83 91,88 88,93 L 78,94 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="1.5" />
+    <ellipse cx="84" cy="87" rx="2" ry="1" fill="#fff" />
+
+    <!-- BLUE SHORTS -->
+    <path d="M 30,60 L 60,60 L 68,78 L 48,80 L 43,72 L 36,80 L 24,75 Z" fill="#0284c7" stroke="#0369a1" stroke-width="1.5" />
+
+    <!-- LEFT ARM (Reaching Back) -->
+    <path d="M 30,35 L 10,48 L -2,38" fill="none" stroke="#ffedd5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- TORSO / STRIPED T-SHIRT -->
+    <g>
+      <path d="M 28,32 L 60,32 L 56,64 L 32,64 Z" fill="#facc15" id="shirt-base" />
+      <!-- Orange Stripes -->
+      <path d="M 29,40 L 58,40 L 57,46 L 30,46 Z" fill="#f97316" />
+      <path d="M 31,52 L 56,52 L 55,58 L 31,58 Z" fill="#f97316" />
+      <!-- Shirt Contour Outline -->
+      <path d="M 28,32 L 60,32 L 56,64 L 32,64 Z" fill="none" stroke="#ca8a04" stroke-width="1.5" />
+    </g>
+
+    <!-- RIGHT ARM (Reaching Forward happily) -->
+    <path d="M 55,35 L 75,45 L 88,32" fill="none" stroke="#ffedd5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Hand -->
+    <circle cx="89" cy="31" r="5" fill="#ffedd5" />
+
+    <!-- NECK -->
+    <rect x="40" y="24" width="8" height="10" fill="#ffedd5" />
+
+    <!-- HEAD -->
+    <circle cx="44" cy="16" r="15" fill="#ffedd5" />
+
+    <!-- FACE EXPRESSION -->
+    <!-- Big Joyful Eye (Right) -->
+    <circle cx="51" cy="14" r="3.5" fill="#ffffff" />
+    <circle cx="52" cy="14" r="2" fill="#4338ca" />
+    <circle cx="53" cy="13" r="0.7" fill="#ffffff" />
+    <!-- Left Eye -->
+    <circle cx="40" cy="14" r="3.5" fill="#ffffff" />
+    <circle cx="41" cy="14" r="2" fill="#4338ca" />
+    <circle cx="42" cy="13" r="0.7" fill="#ffffff" />
+    <!-- Eyebrows (Expressive/Excited) -->
+    <path d="M 37,8 Q 41,6 44,9" fill="none" stroke="#7c2d12" stroke-width="1.5" stroke-linecap="round" />
+    <path d="M 48,9 Q 52,6 55,8" fill="none" stroke="#7c2d12" stroke-width="1.5" stroke-linecap="round" />
+    <!-- Rosy Cheeks -->
+    <ellipse cx="37" cy="20" rx="2.5" ry="1.5" fill="#f87171" opacity="0.6" />
+    <ellipse cx="53" cy="20" rx="2.5" ry="1.5" fill="#f87171" opacity="0.6" />
+    <!-- Open Happy Mouth -->
+    <path d="M 41,21 Q 46,29 51,21 Z" fill="#b91c1c" stroke="#7f1d1d" stroke-width="0.8" />
+    <!-- Tongue inside mouth -->
+    <path d="M 43,24 Q 46,22 49,24 Q 47,27 44,26 Z" fill="#fca5a5" />
+
+    <!-- SPIKY BROWN HAIR -->
+    <path d="M 29,15 C 27,6 35,2 37,2 C 39,-2 46,-1 48,2 C 52,-2 58,1 59,5 C 63,5 62,12 60,16 C 57,11 55,10 52,11 C 50,7 44,6 42,9 C 39,6 33,8 32,12 C 30,12 29,14 29,15 Z" 
+          fill="#78350f" stroke="#451a03" stroke-width="1" />
+    
+    <!-- COOL RED BASEBALL CAP (Turned Backwards) -->
+    <path d="M 30,12 C 32,0 54,0 58,10 Z" fill="#ef4444" />
+    <rect x="41" y="-1" width="6" height="3" rx="1" fill="#facc15" /> <!-- Cap button -->
+    <!-- Cap Brim pointing backward (Left) -->
+    <path d="M 32,10 Q 18,10 15,16 Q 25,16 30,12 Z" fill="#dc2626" stroke="#991b1b" stroke-width="1" />
+  </g>
+
+  <!-- EXTRA PLAYGROUND DETAILS / FLOWERS & BUSHES (Foreground Edges) -->
+  <!-- Left Foreground Bush & Flowers -->
+  <g transform="translate(-10, 340)">
+    <path d="M 0,60 Q 20,20 50,30 Q 80,10 100,60 Z" fill="#15803d" />
+    <path d="M 5,60 Q 30,30 60,60 Z" fill="#22c55e" />
+    <!-- Little Daisy 1 -->
+    <circle cx="30" cy="35" r="4" fill="#ffffff" />
+    <circle cx="35" cy="32" r="4" fill="#ffffff" />
+    <circle cx="38" cy="37" r="4" fill="#ffffff" />
+    <circle cx="33" cy="42" r="4" fill="#ffffff" />
+    <circle cx="28" cy="39" r="4" fill="#ffffff" />
+    <circle cx="33" cy="37" r="3" fill="#facc15" />
+    <!-- Little Daisy 2 -->
+    <circle cx="70" cy="25" r="4" fill="#ffffff" />
+    <circle cx="75" cy="22" r="4" fill="#ffffff" />
+    <circle cx="78" cy="27" r="4" fill="#ffffff" />
+    <circle cx="73" cy="32" r="4" fill="#ffffff" />
+    <circle cx="68" cy="29" r="4" fill="#ffffff" />
+    <circle cx="73" cy="27" r="3" fill="#facc15" />
+  </g>
+
+  <!-- Soccer Ball in Grass (Foreground Right-Center) -->
+  <g transform="translate(195, 350)">
+    <circle cx="12" cy="12" r="11" fill="#ffffff" stroke="#1e293b" stroke-width="1.5" />
+    <polygon points="12,6 7,9 8,15 16,15 17,9" fill="#1e293b" />
+    <line x1="12" y1="6" x2="12" y2="1" stroke="#1e293b" stroke-width="1.2" />
+    <line x1="7" y1="9" x2="2" y2="7" stroke="#1e293b" stroke-width="1.2" />
+    <line x1="8" y1="15" x2="4" y2="19" stroke="#1e293b" stroke-width="1.2" />
+    <line x1="16" y1="15" x2="20" y2="19" stroke="#1e293b" stroke-width="1.2" />
+    <line x1="17" y1="9" x2="22" y2="7" stroke="#1e293b" stroke-width="1.2" />
+    <!-- Grass tuft hiding bottom of ball -->
+    <path d="M -2,20 Q 5,10 8,22 Q 14,8 18,22 Q 22,12 25,20" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- BUBBLES / SPARKLES OF JOY IN AIR -->
+  <g fill="none" stroke="#ffffff" opacity="0.7">
+    <circle cx="110" cy="180" r="6" stroke-width="1.5" fill="#e0f2fe" opacity="0.4" />
+    <circle cx="106" cy="177" r="2" fill="#fff" />
+    <circle cx="140" cy="210" r="9" stroke-width="1.5" fill="#e0f2fe" opacity="0.3" />
+    <circle cx="135" cy="206" r="3" fill="#fff" />
+    <circle cx="230" cy="130" r="5" stroke-width="1" fill="#e0f2fe" opacity="0.5" />
+  </g>
+</svg>
