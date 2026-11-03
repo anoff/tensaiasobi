@@ -12,6 +12,11 @@ interface DifficultySelectorProps {
   className?: string;
   /** `paper` = ink-on-paper track that sits on a NotebookSheet (school games). */
   variant?: 'candy' | 'paper';
+  /**
+   * Level to lock. Left out, it follows the home age switch; `null` keeps all
+   * three open (Math Pop has its own ladder per age).
+   */
+  locked?: GameDifficulty | null;
 }
 
 const STARS: Record<GameDifficulty, string> = {
@@ -27,11 +32,12 @@ export function DifficultySelector({
   disabled = false,
   className = '',
   variant = 'candy',
+  locked: lockedOverride,
 }: DifficultySelectorProps) {
   const paper = variant === 'paper';
   // The level that doesn't fit the home age switch stays visible but locked.
   const band = useContext(GameFXContext)?.ageBand;
-  const locked = band ? difficultyForAge(band).locked : null;
+  const locked = lockedOverride !== undefined ? lockedOverride : band ? difficultyForAge(band).locked : null;
   const idleClass = paper
     ? 'bg-transparent border-2 border-transparent opacity-45 hover:opacity-70 disabled:opacity-30'
     : 'border-transparent opacity-60 hover:opacity-100 disabled:opacity-40';

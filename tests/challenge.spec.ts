@@ -117,14 +117,10 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     // Solve an equation: get the equation text, calculate correct and wrong answers
     const equationElement = page.getByTestId('math-equation');
     await expect(equationElement).toBeVisible();
-    const text = await equationElement.innerText();
-    const match = text.match(/(\d+)\s*\+\s*(\d+)/);
-    expect(match).not.toBeNull();
-    if (!match) return;
-
-    const num1 = parseInt(match[1], 10);
-    const num2 = parseInt(match[2], 10);
-    const correctAnswer = num1 + num2;
+    // Preschool easy draws the sum as fruit only; the numbers ride on data attributes.
+    const sumKey = async () => `${await equationElement.getAttribute('data-num1')}+${await equationElement.getAttribute('data-num2')}`;
+    const text = await sumKey();
+    const correctAnswer = Number(await equationElement.getAttribute('data-answer'));
 
     // Get answer bubbles
     const answerButtons = page.getByTestId('math-answer-option');
@@ -145,20 +141,14 @@ test.describe('tensaiasobi Challenge Mode E2E Tests', () => {
     await page.waitForTimeout(2000);
 
     // Verify a new equation is generated (or the wrong selections are cleared and it's a new equation)
-    const newEquationText = await equationElement.innerText();
+    const newEquationText = await sumKey();
     expect(newEquationText).not.toBe(originalEquation);
 
     // Now answer correctly to earn stars and complete target
     // We need 5 stars. Easy math gives 2 stars per correct answer (CHOICE_STARS).
     // So we need 3 correct answers to reach >= 5 stars (which gives 6 stars).
     for (let round = 0; round < 3; round++) {
-      const currentEqText = await equationElement.innerText();
-      const currentMatch = currentEqText.match(/(\d+)\s*\+\s*(\d+)/);
-      if (!currentMatch) throw new Error("Could not parse current equation");
-      
-      const c1 = parseInt(currentMatch[1], 10);
-      const c2 = parseInt(currentMatch[2], 10);
-      const cAnswer = c1 + c2;
+      const cAnswer = Number(await equationElement.getAttribute('data-answer'));
 
       // Locate correct bubble
       const optCount = await answerButtons.count();
