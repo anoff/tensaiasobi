@@ -8,5 +8,7 @@ describe('operationOf', () => {
     expect(operationOf('−')).toBe('minus');
     expect(operationOf(1)).toBe('plus');
     expect(operationOf(-1)).toBe('minus');
+    expect(operationOf('×')).toBe('times');
+    expect(operationOf('÷')).toBe('divide');
   });
 });

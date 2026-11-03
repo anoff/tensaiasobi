@@ -60,10 +60,7 @@ async function answerMath(page: Page) {
   // A fresh question shows "?" and enabled options.
   await expect(equation).toContainText('?', { timeout: 5000 });
   await expect(page.getByTestId('math-answer-option').first()).toBeEnabled();
-  const text = await equation.innerText();
-  const [a, b] = (text.match(/\d+/g) ?? []).map(Number);
-  const op = await equation.locator('[data-operation]').getAttribute('data-operation');
-  const answer = op === 'minus' ? a - b : a + b;
+  const answer = Number(await equation.getAttribute('data-answer'));
   const options = page.getByTestId('math-answer-option');
   const n = await options.count();
   for (let i = 0; i < n; i++) {

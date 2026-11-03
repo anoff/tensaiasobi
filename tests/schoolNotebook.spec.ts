@@ -23,8 +23,7 @@ test.describe('School games use the notebook answer sheet', () => {
   test('Math: a wrong line shakes and clears so the child can try again', async ({ page }) => {
     await page.getByTestId('launch-math').click();
     const text = await page.getByTestId('math-equation').innerText();
-    const match = text.match(/(\d+)\s*([+−])\s*(\d+)/)!;
-    const answer = match[2] === '+' ? Number(match[1]) + Number(match[3]) : Number(match[1]) - Number(match[3]);
+    const answer = Number(await page.getByTestId('math-equation').getAttribute('data-answer'));
 
     const options = page.getByTestId('math-answer-option');
     const values = await options.evaluateAll((els) => els.map((el) => parseInt(el.textContent ?? '', 10)));
@@ -42,8 +41,7 @@ test.describe('School games use the notebook answer sheet', () => {
     await page.getByTestId('difficulty-hard').click();
     const equation = page.getByTestId('math-equation');
     const text = await equation.innerText();
-    const match = text.match(/(\d+)\s*([+−])\s*(\d+)/)!;
-    const answer = match[2] === '+' ? Number(match[1]) + Number(match[3]) : Number(match[1]) - Number(match[3]);
+    const answer = Number(await equation.getAttribute('data-answer'));
 
     const options = page.getByTestId('math-answer-option');
     const values = await options.evaluateAll((els) => els.map((el) => parseInt(el.textContent ?? '', 10)));
@@ -51,13 +49,15 @@ test.describe('School games use the notebook answer sheet', () => {
     await expect(equation).not.toHaveText(text, { timeout: 3000 });
   });
 
-  test('Math hard stays within 20 and shows no picture crutch', async ({ page }) => {
+  test('Math hard stays within 100 and shows no fruit at all', async ({ page }) => {
     await page.getByTestId('launch-math').click();
     await page.getByTestId('difficulty-hard').click();
-    const text = await page.getByTestId('math-equation').innerText();
-    const [a, b] = (text.match(/\d+/g) ?? []).map(Number);
-    expect(Math.max(a, b)).toBeLessThanOrEqual(20);
+    const equation = page.getByTestId('math-equation');
+    const nums = await Promise.all(['data-num1', 'data-num2', 'data-answer'].map(async (k) => Number(await equation.getAttribute(k))));
+    expect(Math.max(...nums)).toBeLessThanOrEqual(100);
+    expect(await equation.innerText()).not.toMatch(/[*/]/);
     await expect(page.getByTestId('math-pictures')).toHaveCount(0);
+    await expect(page.getByTestId('math-fruit-rows')).toHaveCount(0);
   });
 
   test('First Sound offers letters as notebook lines', async ({ page }) => {
