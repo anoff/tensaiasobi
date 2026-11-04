@@ -16,7 +16,7 @@ describe('Tower Sort board', () => {
     for (const difficulty of ['easy', 'medium', 'hard'] as GameDifficulty[]) {
       const config = TOWER_SORT_CONFIG[difficulty];
       for (let i = 0; i < 50; i++) {
-        const towers = generateTowers(difficulty, TOWER_SORT_THEMES[i % TOWER_SORT_THEMES.length]);
+        const towers = generateTowers(difficulty, Object.values(TOWER_SORT_THEMES)[i % Object.values(TOWER_SORT_THEMES).length]);
         expect(towers).toHaveLength(config.towers);
         expect(towers.every((tower) => tower.length <= config.height)).toBe(true);
         expect(towers.flat()).toHaveLength(config.types * config.height);

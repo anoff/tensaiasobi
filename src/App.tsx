@@ -6,7 +6,9 @@ import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
 import { BlockTile } from './components/BlockTile';
 import { AgeSwitch } from './components/AgeSwitch';
-import { CORAL, LEAF, BUTTER, CHALK, INK, PLAY_MAT_STYLE } from './theme/blockTable';
+import { CORAL, LEAF, BUTTER, CHALK, INK, PLAY_MAT_STYLE, hardShadow } from './theme/blockTable';
+import { THEME_EMOJI, nextTheme, toAppTheme, type AppThemeId } from './theme/appTheme';
+import { EMOJI_HALO } from './components/BlockTile';
 import { CATEGORY_EMOJI, categoryFill } from './theme/categories';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
@@ -89,6 +91,10 @@ function AppContent() {
   const finishAward = useCallback(() => setAwardQueue((q) => q.slice(1)), []);
   const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
   const [storedAgeBand, setAgeBand] = useLocalStorage<string>('settings_age_band', 'little');
+  // App-wide theme (#74): a setting like sound, so "Reset all progress" keeps it.
+  const [storedTheme, setTheme] = useLocalStorage<AppThemeId>('settings_app_theme', 'animals');
+  const theme = toAppTheme(storedTheme);
+  const [themeBumps, setThemeBumps] = useState(0);
   // Older installs may still hold 'all'; the home switch only knows two bands.
   const ageBand: AgeBand = storedAgeBand === 'big' ? 'big' : 'little';
   const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
@@ -288,6 +294,8 @@ function AppContent() {
             onRoundComplete: () => handleRoundComplete(gameId),
             challengeMode: challengeFocusActive,
             ageBand,
+            theme,
+            setTheme,
           }}
         >
           <Game key={language} />
@@ -514,9 +522,38 @@ function AppContent() {
         {currentScreen === 'menu' ? (
           <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full shrink-0 pt-6 pb-4 select-none">
             <div className="text-center space-y-2 mt-4">
-              <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">
-                tensaiasobi 🎮
-              </h1>
+              <div className="flex items-center justify-center gap-[14px]">
+                <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">tensaiasobi</h1>
+                <button
+                  type="button"
+                  data-testid="theme-button"
+                  data-theme={theme}
+                  aria-label={`${t.menu.theme}: ${t.menu.themes[theme]}`}
+                  onClick={() => {
+                    playPop();
+                    setTheme(nextTheme(theme));
+                    setThemeBumps((n) => n + 1);
+                  }}
+                  className="relative shrink-0 flex h-14 w-14 tiny:h-12 tiny:w-12 items-center justify-center rounded-2xl border-[3px] cursor-pointer select-none touch-manipulation outline-none transition-all duration-75 active:translate-x-[3px] active:translate-y-[4px] active:[box-shadow:none] focus-visible:ring-4 focus-visible:ring-amber-400/70"
+                  style={{ backgroundColor: '#fff8ec', borderColor: INK, boxShadow: hardShadow(3, 4) }}
+                >
+                  <span
+                    key={themeBumps}
+                    aria-hidden
+                    className={`text-[32px] tiny:text-[28px] leading-none ${themeBumps > 0 ? 'animate-card-in' : ''}`}
+                    style={{ filter: EMOJI_HALO }}
+                  >
+                    {THEME_EMOJI[theme]}
+                  </span>
+                  <span
+                    aria-hidden
+                    className="absolute -right-[9px] -top-[9px] flex h-6 w-6 items-center justify-center rounded-full border-2 text-[12px] leading-none"
+                    style={{ backgroundColor: BUTTER, borderColor: INK }}
+                  >
+                    🎨
+                  </span>
+                </button>
+              </div>
               <p className="text-[#2a1c14]/50 font-extrabold text-base">{t.menu.subtitle}</p>
             </div>
 

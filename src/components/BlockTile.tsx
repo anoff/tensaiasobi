@@ -3,7 +3,7 @@ import { LauncherGlyph } from './LauncherGlyph';
 import { FILLS, INK, hardShadow, tileLabelOn } from '../theme/blockTable';
 
 /** 4px white halo that follows the glyph outline (plain CSS, no disc). */
-const EMOJI_HALO =
+export const EMOJI_HALO =
   'drop-shadow(4px 0 0 #fff) drop-shadow(-4px 0 0 #fff) drop-shadow(0 4px 0 #fff) drop-shadow(0 -4px 0 #fff) drop-shadow(3px 3px 0 #fff) drop-shadow(-3px 3px 0 #fff) drop-shadow(3px -3px 0 #fff) drop-shadow(-3px -3px 0 #fff)';
 
 function tileTilt(id: string): number {

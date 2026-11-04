@@ -1,3 +1,5 @@
+import type { AppThemeId } from '../theme/appTheme';
+
 export type AgeBand = 'little' | 'big';
 
 export type GameDifficulty = 'easy' | 'medium' | 'hard';
@@ -15,4 +17,8 @@ export interface GameProps {
   challengeMode?: boolean;
   /** Home age switch; sets the starting difficulty and which one is locked. */
   ageBand?: AgeBand;
+  /** App-wide theme (#74): themed games pick their play-area content from it. */
+  theme?: AppThemeId;
+  /** The in-game 🎨 buttons write the same app-wide theme, so home stays in sync. */
+  setTheme?: (theme: AppThemeId) => void;
 }

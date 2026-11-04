@@ -4,6 +4,8 @@ import DifficultySelector from '../components/DifficultySelector';
 import type { GameDifficulty } from '../types/game';
 import { useTranslation } from '../hooks/useTranslation';
 import { TOWER_SORT_THEMES } from './towerSortThemes';
+import { ThemeButton } from '../components/ThemeButton';
+import { nextTheme } from '../theme/appTheme';
 import { canDrop, generateTowers, isSolved, TOWER_SORT_CONFIG } from './towerSortLogic';
 import { useGameFX } from '../hooks/gameFXContext';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
@@ -39,10 +41,9 @@ const TOWER_COLORS = [
 ];
 
 export function TowerSort() {
-  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete, theme: themeId = 'animals', setTheme } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
-  const [themeIndex, setThemeIndex] = useState(0);
   const [towers, setTowers] = useState<string[][]>([]);
   const [held, setHeld] = useState<Held | null>(null);
   const [droppedAt, setDroppedAt] = useState<number | null>(null);
@@ -53,7 +54,7 @@ export function TowerSort() {
   const [shakeHold, setShakeHold] = useState(false);
   const [bestMoves, setBestMoves] = useState(0);
 
-  const theme = TOWER_SORT_THEMES[themeIndex];
+  const theme = TOWER_SORT_THEMES[themeId];
   const config = TOWER_SORT_CONFIG[difficulty];
   const capacity = config.height;
 
@@ -142,7 +143,7 @@ export function TowerSort() {
 
   const changeTheme = () => {
     playPop();
-    setThemeIndex((prev) => (prev + 1) % TOWER_SORT_THEMES.length);
+    setTheme?.(nextTheme(themeId));
   };
 
   const changeDifficulty = (diff: GameDifficulty) => {
@@ -180,13 +181,9 @@ export function TowerSort() {
           )}
         </div>
 
-        <button
-          onClick={changeTheme}
-          disabled={isWon}
-          className="flex items-center gap-1 bg-candy-blue border-b-4 border-sky-600 active:border-b-0 active:translate-y-[4px] text-white text-2xl font-extrabold p-2 rounded-2xl cursor-pointer shadow-sm select-none outline-none hover:scale-105 disabled:opacity-50"
-        >
+        <ThemeButton data-testid="tower-sort-theme" data-theme={themeId} onClick={changeTheme} disabled={isWon} className="gap-1">
           🎨 {theme.nameEmoji}
-        </button>
+        </ThemeButton>
       </div>
 
       {/* Title — always on the light page, whatever the playground theme */}

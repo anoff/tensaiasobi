@@ -14,6 +14,8 @@ export const fr: TranslationSchema = {
     subtitle: "Jeux amusants pour apprendre !",
     footer: "Créé avec ❤️ pour l'apprentissage",
     parents: "Parents",
+    theme: "Thème",
+    themes: { animals: "Animaux", space: "Espace", ocean: "Océan" },
     session: "Défi",
     language: "Langue",
     math: "Math Pop",
@@ -113,7 +115,7 @@ export const fr: TranslationSchema = {
     help: "Appuie sur la bonne bulle !",
   },
   memoryMatch: {
-    title: "Paires d'animaux ! 🐯",
+    title: "Trouve les paires ! 🃏",
     subtitle: "Retourne les cartes pour trouver les paires !",
     victory: "🎉 Bravo ! Tu les as toutes trouvées !",
     help: "Appuie sur les cartes pour les retourner !",
