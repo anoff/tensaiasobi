@@ -654,7 +654,7 @@ export const de: TranslationSchema = {
       doodle: { what: "Mit dem Finger malen, was du willst.", learn: "Kreativität und Handgeschick." },
       trace: { what: "Die gepunktete Form nachfahren.", learn: "Stiftführung und Formen." },
       maze: { what: "Die Figur durch das Labyrinth zum Ziel ziehen.", learn: "Wege finden; Fingergeschick." },
-      emojiMatch: { what: "Finde das Emoji, das beide Karten teilen, allein auf Zeit oder zu zweit.", learn: "Schnelles Suchen mit den Augen." },
+      emojiMatch: { what: "Finde das Emoji, das beide Karten teilen, allein oder zu zweit.", learn: "Schnelles Suchen mit den Augen." },
       animalGenie: { what: "Denk an ein Tier; der Geist errät es mit Ja/Nein-Fragen.", learn: "Merkmale von Tieren; Ja/Nein-Denken." },
       dispatch: { what: "Schick zu jedem Notfall das richtige Fahrzeug.", learn: "Wer hilft wann: Polizei, Feuerwehr, Rettungsdienst." },
     },
