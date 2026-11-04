@@ -100,7 +100,7 @@ export const GAMES = [
   { id: 'patternTrain', category: 'logic', testid: 'launch-pattern-train', emoji: '🚃', labelKey: 'patternTrain', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: PatternTrain },
   { id: 'simonLights', category: 'logic', testid: 'launch-simon-lights', emoji: '🐵', labelKey: 'simonLights', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: SimonLights },
   { id: 'sinkOrFloat', category: 'logic', testid: 'launch-sink-or-float', emoji: '🛁', labelKey: 'sinkOrFloat', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: SinkOrFloat },
-  { id: 'memory', category: 'logic', testid: 'launch-memory', emoji: '🐯', labelKey: 'match', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: MemoryMatch },
+  { id: 'memory', category: 'logic', testid: 'launch-memory', emoji: '🃏', labelKey: 'match', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: MemoryMatch },
   { id: 'shadowFlashlight', category: 'logic', testid: 'launch-shadow', emoji: '🔦', labelKey: 'shadowFlashlight', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: ShadowFlashlight },
   { id: 'snorkelPearlFinder', category: 'logic', testid: 'launch-snorkel-pearl-finder', emoji: '🤿', labelKey: 'snorkelPearlFinder', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: SnorkelPearlFinder },
   { id: 'puzzle', category: 'logic', testid: 'launch-puzzle', emoji: '🧩', labelKey: 'puzzle', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: PuzzleGame },
