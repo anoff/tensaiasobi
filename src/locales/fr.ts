@@ -604,9 +604,8 @@ export const fr: TranslationSchema = {
     active: "Défi en cours",
   },
   guide: {
-    open: "Guide des parents 📖",
-    openDesc: "Ce que chaque jeu apprend · verrouiller l’écran",
-    back: "← Réglages",
+    homeRow: "📖 Guide des parents",
+    back: "← Accueil",
     title: "Guide des parents 📖",
     intro: "Ce qu’est chaque jeu et ce que votre enfant y pratique.",
     learns: "Apprend :",

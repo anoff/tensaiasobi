@@ -1,19 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_IDS } from './catalog';
-import { gameIdFromHash, gameLinkHash, gameUrl } from './gameLink';
+import { gameUrl, routeFromHash, routeHash } from './gameLink';
 
-describe('game links', () => {
-  it('round-trips every catalog id', () => {
-    for (const id of GAME_IDS) expect(gameIdFromHash(gameLinkHash(id))).toBe(id);
+describe('hash routes', () => {
+  it('round-trips every catalog id and the guide', () => {
+    for (const id of GAME_IDS) expect(routeFromHash(routeHash(id))).toBe(id);
+    expect(routeFromHash(routeHash('guide'))).toBe('guide');
   });
 
   it('accepts the slash-less form', () => {
-    expect(gameIdFromHash('#maze')).toBe('maze');
+    expect(routeFromHash('#maze')).toBe('maze');
+    expect(routeFromHash('#guide')).toBe('guide');
   });
 
-  it('treats empty, unknown and malformed hashes as no game', () => {
-    for (const hash of ['', '#', '#/', '#/nope', '#/MAZE', '#/maze/extra', '#/%E0%A4%A']) {
-      expect(gameIdFromHash(hash)).toBeNull();
+  it('treats empty, unknown and malformed hashes as no route', () => {
+    for (const hash of ['', '#', '#/', '#/nope', '#/MAZE', '#/maze/extra', '#/GUIDE', '#/guide/x', '#/%E0%A4%A']) {
+      expect(routeFromHash(hash)).toBeNull();
     }
   });
 });
@@ -21,6 +23,6 @@ describe('game links', () => {
 describe('gameUrl', () => {
   it('points at the public web build', () => {
     expect(gameUrl('maze')).toBe('https://asobi.anoff.io/#/maze');
-    expect(gameIdFromHash(new URL(gameUrl('towerSort')).hash)).toBe('towerSort');
+    expect(routeFromHash(new URL(gameUrl('towerSort')).hash)).toBe('towerSort');
   });
 });

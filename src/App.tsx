@@ -32,11 +32,14 @@ import { accessoryById, bookTotals, collectibleById } from './data/stickers';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 import { formatRemaining, useSessionTimer } from './hooks/useSessionTimer';
-import { gameIdFromHash, gameLinkHash } from './games/gameLink';
+import { routeFromHash, routeHash, type HashRoute } from './games/gameLink';
 
 type Screen = 'menu' | 'stickers' | 'coupons' | 'settings' | 'session' | 'guide' | GameId;
 /** Grown-up screens reached through the parent gate: no Home button, never covered by the session lock. */
+/** Grown-up screens: no Home button in the header, no session-lock overlay, and opening one doesn't start play. */
 const isParentScreen = (screen: Screen) => screen === 'settings' || screen === 'session' || screen === 'guide';
+/** Screens with their own URL hash (#/<game id>, #/guide); every other screen clears the hash. */
+const hasHashRoute = (screen: Screen): screen is HashRoute => screen === 'guide' || isGameId(screen);
 type ParentGateNext = 'settings' | 'session';
 
 function AppContent() {
@@ -60,15 +63,16 @@ function AppContent() {
 
   const challengeFocusActive = challengeActive && !challengePlayUnlocked;
 
-  /** The game a direct link (#/<catalog id>) asks for, if it exists and Learn mode allows it; else the menu. */
-  const linkedGame = (hash: string): GameId | null => {
-    const id = gameIdFromHash(hash);
-    const game = id && GAMES.find((g) => g.id === id);
+  /** The screen a direct link asks for: the guide, or a game if Learn mode allows it; else the menu (null). */
+  const linkedRoute = (hash: string): HashRoute | null => {
+    const route = routeFromHash(hash);
+    if (route === 'guide') return route;
+    const game = route && GAMES.find((g) => g.id === route);
     if (!game) return null;
     return gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames }) ? game.id : null;
   };
 
-  const [currentScreen, setCurrentScreen] = useState<Screen>(() => linkedGame(window.location.hash) ?? 'menu');
+  const [currentScreen, setCurrentScreen] = useState<Screen>(() => linkedRoute(window.location.hash) ?? 'menu');
   const [showParentGate, setShowParentGate] = useState(false);
   const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
 
@@ -93,21 +97,21 @@ function AppContent() {
   const [pendingEarnCouponId, setPendingEarnCouponId] = useState<string | null>(null);
   const [challengeSetupCouponId, setChallengeSetupCouponId] = useState<string | undefined>(undefined);
 
-  // Keep the URL in step with the screen: a game gets its own history entry (#/<id>), so a reload
-  // reopens it and browser Back lands on the menu; any other screen clears the hash.
+  // Keep the URL in step with the screen: a game or the guide gets its own history entry (#/<id>),
+  // so a reload reopens it and browser Back lands on the menu; any other screen clears the hash.
   useEffect(() => {
     const { pathname, search, hash } = window.location;
-    if (isGameId(currentScreen)) {
-      if (gameIdFromHash(hash) !== currentScreen) window.history.pushState(null, '', gameLinkHash(currentScreen));
+    if (hasHashRoute(currentScreen)) {
+      if (routeFromHash(hash) !== currentScreen) window.history.pushState(null, '', routeHash(currentScreen));
     } else if (hash) {
       window.history.replaceState(null, '', pathname + search);
     }
   }, [currentScreen]);
 
   /** Latest screen and link resolver for the popstate listener, which subscribes once. */
-  const linkState = useRef({ currentScreen, linkedGame, startIfIdle });
+  const linkState = useRef({ currentScreen, linkedRoute, startIfIdle });
   useEffect(() => {
-    linkState.current = { currentScreen, linkedGame, startIfIdle };
+    linkState.current = { currentScreen, linkedRoute, startIfIdle };
   });
 
   // Opening a game by link counts as starting play, like tapping its tile.
@@ -118,19 +122,19 @@ function AppContent() {
   // Browser Back/Forward and hand-edited hashes.
   useEffect(() => {
     const onPopState = () => {
-      const { currentScreen: current, linkedGame: resolve, startIfIdle: start } = linkState.current;
+      const { currentScreen: current, linkedRoute: resolve, startIfIdle: start } = linkState.current;
       const target = resolve(window.location.hash);
       if (target) {
         if (target !== current) {
-          start();
+          if (isGameId(target)) start();
           setCurrentScreen(target);
         }
         return;
       }
-      if (!isGameId(current)) return;
+      if (!hasHashRoute(current)) return;
       // A game with an inner screen (Magic Puzzle) takes Back first, like the hardware Back button.
-      if (!window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
-        window.history.pushState(null, '', gameLinkHash(current));
+      if (isGameId(current) && !window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
+        window.history.pushState(null, '', routeHash(current));
         return;
       }
       setCurrentScreen('menu');
@@ -203,10 +207,6 @@ function AppContent() {
       }
       // A game with its own inner screen (Magic Puzzle's gallery) can take Back by cancelling this event.
       if (isGameId(currentScreen) && !window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
-        return;
-      }
-      if (currentScreen === 'guide') {
-        setCurrentScreen('settings');
         return;
       }
       if (currentScreen !== 'menu') {
@@ -351,13 +351,12 @@ function AppContent() {
             onToggleCoupon={toggleCoupon}
             onClearProgress={handleClearProgress}
             onClose={() => handleScreenChange('menu')}
-            onOpenGuide={() => handleScreenChange('guide')}
             onAddCoupon={addCustomCoupon}
             onRemoveCoupon={removeCustomCoupon}
           />
         );
       case 'guide':
-        return <ParentGuide onBack={() => handleScreenChange('settings')} />;
+        return <ParentGuide onBack={() => handleScreenChange('menu')} />;
       default:
         return null;
     }
@@ -507,11 +506,13 @@ function AppContent() {
         className={
           currentScreen === 'stickers'
             ? 'flex-1 flex flex-col min-h-0 overflow-hidden [&:has([data-page-scroll])]:overflow-y-auto overscroll-y-contain px-4 pt-1.5 pb-2'
-            : 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6 short:pb-2'
+            : currentScreen === 'menu'
+              ? 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4'
+              : 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6 short:pb-2'
         }
       >
         {currentScreen === 'menu' ? (
-          <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
+          <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full shrink-0 pt-6 pb-4 select-none">
             <div className="text-center space-y-2 mt-4">
               <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">
                 tensaiasobi 🎮
@@ -606,6 +607,16 @@ function AppContent() {
                   v-{__GIT_HASH__}
                 </a>
               </div>
+              {/* Quiet grown-up footer row (#30, #31): read-only guide, so no parent gate. */}
+              <button
+                type="button"
+                data-testid="home-guide"
+                onClick={() => handleScreenChange('guide')}
+                className="mt-6 block w-full h-11 rounded-[1.6rem] border text-base font-bold cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-amber-400/70"
+                style={{ backgroundColor: '#fff8ec', borderColor: '#D3E3F1', color: '#1E3A5F' }}
+              >
+                {t.guide.homeRow}
+              </button>
             </div>
           </div>
         ) : (

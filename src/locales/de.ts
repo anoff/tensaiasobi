@@ -604,9 +604,8 @@ export const de: TranslationSchema = {
     active: "Challenge läuft",
   },
   guide: {
-    open: "Elternratgeber 📖",
-    openDesc: "Was jedes Spiel fördert · Tipps zur Bildschirmsperre",
-    back: "← Einstellungen",
+    homeRow: "📖 Elternratgeber",
+    back: "← Startseite",
     title: "Elternratgeber 📖",
     intro: "Was jedes Spiel ist und was Ihr Kind dabei übt.",
     learns: "Übt:",

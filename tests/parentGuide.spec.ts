@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 
-// #30 / #31: the Parents' guide sits in Settings, behind the parent gate.
+// #30 / #31: the Parents' guide opens from a quiet footer row on home, with no parent gate.
 
 async function solveParentGate(page: Page) {
   const gateTextElement = page.locator('form div.text-4xl');
@@ -13,16 +13,18 @@ async function solveParentGate(page: Page) {
 
 async function openGuide(page: Page) {
   await page.goto('/');
-  await expect(page.getByTestId('open-guide')).toHaveCount(0);
-  await page.getByTestId('open-settings').click();
-  await expect(page.getByTestId('open-guide')).toHaveCount(0); // still behind the gate
-  await solveParentGate(page);
-  await page.getByTestId('open-guide').click();
+  const row = page.getByTestId('home-guide');
+  await row.scrollIntoViewIfNeeded();
+  await expect(row).toHaveText('📖 Parents’ guide');
+  await row.click();
   await expect(page.getByTestId('parent-guide')).toBeVisible();
+  await expect(page.locator('form div.text-4xl')).toHaveCount(0); // no parent gate
 }
 
+const hashOf = (page: Page) => new URL(page.url()).hash;
+
 test.describe("Parents' guide", () => {
-  test('opens through the gate and lists all games under the four shelves', async ({ page }) => {
+  test('opens from the home footer without a gate and lists all games under the four shelves', async ({ page }) => {
     await openGuide(page);
     await expect(page.getByRole('heading', { name: 'Parents’ guide 📖' })).toBeVisible();
     await expect(page.getByTestId('home-button')).toHaveCount(0);
@@ -41,8 +43,42 @@ test.describe("Parents' guide", () => {
     // Age-only games show just their own chip.
     await expect(page.getByTestId('guide-game-numberTrain').getByTestId('guide-age-big')).toHaveCount(0);
 
+    await expect.poll(() => hashOf(page)).toBe('#/guide');
     await page.getByTestId('guide-back').click();
-    await expect(page.getByTestId('open-guide')).toBeVisible();
+    await expect(page.getByTestId('home-guide')).toBeVisible();
+    await expect.poll(() => hashOf(page)).toBe('');
+  });
+
+  test('#/guide deep-links to the guide; Back and reload return to home', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('home-guide')).toBeAttached(); // app mounted, so the hash change is a popstate
+    await page.goto('/#/guide');
+    await expect(page.getByTestId('parent-guide')).toBeVisible();
+    await expect(page.locator('form div.text-4xl')).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByTestId('parent-guide')).toBeVisible();
+
+    await page.getByTestId('guide-back').click();
+    await expect(page.getByTestId('home-guide')).toBeVisible();
+    await page.reload();
+    await expect(page.getByTestId('home-guide')).toBeVisible();
+    await expect(page.getByTestId('parent-guide')).toHaveCount(0);
+
+    // Browser Back from a guide opened on home lands on home.
+    await page.getByTestId('home-guide').click();
+    await expect(page.getByTestId('parent-guide')).toBeVisible();
+    await page.goBack();
+    await expect(page.getByTestId('home-guide')).toBeVisible();
+    await expect(page.getByTestId('parent-guide')).toHaveCount(0);
+  });
+
+  test('Settings no longer has a guide row', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('open-settings').click();
+    await solveParentGate(page);
+    await expect(page.getByText('Sound Effects 🔊')).toBeVisible();
+    await expect(page.getByTestId('open-guide')).toHaveCount(0);
+    await expect(page.getByText('Parents’ guide')).toHaveCount(0);
   });
 
   test('lock tip defaults to iPhone on a desktop browser and switches to Android', async ({ page }) => {
@@ -75,11 +111,10 @@ test.describe("Parents' guide", () => {
     await page.goto('/');
     await page.getByTestId('lang-dropdown-trigger').click();
     await page.getByTestId('lang-select-de').click();
-    await page.getByTestId('open-settings').click();
-    await solveParentGate(page);
-    await page.getByTestId('open-guide').click();
+    await expect(page.getByTestId('home-guide')).toHaveText('📖 Elternratgeber');
+    await page.getByTestId('home-guide').click();
     await expect(page.getByRole('heading', { name: 'Elternratgeber 📖' })).toBeVisible();
     await expect(page.getByTestId('guide-game-maze')).toContainText('Übt:');
-    await expect(page.getByTestId('guide-back')).toHaveText('← Einstellungen');
+    await expect(page.getByTestId('guide-back')).toHaveText('← Startseite');
   });
 });

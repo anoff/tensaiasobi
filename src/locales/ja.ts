@@ -604,9 +604,8 @@ export const ja: TranslationSchema = {
     active: "チャレンジちゅう",
   },
   guide: {
-    open: "保護者ガイド 📖",
-    openDesc: "各ゲームで学べること・画面ロックのヒント",
-    back: "← 設定",
+    homeRow: "📖 保護者ガイド",
+    back: "← ホーム",
     title: "保護者ガイド 📖",
     intro: "各ゲームの内容と、お子さまが練習できること。",
     learns: "学べること：",

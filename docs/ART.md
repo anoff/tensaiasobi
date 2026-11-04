@@ -181,7 +181,7 @@ Don't
 ## 12. Parent page and app theme (PR for #30, #31, #74, #75)
 
 ### Parents’ guide **new**
-- Lives behind ⚙️ → parent gate → Settings → "📖 Parents’ guide" (screen `guide`, `ParentGuide.tsx`). No home icon and no second gate.
+- Opens from a quiet footer row at the bottom of home (44 px, ink on cream, 1 px rule border, no shadow). No parent lock: the guide is read-only. Screen `guide` (`ParentGuide.tsx`), direct link `#/guide`.
 - Grown-up screen, so text is the content here. §9's 44 px parent minimum applies; §4 weights and `ink` / `ink-soft` still apply. No emoji-only instructions needed.
 - Layout at 390: `max-w-md`, 16 px side padding. Title 30 px `font-black`, intro 14 px `ink-soft`. Order: lock-tip card, then shelves in home order.
 - **Shelf header:** the shelf's drawn character (idle, 44 px: owl, fox, tortoise, panda) + shelf name 18 px. Never the 🐼 emoji (§6).

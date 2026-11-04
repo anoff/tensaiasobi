@@ -604,9 +604,8 @@ export const ko: TranslationSchema = {
     active: "도전 중",
   },
   guide: {
-    open: "부모 가이드 📖",
-    openDesc: "게임별 배우는 것 · 화면 고정 팁",
-    back: "← 설정",
+    homeRow: "📖 부모 가이드",
+    back: "← 홈",
     title: "부모 가이드 📖",
     intro: "각 게임이 무엇이고 아이가 무엇을 연습하는지 알려 드려요.",
     learns: "배우는 것:",

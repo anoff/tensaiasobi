@@ -1,23 +1,25 @@
 import { isGameId, type GameId } from './catalog';
 
 /**
- * Direct game links (#75) live in the URL hash: `#/<catalog id>`, e.g. `#/maze`.
- * The hash never reaches the server, so the same link works under any base path
- * (GitHub Pages, PR previews, the iOS shell) without touching vite `base`.
- * `#<catalog id>` (no slash) is accepted too; anything else is "no game".
+ * Screens with their own link live in the URL hash: `#/<catalog id>` for a game (#75), e.g. `#/maze`,
+ * and `#/guide` for the parents' guide. The hash never reaches the server, so the same link works
+ * under any base path (GitHub Pages, PR previews, the iOS shell) without touching vite `base`.
+ * The slash-less form (`#maze`) is accepted too; anything else is "no route" (the menu).
  */
-export function gameIdFromHash(hash: string): GameId | null {
+export type HashRoute = GameId | 'guide';
+
+export function routeFromHash(hash: string): HashRoute | null {
   let slug = hash.replace(/^#\/?/, '');
   try {
     slug = decodeURIComponent(slug);
   } catch {
     return null;
   }
-  return isGameId(slug) ? slug : null;
+  return slug === 'guide' || isGameId(slug) ? slug : null;
 }
 
-export function gameLinkHash(id: GameId): string {
-  return `#/${id}`;
+export function routeHash(route: HashRoute): string {
+  return `#/${route}`;
 }
 
 /** The public web build. Guide links always point here, also from a PR preview. */
@@ -25,5 +27,5 @@ export const PUBLIC_WEB_URL = 'https://asobi.anoff.io/';
 
 /** Shareable link to one game, e.g. `https://asobi.anoff.io/#/maze`. */
 export function gameUrl(id: GameId, base: string = PUBLIC_WEB_URL): string {
-  return `${base}${gameLinkHash(id)}`;
+  return `${base}${routeHash(id)}`;
 }

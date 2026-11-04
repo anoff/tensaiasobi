@@ -604,9 +604,8 @@ export const en = {
     active: "Challenge is on",
   },
   guide: {
-    open: "Parents’ guide 📖",
-    openDesc: "What each game teaches · screen lock tips",
-    back: "← Settings",
+    homeRow: "📖 Parents’ guide",
+    back: "← Home",
     title: "Parents’ guide 📖",
     intro: "What each game is and what your child practises.",
     learns: "Learns:",
