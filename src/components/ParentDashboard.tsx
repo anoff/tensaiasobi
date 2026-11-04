@@ -13,6 +13,7 @@ interface ParentDashboardProps {
   onToggleCoupon: (id: string) => void;
   onClearProgress: () => void;
   onClose: () => void;
+  onOpenGuide: () => void;
   onAddCoupon: (input: { emoji: string; name: string; rewardSize: CouponRewardSize }) => void;
   onRemoveCoupon: (id: string) => void;
 }
@@ -26,6 +27,7 @@ export function ParentDashboard({
   onToggleCoupon,
   onClearProgress,
   onClose,
+  onOpenGuide,
   onAddCoupon,
   onRemoveCoupon,
 }: ParentDashboardProps) {
@@ -43,6 +45,20 @@ export function ParentDashboard({
         </div>
 
         <div className="space-y-6">
+          {/* Parents' guide (#30, #31) */}
+          <button
+            type="button"
+            data-testid="open-guide"
+            onClick={onOpenGuide}
+            className="w-full flex items-center justify-between gap-3 p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 text-left cursor-pointer outline-none hover:bg-slate-100 focus-visible:ring-4 focus-visible:ring-purple-300"
+          >
+            <div>
+              <span className="text-lg font-bold text-slate-800 block">{t.guide.open}</span>
+              <span className="text-xs text-slate-500">{t.guide.openDesc}</span>
+            </div>
+            <span aria-hidden className="text-2xl font-bold text-slate-400">›</span>
+          </button>
+
           {/* Sound settings */}
           <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border-2 border-slate-100">
             <div>

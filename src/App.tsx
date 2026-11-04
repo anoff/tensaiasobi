@@ -11,6 +11,7 @@ import { CATEGORY_EMOJI, categoryFill } from './theme/categories';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
+import ParentGuide from './components/ParentGuide';
 import SessionCard, { type SessionStartConfig } from './components/SessionCard';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 import { GameFXProvider } from './hooks/useGameFX';
@@ -33,7 +34,9 @@ import { useChallenge } from './hooks/useChallenge';
 import { formatRemaining, useSessionTimer } from './hooks/useSessionTimer';
 import { gameIdFromHash, gameLinkHash } from './games/gameLink';
 
-type Screen = 'menu' | 'stickers' | 'coupons' | 'settings' | 'session' | GameId;
+type Screen = 'menu' | 'stickers' | 'coupons' | 'settings' | 'session' | 'guide' | GameId;
+/** Grown-up screens reached through the parent gate: no Home button, never covered by the session lock. */
+const isParentScreen = (screen: Screen) => screen === 'settings' || screen === 'session' || screen === 'guide';
 type ParentGateNext = 'settings' | 'session';
 
 function AppContent() {
@@ -202,6 +205,10 @@ function AppContent() {
       if (isGameId(currentScreen) && !window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
         return;
       }
+      if (currentScreen === 'guide') {
+        setCurrentScreen('settings');
+        return;
+      }
       if (currentScreen !== 'menu') {
         setCurrentScreen('menu');
         return;
@@ -231,8 +238,8 @@ function AppContent() {
   const handleScreenChange = (screen: Screen) => {
     playPop();
     if (screen !== 'settings' && screen !== 'session') setChallengeSetupCouponId(undefined);
-    if (sessionLocked && screen !== 'settings' && screen !== 'session' && screen !== 'menu') return;
-    if (screen !== 'menu' && screen !== 'settings' && screen !== 'session') startIfIdle();
+    if (sessionLocked && !isParentScreen(screen) && screen !== 'menu') return;
+    if (screen !== 'menu' && !isParentScreen(screen)) startIfIdle();
     setCurrentScreen(screen);
   };
 
@@ -344,10 +351,13 @@ function AppContent() {
             onToggleCoupon={toggleCoupon}
             onClearProgress={handleClearProgress}
             onClose={() => handleScreenChange('menu')}
+            onOpenGuide={() => handleScreenChange('guide')}
             onAddCoupon={addCustomCoupon}
             onRemoveCoupon={removeCustomCoupon}
           />
         );
+      case 'guide':
+        return <ParentGuide onBack={() => handleScreenChange('settings')} />;
       default:
         return null;
     }
@@ -415,7 +425,7 @@ function AppContent() {
       {currentScreen !== 'stickers' && (
         <header className="flex justify-between items-center p-4 short:p-2 tiny:p-1.5 z-50">
           <div>
-            {currentScreen !== 'menu' && currentScreen !== 'settings' && currentScreen !== 'session' && (
+            {currentScreen !== 'menu' && !isParentScreen(currentScreen) && (
               <HomeButton data-testid="home-button" onClick={() => handleScreenChange('menu')} />
             )}
           </div>
@@ -728,7 +738,7 @@ function AppContent() {
         ) : null;
       })()}
 
-      {sessionLocked && currentScreen !== 'settings' && currentScreen !== 'session' && (
+      {sessionLocked && !isParentScreen(currentScreen) && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/70 p-6" data-testid="session-locked">
           <div className="bg-white rounded-[2rem] border-4 border-slate-300 p-8 max-w-sm w-full text-center space-y-4">
             <span className="text-6xl block">⏰</span>

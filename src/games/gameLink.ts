@@ -19,3 +19,11 @@ export function gameIdFromHash(hash: string): GameId | null {
 export function gameLinkHash(id: GameId): string {
   return `#/${id}`;
 }
+
+/** The public web build. Guide links always point here, also from a PR preview. */
+export const PUBLIC_WEB_URL = 'https://asobi.anoff.io/';
+
+/** Shareable link to one game, e.g. `https://asobi.anoff.io/#/maze`. */
+export function gameUrl(id: GameId, base: string = PUBLIC_WEB_URL): string {
+  return `${base}${gameLinkHash(id)}`;
+}

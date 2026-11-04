@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_IDS } from './catalog';
-import { gameIdFromHash, gameLinkHash } from './gameLink';
+import { gameIdFromHash, gameLinkHash, gameUrl } from './gameLink';
 
 describe('game links', () => {
   it('round-trips every catalog id', () => {
@@ -15,5 +15,12 @@ describe('game links', () => {
     for (const hash of ['', '#', '#/', '#/nope', '#/MAZE', '#/maze/extra', '#/%E0%A4%A']) {
       expect(gameIdFromHash(hash)).toBeNull();
     }
+  });
+});
+
+describe('gameUrl', () => {
+  it('points at the public web build', () => {
+    expect(gameUrl('maze')).toBe('https://asobi.anoff.io/#/maze');
+    expect(gameIdFromHash(new URL(gameUrl('towerSort')).hash)).toBe('towerSort');
   });
 });

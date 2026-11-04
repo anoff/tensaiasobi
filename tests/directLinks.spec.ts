@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 // #75: every game has a direct link, `#/<catalog id>`. The hash keeps it base-path agnostic.
 
-const hashOf = (page: Page) => page.evaluate(() => window.location.hash);
+const hashOf = async (page: Page) => new URL(page.url()).hash;
 
 test.describe('Direct game links', () => {
   // No link may crash the app: every test ends with zero uncaught page errors.
