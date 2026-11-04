@@ -31,6 +31,7 @@ import { accessoryById, bookTotals, collectibleById } from './data/stickers';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 import { formatRemaining, useSessionTimer } from './hooks/useSessionTimer';
+import { gameIdFromHash, gameLinkHash } from './games/gameLink';
 
 type Screen = 'menu' | 'stickers' | 'coupons' | 'settings' | 'session' | GameId;
 type ParentGateNext = 'settings' | 'session';
@@ -38,7 +39,33 @@ type ParentGateNext = 'settings' | 'session';
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', false);
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>('settings_vibration_enabled', true);
-  const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
+  const { minutes: sessionMinutes, setMinutes: setSessionMinutes, remainingMs, locked: sessionLocked, startOrRefresh, startIfIdle, unlock } = useSessionTimer();
+  const {
+    challengeActive,
+    challengeStarsTarget,
+    challengeStarsRemaining,
+    challengeAllowedGames,
+    challengeCouponId,
+    challengePlayUnlocked,
+    pendingChallengeAnimations,
+    addChallengeStars,
+    clearChallengeAnimation,
+    startChallenge,
+    cancelChallenge,
+    claimChallengeReward,
+  } = useChallenge();
+
+  const challengeFocusActive = challengeActive && !challengePlayUnlocked;
+
+  /** The game a direct link (#/<catalog id>) asks for, if it exists and Learn mode allows it; else the menu. */
+  const linkedGame = (hash: string): GameId | null => {
+    const id = gameIdFromHash(hash);
+    const game = id && GAMES.find((g) => g.id === id);
+    if (!game) return null;
+    return gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames }) ? game.id : null;
+  };
+
+  const [currentScreen, setCurrentScreen] = useState<Screen>(() => linkedGame(window.location.hash) ?? 'menu');
   const [showParentGate, setShowParentGate] = useState(false);
   const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
 
@@ -57,29 +84,57 @@ function AppContent() {
   const [storedAgeBand, setAgeBand] = useLocalStorage<string>('settings_age_band', 'little');
   // Older installs may still hold 'all'; the home switch only knows two bands.
   const ageBand: AgeBand = storedAgeBand === 'big' ? 'big' : 'little';
-  const { minutes: sessionMinutes, setMinutes: setSessionMinutes, remainingMs, locked: sessionLocked, startOrRefresh, startIfIdle, unlock } = useSessionTimer();
   const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
   const [pendingCouponRedeemConfirmId, setPendingCouponRedeemConfirmId] = useState<string | null>(null);
   const [celebratingCoupon, setCelebratingCoupon] = useState<Coupon | null>(null);
   const [pendingEarnCouponId, setPendingEarnCouponId] = useState<string | null>(null);
   const [challengeSetupCouponId, setChallengeSetupCouponId] = useState<string | undefined>(undefined);
 
-  const {
-    challengeActive,
-    challengeStarsTarget,
-    challengeStarsRemaining,
-    challengeAllowedGames,
-    challengeCouponId,
-    challengePlayUnlocked,
-    pendingChallengeAnimations,
-    addChallengeStars,
-    clearChallengeAnimation,
-    startChallenge,
-    cancelChallenge,
-    claimChallengeReward,
-  } = useChallenge();
+  // Keep the URL in step with the screen: a game gets its own history entry (#/<id>), so a reload
+  // reopens it and browser Back lands on the menu; any other screen clears the hash.
+  useEffect(() => {
+    const { pathname, search, hash } = window.location;
+    if (isGameId(currentScreen)) {
+      if (gameIdFromHash(hash) !== currentScreen) window.history.pushState(null, '', gameLinkHash(currentScreen));
+    } else if (hash) {
+      window.history.replaceState(null, '', pathname + search);
+    }
+  }, [currentScreen]);
 
-  const challengeFocusActive = challengeActive && !challengePlayUnlocked;
+  /** Latest screen and link resolver for the popstate listener, which subscribes once. */
+  const linkState = useRef({ currentScreen, linkedGame, startIfIdle });
+  useEffect(() => {
+    linkState.current = { currentScreen, linkedGame, startIfIdle };
+  });
+
+  // Opening a game by link counts as starting play, like tapping its tile.
+  useEffect(() => {
+    if (isGameId(linkState.current.currentScreen)) linkState.current.startIfIdle();
+  }, []);
+
+  // Browser Back/Forward and hand-edited hashes.
+  useEffect(() => {
+    const onPopState = () => {
+      const { currentScreen: current, linkedGame: resolve, startIfIdle: start } = linkState.current;
+      const target = resolve(window.location.hash);
+      if (target) {
+        if (target !== current) {
+          start();
+          setCurrentScreen(target);
+        }
+        return;
+      }
+      if (!isGameId(current)) return;
+      // A game with an inner screen (Magic Puzzle) takes Back first, like the hardware Back button.
+      if (!window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
+        window.history.pushState(null, '', gameLinkHash(current));
+        return;
+      }
+      setCurrentScreen('menu');
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   const handleStarEarned = (amount: number) => {
     if (challengeFocusActive) addChallengeStars(amount);
