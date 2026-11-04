@@ -1,0 +1,331 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient (Misty Japanese Forest) -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="40%" stop-color="#bae6fd"/>
+      <stop offset="80%" stop-color="#d9f99d"/>
+      <stop offset="100%" stop-color="#4ade80"/>
+    </linearGradient>
+
+    <!-- Sun Rays Gradient -->
+    <linearGradient id="sunRayGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Oak Tree Trunk & Branch Gradient -->
+    <linearGradient id="woodGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#78350f"/>
+      <stop offset="50%" stop-color="#451a03"/>
+      <stop offset="100%" stop-color="#290e03"/>
+    </linearGradient>
+
+    <!-- Leaf Gradient -->
+    <linearGradient id="leafGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="50%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+
+    <!-- Japanese Rhinoceros Beetle (Kabutomushi) Shell Gradient -->
+    <linearGradient id="beetleArmor" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9a3412"/>
+      <stop offset="35%" stop-color="#7c2d12"/>
+      <stop offset="75%" stop-color="#451a03"/>
+      <stop offset="100%" stop-color="#1c0a02"/>
+    </linearGradient>
+
+    <linearGradient id="beetleHighlight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </linearGradient>
+
+    <!-- Sap Gradient -->
+    <linearGradient id="sapGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- Shared Leaf Template -->
+    <g id="oakLeaf">
+      <path d="M 0 0 C -20 -15 -25 -35 -15 -55 C -5 -65 0 -85 20 -90 C 40 -85 45 -65 55 -55 C 65 -35 60 -15 40 0 Z" fill="url(#leafGrad)" stroke="#14532d" stroke-width="2"/>
+      <!-- Veins -->
+      <path d="M 20 0 L 20 -85 M 20 -20 Q 10 -30 0 -35 M 20 -40 Q 5 -50 -5 -55 M 20 -60 Q 10 -70 5 -75 M 20 -20 Q 30 -30 40 -35 M 20 -40 Q 35 -50 45 -55 M 20 -60 Q 30 -70 35 -75" fill="none" stroke="#86efac" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Shared Flower Template -->
+    <g id="forestFlower">
+      <circle cx="-4" cy="0" r="3.5" fill="#f472b6"/>
+      <circle cx="4" cy="0" r="3.5" fill="#f472b6"/>
+      <circle cx="0" cy="-4" r="3.5" fill="#f472b6"/>
+      <circle cx="0" cy="4" r="3.5" fill="#f472b6"/>
+      <circle cx="0" cy="0" r="2.5" fill="#fef08a"/>
+    </g>
+
+    <!-- Sparkle / Light Particle -->
+    <g id="sparkle">
+      <path d="M 0 -5 Q 0 0 5 0 Q 0 0 0 5 Q 0 0 -5 0 Q 0 0 0 -5 Z" fill="#ffffff"/>
+    </g>
+  </defs>
+
+  <!-- ==================== BACKGROUND ==================== -->
+  <rect width="400" height="400" rx="16" fill="url(#bgGrad)"/>
+
+  <!-- Sun Rays Through Canopy -->
+  <polygon points="0,0 120,0 250,400 0,400" fill="url(#sunRayGrad)"/>
+  <polygon points="180,0 300,0 400,280 320,400" fill="url(#sunRayGrad)"/>
+
+  <!-- Distant Background Foliage -->
+  <path d="M -20 220 Q 40 160 100 210 Q 160 170 220 220 Q 280 180 340 230 Q 380 170 420 210 L 420 420 L -20 420 Z" fill="#22c55e" opacity="0.4"/>
+  <path d="M -20 260 Q 60 210 140 250 Q 220 200 300 260 Q 360 220 420 270 L 420 420 L -20 420 Z" fill="#15803d" opacity="0.6"/>
+
+  <!-- Decorative Background Oak Leaves -->
+  <use href="#oakLeaf" x="300" y="100" transform="scale(0.8) rotate(35)"/>
+  <use href="#oakLeaf" x="20" y="60" transform="scale(0.7) rotate(-45)"/>
+  <use href="#oakLeaf" x="140" y="40" transform="scale(0.9) rotate(15)"/>
+
+  <!-- ==================== ADDED FLOOR DETAILS (UNDER MAIN BRANCH) ==================== -->
+  <!-- Scattered Leaf Litter -->
+  <ellipse cx="50" cy="380" rx="15" ry="5" fill="#a16207" opacity="0.7" transform="rotate(15 50 380)"/>
+  <ellipse cx="120" cy="370" rx="12" ry="4" fill="#854d0e" opacity="0.6" transform="rotate(-10 120 370)"/>
+  <ellipse cx="250" cy="385" rx="18" ry="6" fill="#a16207" opacity="0.7" transform="rotate(5 250 385)"/>
+  <ellipse cx="320" cy="375" rx="10" ry="4" fill="#854d0e" opacity="0.6" transform="rotate(20 320 375)"/>
+
+  <!-- Happy Mushroom -->
+  <g transform="translate(350, 360) scale(0.8)">
+    <path d="M -10 20 L 10 20 Q 8 0 0 0 T -10 20 Z" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/> <!-- Stem -->
+    <path d="M -25 5 Q 0 -25 25 5 Q 15 15 0 15 T -25 5 Z" fill="#a855f7" stroke="#6b21a8" stroke-width="2"/> <!-- Cap -->
+    <circle cx="-10" cy="-3" r="3" fill="#ffffff" opacity="0.8"/>
+    <circle cx="5" cy="5" r="4" fill="#ffffff" opacity="0.8"/>
+    <circle cx="12" cy="-5" r="2.5" fill="#ffffff" opacity="0.8"/>
+  </g>
+
+  <!-- Friendly Snail -->
+  <g transform="translate(200, 375) scale(0.7) rotate(-5)">
+    <path d="M -35 15 C -20 0 0 0 15 15 L 10 20 Q 0 15 -10 20 T -35 15 Z" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/> <!-- Body -->
+    <circle cx="-30" cy="5" r="3" fill="#fef08a" stroke="#ca8a04" stroke-width="1.5"/> <!-- Head -->
+    <line x1="-31" y1="2" x2="-33" y2="-5" stroke="#ca8a04" stroke-width="1"/> <!-- Eye stalk 1 -->
+    <line x1="-29" y1="2" x2="-27" y2="-5" stroke="#ca8a04" stroke-width="1"/> <!-- Eye stalk 2 -->
+    <circle cx="-33" cy="-5" r="1" fill="#000"/>
+    <circle cx="-27" cy="-5" r="1" fill="#000"/>
+    <circle cx="-5" cy="5" r="18" fill="#fdba74" stroke="#c2410c" stroke-width="2.5"/> <!-- Shell -->
+    <path d="M -5 5 m -12 0 a 12 12 0 1 0 24 0 a 12 12 0 1 0 -24 0 m 6 0 a 6 6 0 1 1 12 0" fill="none" stroke="#c2410c" stroke-width="1.5"/> <!-- Spiral -->
+  </g>
+
+  <!-- Additional Floor Flowers -->
+  <use href="#forestFlower" x="150" y="385" transform="scale(0.8)"/>
+  <use href="#forestFlower" x="280" y="390" transform="scale(0.9)"/>
+
+  <!-- ==================== MAIN PLANT & OAK BRANCH ==================== -->
+  <g id="mainPlant">
+    <!-- Main Thick Tree Trunk/Branch carrying the beetles -->
+    <path d="M -20 380 Q 80 330 180 270 T 420 120" fill="none" stroke="url(#woodGrad)" stroke-width="48" stroke-linecap="round"/>
+    <path d="M -20 380 Q 80 330 180 270 T 420 120" fill="none" stroke="#9a3412" stroke-width="48" stroke-linecap="round" opacity="0.15"/>
+    
+    <!-- Wood Bark Texture Lines -->
+    <path d="M -10 375 Q 80 325 175 265 T 410 115" fill="none" stroke="#290e03" stroke-width="2" stroke-dasharray="15,8,25,10"/>
+    <path d="M 0 388 Q 85 338 185 278 T 415 128" fill="none" stroke="#78350f" stroke-width="2" stroke-dasharray="20,12,10,15"/>
+
+    <!-- Side Plant Stem 1 (Top Right Leaves) -->
+    <path d="M 310 180 Q 350 140 380 70" fill="none" stroke="#15803d" stroke-width="10" stroke-linecap="round"/>
+    <use href="#oakLeaf" x="380" y="70" transform="scale(0.75) rotate(60)"/>
+    <use href="#oakLeaf" x="340" y="110" transform="scale(0.65) rotate(-30)"/>
+
+    <!-- Side Plant Stem 2 (Center Left Branch & Leaves) -->
+    <path d="M 120 300 Q 60 250 20 170" fill="none" stroke="#15803d" stroke-width="12" stroke-linecap="round"/>
+    <use href="#oakLeaf" x="20" y="170" transform="scale(0.85) rotate(-70)"/>
+    <use href="#oakLeaf" x="50" y="210" transform="scale(0.7) rotate(40)"/>
+
+    <!-- Yummy Tree Sap Trickling Down (Feeding Attraction for Beetles!) -->
+    <g id="treeSap" transform="translate(160, 240)">
+      <ellipse cx="20" cy="20" rx="18" ry="12" fill="url(#sapGrad)"/>
+      <path d="M 10 20 Q 20 40 25 55 Q 18 50 10 20 Z" fill="url(#sapGrad)"/>
+      <circle cx="22" cy="18" r="3" fill="#ffffff" opacity="0.6"/>
+      <circle cx="26" cy="35" r="2" fill="#ffffff" opacity="0.6"/>
+    </g>
+  </g>
+
+  <!-- ==================== THREE KABUTOMUSHI (BEETLES) ==================== -->
+
+  <!-- ========================================================================= -->
+  <!-- KABUTOMUSHI 1: MALE HERO BEETLE (CENTER - WALKING UP TO SAP)             -->
+  <!-- Dynamic Y-shaped Horn, Detailed Body Structure & Legs                   -->
+  <!-- ========================================================================= -->
+  <g id="heroMaleBeetle" transform="translate(130, 160) rotate(-28)">
+    <!-- Shadow -->
+    <ellipse cx="25" cy="45" rx="22" ry="38" fill="#14532d" opacity="0.5"/>
+
+    <!-- LEGS (6 Articulated Legs Attached to Thorax) -->
+    <g stroke="#1c0a02" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <!-- Front Legs -->
+      <path d="M 12 10 L -12 -5 L -22 8 M -22 8 L -26 5"/>
+      <path d="M 38 10 L 62 -5 L 72 8 M 72 8 L 76 5"/>
+      <!-- Middle Legs -->
+      <path d="M 10 30 L -18 32 L -28 50"/>
+      <path d="M 40 30 L 68 32 L 78 50"/>
+      <!-- Back Legs -->
+      <path d="M 12 55 L -15 68 L -22 92"/>
+      <path d="M 38 55 L 65 68 L 72 92"/>
+    </g>
+
+    <!-- ABDOMEN / ELYTRA (Hard Wing Covers) -->
+    <path d="M 5 28 C 0 50 5 82 25 82 C 45 82 50 50 45 28 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="2"/>
+    <!-- Elytra Center Split Line -->
+    <line x1="25" y1="28" x2="25" y2="81" stroke="#1c0a02" stroke-width="2"/>
+    <!-- Shell Specular Highlights -->
+    <path d="M 9 32 Q 12 55 16 72" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+    <path d="M 41 32 Q 38 55 34 72" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+
+    <!-- THORAX (Chest Shield) -->
+    <path d="M 8 10 C 6 2 12 -8 25 -8 C 38 -8 44 2 42 10 Q 25 32 8 10 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="2"/>
+    <!-- Thorax Highlight -->
+    <ellipse cx="25" cy="5" rx="10" ry="6" fill="url(#beetleHighlight)" opacity="0.6"/>
+
+    <!-- THORACIC SMALL HORN (Pronoal Horn pointing forward) -->
+    <path d="M 22 -2 Q 25 -16 25 -22 L 27 -22 Q 27 -16 28 -2 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="1.5"/>
+
+    <!-- HEAD & EYES -->
+    <circle cx="25" cy="-10" r="8" fill="#1c0a02"/>
+    <!-- Shiny Eyes -->
+    <circle cx="18" cy="-10" r="2.5" fill="#ef4444"/>
+    <circle cx="17.5" cy="-11" r="0.8" fill="#ffffff"/>
+    <circle cx="32" cy="-10" r="2.5" fill="#ef4444"/>
+    <circle cx="32.5" cy="-11" r="0.8" fill="#ffffff"/>
+
+    <!-- GIANT HEAD HORN (Characteristic Y-Shaped Japanese Kabutomushi Horn) -->
+    <g id="mainYHorn">
+      <!-- Main Horn Stem -->
+      <path d="M 22 -14 C 20 -30 15 -42 15 -48 L 35 -48 C 35 -42 30 -30 28 -14 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="1.5"/>
+      <!-- Forked Y Tip (Top Fork) -->
+      <path d="M 15 -48 Q 5 -58 -2 -60 Q 5 -54 15 -51 Q 25 -58 25 -65 Q 25 -58 35 -51 Q 45 -54 52 -60 Q 45 -58 35 -48 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="1.5"/>
+      <!-- Horn Highlight -->
+      <path d="M 23 -16 Q 21 -32 18 -46" fill="none" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+    </g>
+
+    <!-- Feathered Antennae -->
+    <path d="M 19 -14 Q 10 -18 8 -22 M 7 -20 L 10 -22 M 8 -22 L 11 -24" stroke="#f97316" stroke-width="1.5" fill="none"/>
+    <path d="M 31 -14 Q 40 -18 42 -22 M 43 -20 L 40 -22 M 42 -22 L 39 -24" stroke="#f97316" stroke-width="1.5" fill="none"/>
+  </g>
+
+
+  <!-- ========================================================================= -->
+  <!-- KABUTOMUSHI 2: SECOND MALE BEETLE (TOP RIGHT - CLIMBING DOWN)            -->
+  <!-- ========================================================================= -->
+  <g id="maleBeetle2" transform="translate(285, 115) rotate(135) scale(0.85)">
+    <!-- Shadow -->
+    <ellipse cx="25" cy="45" rx="20" ry="35" fill="#14532d" opacity="0.4"/>
+
+    <!-- Legs -->
+    <g stroke="#1c0a02" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M 12 10 L -10 -2 L -18 10"/>
+      <path d="M 38 10 L 60 -2 L 68 10"/>
+      <path d="M 10 30 L -15 32 L -22 48"/>
+      <path d="M 40 30 L 65 32 L 72 48"/>
+      <path d="M 12 55 L -12 68 L -18 88"/>
+      <path d="M 38 55 L 62 68 L 68 88"/>
+    </g>
+
+    <!-- Elytra -->
+    <path d="M 5 28 C 0 50 5 82 25 82 C 45 82 50 50 45 28 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="2"/>
+    <line x1="25" y1="28" x2="25" y2="81" stroke="#1c0a02" stroke-width="2"/>
+    <path d="M 9 32 Q 12 55 16 72" fill="none" stroke="#ea580c" stroke-width="2" opacity="0.7"/>
+
+    <!-- Thorax -->
+    <path d="M 8 10 C 6 2 12 -8 25 -8 C 38 -8 44 2 42 10 Q 25 32 8 10 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="2"/>
+    <ellipse cx="25" cy="5" rx="8" ry="5" fill="url(#beetleHighlight)" opacity="0.6"/>
+
+    <!-- Small Thoracic Horn -->
+    <path d="M 23 -2 Q 25 -14 25 -18 L 27 -18 Q 27 -14 27 -2 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="1"/>
+
+    <!-- Head & Eyes -->
+    <circle cx="25" cy="-10" r="7" fill="#1c0a02"/>
+    <circle cx="19" cy="-10" r="2" fill="#ef4444"/>
+    <circle cx="31" cy="-10" r="2" fill="#ef4444"/>
+
+    <!-- Y Horn -->
+    <path d="M 22 -14 C 20 -26 16 -36 16 -42 L 34 -42 C 34 -36 30 -26 28 -14 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="1.5"/>
+    <path d="M 16 -42 Q 8 -50 2 -52 Q 8 -47 16 -44 Q 25 -50 25 -56 Q 25 -50 34 -44 Q 42 -47 48 -52 Q 42 -50 34 -42 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="1.5"/>
+  </g>
+
+
+  <!-- ========================================================================= -->
+  <!-- KABUTOMUSHI 3: FEMALE BEETLE (BOTTOM LEFT - NO LARGE HORN)               -->
+  <!-- Female Japanese Kabutomushi is sleek, rounder, with no large Y-horn      -->
+  <!-- ========================================================================= -->
+  <g id="femaleBeetle" transform="translate(65, 290) rotate(-55) scale(0.8)">
+    <!-- Shadow -->
+    <ellipse cx="25" cy="40" rx="22" ry="32" fill="#14532d" opacity="0.4"/>
+
+    <!-- Legs -->
+    <g stroke="#1c0a02" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M 10 10 L -12 0 L -20 12"/>
+      <path d="M 40 10 L 62 0 L 70 12"/>
+      <path d="M 8 28 L -16 30 L -24 46"/>
+      <path d="M 42 28 L 66 30 L 74 46"/>
+      <path d="M 10 50 L -14 62 L -20 80"/>
+      <path d="M 40 50 L 64 62 L 70 80"/>
+    </g>
+
+    <!-- Elytra (Rounder Shell) -->
+    <path d="M 3 22 C -2 45 3 75 25 75 C 47 75 52 45 47 22 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="2"/>
+    <line x1="25" y1="22" x2="25" y2="74" stroke="#1c0a02" stroke-width="2"/>
+    <path d="M 8 26 Q 11 48 15 65" fill="none" stroke="#ea580c" stroke-width="2" opacity="0.6"/>
+
+    <!-- Thorax (Smooth, No Horn) -->
+    <path d="M 6 8 C 4 0 10 -8 25 -8 C 40 -8 46 0 44 8 Q 25 26 6 8 Z" fill="url(#beetleArmor)" stroke="#1c0a02" stroke-width="2"/>
+    <ellipse cx="25" cy="3" rx="9" ry="5" fill="#beetleHighlight)" opacity="0.5"/>
+
+    <!-- Head (Small, No Horn) -->
+    <circle cx="25" cy="-10" r="7" fill="#1c0a02"/>
+    <circle cx="19" cy="-10" r="2" fill="#ef4444"/>
+    <circle cx="18.5" cy="-11" r="0.6" fill="#ffffff"/>
+    <circle cx="31" cy="-10" r="2" fill="#ef4444"/>
+    <circle cx="31.5" cy="-11" r="0.6" fill="#ffffff"/>
+
+    <!-- Antennae -->
+    <path d="M 20 -13 Q 12 -18 10 -22" stroke="#f97316" stroke-width="1.5" fill="none"/>
+    <path d="M 30 -13 Q 38 -18 40 -22" stroke="#f97316" stroke-width="1.5" fill="none"/>
+  </g>
+
+
+  <!-- ==================== FOREGROUND DETAILS & INSECTS ==================== -->
+  <!-- Cute Forest Ladybug on Leaf -->
+  <g id="ladybug" transform="translate(45, 175) rotate(20)">
+    <ellipse cx="0" cy="0" rx="6" ry="5" fill="#ef4444" stroke="#7f1d1d" stroke-width="0.8"/>
+    <circle cx="-4" cy="0" r="2" fill="#1c0a02"/> <!-- Head -->
+    <line x1="-2" y1="0" x2="6" y2="0" stroke="#1c0a02" stroke-width="1"/>
+    <!-- Spots -->
+    <circle cx="0" cy="-2" r="1" fill="#1c0a02"/>
+    <circle cx="3" cy="-2" r="0.8" fill="#1c0a02"/>
+    <circle cx="0" cy="2" r="1" fill="#1c0a02"/>
+    <circle cx="3" cy="2" r="0.8" fill="#1c0a02"/>
+  </g>
+
+  <!-- Honeybee Flying near Flowers -->
+  <g id="bee" transform="translate(320, 240)">
+    <!-- Wings -->
+    <ellipse cx="-2" cy="-6" rx="3" ry="6" fill="#bae6fd" opacity="0.7" transform="rotate(-20 -2 -6)"/>
+    <ellipse cx="4" cy="-6" rx="3" ry="6" fill="#bae6fd" opacity="0.7" transform="rotate(20 4 -6)"/>
+    <!-- Body -->
+    <ellipse cx="0" cy="0" rx="6" ry="8" fill="#facc15" stroke="#78350f" stroke-width="1" transform="rotate(70)"/>
+    <!-- Stripes -->
+    <line x1="-4" y1="-2" x2="-4" y2="2" stroke="#1c0a02" stroke-width="2"/>
+    <line x1="0" y1="-4" x2="0" y2="4" stroke="#1c0a02" stroke-width="2"/>
+    <!-- Head -->
+    <circle cx="-7" cy="0" r="2.5" fill="#1c0a02"/>
+  </g>
+
+  <!-- Scattered Forest Flowers -->
+  <use href="#forestFlower" x="70" y="340" transform="scale(1.3)"/>
+  <use href="#forestFlower" x="95" y="355"/>
+  <use href="#forestFlower" x="310" y="270" transform="scale(1.2)"/>
+  <use href="#forestFlower" x="335" y="285"/>
+
+  <!-- Floating Forest Glow Particles / Dust -->
+  <use href="#sparkle" x="100" y="120" transform="scale(1.2)"/>
+  <use href="#sparkle" x="250" y="80"/>
+  <use href="#sparkle" x="220" y="220" transform="scale(1.4)"/>
+  <use href="#sparkle" x="350" y="180" transform="scale(0.8)"/>
+</svg>
