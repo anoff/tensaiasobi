@@ -42,7 +42,7 @@ test.describe('Slice A catalog, motion, a11y', () => {
   });
 
   test('parent gate is a named dialog that closes on Escape', async ({ page }) => {
-    await page.getByRole('button', { name: /Parents|Eltern|ほごしゃ|부모님/ }).click();
+    await page.getByRole('button', { name: /^(Parents|Eltern|ほごしゃ|부모님)$/ }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog).toHaveAttribute('aria-modal', 'true');

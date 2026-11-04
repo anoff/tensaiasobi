@@ -11,7 +11,7 @@ async function solveParentGate(page: Page) {
 }
 
 async function openSettings(page: Page) {
-  await page.getByRole('button', { name: /Parents|Eltern|ほごしゃ|부모님/ }).click();
+  await page.getByRole('button', { name: /^(Parents|Eltern|ほごしゃ|부모님)$/ }).click();
   await solveParentGate(page);
 }
 
