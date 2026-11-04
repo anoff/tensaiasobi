@@ -185,7 +185,7 @@ Don't
 - Grown-up screen, so text is the content here. §9's 44 px parent minimum applies; §4 weights and `ink` / `ink-soft` still apply. No emoji-only instructions needed.
 - Layout at 390: `max-w-md`, 16 px side padding. Title 30 px `font-black`, intro 14 px `ink-soft`. Order: lock-tip card, then shelves in home order.
 - **Shelf header:** the shelf's drawn character (idle, 44 px: owl, fox, tortoise, panda) + shelf name 18 px. Never the 🐼 emoji (§6).
-- **Overview card:** one cream card per shelf (3 px ink, `hardShadow(5,6)`, radius 2rem). Rows: 48 px glyph block in the shelf fill (3 px ink, `rounded-xl`, haloed emoji 26 px) · name 16 px `font-black` · age chips (🧸 3–5 / 🎒 6–8, white pill, 2 px ink, 11 px) · "what" 13 px ink · "Learns:" 13 px `ink-soft` · 44 px copy-link button (white, 2 px ink, 🔗 → ✓ for 1.5 s). Rows split by a 2 px `ink` 10 % line.
+- **Overview card:** one cream card per shelf (3 px ink, `hardShadow(5,6)`, radius 2rem). Rows: 48 px glyph block in the shelf fill (3 px ink, `rounded-xl`, haloed emoji 26 px; guide icons at 26 px use a 2 px white emoji outline) · name 16 px `font-black` · age chips (🧸 3–5 / 🎒 6–8, white pill, 2 px ink, 11 px) · "what" 13 px ink · "Learns:" 13 px `ink-soft` · 44 px copy-link button (white, 2 px ink, 🔗 → ✓ for 1.5 s). Rows split by a 2 px `ink` 10 % line.
 - Copy-link exists only here and only on the web build. Kids never see share UI.
 
 ### Lock-tip card **new**
