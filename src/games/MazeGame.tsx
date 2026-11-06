@@ -11,6 +11,8 @@ import { spawnParticles, drawParticles, type Particle } from '../utils/particles
 import type { GameDifficulty } from '../types/game';
 import { useGameFX } from '../hooks/gameFXContext';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
+import { ThemeButton } from '../components/ThemeButton';
+import { nextTheme, type AppThemeId } from '../theme/appTheme';
 
 interface Cell {
   col: number;
@@ -27,7 +29,6 @@ interface Cell {
 }
 
 interface Theme {
-  id: string;
   startEmoji: string;
   endEmoji: string;
   bgGradient: string;
@@ -39,9 +40,9 @@ interface Theme {
   titleEmoji: string;
 }
 
-const THEMES: Theme[] = [
-  {
-    id: 'puppy',
+/** One entry per app theme (#74): `animals` is the old puppy maze. */
+const THEMES: Record<AppThemeId, Theme> = {
+  animals: {
     startEmoji: '🐶',
     endEmoji: '🦴',
     bgGradient: 'from-emerald-50 via-green-100 to-teal-50',
@@ -52,8 +53,7 @@ const THEMES: Theme[] = [
     starEmoji: '⭐',
     titleEmoji: '🐾',
   },
-  {
-    id: 'space',
+  space: {
     startEmoji: '🚀',
     endEmoji: '🪐',
     bgGradient: 'from-slate-900 via-indigo-950 to-slate-900',
@@ -64,20 +64,7 @@ const THEMES: Theme[] = [
     starEmoji: '✨',
     titleEmoji: '☄️',
   },
-  {
-    id: 'monkey',
-    startEmoji: '🐒',
-    endEmoji: '🍌',
-    bgGradient: 'from-amber-50 via-lime-100 to-emerald-50',
-    pathColor: '#FFF3E0',
-    tracedColor: '#FFE082', // Sandy gold highlight
-    wallColor: '#EF6C00',
-    wallEmoji: '🌴',
-    starEmoji: '💎',
-    titleEmoji: '🍌',
-  },
-  {
-    id: 'ocean',
+  ocean: {
     startEmoji: '🐠',
     endEmoji: '🐚',
     bgGradient: 'from-sky-100 via-cyan-100 to-blue-200',
@@ -88,25 +75,12 @@ const THEMES: Theme[] = [
     starEmoji: '🌟',
     titleEmoji: '🐳',
   },
-  {
-    id: 'bee',
-    startEmoji: '🐝',
-    endEmoji: '🌸',
-    bgGradient: 'from-yellow-50 via-amber-100 to-orange-50',
-    pathColor: '#FFFDE7',
-    tracedColor: '#FFE082', // Honey gold highlight
-    wallColor: '#F57F17',
-    wallEmoji: '🌻',
-    starEmoji: '🍯',
-    titleEmoji: '🍯',
-  },
-];
+};
 
 export function MazeGame() {
-  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete, theme: themeId = 'animals', setTheme } = useGameFX();
   const { t } = useTranslation();
   const [difficulty, setDifficulty] = useAgeDifficulty();
-  const [themeIndex, setThemeIndex] = useState(0);
   const [grid, setGrid] = useState<Cell[][]>([]);
   const activePointerCoordsRef = useRef<{ x: number; y: number } | null>(null);
   const [mappedPath, setMappedPath] = useState<{ col: number; row: number }[]>([]);
@@ -122,7 +96,7 @@ export function MazeGame() {
   const isDrawingRef = useRef(false);
   const particlesRef = useRef<Particle[]>([]);
 
-  const theme = THEMES[themeIndex];
+  const theme = THEMES[themeId];
 
   const getGridSize = (diff: GameDifficulty): { cols: number; rows: number } => {
     switch (diff) {
@@ -210,7 +184,7 @@ export function MazeGame() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     generateMaze();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [difficulty, themeIndex]);
+  }, [difficulty, themeId]);
 
   useCanvasLoop(
     canvasRef,
@@ -328,7 +302,7 @@ export function MazeGame() {
       // 8. Update and Draw Particles
       drawParticles(ctx, particlesRef.current);
     },
-    [grid, mappedPath, isAnimating, animatingIndex, themeIndex],
+    [grid, mappedPath, isAnimating, animatingIndex, themeId],
     450
   );
 
@@ -535,7 +509,7 @@ export function MazeGame() {
 
   const changeTheme = () => {
     playPop();
-    setThemeIndex((prev) => (prev + 1) % THEMES.length);
+    setTheme?.(nextTheme(themeId));
   };
 
   const changeDifficulty = (diff: GameDifficulty) => {
@@ -561,13 +535,9 @@ export function MazeGame() {
           className="!w-auto flex-1 max-w-[220px]"
         />
 
-        <button
-          onClick={changeTheme}
-          disabled={isAnimating}
-          className="flex items-center gap-2 bg-candy-blue border-b-4 border-sky-600 active:border-b-0 active:translate-y-[4px] text-white text-2xl font-extrabold p-2 rounded-2xl cursor-pointer shadow-sm select-none outline-none hover:scale-105 disabled:opacity-50"
-        >
+        <ThemeButton data-testid="maze-theme" data-theme={themeId} onClick={changeTheme} disabled={isAnimating}>
           🎨 {theme.startEmoji} → {theme.endEmoji}
-        </button>
+        </ThemeButton>
       </div>
 
       {/* Play Ground */}

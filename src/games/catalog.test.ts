@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { APP_PROGRESS_KEYS, GAMES, GAME_CATEGORIES, gamesInCategory, clearPersistedProgress, defaultChallengeAllowedGames, gameVisibleForAge, gameVisibleInChallenge, isGameId } from './catalog';
+import { translations } from '../locales';
 
 describe('game catalog', () => {
   afterEach(() => {
@@ -112,6 +113,19 @@ describe('game catalog', () => {
 
     for (const key of APP_PROGRESS_KEYS) {
       expect(localStorage.getItem(key)).toBeNull();
+    }
+  });
+
+  it('has Parents’ guide text for every game in every language', () => {
+    for (const [lang, t] of Object.entries(translations)) {
+      expect(Object.keys(t.guide.games).sort(), lang).toEqual(GAMES.map((game) => game.id).sort());
+      for (const game of GAMES) {
+        const info = t.guide.games[game.id];
+        expect(info.what.trim(), `${lang} ${game.id} what`).not.toBe('');
+        expect(info.learn.trim(), `${lang} ${game.id} learn`).not.toBe('');
+      }
+      expect(t.guide.lock.iosSteps, lang).toHaveLength(3);
+      expect(t.guide.lock.androidSteps, lang).toHaveLength(3);
     }
   });
 });

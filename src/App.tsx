@@ -6,11 +6,14 @@ import { useWakeLock } from './hooks/useWakeLock';
 import KidButton from './components/KidButton';
 import { BlockTile } from './components/BlockTile';
 import { AgeSwitch } from './components/AgeSwitch';
-import { CORAL, LEAF, BUTTER, CHALK, INK, PLAY_MAT_STYLE } from './theme/blockTable';
+import { CORAL, LEAF, BUTTER, CHALK, INK, PLAY_MAT_STYLE, hardShadow } from './theme/blockTable';
+import { THEME_EMOJI, nextTheme, toAppTheme, type AppThemeId } from './theme/appTheme';
+import { EmojiHalo, TILE_HALO_PX } from './components/EmojiHalo';
 import { CATEGORY_EMOJI, categoryFill } from './theme/categories';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
 import ParentDashboard from './components/ParentDashboard';
+import ParentGuide from './components/ParentGuide';
 import SessionCard, { type SessionStartConfig } from './components/SessionCard';
 import { I18nProvider, useTranslation } from './hooks/useTranslation';
 import { GameFXProvider } from './hooks/useGameFX';
@@ -31,39 +34,20 @@ import { accessoryById, bookTotals, collectibleById } from './data/stickers';
 import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 import { formatRemaining, useSessionTimer } from './hooks/useSessionTimer';
+import { routeFromHash, routeHash, type HashRoute } from './games/gameLink';
 
-type Screen = 'menu' | 'stickers' | 'coupons' | 'settings' | 'session' | GameId;
+type Screen = 'menu' | 'stickers' | 'coupons' | 'settings' | 'session' | 'guide' | GameId;
+/** Grown-up screens reached through the parent gate: no Home button, never covered by the session lock. */
+/** Grown-up screens: no Home button in the header, no session-lock overlay, and opening one doesn't start play. */
+const isParentScreen = (screen: Screen) => screen === 'settings' || screen === 'session' || screen === 'guide';
+/** Screens with their own URL hash (#/<game id>, #/guide); every other screen clears the hash. */
+const hasHashRoute = (screen: Screen): screen is HashRoute => screen === 'guide' || isGameId(screen);
 type ParentGateNext = 'settings' | 'session';
 
 function AppContent() {
   const [soundEnabled, setSoundEnabled] = useLocalStorage<boolean>('settings_sound_enabled', false);
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>('settings_vibration_enabled', true);
-  const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
-  const [showParentGate, setShowParentGate] = useState(false);
-  const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
-
-  const { playPop, playSuccess, playError, playSimonTone, playCue } = useSound(soundEnabled, vibrationEnabled);
-  const { language, setLanguage, t } = useTranslation();
-  const [langOpen, setLangOpen] = useState(false);
-  const langRef = useRef<HTMLDivElement>(null);
-
-  const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
-  const stickers = useStickers();
-  const { completeRound, buyAccessory } = stickers;
-  /** Capsules won and waiting for their award overlay, oldest first. */
-  const [awardQueue, setAwardQueue] = useState<CapsuleAward[]>([]);
-  const finishAward = useCallback(() => setAwardQueue((q) => q.slice(1)), []);
-  const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
-  const [storedAgeBand, setAgeBand] = useLocalStorage<string>('settings_age_band', 'little');
-  // Older installs may still hold 'all'; the home switch only knows two bands.
-  const ageBand: AgeBand = storedAgeBand === 'big' ? 'big' : 'little';
   const { minutes: sessionMinutes, setMinutes: setSessionMinutes, remainingMs, locked: sessionLocked, startOrRefresh, startIfIdle, unlock } = useSessionTimer();
-  const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
-  const [pendingCouponRedeemConfirmId, setPendingCouponRedeemConfirmId] = useState<string | null>(null);
-  const [celebratingCoupon, setCelebratingCoupon] = useState<Coupon | null>(null);
-  const [pendingEarnCouponId, setPendingEarnCouponId] = useState<string | null>(null);
-  const [challengeSetupCouponId, setChallengeSetupCouponId] = useState<string | undefined>(undefined);
-
   const {
     challengeActive,
     challengeStarsTarget,
@@ -80,6 +64,90 @@ function AppContent() {
   } = useChallenge();
 
   const challengeFocusActive = challengeActive && !challengePlayUnlocked;
+
+  /** The screen a direct link asks for: the guide, or a game if Learn mode allows it; else the menu (null). */
+  const linkedRoute = (hash: string): HashRoute | null => {
+    const route = routeFromHash(hash);
+    if (route === 'guide') return route;
+    const game = route && GAMES.find((g) => g.id === route);
+    if (!game) return null;
+    return gameVisibleInChallenge(game, { focusActive: challengeFocusActive, allowedGames: challengeAllowedGames }) ? game.id : null;
+  };
+
+  const [currentScreen, setCurrentScreen] = useState<Screen>(() => linkedRoute(window.location.hash) ?? 'menu');
+  const [showParentGate, setShowParentGate] = useState(false);
+  const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
+
+  const { playPop, playSuccess, playError, playSimonTone, playCue } = useSound(soundEnabled, vibrationEnabled);
+  const { language, setLanguage, t } = useTranslation();
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+
+  const { stars, pendingAnimations, addStars, spendStars, clearAnimation, resetStars } = useStars();
+  const stickers = useStickers();
+  const { completeRound, buyAccessory } = stickers;
+  /** Capsules won and waiting for their award overlay, oldest first. */
+  const [awardQueue, setAwardQueue] = useState<CapsuleAward[]>([]);
+  const finishAward = useCallback(() => setAwardQueue((q) => q.slice(1)), []);
+  const { coupons, toggleCoupon, addCustomCoupon, removeCustomCoupon, awardCoupon, redeemCoupon, resetCoupons } = useCoupons();
+  const [storedAgeBand, setAgeBand] = useLocalStorage<string>('settings_age_band', 'little');
+  // App-wide theme (#74): a setting like sound, so "Reset all progress" keeps it.
+  const [storedTheme, setTheme] = useLocalStorage<AppThemeId>('settings_app_theme', 'animals');
+  const theme = toAppTheme(storedTheme);
+  const [themeBumps, setThemeBumps] = useState(0);
+  // Older installs may still hold 'all'; the home switch only knows two bands.
+  const ageBand: AgeBand = storedAgeBand === 'big' ? 'big' : 'little';
+  const [pendingCouponRedeemGateId, setPendingCouponRedeemGateId] = useState<string | null>(null);
+  const [pendingCouponRedeemConfirmId, setPendingCouponRedeemConfirmId] = useState<string | null>(null);
+  const [celebratingCoupon, setCelebratingCoupon] = useState<Coupon | null>(null);
+  const [pendingEarnCouponId, setPendingEarnCouponId] = useState<string | null>(null);
+  const [challengeSetupCouponId, setChallengeSetupCouponId] = useState<string | undefined>(undefined);
+
+  // Keep the URL in step with the screen: a game or the guide gets its own history entry (#/<id>),
+  // so a reload reopens it and browser Back lands on the menu; any other screen clears the hash.
+  useEffect(() => {
+    const { pathname, search, hash } = window.location;
+    if (hasHashRoute(currentScreen)) {
+      if (routeFromHash(hash) !== currentScreen) window.history.pushState(null, '', routeHash(currentScreen));
+    } else if (hash) {
+      window.history.replaceState(null, '', pathname + search);
+    }
+  }, [currentScreen]);
+
+  /** Latest screen and link resolver for the popstate listener, which subscribes once. */
+  const linkState = useRef({ currentScreen, linkedRoute, startIfIdle });
+  useEffect(() => {
+    linkState.current = { currentScreen, linkedRoute, startIfIdle };
+  });
+
+  // Opening a game by link counts as starting play, like tapping its tile.
+  useEffect(() => {
+    if (isGameId(linkState.current.currentScreen)) linkState.current.startIfIdle();
+  }, []);
+
+  // Browser Back/Forward and hand-edited hashes.
+  useEffect(() => {
+    const onPopState = () => {
+      const { currentScreen: current, linkedRoute: resolve, startIfIdle: start } = linkState.current;
+      const target = resolve(window.location.hash);
+      if (target) {
+        if (target !== current) {
+          if (isGameId(target)) start();
+          setCurrentScreen(target);
+        }
+        return;
+      }
+      if (!hasHashRoute(current)) return;
+      // A game with an inner screen (Magic Puzzle) takes Back first, like the hardware Back button.
+      if (isGameId(current) && !window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
+        window.history.pushState(null, '', routeHash(current));
+        return;
+      }
+      setCurrentScreen('menu');
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   const handleStarEarned = (amount: number) => {
     if (challengeFocusActive) addChallengeStars(amount);
@@ -176,8 +244,8 @@ function AppContent() {
   const handleScreenChange = (screen: Screen) => {
     playPop();
     if (screen !== 'settings' && screen !== 'session') setChallengeSetupCouponId(undefined);
-    if (sessionLocked && screen !== 'settings' && screen !== 'session' && screen !== 'menu') return;
-    if (screen !== 'menu' && screen !== 'settings' && screen !== 'session') startIfIdle();
+    if (sessionLocked && !isParentScreen(screen) && screen !== 'menu') return;
+    if (screen !== 'menu' && !isParentScreen(screen)) startIfIdle();
     setCurrentScreen(screen);
   };
 
@@ -226,6 +294,8 @@ function AppContent() {
             onRoundComplete: () => handleRoundComplete(gameId),
             challengeMode: challengeFocusActive,
             ageBand,
+            theme,
+            setTheme,
           }}
         >
           <Game key={language} />
@@ -293,6 +363,8 @@ function AppContent() {
             onRemoveCoupon={removeCustomCoupon}
           />
         );
+      case 'guide':
+        return <ParentGuide onBack={() => handleScreenChange('menu')} />;
       default:
         return null;
     }
@@ -360,7 +432,7 @@ function AppContent() {
       {currentScreen !== 'stickers' && (
         <header className="flex justify-between items-center p-4 short:p-2 tiny:p-1.5 z-50">
           <div>
-            {currentScreen !== 'menu' && currentScreen !== 'settings' && currentScreen !== 'session' && (
+            {currentScreen !== 'menu' && !isParentScreen(currentScreen) && (
               <HomeButton data-testid="home-button" onClick={() => handleScreenChange('menu')} />
             )}
           </div>
@@ -442,15 +514,45 @@ function AppContent() {
         className={
           currentScreen === 'stickers'
             ? 'flex-1 flex flex-col min-h-0 overflow-hidden [&:has([data-page-scroll])]:overflow-y-auto overscroll-y-contain px-4 pt-1.5 pb-2'
-            : 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6 short:pb-2'
+            : currentScreen === 'menu'
+              ? 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4'
+              : 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6 short:pb-2'
         }
       >
         {currentScreen === 'menu' ? (
-          <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full py-6 select-none">
+          <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full shrink-0 pt-6 pb-4 select-none">
             <div className="text-center space-y-2 mt-4">
-              <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">
-                tensaiasobi 🎮
-              </h1>
+              <div className="flex items-center justify-center gap-[14px]">
+                <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">tensaiasobi</h1>
+                <button
+                  type="button"
+                  data-testid="theme-button"
+                  data-theme={theme}
+                  aria-label={`${t.menu.theme}: ${t.menu.themes[theme]}`}
+                  onClick={() => {
+                    playPop();
+                    setTheme(nextTheme(theme));
+                    setThemeBumps((n) => n + 1);
+                  }}
+                  className="relative shrink-0 flex h-14 w-14 tiny:h-12 tiny:w-12 items-center justify-center rounded-2xl border-[3px] cursor-pointer select-none touch-manipulation outline-none transition-all duration-75 active:translate-x-[3px] active:translate-y-[4px] active:[box-shadow:none] focus-visible:ring-4 focus-visible:ring-amber-400/70"
+                  style={{ backgroundColor: '#fff8ec', borderColor: INK, boxShadow: hardShadow(3, 4) }}
+                >
+                  <EmojiHalo
+                    key={themeBumps}
+                    radius={TILE_HALO_PX}
+                    className={`text-[32px] tiny:text-[28px] leading-none ${themeBumps > 0 ? 'animate-card-in' : ''}`}
+                  >
+                    {THEME_EMOJI[theme]}
+                  </EmojiHalo>
+                  <span
+                    aria-hidden
+                    className="absolute -right-[9px] -top-[9px] flex h-6 w-6 items-center justify-center rounded-full border-2 text-[12px] leading-none"
+                    style={{ backgroundColor: BUTTER, borderColor: INK }}
+                  >
+                    🎨
+                  </span>
+                </button>
+              </div>
               <p className="text-[#2a1c14]/50 font-extrabold text-base">{t.menu.subtitle}</p>
             </div>
 
@@ -542,6 +644,16 @@ function AppContent() {
                   v-{__GIT_HASH__}
                 </a>
               </div>
+              {/* Quiet grown-up footer row (#30, #31): read-only guide, so no parent gate. */}
+              <button
+                type="button"
+                data-testid="home-guide"
+                onClick={() => handleScreenChange('guide')}
+                className="mt-6 block w-full h-11 rounded-[1.6rem] border text-base font-bold cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-amber-400/70"
+                style={{ backgroundColor: '#fff8ec', borderColor: '#D3E3F1', color: '#1E3A5F' }}
+              >
+                {t.guide.homeRow}
+              </button>
             </div>
           </div>
         ) : (
@@ -674,7 +786,7 @@ function AppContent() {
         ) : null;
       })()}
 
-      {sessionLocked && currentScreen !== 'settings' && currentScreen !== 'session' && (
+      {sessionLocked && !isParentScreen(currentScreen) && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/70 p-6" data-testid="session-locked">
           <div className="bg-white rounded-[2rem] border-4 border-slate-300 p-8 max-w-sm w-full text-center space-y-4">
             <span className="text-6xl block">⏰</span>

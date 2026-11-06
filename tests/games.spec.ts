@@ -310,3 +310,65 @@ test.describe('tensaiasobi E2E Game Interaction Checks', () => {
     }
   });
 });
+
+// #74: one app-wide theme. Home's 🎨 button and the in-game 🎨 buttons write the same setting.
+test.describe('App theme', () => {
+  const SPACE_FACES = ['🚀', '🪐', '⭐', '☄️', '👽', '🛸', '🌙', '🛰️'];
+
+  test('a theme picked on home shows in Maze, Tower Sort and Memory, syncs back from Maze, and survives a reload', async ({ page }) => {
+    await page.goto('/');
+    const themeButton = page.getByTestId('theme-button');
+    await expect(themeButton).toHaveAttribute('data-theme', 'animals');
+    await expect(themeButton).toHaveAccessibleName('Theme: Animals');
+
+    await themeButton.click();
+    await expect(themeButton).toHaveAttribute('data-theme', 'space');
+    await expect(themeButton).toHaveAccessibleName('Theme: Space');
+
+    await page.getByTestId('launch-maze').click();
+    await expect(page.getByTestId('maze-theme')).toHaveAttribute('data-theme', 'space');
+    await page.getByTestId('home-button').click();
+
+    await (await launcherFor(page, 'launch-tower-sort')).click();
+    await expect(page.getByTestId('tower-sort-theme')).toHaveAttribute('data-theme', 'space');
+    await page.getByTestId('home-button').click();
+
+    await (await launcherFor(page, 'launch-memory')).click();
+    await expect(page.getByTestId('memory-match')).toHaveAttribute('data-theme', 'space');
+    const card = page.getByTestId('memory-card').first();
+    await card.click();
+    expect(SPACE_FACES).toContain((await card.innerText()).trim());
+    await page.getByTestId('home-button').click();
+
+    // The Maze 🎨 button moves the app theme on; home shows it after Back.
+    await (await launcherFor(page, 'launch-maze')).click();
+    await page.getByTestId('maze-theme').click();
+    await expect(page.getByTestId('maze-theme')).toHaveAttribute('data-theme', 'ocean');
+    await page.goBack();
+    await expect(themeButton).toHaveAttribute('data-theme', 'ocean');
+
+    await page.reload();
+    await expect(page.getByTestId('theme-button')).toHaveAttribute('data-theme', 'ocean');
+  });
+
+  test('an unknown stored theme falls back to animals', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => localStorage.setItem('settings_app_theme', JSON.stringify('fruits')));
+    await page.reload();
+    await expect(page.getByTestId('theme-button')).toHaveAttribute('data-theme', 'animals');
+  });
+
+  for (const width of [390, 320]) {
+    test(`the title row stays on one line at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto('/');
+      const title = page.getByRole('heading', { level: 1, name: 'tensaiasobi' });
+      const button = page.getByTestId('theme-button');
+      const [t, b] = [(await title.boundingBox())!, (await button.boundingBox())!];
+      expect(t.height).toBeLessThan(56); // one 36px line, not two
+      expect(b.x).toBeGreaterThan(t.x + t.width); // the button sits beside the title
+      expect(Math.abs(t.y + t.height / 2 - (b.y + b.height / 2))).toBeLessThan(4);
+      expect(b.x + b.width + 9).toBeLessThanOrEqual(width); // badge included
+    });
+  }
+});

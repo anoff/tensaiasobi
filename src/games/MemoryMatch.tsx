@@ -7,6 +7,7 @@ import { shuffle } from '../utils/shuffle';
 import { starMultiplier } from '../utils/difficulty';
 import { useGameFX } from '../hooks/gameFXContext';
 import { useAgeDifficulty } from '../hooks/useAgeDifficulty';
+import { MEMORY_POOLS } from './memoryMatchPools';
 
 
 interface Card {
@@ -16,10 +17,8 @@ interface Card {
   isMatched: boolean;
 }
 
-const ANIMAL_POOL = ['🦁', '🐯', '🐼', '🐨', '🦊', '🐰', '🐸', '🐷', '🐮', '🐔', '🐧', '🦉', '🐻', '🐹', '🐭', '🐱'];
-
 export function MemoryMatch() {
-  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete, theme = 'animals' } = useGameFX();
   const [level, setLevel] = useAgeDifficulty();
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
@@ -33,7 +32,7 @@ export function MemoryMatch() {
     if (currentLevel === 'hard') numPairs = 8; // (4x4)
 
 
-    const selectedAnimals = shuffle(ANIMAL_POOL).slice(0, numPairs);
+    const selectedAnimals = shuffle(MEMORY_POOLS[theme]).slice(0, numPairs);
 
 
     const cardsPool = shuffle([...selectedAnimals, ...selectedAnimals])
@@ -53,7 +52,7 @@ export function MemoryMatch() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     initGame(level);
-  }, [level]);
+  }, [level, theme]);
 
   const handleCardClick = (cardId: number) => {
     // Ignore clicks if 2 cards are already flipped/processing
@@ -129,7 +128,7 @@ export function MemoryMatch() {
   const gridLayout = getGridLayout();
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
+    <div data-testid="memory-match" data-theme={theme} className="flex-1 flex flex-col items-center justify-between p-6 w-full select-none max-w-lg mx-auto">
       {showConfetti && (
         <GameConfetti pieces={140} />
       )}
