@@ -59,12 +59,13 @@ describe('game catalog', () => {
     expect(band('physics')).toEqual(['big']);
     expect(band('shiritori')).toEqual(['big']);
     expect(band('towerSort')).toEqual(['big']);
+    expect(band('chess')).toEqual(['big']);
     const genie = GAMES.find((g) => g.id === 'animalGenie')!;
     expect(genie.category).toBe('play');
     expect(genie.kind).toBe('play');
-    expect(GAMES).toHaveLength(26);
+    expect(GAMES).toHaveLength(27);
     expect(GAMES.filter((g) => gameVisibleForAge(g, 'little'))).toHaveLength(22);
-    expect(GAMES.filter((g) => gameVisibleForAge(g, 'big'))).toHaveLength(21);
+    expect(GAMES.filter((g) => gameVisibleForAge(g, 'big'))).toHaveLength(22);
   });
 
   it('covers every GameId in challenge defaults', () => {

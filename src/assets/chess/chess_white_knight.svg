@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="wwood" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#efe2c4"/>
+      <stop offset="18%" stop-color="#fffaf0"/>
+      <stop offset="48%" stop-color="#fff8ec"/>
+      <stop offset="72%" stop-color="#fffaf0"/>
+      <stop offset="100%" stop-color="#e8d7b4"/>
+    </linearGradient>
+    <linearGradient id="bwood" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#261e19"/>
+      <stop offset="28%" stop-color="#3a2e27"/>
+      <stop offset="52%" stop-color="#4c3d33"/>
+      <stop offset="78%" stop-color="#3a2e27"/>
+      <stop offset="100%" stop-color="#2a211c"/>
+    </linearGradient>
+    <linearGradient id="wshine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.40"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#c4b08a" stop-opacity="0.22"/>
+    </linearGradient>
+    <linearGradient id="bshine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8aea3" stop-opacity="0.42"/>
+      <stop offset="40%" stop-color="#b8aea3" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#140f0c" stop-opacity="0.40"/>
+    </linearGradient>
+  </defs>
+  
+  <ellipse cx="128" cy="237" rx="51.839999999999996" ry="11.88" fill="#2a1c14" opacity="0.20"/>
+<ellipse cx="128" cy="232" rx="54.0" ry="11.88" fill="url(#wwood)" stroke="#2a1c14" stroke-width="13.0"/>
+<path d="M78.32 226 Q128 214 177.68 226 L173.9 218 Q128 206 82.1 218 Z" fill="url(#wwood)" stroke="#2a1c14" stroke-width="13.0"/>
+<ellipse cx="128" cy="204" rx="38.879999999999995" ry="8.64" fill="url(#wwood)" stroke="#2a1c14" stroke-width="13.0"/>
+<ellipse cx="114.5" cy="222" rx="18.9" ry="4.32" fill="url(#wshine)"/>
+<path d="M158 204 L164 155 Q172 115 154 82 Q142 56 124 48 L108 32 Q122 52 124 66 Q100 68 76 84 Q62 96 68 114 Q76 128 96 122 Q112 136 124 150 Q136 168 142 204 Z" fill="url(#wwood)" stroke="#2a1c14" stroke-width="13.0" stroke-linejoin="round"/>
+<ellipse cx="98" cy="90" rx="6" ry="5" fill="none" stroke="#2a1c14" stroke-width="4.5" opacity="0.7"/>
+<path d="M148 88 Q158 100 156 122" stroke="#2a1c14" stroke-width="4.5" fill="none" opacity="0.45"/>
+</svg>

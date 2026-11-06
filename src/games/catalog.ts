@@ -26,6 +26,8 @@ import AnimalGenie from './AnimalGenie';
 import SimonLights from './SimonLights';
 import SinkOrFloat from './SinkOrFloat';
 import DiceFlash from './DiceFlash';
+import ChessGame from './ChessGame';
+import { CHESS_LAUNCHER } from './chessAssets';
 
 export type { AgeBand };
 /** Learning games are the challenge focus; play games unlock after the star quota. */
@@ -66,7 +68,8 @@ export type GameLabelKey =
   | 'animalGenie'
   | 'simonLights'
   | 'sinkOrFloat'
-  | 'diceFlash';
+  | 'diceFlash'
+  | 'chess';
 
 export interface GameCatalogEntry {
   id: string;
@@ -79,6 +82,8 @@ export interface GameCatalogEntry {
   storageKeys: readonly string[];
   storageKeyPrefixes?: readonly string[];
   Component: ComponentType;
+  /** Optional drawn launcher (chess Staunton exception). */
+  glyphSrc?: string;
 }
 
 export const GAMES = [
@@ -105,6 +110,7 @@ export const GAMES = [
   { id: 'snorkelPearlFinder', category: 'logic', testid: 'launch-snorkel-pearl-finder', emoji: '🤿', labelKey: 'snorkelPearlFinder', ageBands: ['little'], kind: 'learn', storageKeys: [], Component: SnorkelPearlFinder },
   { id: 'puzzle', category: 'logic', testid: 'launch-puzzle', emoji: '🧩', labelKey: 'puzzle', ageBands: ['little', 'big'], kind: 'learn', storageKeys: [], Component: PuzzleGame },
   { id: 'towerSort', category: 'logic', testid: 'launch-tower-sort', emoji: '🗼', labelKey: 'towerSort', ageBands: ['big'], kind: 'learn', storageKeys: [], storageKeyPrefixes: ['tower_sort_best_moves_'], Component: TowerSort },
+  { id: 'chess', category: 'logic', testid: 'launch-chess', emoji: '', labelKey: 'chess', ageBands: ['big'], kind: 'learn', storageKeys: [], Component: ChessGame, glyphSrc: CHESS_LAUNCHER },
   // Play (just for fun; unlocks after a learn-first goal)
   { id: 'doodle', category: 'play', testid: 'launch-doodle', emoji: '🎨', labelKey: 'doodle', ageBands: ['little'], kind: 'play', storageKeys: [], Component: DoodlePad },
   { id: 'trace', category: 'play', testid: 'launch-trace', emoji: '⭐', labelKey: 'trace', ageBands: ['little'], kind: 'play', storageKeys: [], Component: ShapeTrace },

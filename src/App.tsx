@@ -610,6 +610,7 @@ function AppContent() {
                         <BlockTile
                           key={game.id}
                           emoji={game.emoji}
+                          glyphSrc={'glyphSrc' in game ? game.glyphSrc : undefined}
                           label={t.menu[game.labelKey]}
                           index={i}
                           fill={categoryFill(category, i)}

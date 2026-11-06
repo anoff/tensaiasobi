@@ -15,6 +15,8 @@ function tileFill(index: number): string {
 
 interface BlockTileProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   emoji: string;
+  /** Drawn launcher art (chess exception to emoji launchers). */
+  glyphSrc?: string;
   label: string;
   /** Grid index — cycles coral, leaf, butter when no `fill` is given. */
   index: number;
@@ -24,7 +26,7 @@ interface BlockTileProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   tileId: string;
 }
 
-export function BlockTile({ emoji, label, index, fill: fillProp, tileId, className = '', style, ...props }: BlockTileProps) {
+export function BlockTile({ emoji, glyphSrc, label, index, fill: fillProp, tileId, className = '', style, ...props }: BlockTileProps) {
   const fill = fillProp ?? tileFill(index);
   const tilt = tileTilt(tileId);
 
@@ -49,7 +51,7 @@ export function BlockTile({ emoji, label, index, fill: fillProp, tileId, classNa
         {...props}
       >
         <EmojiHalo radius={TILE_HALO_PX} className="flex shrink-0 items-center justify-center">
-          <LauncherGlyph emoji={emoji} sizeClass="h-14 w-14" />
+          <LauncherGlyph emoji={emoji} src={glyphSrc} sizeClass="h-14 w-14" />
         </EmojiHalo>
         <span
           className="w-full truncate px-0.5 text-center text-[13px] font-black leading-tight tracking-tight sm:text-sm"

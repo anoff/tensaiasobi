@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="wwood" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#efe2c4"/>
+      <stop offset="18%" stop-color="#fffaf0"/>
+      <stop offset="48%" stop-color="#fff8ec"/>
+      <stop offset="72%" stop-color="#fffaf0"/>
+      <stop offset="100%" stop-color="#e8d7b4"/>
+    </linearGradient>
+    <linearGradient id="bwood" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#261e19"/>
+      <stop offset="28%" stop-color="#3a2e27"/>
+      <stop offset="52%" stop-color="#4c3d33"/>
+      <stop offset="78%" stop-color="#3a2e27"/>
+      <stop offset="100%" stop-color="#2a211c"/>
+    </linearGradient>
+    <linearGradient id="wshine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.40"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#c4b08a" stop-opacity="0.22"/>
+    </linearGradient>
+    <linearGradient id="bshine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8aea3" stop-opacity="0.42"/>
+      <stop offset="40%" stop-color="#b8aea3" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#140f0c" stop-opacity="0.40"/>
+    </linearGradient>
+  </defs>
+  
+  <ellipse cx="128" cy="237" rx="56.64" ry="12.98" fill="#2a1c14" opacity="0.20"/>
+<ellipse cx="128" cy="232" rx="59.0" ry="12.98" fill="url(#bwood)" stroke="#2a1c14" stroke-width="13.0"/>
+<path d="M73.72 226 Q128 214 182.28 226 L178.15 218 Q128 206 77.85 218 Z" fill="url(#bwood)" stroke="#2a1c14" stroke-width="13.0"/>
+<ellipse cx="128" cy="204" rx="42.48" ry="9.44" fill="url(#bwood)" stroke="#2a1c14" stroke-width="13.0"/>
+<ellipse cx="113.25" cy="222" rx="20.65" ry="4.72" fill="url(#bshine)"/>
+<ellipse cx="146.88" cy="224" rx="12.98" ry="4.72" fill="#b8aea3"/>
+<ellipse cx="119.15" cy="210" rx="16.520000000000003" ry="3.54" fill="#b8aea3" opacity="0.75"/>
+<path d="M111.0 120 L145.0 120 L153.0 202 L103.0 202 Z" fill="url(#bwood)" stroke="#2a1c14" stroke-width="13.0"/><path d="M116.0 123 L118.0 199" stroke="url(#bshine)" stroke-width="7" opacity="0.55"/>
+<ellipse cx="128" cy="114" rx="36.0" ry="10.080000000000002" fill="url(#bwood)" stroke="#2a1c14" stroke-width="13.0"/><ellipse cx="140.96" cy="113" rx="11.52" ry="4.32" fill="#b8aea3"/>
+<path d="M88 114 L84 76 Q110 66 128 70 Q146 66 172 76 L168 114 Z" fill="url(#bwood)" stroke="#2a1c14" stroke-width="13.0"/>
+<rect x="116" y="14" width="24" height="58" rx="4" fill="url(#bwood)" stroke="#2a1c14" stroke-width="13.0" stroke-linejoin="round"/><rect x="100" y="28" width="56" height="24" rx="4" fill="url(#bwood)" stroke="#2a1c14" stroke-width="13.0" stroke-linejoin="round"/>
+<rect x="123" y="24" width="10" height="22" fill="#b8aea3"/>
+<rect x="112" y="34" width="32" height="8" fill="#b8aea3" opacity="0.85"/>
+</svg>
