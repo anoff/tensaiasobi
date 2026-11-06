@@ -1,10 +1,7 @@
 import React from 'react';
 import { LauncherGlyph } from './LauncherGlyph';
+import { EmojiHalo, TILE_HALO_PX } from './EmojiHalo';
 import { FILLS, INK, hardShadow, tileLabelOn } from '../theme/blockTable';
-
-/** 4px white halo that follows the glyph outline (plain CSS, no disc). */
-export const EMOJI_HALO =
-  'drop-shadow(4px 0 0 #fff) drop-shadow(-4px 0 0 #fff) drop-shadow(0 4px 0 #fff) drop-shadow(0 -4px 0 #fff) drop-shadow(3px 3px 0 #fff) drop-shadow(-3px 3px 0 #fff) drop-shadow(3px -3px 0 #fff) drop-shadow(-3px -3px 0 #fff)';
 
 function tileTilt(id: string): number {
   let h = 0;
@@ -51,9 +48,9 @@ export function BlockTile({ emoji, label, index, fill: fillProp, tileId, classNa
         }}
         {...props}
       >
-        <span className="flex shrink-0 items-center justify-center" style={{ filter: EMOJI_HALO }}>
+        <EmojiHalo radius={TILE_HALO_PX} className="flex shrink-0 items-center justify-center">
           <LauncherGlyph emoji={emoji} sizeClass="h-14 w-14" />
-        </span>
+        </EmojiHalo>
         <span
           className="w-full truncate px-0.5 text-center text-[13px] font-black leading-tight tracking-tight sm:text-sm"
           style={{ color: tileLabelOn(fill) }}

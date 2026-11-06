@@ -63,7 +63,7 @@ One shelf, one colour, everywhere: the launcher tile, sticker-book page, sticker
 
 ## 6. Icon rule and sticker album
 
-- **In-game objects stay emoji for now.** They cost no art, work in every language and match the platform. Launchers wrap emoji in `LauncherGlyph` with the 4 px white halo (`EMOJI_HALO`). Reuse that halo for emoji objects. Drawn art and haloed emoji may share a screen or a row: the white halo and the sticker's white cut read as the same family.
+- **In-game objects stay emoji for now.** They cost no art, work in every language and match the platform. Launchers wrap emoji in `LauncherGlyph` with a 4 px white sticker halo (`EmojiHalo`). The halo is one SVG `feMorphology` dilate of the glyph's alpha, flooded `#ffffff` and composited behind it — an even cut along the outline, not chained `filter: drop-shadow()` (each shadow outlines the previous ones and the fringe looks torn), and not `-webkit-text-stroke` or a blurred glow. Reuse that helper for emoji objects. Drawn art and haloed emoji may share a screen or a row: the white halo and the sticker's white cut read as the same family.
 - **Characters and brand marks are drawn**, in the app-icon style: a 5 px ink line at 140 px (about 3 px on screen), flat fills from the palette, dot eyes, a small smile and blush cheeks. The cast is the drawn panda, fox, owl and tortoise (`characters/cast.md`). Don't mix emoji vendors (no Twemoji images).
 - The 🐼 emoji stays **content** (Shadow, Animal Genie, word lists). The **mascot** is always the drawn panda, so kids never confuse the guide with an answer.
 
@@ -185,7 +185,7 @@ Don't
 - Grown-up screen, so text is the content here. §9's 44 px parent minimum applies; §4 weights and `ink` / `ink-soft` still apply. No emoji-only instructions needed.
 - Layout at 390: `max-w-md`, 16 px side padding. Title 30 px `font-black`, intro 14 px `ink-soft`. Order: lock-tip card, then shelves in home order.
 - **Shelf header:** the shelf's drawn character (idle, 44 px: owl, fox, tortoise, panda) + shelf name 18 px. Never the 🐼 emoji (§6).
-- **Overview card:** one cream card per shelf (3 px ink, `hardShadow(5,6)`, radius 2rem). Rows: 48 px glyph block in the shelf fill (3 px ink, `rounded-xl`, haloed emoji 26 px; guide icons at 26 px use a 2 px white emoji outline) · name 16 px `font-black` · age chips (🧸 3–5 / 🎒 6–8, white pill, 2 px ink, 11 px) · "what" 13 px ink · "Learns:" 13 px `ink-soft` · 44 px copy-link button (white, 2 px ink, 🔗 → ✓ for 1.5 s). Rows split by a 2 px `ink` 10 % line.
+- **Overview card:** one cream card per shelf (3 px ink, `hardShadow(5,6)`, radius 2rem). Rows: 48 px glyph block in the shelf fill (3 px ink, `rounded-xl`, haloed emoji 26 px; guide icons at 26 px use the same `EmojiHalo` dilate at 2 px, so the shelf fill still shows) · name 16 px `font-black` · age chips (🧸 3–5 / 🎒 6–8, white pill, 2 px ink, 11 px) · "what" 13 px ink · "Learns:" 13 px `ink-soft` · 44 px copy-link button (white, 2 px ink, 🔗 → ✓ for 1.5 s). Rows split by a 2 px `ink` 10 % line.
 - Copy-link exists only here and only on the web build. Kids never see share UI.
 
 ### Lock-tip card **new**
@@ -197,5 +197,5 @@ Don't
 - One app-wide theme with 3 values: `animals` 🐶, `space` 🚀, `ocean` 🐠 (`src/theme/appTheme.ts`, stored as `settings_app_theme`).
 - **A theme changes play-area content only** (emoji sets, the scene gradient inside the stage). Chrome, shelves and tokens never change with the theme.
 - Themed games: Maze, Tower Sort, Memory Match. A new themed game must offer all 3 themes.
-- **Home theme block:** 56×56 cream block in the title row after "tensaiasobi" (replaces 🎮). 3 px ink, `hardShadow(3,4)`, radius 1rem, theme emoji 32 px with halo, 24 px butter 🎨 badge at the top-right. Tap cycles the themes with `card-in`.
+- **Home theme block:** 56×56 cream block in the title row after "tensaiasobi" (replaces 🎮). 3 px ink, `hardShadow(3,4)`, radius 1rem, theme emoji 32 px with the same 4 px `EmojiHalo` dilate as the launcher tiles, 24 px butter 🎨 badge at the top-right. Tap cycles the themes with `card-in`.
 - **In-game 🎨 button** (Maze, Tower Sort): the same cream block style, writing the same global theme. The old `candy-blue` button is retired.

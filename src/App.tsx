@@ -8,7 +8,7 @@ import { BlockTile } from './components/BlockTile';
 import { AgeSwitch } from './components/AgeSwitch';
 import { CORAL, LEAF, BUTTER, CHALK, INK, PLAY_MAT_STYLE, hardShadow } from './theme/blockTable';
 import { THEME_EMOJI, nextTheme, toAppTheme, type AppThemeId } from './theme/appTheme';
-import { EMOJI_HALO } from './components/BlockTile';
+import { EmojiHalo, TILE_HALO_PX } from './components/EmojiHalo';
 import { CATEGORY_EMOJI, categoryFill } from './theme/categories';
 import HomeButton from './components/HomeButton';
 import ParentGate from './components/ParentGate';
@@ -537,14 +537,13 @@ function AppContent() {
                   className="relative shrink-0 flex h-14 w-14 tiny:h-12 tiny:w-12 items-center justify-center rounded-2xl border-[3px] cursor-pointer select-none touch-manipulation outline-none transition-all duration-75 active:translate-x-[3px] active:translate-y-[4px] active:[box-shadow:none] focus-visible:ring-4 focus-visible:ring-amber-400/70"
                   style={{ backgroundColor: '#fff8ec', borderColor: INK, boxShadow: hardShadow(3, 4) }}
                 >
-                  <span
+                  <EmojiHalo
                     key={themeBumps}
-                    aria-hidden
+                    radius={TILE_HALO_PX}
                     className={`text-[32px] tiny:text-[28px] leading-none ${themeBumps > 0 ? 'animate-card-in' : ''}`}
-                    style={{ filter: EMOJI_HALO }}
                   >
                     {THEME_EMOJI[theme]}
-                  </span>
+                  </EmojiHalo>
                   <span
                     aria-hidden
                     className="absolute -right-[9px] -top-[9px] flex h-6 w-6 items-center justify-center rounded-full border-2 text-[12px] leading-none"

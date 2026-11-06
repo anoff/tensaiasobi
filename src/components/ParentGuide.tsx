@@ -6,14 +6,12 @@ import { gameUrl } from '../games/gameLink';
 import { BUTTER, INK, hardShadow } from '../theme/blockTable';
 import { CATEGORY_EMOJI, categoryFill } from '../theme/categories';
 import { characterArt, characterForShelf } from '../data/stickers';
+import { EmojiHalo, GUIDE_HALO_PX } from './EmojiHalo';
 
 /** Parents' guide (#30, #31): screen-lock tip plus what every game is and teaches. Lives behind the parent gate. */
 
 const CREAM = '#fff8ec';
 const INK_SOFT = '#6b5a4c';
-/** The launcher halo scaled down for 26 px glyphs: 2 px instead of 4 px, so the shelf fill still shows. */
-const SMALL_HALO =
-  'drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)';
 const CARD_STYLE = { backgroundColor: CREAM, borderColor: INK, boxShadow: hardShadow(5, 6) } as const;
 
 type LockPlatform = 'ios' | 'android';
@@ -169,7 +167,7 @@ export function ParentGuide({ onBack }: ParentGuideProps) {
                     className="flex h-12 w-12 items-center justify-center rounded-xl border-[3px]"
                     style={{ backgroundColor: categoryFill(shelf, i), borderColor: INK }}
                   >
-                    <span className="text-[26px] leading-none" style={{ filter: SMALL_HALO }}>{game.emoji}</span>
+                    <EmojiHalo radius={GUIDE_HALO_PX} className="text-[26px] leading-none">{game.emoji}</EmojiHalo>
                   </span>
                   <div className="min-w-0">
                     <h3 className="text-base font-black leading-tight">{t.menu[game.labelKey]}</h3>
