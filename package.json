@@ -31,6 +31,7 @@
     "@capacitor/share": "^8.0.3",
     "@capacitor/status-bar": "^8.0.3",
     "@capgo/capacitor-native-biometric": "^8.6.10",
+    "chess.js": "^1.4.0",
     "jspdf": "^4.2.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
