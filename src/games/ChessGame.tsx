@@ -22,6 +22,8 @@ import {
   type MovesPrompt,
   FILES,
   RANKS,
+  applyCaptureMove,
+  applyMove,
   gradeMovesTap,
   nextCapturePuzzle,
   nextMovesPrompt,
@@ -53,7 +55,9 @@ export default function ChessGame() {
   const [capturePuzzle, setCapturePuzzle] = useState<CapturePuzzle | null>(null);
   const [hotseat, setHotseat] = useState<HotseatState | null>(null);
   const [selected, setSelected] = useState<Square | null>(null);
-  const [hints, setHints] = useState<Square[]>([]);
+  const [hintOn, setHintOn] = useState(false);
+  const [playFen, setPlayFen] = useState<string | null>(null);
+  const [captureStep, setCaptureStep] = useState(0);
   const [shake, setShake] = useState<Square | null>(null);
   const [locked, setLocked] = useState(false);
   const [promo, setPromo] = useState<{ from: Square; to: Square } | null>(null);
@@ -62,26 +66,33 @@ export default function ChessGame() {
   const tortoiseCheer = characterArt('tortoise', 'cheer');
   const panda = characterArt('panda', 'idle');
 
-  const fen = mode === 'moves'
-    ? movesPrompt?.fen
-    : mode === 'capture'
-      ? capturePuzzle?.fen
-      : hotseat?.fen;
+  const fen = mode === 'hotseat'
+    ? hotseat?.fen
+    : playFen ?? (mode === 'moves' ? movesPrompt?.fen : capturePuzzle?.fen);
 
   const pieces = useMemo(() => (fen ? piecesFromFen(fen) : []), [fen]);
 
+  const currentCapture = capturePuzzle?.steps[captureStep];
+
   const legalHints = useMemo(() => {
-    if (hints.length) return hints;
     if (mode === 'hotseat' && selected && fen) {
       return hotseatMoves(fen, selected).map((m) => m.to);
     }
+    if (!hintOn) return [] as Square[];
+    if (mode === 'moves' && movesPrompt) return movesPrompt.legalTargets;
     return [] as Square[];
-  }, [hints, mode, selected, fen]);
+  }, [hintOn, mode, selected, fen, movesPrompt]);
 
   const captureTargets = useMemo(() => {
-    if (!fen || !selected || mode !== 'hotseat') return new Set<Square>();
-    return new Set(hotseatMoves(fen, selected).filter((m) => m.captured).map((m) => m.to));
-  }, [fen, selected, mode]);
+    if (!fen) return new Set<Square>();
+    if (mode === 'hotseat' && selected) {
+      return new Set(hotseatMoves(fen, selected).filter((m) => m.captured).map((m) => m.to));
+    }
+    if (mode === 'capture' && hintOn && currentCapture) {
+      return new Set<Square>([currentCapture.to]);
+    }
+    return new Set<Square>();
+  }, [fen, selected, mode, hintOn, currentCapture]);
 
   const promptText = (() => {
     if (phase === 'pick') return t.chessGame.pickMode;
@@ -107,23 +118,28 @@ export default function ChessGame() {
     setMode(m);
     setPhase('play');
     setSelected(null);
-    setHints([]);
+    setHintOn(false);
     setShake(null);
     setLocked(false);
     setPromo(null);
     setShowConfetti(false);
     setMoveStep(0);
+    setCaptureStep(0);
     if (m === 'moves') {
       const p = nextMovesPrompt(null, 0);
       setMovesPrompt(p);
+      setPlayFen(p.fen);
       setCapturePuzzle(null);
       setHotseat(null);
     } else if (m === 'capture') {
-      setCapturePuzzle(nextCapturePuzzle(null));
+      const p = nextCapturePuzzle(null);
+      setCapturePuzzle(p);
+      setPlayFen(p.fen);
       setMovesPrompt(null);
       setHotseat(null);
     } else {
       setHotseat(startHotseat());
+      setPlayFen(null);
       setMovesPrompt(null);
       setCapturePuzzle(null);
     }
@@ -135,7 +151,8 @@ export default function ChessGame() {
     setPhase('pick');
     setMode(null);
     setSelected(null);
-    setHints([]);
+    setHintOn(false);
+    setPlayFen(null);
     setShake(null);
     setLocked(false);
     setPromo(null);
@@ -168,58 +185,72 @@ export default function ChessGame() {
       if (gradeMovesTap(movesPrompt, square) === 'hit') {
         setLocked(true);
         setSelected(movesPrompt.from);
-        setHints([]);
-        awardHit('moves');
+        setHintOn(false);
+        setPlayFen(applyMove(movesPrompt.fen, movesPrompt.from, square));
         later(() => {
-          const nextStep = moveStep + 1;
-          setMoveStep(nextStep);
-          setMovesPrompt(nextMovesPrompt(movesPrompt.id, nextStep));
-          setSelected(null);
-          setLocked(false);
-        }, 700);
+          awardHit('moves');
+          later(() => {
+            const nextStep = moveStep + 1;
+            setMoveStep(nextStep);
+            const next = nextMovesPrompt(movesPrompt.id, nextStep);
+            setMovesPrompt(next);
+            setPlayFen(next.fen);
+            setSelected(null);
+            setHintOn(false);
+            setLocked(false);
+          }, 700);
+        }, 450);
       } else {
         flashMiss(square);
-        setHints(movesPrompt.legalTargets);
-        setSelected(movesPrompt.from);
       }
       return;
     }
 
-    if (mode === 'capture' && capturePuzzle) {
-      const piece = pieceAt(capturePuzzle.fen, square);
+    if (mode === 'capture' && capturePuzzle && currentCapture && fen) {
+      const piece = pieceAt(fen, square);
       if (!selected) {
-        if (piece && piece.color === capturePuzzle.side && square === capturePuzzle.from) {
+        if (piece && piece.color === capturePuzzle.side && square === currentCapture.from) {
           playPop();
           setSelected(square);
-          setHints([]);
-        } else if (piece && piece.color === capturePuzzle.side) {
-          // Wrong own piece — gentle miss, then hint the right one.
-          flashMiss(square);
-          setHints([capturePuzzle.from]);
         } else {
           flashMiss(square);
-          setHints([capturePuzzle.from]);
         }
         return;
       }
       if (piece && piece.color === capturePuzzle.side) {
-        playPop();
-        setSelected(square);
-        setHints([]);
+        if (square === currentCapture.from) {
+          playPop();
+          setSelected(square);
+        } else {
+          flashMiss(square);
+        }
         return;
       }
-      if (selected === capturePuzzle.from && square === capturePuzzle.to) {
+      if (selected === currentCapture.from && square === currentCapture.to) {
         setLocked(true);
-        setHints([]);
-        awardHit('capture');
+        setHintOn(false);
+        setPlayFen(applyCaptureMove(fen, currentCapture.from, square, capturePuzzle.side));
+        setSelected(null);
         later(() => {
-          setCapturePuzzle(nextCapturePuzzle(capturePuzzle.id));
-          setSelected(null);
-          setLocked(false);
-        }, 700);
+          const nextIdx = captureStep + 1;
+          if (nextIdx < capturePuzzle.steps.length) {
+            setCaptureStep(nextIdx);
+            setLocked(false);
+          } else {
+            awardHit('capture');
+            later(() => {
+              const next = nextCapturePuzzle(capturePuzzle.id);
+              setCapturePuzzle(next);
+              setCaptureStep(0);
+              setPlayFen(next.fen);
+              setSelected(null);
+              setHintOn(false);
+              setLocked(false);
+            }, 700);
+          }
+        }, 450);
       } else {
         flashMiss(square);
-        setHints([capturePuzzle.to]);
       }
       return;
     }
@@ -252,9 +283,14 @@ export default function ChessGame() {
       setHotseat(result.state);
       setSelected(null);
       if (result.state.status === 'checkmate') {
-        setShowConfetti(true);
-        onStarEarned?.(modeStars('hotseat'));
-        tallyRound();
+        setLocked(true);
+        later(() => {
+          setShowConfetti(true);
+          onStarEarned?.(modeStars('hotseat'));
+          tallyRound();
+          later(() => setShowConfetti(false), 900);
+          setLocked(false);
+        }, 450);
       }
     }
   };
@@ -268,9 +304,14 @@ export default function ChessGame() {
     setHotseat(result.state);
     setSelected(null);
     if (result.state.status === 'checkmate') {
-      setShowConfetti(true);
-      onStarEarned?.(modeStars('hotseat'));
-      tallyRound();
+      setLocked(true);
+      later(() => {
+        setShowConfetti(true);
+        onStarEarned?.(modeStars('hotseat'));
+        tallyRound();
+        later(() => setShowConfetti(false), 900);
+        setLocked(false);
+      }, 450);
     }
   };
 
@@ -280,7 +321,7 @@ export default function ChessGame() {
     setSelected(null);
     setPromo(null);
     setShowConfetti(false);
-    setHints([]);
+    setHintOn(false);
   };
 
   const cream = CREAM;
@@ -335,7 +376,7 @@ export default function ChessGame() {
             pieces={pieces}
             selected={selected}
             hints={legalHints}
-            captureTargets={mode === 'capture' && selected ? new Set([capturePuzzle!.to]) : captureTargets}
+            captureTargets={captureTargets}
             shake={shake}
             checkSquare={
               mode === 'hotseat' && hotseat && (hotseat.status === 'check' || hotseat.status === 'checkmate')
@@ -366,6 +407,20 @@ export default function ChessGame() {
             <KidButton color="yellow" size="md" className="min-h-24 min-w-[6.5rem]" data-testid="chess-done" onClick={backToModes}>
               {t.chessGame.done}
             </KidButton>
+            {(mode === 'moves' || mode === 'capture') && (
+              <KidButton
+                color="green"
+                size="md"
+                className="min-h-24 min-w-[6.5rem]"
+                data-testid="chess-hint"
+                onClick={() => {
+                  playPop();
+                  setHintOn(true);
+                }}
+              >
+                {t.chessGame.hint}
+              </KidButton>
+            )}
             {mode === 'hotseat' && (
               <ConfirmWipeButton
                 label={t.chessGame.newGame}

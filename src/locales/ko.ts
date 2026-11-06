@@ -487,6 +487,7 @@ export const ko: TranslationSchema = {
     blackWins: "흑 승리",
     draw: "무승부",
     done: "끝",
+    hint: "힌트",
     newGame: "새 게임",
     newGameConfirm: "새 게임?",
     pieces: {

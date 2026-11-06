@@ -487,6 +487,7 @@ export const de: TranslationSchema = {
     blackWins: "Schwarz gewinnt",
     draw: "Remis",
     done: "Fertig",
+    hint: "Hinweis",
     newGame: "Neu",
     newGameConfirm: "Neu?",
     pieces: {
