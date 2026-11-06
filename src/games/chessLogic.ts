@@ -18,13 +18,18 @@ export interface MovesPrompt {
   legalTargets: Square[];
 }
 
+export interface CaptureStep {
+  from: Square;
+  to: Square;
+}
+
 export interface CapturePuzzle {
   id: string;
   fen: string;
   /** Side the child plays. */
   side: Color;
-  from: Square;
-  to: Square;
+  /** 2–3 successive captures by `side` (no opponent replies). */
+  steps: CaptureStep[];
 }
 
 export const FILES = 'abcdefgh';
@@ -54,6 +59,31 @@ export function piecesFromFen(fen: string): BoardPiece[] {
 export function legalTargets(fen: string, from: Square): Square[] {
   const chess = new Chess(fen);
   return chess.moves({ square: from, verbose: true }).map((m) => m.to);
+}
+
+export function applyMove(fen: string, from: Square, to: Square): string {
+  const chess = new Chess(fen);
+  const move = chess.move({ from, to });
+  if (!move) throw new Error(`illegal ${from}->${to} in ${fen}`);
+  return chess.fen();
+}
+
+/** Apply a capture and keep `side` to move so a sequence can continue without an opponent reply. */
+export function applyCaptureMove(fen: string, from: Square, to: Square, side: Color): string {
+  const chess = new Chess(fen);
+  const move = chess.move({ from, to });
+  if (!move?.captured) throw new Error(`illegal capture ${from}->${to} in ${fen}`);
+  const natural = chess.fen();
+  const parts = natural.split(' ');
+  parts[1] = side;
+  const flipped = parts.join(' ');
+  try {
+    // Invalid if the opposite king is left in check while `side` still moves (often the last take).
+    new Chess(flipped);
+    return flipped;
+  } catch {
+    return natural;
+  }
 }
 
 function assertLegal(fen: string, from: Square): Square[] {
@@ -141,60 +171,80 @@ export function gradeMovesTap(prompt: MovesPrompt, to: Square): 'hit' | 'miss' {
 }
 
 /**
- * Capture puzzles: one clear capture of an unprotected enemy piece.
- * Child plays the side to move; correct answer is from → to.
+ * Capture puzzles: a short sequence of 2–3 captures by the same side.
+ * Child plays the side to move; no opponent replies between takes.
  */
 export const CAPTURE_PUZZLES: CapturePuzzle[] = [
   {
-    id: 'rook-takes-pawn',
-    fen: '4k3/8/8/3p4/8/8/8/3RK3 w - - 0 1',
+    id: 'queen-file-two',
+    fen: '4k3/3p4/8/3p4/8/8/8/3QK3 w - - 0 1',
     side: 'w',
-    from: 'd1',
-    to: 'd5',
+    steps: [
+      { from: 'd1', to: 'd5' },
+      { from: 'd5', to: 'd7' },
+    ],
   },
   {
-    id: 'bishop-takes-knight',
-    fen: '4k3/8/8/4n3/8/2B5/8/4K3 w - - 0 1',
+    id: 'queen-file-three',
+    fen: '4k3/3p4/8/3p4/8/3p4/8/3QK3 w - - 0 1',
     side: 'w',
-    from: 'c3',
-    to: 'e5',
+    steps: [
+      { from: 'd1', to: 'd3' },
+      { from: 'd3', to: 'd5' },
+      { from: 'd5', to: 'd7' },
+    ],
   },
   {
-    id: 'queen-takes-bishop',
-    fen: '4k3/8/8/5b2/8/8/5Q2/4K3 w - - 0 1',
+    id: 'rook-file-two',
+    fen: '4k3/3p4/8/3p4/8/8/8/3RK3 w - - 0 1',
     side: 'w',
-    from: 'f2',
-    to: 'f5',
+    steps: [
+      { from: 'd1', to: 'd5' },
+      { from: 'd5', to: 'd7' },
+    ],
   },
   {
-    id: 'knight-takes-pawn',
-    fen: '4k3/8/8/4p3/8/5N2/8/4K3 w - - 0 1',
+    id: 'bishop-diag-two',
+    fen: '4k3/8/8/6p1/8/4n3/8/2B1K3 w - - 0 1',
     side: 'w',
-    from: 'f3',
-    to: 'e5',
+    steps: [
+      { from: 'c1', to: 'e3' },
+      { from: 'e3', to: 'g5' },
+    ],
   },
   {
-    id: 'pawn-takes-pawn',
-    fen: '4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1',
+    id: 'knight-two',
+    fen: '4k3/3p4/8/4p3/8/5N2/8/4K3 w - - 0 1',
     side: 'w',
-    from: 'e4',
-    to: 'd5',
+    steps: [
+      { from: 'f3', to: 'e5' },
+      { from: 'e5', to: 'd7' },
+    ],
   },
   {
-    id: 'king-takes-pawn',
-    fen: '4k3/8/8/3pK3/8/8/8/8 w - - 0 1',
+    id: 'pawn-two',
+    fen: '4k3/8/2p1p3/3p4/4P3/8/8/4K3 w - - 0 1',
     side: 'w',
-    from: 'e5',
-    to: 'd5',
+    steps: [
+      { from: 'e4', to: 'd5' },
+      { from: 'd5', to: 'c6' },
+    ],
   },
 ];
 
-// Validate capture puzzles at module load in tests; soft-check here.
+// Validate each step is a legal capture after previous steps are applied.
 for (const p of CAPTURE_PUZZLES) {
-  const chess = new Chess(p.fen);
-  const move = chess.moves({ square: p.from, verbose: true }).find((m) => m.to === p.to && Boolean(m.captured));
-  if (!move) {
-    throw new Error(`bad capture puzzle ${p.id}: ${p.from}->${p.to} not a capture in ${p.fen}`);
+  if (p.steps.length < 2 || p.steps.length > 3) {
+    throw new Error(`bad capture puzzle ${p.id}: need 2–3 steps`);
+  }
+  let fen = p.fen;
+  for (const step of p.steps) {
+    const chess = new Chess(fen);
+    const move = chess.moves({ square: step.from, verbose: true }).find((m) => m.to === step.to && Boolean(m.captured));
+    if (!move) {
+      throw new Error(`bad capture puzzle ${p.id}: ${step.from}->${step.to} not a capture in ${fen}`);
+    }
+    fen = applyCaptureMove(fen, step.from, step.to, p.side);
   }
 }
 

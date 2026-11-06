@@ -24,28 +24,24 @@ test.describe('Chess', () => {
     }
   });
 
-  test('moves mode: miss shows leaf hints, hit advances', async ({ page }) => {
+  test('moves mode: hint reveals legal squares, miss does not, hit moves the piece', async ({ page }) => {
     await openChess(page);
     await page.getByTestId('chess-mode-moves').click();
     await expect(page.getByTestId('chess-board')).toBeVisible();
     const board = page.getByTestId('chess-board');
-    // Legal squares are marked as soon as the piece is presented.
+    const hintBtn = page.getByTestId('chess-hint');
+    await expect(hintBtn).toBeVisible();
+    const hb = await hintBtn.boundingBox();
+    expect(hb?.height ?? 0).toBeGreaterThanOrEqual(96);
+    await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
+    await expect(page.getByTestId('chess-hint-capture')).toHaveCount(0);
+    await page.getByTestId('chess-sq-a8').click();
+    await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
+    await expect(page.getByTestId('chess-hint-capture')).toHaveCount(0);
+    await hintBtn.click();
     await expect(
       page.getByTestId('chess-hint-dot').or(page.getByTestId('chess-hint-capture')).first(),
     ).toBeVisible();
-    // Find the piece square from data-piece attributes.
-    const from = await board.locator('[data-piece^="w"]').first().getAttribute('data-square');
-    expect(from).toBeTruthy();
-    // Tap a clearly empty corner that is usually illegal (a8) unless the piece is a long-ranger covering it.
-    await page.getByTestId('chess-sq-a8').click();
-    // Either hints appear (miss) or it was somehow legal; if no hints, try h8.
-    const hints = page.getByTestId('chess-hint-dot');
-    if ((await hints.count()) === 0) {
-      await page.getByTestId('chess-sq-h8').click();
-    }
-    await expect(page.getByTestId('chess-hint-dot').first()).toBeVisible({ timeout: 3000 });
-
-    // Hit a hinted square.
     const hintSq = await page.getByTestId('chess-hint-dot').first().locator('xpath=ancestor::button').getAttribute('data-square');
     expect(hintSq).toBeTruthy();
     const before = await board.getAttribute('data-fen');
@@ -53,25 +49,38 @@ test.describe('Chess', () => {
     await expect.poll(async () => board.getAttribute('data-fen')).not.toBe(before);
   });
 
-  test('capture mode: two-tap capture grades a hit', async ({ page }) => {
+  test('capture mode: hint-gated sequence of captures', async ({ page }) => {
     await openChess(page);
     await page.getByTestId('chess-mode-capture').click();
     const board = page.getByTestId('chess-board');
     await expect(board).toBeVisible();
+    await expect(page.getByTestId('chess-hint')).toBeVisible();
+    await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
+    await expect(page.getByTestId('chess-hint-capture')).toHaveCount(0);
     const whites = board.locator('[data-piece^="w"]');
     const count = await whites.count();
     for (let i = 0; i < count; i++) {
       await whites.nth(i).click();
-      if ((await page.getByTestId('chess-selected').count()) && (await page.getByTestId('chess-hint-capture').count())) {
-        break;
-      }
+      if (await page.getByTestId('chess-selected').count()) break;
     }
     await expect(page.getByTestId('chess-selected')).toBeVisible();
-    await expect(page.getByTestId('chess-hint-capture').first()).toBeVisible();
-    // Tap wrong empty square → marks stay, miss shakes.
+    await expect(page.getByTestId('chess-hint-capture')).toHaveCount(0);
     await page.getByTestId('chess-sq-a8').click();
+    await expect(page.getByTestId('chess-hint-capture')).toHaveCount(0);
+    await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
+    await page.getByTestId('chess-hint').click();
     await expect(page.getByTestId('chess-hint-capture').first()).toBeVisible();
-    await expect(page.getByTestId('chess-selected')).toBeVisible();
+    const startFen = await board.getAttribute('data-fen');
+    const capSq = await page.getByTestId('chess-hint-capture').first().locator('xpath=ancestor::button').getAttribute('data-square');
+    expect(capSq).toBeTruthy();
+    await page.getByTestId(`chess-sq-${capSq}`).click();
+    await expect.poll(async () => board.getAttribute('data-fen')).not.toBe(startFen);
+    await expect(page.getByTestId('chess-hint-capture')).toHaveCount(0);
+    await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
+    await page.getByTestId('chess-hint').click();
+    await expect(
+      page.getByTestId('chess-hint-capture').or(page.getByTestId('chess-hint-dot')).first(),
+    ).toBeVisible();
   });
 
   test('hot-seat starts from the standard setup with turn banner', async ({ page }) => {
@@ -82,6 +91,7 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-sq-a1')).toHaveAttribute('data-tile', 'walnut');
     await expect(page.getByTestId('chess-sq-h1')).toHaveAttribute('data-tile', 'cream');
     await expect(page.getByTestId('chess-panda')).toBeVisible();
+    await expect(page.getByTestId('chess-hint')).toHaveCount(0);
     await page.getByTestId('chess-sq-e2').click();
     await expect(page.getByTestId('chess-selected')).toBeVisible();
     await expect(page.getByTestId('chess-hint-dot').first()).toBeVisible();

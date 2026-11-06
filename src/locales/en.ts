@@ -485,6 +485,7 @@ export const en = {
     blackWins: "Black wins",
     draw: "Draw",
     done: "Done",
+    hint: "Hint",
     newGame: "New Game",
     newGameConfirm: "New?",
     pieces: {

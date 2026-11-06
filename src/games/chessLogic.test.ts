@@ -3,6 +3,7 @@ import { Chess } from 'chess.js';
 import {
   _test,
   gradeMovesTap,
+  applyCaptureMove,
   hotseatMoves,
   legalTargets,
   modeStars,
@@ -27,14 +28,19 @@ describe('chessLogic', () => {
     expect(seen).toEqual(new Set(['p', 'r', 'n', 'b', 'q', 'k']));
   });
 
-  it('wires every capture puzzle as a real unprotected capture', () => {
+  it('wires every capture puzzle as a short sequence of real captures', () => {
     for (const puzzle of _test.CAPTURE_PUZZLES) {
-      const chess = new Chess(puzzle.fen);
-      const move = chess.moves({ square: puzzle.from, verbose: true }).find((m) => m.to === puzzle.to);
-      expect(move, puzzle.id).toBeTruthy();
-      expect(move!.captured, puzzle.id).toBeTruthy();
-      // Target is not defended enough to make the capture illegal.
-      expect(() => chess.move({ from: puzzle.from, to: puzzle.to })).not.toThrow();
+      expect(puzzle.steps.length).toBeGreaterThanOrEqual(2);
+      expect(puzzle.steps.length).toBeLessThanOrEqual(3);
+      let fen = puzzle.fen;
+      for (const step of puzzle.steps) {
+        const chess = new Chess(fen);
+        const move = chess.moves({ square: step.from, verbose: true }).find((m) => m.to === step.to);
+        expect(move, `${puzzle.id} ${step.from}${step.to}`).toBeTruthy();
+        expect(move!.captured, `${puzzle.id} ${step.from}${step.to}`).toBeTruthy();
+        expect(() => chess.move({ from: step.from, to: step.to })).not.toThrow();
+        fen = applyCaptureMove(fen, step.from, step.to, puzzle.side);
+      }
     }
     const a = nextCapturePuzzle(null);
     const b = nextCapturePuzzle(a.id);

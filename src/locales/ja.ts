@@ -487,6 +487,7 @@ export const ja: TranslationSchema = {
     blackWins: "くろのかち",
     draw: "ひきわけ",
     done: "おわり",
+    hint: "ヒント",
     newGame: "はじめから",
     newGameConfirm: "いい？",
     pieces: {
