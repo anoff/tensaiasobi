@@ -29,6 +29,10 @@ test.describe('Chess', () => {
     await page.getByTestId('chess-mode-moves').click();
     await expect(page.getByTestId('chess-board')).toBeVisible();
     const board = page.getByTestId('chess-board');
+    // Legal squares are marked as soon as the piece is presented.
+    await expect(
+      page.getByTestId('chess-hint-dot').or(page.getByTestId('chess-hint-capture')).first(),
+    ).toBeVisible();
     // Find the piece square from data-piece attributes.
     const from = await board.locator('[data-piece^="w"]').first().getAttribute('data-square');
     expect(from).toBeTruthy();
@@ -54,11 +58,20 @@ test.describe('Chess', () => {
     await page.getByTestId('chess-mode-capture').click();
     const board = page.getByTestId('chess-board');
     await expect(board).toBeVisible();
-    // Tap wrong empty square → hints the from square.
+    const whites = board.locator('[data-piece^="w"]');
+    const count = await whites.count();
+    for (let i = 0; i < count; i++) {
+      await whites.nth(i).click();
+      if ((await page.getByTestId('chess-selected').count()) && (await page.getByTestId('chess-hint-capture').count())) {
+        break;
+      }
+    }
+    await expect(page.getByTestId('chess-selected')).toBeVisible();
+    await expect(page.getByTestId('chess-hint-capture').first()).toBeVisible();
+    // Tap wrong empty square → marks stay, miss shakes.
     await page.getByTestId('chess-sq-a8').click();
-    await expect(
-      page.getByTestId('chess-hint-capture').or(page.getByTestId('chess-hint-dot')).or(page.getByTestId('chess-selected')),
-    ).toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId('chess-hint-capture').first()).toBeVisible();
+    await expect(page.getByTestId('chess-selected')).toBeVisible();
   });
 
   test('hot-seat starts from the standard setup with turn banner', async ({ page }) => {
@@ -71,6 +84,7 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-panda')).toBeVisible();
     await page.getByTestId('chess-sq-e2').click();
     await expect(page.getByTestId('chess-selected')).toBeVisible();
+    await expect(page.getByTestId('chess-hint-dot').first()).toBeVisible();
     await page.getByTestId('chess-sq-e4').click();
     await expect(page.getByTestId('chess-prompt')).toContainText(/Black|Noirs|Schwarz|くろ|흑/);
   });

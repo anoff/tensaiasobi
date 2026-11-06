@@ -71,12 +71,15 @@ export default function ChessGame() {
   const pieces = useMemo(() => (fen ? piecesFromFen(fen) : []), [fen]);
 
   const legalHints = useMemo(() => {
+    if (mode === 'moves' && movesPrompt) {
+      return movesPrompt.legalTargets;
+    }
     if (hints.length) return hints;
     if (mode === 'hotseat' && selected && fen) {
       return hotseatMoves(fen, selected).map((m) => m.to);
     }
     return [] as Square[];
-  }, [hints, mode, selected, fen]);
+  }, [hints, mode, selected, fen, movesPrompt]);
 
   const captureTargets = useMemo(() => {
     if (!fen || !selected || mode !== 'hotseat') return new Set<Square>();
