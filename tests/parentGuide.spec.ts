@@ -32,7 +32,7 @@ test.describe("Parents' guide", () => {
     for (const shelf of ['numbers', 'language', 'logic', 'play']) {
       await expect(page.getByTestId(`guide-shelf-${shelf}`)).toBeVisible();
     }
-    await expect(page.locator('[data-testid^="guide-game-"]')).toHaveCount(26);
+    await expect(page.locator('[data-testid^="guide-game-"]')).toHaveCount(27);
 
     const math = page.getByTestId('guide-game-math');
     await expect(math).toContainText('Math Pop');

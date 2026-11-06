@@ -680,6 +680,7 @@ export const fr: TranslationSchema = {
       snorkelPearlFinder: { what: "Essuie les bulles et porte chaque perle à la coquille de sa couleur.", learn: "Associer les couleurs ; agilité des doigts." },
       puzzle: { what: "Remets les pièces pour reformer l’image.", learn: "Pensée spatiale : des parties au tout." },
       towerSort: { what: "Déplace la pièce du haut pour trier les tours.", learn: "Planifier ses coups." },
+      chess: { what: "Déplace une pièce sur la bonne case, prends une pièce libre, ou joue avec un ami.", learn: "Comment chaque pièce se déplace ; les prises." },
       doodle: { what: "Dessine ce que tu veux avec le doigt.", learn: "Créativité et habileté de la main." },
       trace: { what: "Suis la forme en pointillés.", learn: "Tenue du trait et formes." },
       maze: { what: "Fais glisser le personnage jusqu’au but du labyrinthe.", learn: "Trouver un chemin ; agilité des doigts." },

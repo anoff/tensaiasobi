@@ -7,6 +7,7 @@ import { BUTTER, INK, hardShadow } from '../theme/blockTable';
 import { CATEGORY_EMOJI, categoryFill } from '../theme/categories';
 import { characterArt, characterForShelf } from '../data/stickers';
 import { EmojiHalo, GUIDE_HALO_PX } from './EmojiHalo';
+import { LauncherGlyph } from './LauncherGlyph';
 
 /** Parents' guide (#30, #31): screen-lock tip plus what every game is and teaches. Lives behind the parent gate. */
 
@@ -167,7 +168,13 @@ export function ParentGuide({ onBack }: ParentGuideProps) {
                     className="flex h-12 w-12 items-center justify-center rounded-xl border-[3px]"
                     style={{ backgroundColor: categoryFill(shelf, i), borderColor: INK }}
                   >
-                    <EmojiHalo radius={GUIDE_HALO_PX} className="text-[26px] leading-none">{game.emoji}</EmojiHalo>
+                    <EmojiHalo radius={GUIDE_HALO_PX} className="text-[26px] leading-none">
+                      {'glyphSrc' in game && game.glyphSrc ? (
+                        <LauncherGlyph emoji={game.emoji} src={game.glyphSrc} sizeClass="h-[26px] w-[26px]" />
+                      ) : (
+                        game.emoji
+                      )}
+                    </EmojiHalo>
                   </span>
                   <div className="min-w-0">
                     <h3 className="text-base font-black leading-tight">{t.menu[game.labelKey]}</h3>

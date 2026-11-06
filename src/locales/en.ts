@@ -680,6 +680,7 @@ export const en = {
       snorkelPearlFinder: { what: "Wipe away bubbles and take each pearl to the clam of the same colour.", learn: "Colour matching; finger control." },
       puzzle: { what: "Put the pieces back to fix the picture.", learn: "Spatial thinking: how parts make a whole." },
       towerSort: { what: "Move the top piece to sort the towers.", learn: "Planning moves ahead." },
+      chess: { what: "Move a piece to the right square, take a free piece, or play a friend.", learn: "How each piece moves; capturing." },
       doodle: { what: "Draw anything with a finger.", learn: "Creativity and hand control." },
       trace: { what: "Trace the dotted shape.", learn: "Pen control and shapes." },
       maze: { what: "Drag the character through the maze to its goal.", learn: "Finding a path; finger control." },

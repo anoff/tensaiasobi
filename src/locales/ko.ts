@@ -680,6 +680,7 @@ export const ko: TranslationSchema = {
       snorkelPearlFinder: { what: "거품을 닦고 진주를 같은 색 조개로 옮겨요.", learn: "색깔 짝 짓기; 손가락 조절." },
       puzzle: { what: "조각을 맞춰 그림을 다시 완성해요.", learn: "공간 감각: 부분이 모여 전체가 돼요." },
       towerSort: { what: "맨 위 조각을 옮겨 탑을 정리해요.", learn: "앞을 내다보고 계획하기." },
+      chess: { what: "말을 올바른 칸으로 옮기거나, 잡을 수 있는 말을 잡거나, 친구와 대국해요.", learn: "각 말의 움직임과 잡기." },
       doodle: { what: "손가락으로 무엇이든 그려요.", learn: "창의력과 손 조절." },
       trace: { what: "점선 모양을 따라 그려요.", learn: "선 긋기와 모양." },
       maze: { what: "캐릭터를 끌어 미로의 도착점까지 가요.", learn: "길 찾기; 손가락 조절." },

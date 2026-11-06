@@ -680,6 +680,7 @@ export const ja: TranslationSchema = {
       snorkelPearlFinder: { what: "泡をふいて、真珠を同じ色の貝へ運びます。", learn: "色合わせ。指先の動き。" },
       puzzle: { what: "ピースをはめて絵を元にもどします。", learn: "空間認識：部分から全体へ。" },
       towerSort: { what: "いちばん上のピースを動かしてタワーを並べます。", learn: "先を読んで計画する力。" },
+      chess: { what: "駒を正しいマスへ動かしたり、取れる駒を取ったり、友だちと対局します。", learn: "各駒の動きと取り方。" },
       doodle: { what: "指で自由に絵をかきます。", learn: "創造力と手の動き。" },
       trace: { what: "点線の形をなぞります。", learn: "線をかく力と形。" },
       maze: { what: "キャラクターをゴールまでめいろの中を動かします。", learn: "道を見つける力。指先の動き。" },
