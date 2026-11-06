@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="wwood" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#efe2c4"/>
+      <stop offset="18%" stop-color="#fffaf0"/>
+      <stop offset="48%" stop-color="#fff8ec"/>
+      <stop offset="72%" stop-color="#fffaf0"/>
+      <stop offset="100%" stop-color="#e8d7b4"/>
+    </linearGradient>
+    <linearGradient id="bwood" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#261e19"/>
+      <stop offset="28%" stop-color="#3a2e27"/>
+      <stop offset="52%" stop-color="#4c3d33"/>
+      <stop offset="78%" stop-color="#3a2e27"/>
+      <stop offset="100%" stop-color="#2a211c"/>
+    </linearGradient>
+    <linearGradient id="wshine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.40"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#c4b08a" stop-opacity="0.22"/>
+    </linearGradient>
+    <linearGradient id="bshine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8aea3" stop-opacity="0.42"/>
+      <stop offset="40%" stop-color="#b8aea3" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#140f0c" stop-opacity="0.40"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" fill="#ffe7c2"/>
+  <rect x="16" y="16" width="224" height="224" rx="10" fill="#3a2e27" stroke="#2a1c14" stroke-width="4"/>
+<rect x="22.0" y="22.0" width="53.5" height="53.5" fill="#fff8ec"/>
+<rect x="75.0" y="22.0" width="53.5" height="53.5" fill="#8d5a36"/>
+<rect x="128.0" y="22.0" width="53.5" height="53.5" fill="#fff8ec"/>
+<rect x="181.0" y="22.0" width="53.5" height="53.5" fill="#8d5a36"/>
+<rect x="22.0" y="75.0" width="53.5" height="53.5" fill="#8d5a36"/>
+<rect x="75.0" y="75.0" width="53.5" height="53.5" fill="#fff8ec"/>
+<rect x="128.0" y="75.0" width="53.5" height="53.5" fill="#8d5a36"/>
+<rect x="181.0" y="75.0" width="53.5" height="53.5" fill="#fff8ec"/>
+<rect x="22.0" y="128.0" width="53.5" height="53.5" fill="#fff8ec"/>
+<rect x="75.0" y="128.0" width="53.5" height="53.5" fill="#8d5a36"/>
+<rect x="128.0" y="128.0" width="53.5" height="53.5" fill="#fff8ec"/>
+<rect x="181.0" y="128.0" width="53.5" height="53.5" fill="#8d5a36"/>
+<rect x="22.0" y="181.0" width="53.5" height="53.5" fill="#8d5a36"/>
+<rect x="75.0" y="181.0" width="53.5" height="53.5" fill="#fff8ec"/>
+<rect x="128.0" y="181.0" width="53.5" height="53.5" fill="#8d5a36"/>
+<rect x="181.0" y="181.0" width="53.5" height="53.5" fill="#fff8ec"/>
+<g opacity="0.09" stroke="#6a4228" stroke-width="1.2" fill="none">
+<path d="M22 32 Q128.0 36 234 32"/>
+<path d="M22 68 Q128.0 72 234 68"/>
+<path d="M22 104 Q128.0 108 234 104"/>
+<path d="M22 140 Q128.0 144 234 140"/>
+<path d="M22 176 Q128.0 180 234 176"/>
+<path d="M22 212 Q128.0 216 234 212"/>
+</g>
+
+    <g transform="translate(101.5,157.14999999999998) scale(0.5888888888888889)">
+      <ellipse cx="0" cy="8" rx="28" ry="6" fill="#2a1c14" opacity="0.15"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9" fill="#fffaf0" stroke="#2a1c14" stroke-width="4.5"/>
+      <path d="M-14 -6 L-12 -58 L12 -58 L14 -6 Z" fill="#fffaf0" stroke="#2a1c14" stroke-width="4.5" stroke-linejoin="round"/>
+      <ellipse cx="0" cy="-60" rx="20" ry="6" fill="#fffaf0" stroke="#2a1c14" stroke-width="4.5"/>
+      <path d="M-18 -60 L-20 -82 Q-8 -90 0 -86 Q8 -90 20 -82 L18 -60 Z" fill="#fffaf0" stroke="#2a1c14" stroke-width="4.5" stroke-linejoin="round"/>
+      <rect x="-8" y="-120" width="16" height="38" rx="2" fill="#fffaf0" stroke="#2a1c14" stroke-width="4.5" stroke-linejoin="round"/>
+      <rect x="-20" y="-108" width="40" height="14" rx="2" fill="#fffaf0" stroke="#2a1c14" stroke-width="4.5" stroke-linejoin="round"/>
+    </g>
+</svg>
