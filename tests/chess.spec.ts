@@ -69,18 +69,18 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-hint-capture')).toHaveCount(0);
     await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
     await page.getByTestId('chess-hint').click();
-    await expect(page.getByTestId('chess-hint-capture').first()).toBeVisible();
+    await expect(page.getByTestId('chess-hint-capture')).toHaveCount(1);
+    await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
     const startFen = await board.getAttribute('data-fen');
-    const capSq = await page.getByTestId('chess-hint-capture').first().locator('xpath=ancestor::button').getAttribute('data-square');
+    const capSq = await page.getByTestId('chess-hint-capture').locator('xpath=ancestor::button').getAttribute('data-square');
     expect(capSq).toBeTruthy();
     await page.getByTestId(`chess-sq-${capSq}`).click();
     await expect.poll(async () => board.getAttribute('data-fen')).not.toBe(startFen);
     await expect(page.getByTestId('chess-hint-capture')).toHaveCount(0);
     await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
     await page.getByTestId('chess-hint').click();
-    await expect(
-      page.getByTestId('chess-hint-capture').or(page.getByTestId('chess-hint-dot')).first(),
-    ).toBeVisible();
+    await expect(page.getByTestId('chess-hint-capture')).toHaveCount(1);
+    await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
   });
 
   test('hot-seat starts from the standard setup with turn banner', async ({ page }) => {

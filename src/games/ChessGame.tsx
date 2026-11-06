@@ -25,7 +25,6 @@ import {
   applyCaptureMove,
   applyMove,
   gradeMovesTap,
-  legalTargets,
   nextCapturePuzzle,
   nextMovesPrompt,
   piecesFromFen,
@@ -81,9 +80,8 @@ export default function ChessGame() {
     }
     if (!hintOn) return [] as Square[];
     if (mode === 'moves' && movesPrompt) return movesPrompt.legalTargets;
-    if (mode === 'capture' && currentCapture && fen) return legalTargets(fen, currentCapture.from);
     return [] as Square[];
-  }, [hintOn, mode, selected, fen, movesPrompt, currentCapture]);
+  }, [hintOn, mode, selected, fen, movesPrompt]);
 
   const captureTargets = useMemo(() => {
     if (!fen) return new Set<Square>();
@@ -91,7 +89,7 @@ export default function ChessGame() {
       return new Set(hotseatMoves(fen, selected).filter((m) => m.captured).map((m) => m.to));
     }
     if (mode === 'capture' && hintOn && currentCapture) {
-      return new Set(hotseatMoves(fen, currentCapture.from).filter((m) => m.captured).map((m) => m.to));
+      return new Set<Square>([currentCapture.to]);
     }
     return new Set<Square>();
   }, [fen, selected, mode, hintOn, currentCapture]);
