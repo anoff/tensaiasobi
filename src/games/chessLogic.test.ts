@@ -12,6 +12,7 @@ import {
   piecesFromFen,
   startHotseat,
   tryHotseatMove,
+  visibleCaptureSquares,
 } from './chessLogic';
 
 describe('chessLogic', () => {
@@ -92,5 +93,32 @@ describe('chessLogic', () => {
     expect(modeStars('capture')).toBe(3);
     expect(modeStars('hotseat')).toBe(4);
     expect(piecesFromFen(start.fen).length).toBe(32);
+  });
+
+  it('names only the capturer and remaining targets as visible capture squares', () => {
+    const pawn = _test.CAPTURE_PUZZLES.find((puzzle) => puzzle.id === 'pawn-two')!;
+    const start = visibleCaptureSquares(pawn, 0);
+    expect([...start].sort()).toEqual(['c6', 'd5', 'e4']);
+    const mid = visibleCaptureSquares(pawn, 1);
+    expect([...mid].sort()).toEqual(['c6', 'd5']);
+    const done = visibleCaptureSquares(pawn, 2);
+    expect([...done]).toEqual(['c6']);
+
+    const queen = _test.CAPTURE_PUZZLES.find((puzzle) => puzzle.id === 'queen-file-two')!;
+    expect([...visibleCaptureSquares(queen, 0)].sort()).toEqual(['d1', 'd5', 'd7']);
+  });
+
+  it('reports the captured piece after a hot-seat take', () => {
+    const fen = (() => {
+      const c = new Chess();
+      c.move('e4');
+      c.move('d5');
+      return c.fen();
+    })();
+    const result = tryHotseatMove(fen, 'e4', 'd5');
+    expect(result.ok && !result.needsPromotion).toBe(true);
+    if (result.ok && !result.needsPromotion) {
+      expect(result.captured).toEqual({ type: 'p', color: 'b' });
+    }
   });
 });

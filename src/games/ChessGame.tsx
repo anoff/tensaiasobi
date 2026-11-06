@@ -18,6 +18,7 @@ import {
 import {
   type ChessMode,
   type CapturePuzzle,
+  type CapturedPiece,
   type HotseatState,
   type MovesPrompt,
   FILES,
@@ -34,6 +35,7 @@ import {
   hotseatMoves,
   modeStars,
   sq,
+  visibleCaptureSquares,
 } from './chessLogic';
 
 const CREAM = '#fff8ec';
@@ -61,6 +63,8 @@ export default function ChessGame() {
   const [shake, setShake] = useState<Square | null>(null);
   const [locked, setLocked] = useState(false);
   const [promo, setPromo] = useState<{ from: Square; to: Square } | null>(null);
+  const [wonWhite, setWonWhite] = useState<CapturedPiece[]>([]);
+  const [wonBlack, setWonBlack] = useState<CapturedPiece[]>([]);
 
   const tortoise = characterArt('tortoise', 'idle');
   const tortoiseCheer = characterArt('tortoise', 'cheer');
@@ -71,6 +75,12 @@ export default function ChessGame() {
     : playFen ?? (mode === 'moves' ? movesPrompt?.fen : capturePuzzle?.fen);
 
   const pieces = useMemo(() => (fen ? piecesFromFen(fen) : []), [fen]);
+
+  const boardPieces = useMemo(() => {
+    if (mode !== 'capture' || !capturePuzzle) return pieces;
+    const visible = visibleCaptureSquares(capturePuzzle, captureStep);
+    return pieces.filter((piece) => visible.has(piece.square));
+  }, [mode, pieces, capturePuzzle, captureStep]);
 
   const currentCapture = capturePuzzle?.steps[captureStep];
 
@@ -125,6 +135,8 @@ export default function ChessGame() {
     setShowConfetti(false);
     setMoveStep(0);
     setCaptureStep(0);
+    setWonWhite([]);
+    setWonBlack([]);
     if (m === 'moves') {
       const p = nextMovesPrompt(null, 0);
       setMovesPrompt(p);
@@ -157,6 +169,8 @@ export default function ChessGame() {
     setLocked(false);
     setPromo(null);
     setShowConfetti(false);
+    setWonWhite([]);
+    setWonBlack([]);
   };
 
   const flashMiss = (square: Square) => {
@@ -233,8 +247,8 @@ export default function ChessGame() {
         setSelected(null);
         later(() => {
           const nextIdx = captureStep + 1;
+          setCaptureStep(nextIdx);
           if (nextIdx < capturePuzzle.steps.length) {
-            setCaptureStep(nextIdx);
             setLocked(false);
           } else {
             awardHit('capture');
@@ -282,6 +296,7 @@ export default function ChessGame() {
       playPop();
       setHotseat(result.state);
       setSelected(null);
+      recordCapture(result.captured);
       if (result.state.status === 'checkmate') {
         setLocked(true);
         later(() => {
@@ -295,6 +310,12 @@ export default function ChessGame() {
     }
   };
 
+  const recordCapture = (piece: CapturedPiece | null) => {
+    if (!piece) return;
+    if (piece.color === 'b') setWonWhite((prev) => [...prev, piece]);
+    else setWonBlack((prev) => [...prev, piece]);
+  };
+
   const confirmPromo = (promoPiece: PieceSymbol) => {
     if (!promo || !hotseat) return;
     const result = tryHotseatMove(hotseat.fen, promo.from, promo.to, promoPiece);
@@ -303,6 +324,7 @@ export default function ChessGame() {
     playPop();
     setHotseat(result.state);
     setSelected(null);
+    recordCapture(result.captured);
     if (result.state.status === 'checkmate') {
       setLocked(true);
       later(() => {
@@ -322,9 +344,21 @@ export default function ChessGame() {
     setPromo(null);
     setShowConfetti(false);
     setHintOn(false);
+    setWonWhite([]);
+    setWonBlack([]);
   };
 
   const cream = CREAM;
+
+  const sideToPlay = mode === 'capture' && capturePuzzle
+    ? capturePuzzle.side
+    : mode === 'hotseat' && hotseat
+      ? hotseat.turn
+      : null;
+  const showSideDot = Boolean(
+    (mode === 'capture' && capturePuzzle) ||
+    (mode === 'hotseat' && hotseat && hotseat.status !== 'checkmate' && hotseat.status !== 'stalemate' && hotseat.status !== 'draw'),
+  );
 
   return (
     <div className="relative flex-1 flex flex-col items-center w-full select-none max-w-lg mx-auto px-3 pt-2 pb-3 gap-2" data-testid="chess-root" data-phase={phase} data-mode={mode ?? 'pick'}>
@@ -339,6 +373,11 @@ export default function ChessGame() {
             data-testid="chess-tortoise"
           />
         )}
+        {showSideDot && sideToPlay && (
+          <span className="text-2xl leading-none pointer-events-none" data-testid="chess-side-dot" aria-hidden>
+            {sideToPlay === 'w' ? '⚪' : '⚫'}
+          </span>
+        )}
         <p
           className="flex-1 text-center text-lg font-black leading-tight"
           style={{ color: INK }}
@@ -346,6 +385,15 @@ export default function ChessGame() {
         >
           {promptText}
         </p>
+        {mode === 'capture' && capturePuzzle && (
+          <span
+            className="shrink-0 text-lg font-black tabular-nums"
+            style={{ color: INK }}
+            data-testid="chess-capture-progress"
+          >
+            {captureStep} / {capturePuzzle.steps.length}
+          </span>
+        )}
       </div>
 
       {phase === 'pick' && (
@@ -371,9 +419,16 @@ export default function ChessGame() {
 
       {phase === 'play' && fen && (
         <>
+          {mode === 'hotseat' && (
+            <div className="w-full flex items-start gap-3 px-1" data-testid="chess-won-trays">
+              <WonTray side="w" taken={wonWhite} />
+              <WonTray side="b" taken={wonBlack} />
+            </div>
+          )}
+
           <ChessBoardView
             fen={fen}
-            pieces={pieces}
+            pieces={boardPieces}
             selected={selected}
             hints={legalHints}
             captureTargets={captureTargets}
@@ -444,6 +499,47 @@ export default function ChessGame() {
           )}
         </>
       )}
+    </div>
+  );
+}
+
+function WonTray({ side, taken }: { side: 'w' | 'b'; taken: CapturedPiece[] }) {
+  const overflow = taken.length > 6;
+  const items = overflow
+    ? (['q', 'r', 'b', 'n', 'p', 'k'] as const)
+        .map((type) => {
+          const match = taken.find((piece) => piece.type === type);
+          return {
+            type,
+            color: match?.color,
+            count: taken.filter((piece) => piece.type === type).length,
+          };
+        })
+        .filter((item) => item.count > 0 && item.color)
+    : taken.map((piece) => ({ type: piece.type, color: piece.color, count: 1 }));
+
+  return (
+    <div
+      className="flex flex-1 items-center gap-1 min-h-8 min-w-0 pointer-events-none overflow-hidden"
+      data-testid={side === 'w' ? 'chess-won-white' : 'chess-won-black'}
+    >
+      <span className="text-lg leading-none" aria-hidden>{side === 'w' ? '⚪' : '⚫'}</span>
+      <span className="text-sm font-black tabular-nums" style={{ color: INK }} data-testid={side === 'w' ? 'chess-won-count-w' : 'chess-won-count-b'}>
+        {taken.length}
+      </span>
+      {items.map((item, i) => (
+        <span key={`${item.type}-${i}`} className="relative shrink-0 flex items-center">
+          <img
+            src={pieceSrc(item.color!, item.type)}
+            alt=""
+            className="h-7 w-7 object-contain pointer-events-none"
+            draggable={false}
+          />
+          {item.count > 1 && (
+            <span className="text-[11px] font-black" style={{ color: INK }}>×{item.count}</span>
+          )}
+        </span>
+      ))}
     </div>
   );
 }

@@ -248,6 +248,20 @@ for (const p of CAPTURE_PUZZLES) {
   }
 }
 
+/** Squares whose pieces should be drawn in Capture: the capturer and remaining targets. */
+export function visibleCaptureSquares(puzzle: CapturePuzzle, stepIndex: number): Set<Square> {
+  const visible = new Set<Square>();
+  if (puzzle.steps.length === 0) return visible;
+  if (stepIndex >= puzzle.steps.length) {
+    visible.add(puzzle.steps[puzzle.steps.length - 1].to);
+    return visible;
+  }
+  const idx = Math.max(0, stepIndex);
+  visible.add(puzzle.steps[idx].from);
+  for (let i = idx; i < puzzle.steps.length; i++) visible.add(puzzle.steps[i].to);
+  return visible;
+}
+
 export function nextCapturePuzzle(prevId: string | null): CapturePuzzle {
   const pool = CAPTURE_PUZZLES.filter((p) => p.id !== prevId);
   return pool[Math.floor(Math.random() * pool.length)] ?? CAPTURE_PUZZLES[0];
@@ -289,12 +303,14 @@ export function hotseatMoves(fen: string, from: Square) {
   return chess.moves({ square: from, verbose: true });
 }
 
+export type CapturedPiece = { type: PieceSymbol; color: Color };
+
 export function tryHotseatMove(
   fen: string,
   from: Square,
   to: Square,
   promotion?: PieceSymbol,
-): { ok: true; state: HotseatState; needsPromotion: false } | { ok: true; state: HotseatState; needsPromotion: true; from: Square; to: Square } | { ok: false } {
+): { ok: true; state: HotseatState; needsPromotion: false; captured: CapturedPiece | null } | { ok: true; state: HotseatState; needsPromotion: true; from: Square; to: Square } | { ok: false } {
   const chess = new Chess(fen);
   const options = chess.moves({ square: from, verbose: true }).filter((m) => m.to === to);
   if (options.length === 0) return { ok: false };
@@ -304,7 +320,10 @@ export function tryHotseatMove(
   }
   const move = chess.move({ from, to, promotion: promotion ?? undefined });
   if (!move) return { ok: false };
-  return { ok: true, state: snapshot(chess), needsPromotion: false };
+  const captured: CapturedPiece | null = move.captured
+    ? { type: move.captured, color: move.color === 'w' ? 'b' : 'w' }
+    : null;
+  return { ok: true, state: snapshot(chess), needsPromotion: false, captured };
 }
 
 export function pieceAt(fen: string, square: Square): BoardPiece | null {

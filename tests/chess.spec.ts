@@ -83,6 +83,31 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-hint-dot')).toHaveCount(0);
   });
 
+  test('capture mode: involved pieces only, progress count, and side dot', async ({ page }) => {
+    await openChess(page);
+    await page.getByTestId('chess-mode-capture').click();
+    await expect(page.getByTestId('chess-side-dot')).toBeVisible();
+    await expect(page.getByTestId('chess-side-dot')).toHaveText('⚪');
+    const progress = page.getByTestId('chess-capture-progress');
+    await expect(progress).toBeVisible();
+    await expect(progress).toHaveText(/0 \/ [23]/);
+    await expect(page.locator('[data-piece="wk"]')).toHaveCount(0);
+    await expect(page.locator('[data-piece="bk"]')).toHaveCount(0);
+    await expect(page.getByTestId('chess-won-trays')).toHaveCount(0);
+    const whites = page.getByTestId('chess-board').locator('[data-piece^="w"]');
+    const count = await whites.count();
+    for (let i = 0; i < count; i++) {
+      await whites.nth(i).click();
+      if (await page.getByTestId('chess-selected').count()) break;
+    }
+    await page.getByTestId('chess-hint').click();
+    const capSq = await page.getByTestId('chess-hint-capture').locator('xpath=ancestor::button').getAttribute('data-square');
+    await page.getByTestId(`chess-sq-${capSq}`).click();
+    await expect.poll(async () => progress.textContent()).toMatch(/1 \/ [23]/);
+    await expect(page.locator('[data-piece="wk"]')).toHaveCount(0);
+    await expect(page.locator('[data-piece="bk"]')).toHaveCount(0);
+  });
+
   test('hot-seat starts from the standard setup with turn banner', async ({ page }) => {
     await openChess(page);
     await page.getByTestId('chess-mode-hotseat').click();
@@ -97,6 +122,24 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-hint-dot').first()).toBeVisible();
     await page.getByTestId('chess-sq-e4').click();
     await expect(page.getByTestId('chess-prompt')).toContainText(/Black|Noirs|Schwarz|くろ|흑/);
+    await expect(page.getByTestId('chess-side-dot')).toHaveText('⚫');
+    await expect(page.getByTestId('chess-won-count-w')).toHaveText('0');
+    await expect(page.getByTestId('chess-won-count-b')).toHaveText('0');
+    await page.getByTestId('chess-sq-d7').click();
+    await page.getByTestId('chess-sq-d5').click();
+    await page.getByTestId('chess-sq-e4').click();
+    await page.getByTestId('chess-sq-d5').click();
+    await expect(page.getByTestId('chess-won-count-w')).toHaveText('1');
+    await expect(page.getByTestId('chess-won-white').locator('img')).toHaveCount(1);
+    await expect(page.getByTestId('chess-won-count-b')).toHaveText('0');
+  });
+
+  test('moves mode has no tray, take-count, or side dot', async ({ page }) => {
+    await openChess(page);
+    await page.getByTestId('chess-mode-moves').click();
+    await expect(page.getByTestId('chess-side-dot')).toHaveCount(0);
+    await expect(page.getByTestId('chess-capture-progress')).toHaveCount(0);
+    await expect(page.getByTestId('chess-won-trays')).toHaveCount(0);
   });
 
   test('fits short phones without clipped chrome', async ({ page }) => {
