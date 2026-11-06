@@ -66,6 +66,9 @@ test.describe('Chess', () => {
     await page.getByTestId('chess-mode-hotseat').click();
     await expect(page.getByTestId('chess-prompt')).toContainText(/White|Blancs|Weiß|しろ|백/);
     await expect(page.getByTestId('chess-board')).toHaveAttribute('data-fen', /rnbqkbnr\/pppppppp/);
+    await expect(page.getByTestId('chess-sq-a1')).toHaveAttribute('data-tile', 'walnut');
+    await expect(page.getByTestId('chess-sq-h1')).toHaveAttribute('data-tile', 'cream');
+    await expect(page.getByTestId('chess-panda')).toBeVisible();
     await page.getByTestId('chess-sq-e2').click();
     await expect(page.getByTestId('chess-selected')).toBeVisible();
     await page.getByTestId('chess-sq-e4').click();
@@ -91,6 +94,7 @@ test.describe('Chess', () => {
       const db = await done.boundingBox();
       expect(db!.y + db!.height).toBeLessThanOrEqual(height);
       expect(db!.height).toBeGreaterThanOrEqual(72);
+      await expect(page.getByTestId('chess-panda')).toBeHidden();
       await page.getByTestId('chess-done').click();
     }
   });

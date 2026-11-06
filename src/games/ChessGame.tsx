@@ -60,6 +60,7 @@ export default function ChessGame() {
 
   const tortoise = characterArt('tortoise', 'idle');
   const tortoiseCheer = characterArt('tortoise', 'cheer');
+  const panda = characterArt('panda', 'idle');
 
   const fen = mode === 'moves'
     ? movesPrompt?.fen
@@ -285,7 +286,7 @@ export default function ChessGame() {
   const cream = CREAM;
 
   return (
-    <div className="flex-1 flex flex-col items-center w-full select-none max-w-lg mx-auto px-3 pt-2 pb-3 gap-2" data-testid="chess-root" data-phase={phase} data-mode={mode ?? 'pick'}>
+    <div className="relative flex-1 flex flex-col items-center w-full select-none max-w-lg mx-auto px-3 pt-2 pb-3 gap-2" data-testid="chess-root" data-phase={phase} data-mode={mode ?? 'pick'}>
       {showConfetti && <GameConfetti pieces={120} />}
 
       <div className="w-full flex items-center gap-2 min-h-[52px]">
@@ -376,6 +377,16 @@ export default function ChessGame() {
               />
             )}
           </div>
+
+          {panda && (
+            <img
+              src={panda}
+              alt=""
+              aria-hidden
+              className="pointer-events-none absolute bottom-2 left-2 h-[76px] w-[76px] object-contain short:hidden tiny:hidden"
+              data-testid="chess-panda"
+            />
+          )}
         </>
       )}
     </div>
@@ -422,7 +433,7 @@ function ChessBoardView({
           {ranks.map((_, rankIdx) =>
             [...FILES].map((_, fileIdx) => {
               const square = sq(fileIdx, 7 - rankIdx);
-              const dark = (fileIdx + (7 - rankIdx)) % 2 === 1;
+              const dark = (fileIdx + (7 - rankIdx)) % 2 === 0;
               const piece = pieceMap.get(square);
               const isSelected = selected === square;
               const isHint = hintSet.has(square);
@@ -435,6 +446,7 @@ function ChessBoardView({
                   type="button"
                   data-testid={`chess-sq-${square}`}
                   data-square={square}
+                  data-tile={dark ? 'walnut' : 'cream'}
                   data-piece={piece ? `${piece.color}${piece.type}` : ''}
                   className={`relative p-0 border-0 outline-none touch-manipulation ${isShake ? 'animate-shake' : ''}`}
                   onClick={() => onSquare(square)}
