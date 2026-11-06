@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Sky & Atmosphere Gradients -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="60%" stop-color="#7dd3fc" />
+      <stop offset="100%" stop-color="#bae6fd" />
+    </linearGradient>
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#facc15" />
+    </radialGradient>
+    
+    <!-- Kite specific gradients -->
+    <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="20%" stop-color="#f97316" />
+      <stop offset="40%" stop-color="#facc15" />
+      <stop offset="60%" stop-color="#4ade80" />
+      <stop offset="80%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+  </defs>
+  
+  <!-- BACKGROUND LAYER -->
+  <rect width="400" height="400" fill="url(#skyGrad)" />
+  
+  <!-- SUN (Child style) -->
+  <g transform="translate(350, 50)">
+    <circle cx="0" cy="0" r="40" fill="url(#sunGrad)" opacity="0.6"/>
+    <circle cx="0" cy="0" r="25" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+    <!-- Face on Sun -->
+    <circle cx="-8" cy="-4" r="2.5" fill="#fff"/><circle cx="-8" cy="-4" r="1.2" fill="#000"/>
+    <circle cx="8" cy="-4" r="2.5" fill="#fff"/><circle cx="8" cy="-4" r="1.2" fill="#000"/>
+    <circle cx="-13" cy="1" r="2.5" fill="#fca5a5" opacity="0.6"/>
+    <circle cx="13" cy="1" r="2.5" fill="#fca5a5" opacity="0.6"/>
+    <path d="M -6,8 Q 0,13 6,8" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- BACKGROUND LIGHT BEAMS (for uniquely shaped pieces) -->
+  <polygon points="0,0 100,0 250,400 0,400" fill="#ffffff" opacity="0.1" />
+  <polygon points="200,0 350,0 150,400 -50,400" fill="#ffffff" opacity="0.06" />
+
+  <!-- CLOUDS LAYER (Layered *below* large kites) -->
+  <g fill="#ffffff" stroke="#e0f2fe" stroke-width="1.5">
+    <ellipse cx="50" cy="50" rx="25" ry="15" />
+    <ellipse cx="75" cy="60" rx="20" ry="12" />
+    <ellipse cx="35" cy="65" rx="18" ry="10" />
+    
+    <ellipse cx="230" cy="40" rx="20" ry="12" opacity="0.8" />
+    
+    <ellipse cx="150" cy="350" rx="30" ry="15" opacity="0.9" />
+    <ellipse cx="170" cy="365" rx="25" ry="12" opacity="0.9" />
+    
+    <!-- More Clouds added -->
+    <ellipse cx="300" cy="90" rx="28" ry="16" opacity="0.7" />
+    <ellipse cx="320" cy="100" rx="24" ry="14" opacity="0.7" />
+    
+    <ellipse cx="100" cy="250" rx="22" ry="12" opacity="0.6" />
+    
+    <ellipse cx="350" cy="280" rx="18" ry="10" opacity="0.5" />
+  </g>
+  
+  <!-- BIRDS -->
+  <g fill="none" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round">
+    <path d="M 100,100 Q 105,95 110,100 Q 115,95 120,100" />
+    <path d="M 90,115 Q 95,110 100,115 Q 105,110 110,115" scale="0.8" transform="translate(0,0)"/>
+  </g>
+  
+  <!-- STRINGS COMPLEX (Layered *below* large kites) -->
+  <g fill="none" stroke="#475569" stroke-width="1.5">
+    <!-- Kite 1 String -->
+    <path d="M 90,210 C 110,260 150,320 200,400" />
+    <!-- Kite 2 String -->
+    <path d="M 210,160 C 200,220 180,300 140,400" />
+    <!-- Kite 3 String -->
+    <path d="M 310,240 C 300,280 280,340 260,400" />
+    <!-- Kite 4 String -->
+    <path d="M 240,310 Q 260,350 280,400" />
+  </g>
+  
+  <!-- MID-GROUND & MAIN LARGE KITES LAYER -->
+  
+  <!-- KITE 1: Classic Diamond Face (Top Left) -->
+  <g transform="translate(90, 190) scale(1.4) rotate(-10)">
+    <polygon points="0,-35 25,0 0,35 -25,0" fill="#4ade80" stroke="#16a34a" stroke-width="4"/>
+    <path d="M 0,-35 L 0,35 M -25,0 L 25,0" fill="none" stroke="#16a34a" stroke-width="2"/>
+    <!-- Face detail -->
+    <circle cx="-10" cy="-5" r="4.5" fill="#ffffff"/><circle cx="-10" cy="-5" r="2" fill="#000000"/>
+    <circle cx="10" cy="-5" r="4.5" fill="#ffffff"/><circle cx="10" cy="-5" r="2" fill="#000000"/>
+    <path d="M -8,12 Q 0,18 8,12" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round"/>
+    <!-- Tail ribbons -->
+    <path d="M 0,35 L 5,80 M -8,90 L 0,35 M 0,35 L -5,95 M 8,105 L 0,35" fill="none" stroke="#16a34a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+  
+  <!-- KITE 2: Rainbow Delta (Center) -->
+  <g transform="translate(210, 160) scale(1.5) rotate(5)">
+    <path d="M 0,-40 L 60,30 Q 30,50 0,40 Q -30,50 -60,30 Z" fill="url(#rainbowGrad)" stroke="#64748b" stroke-width="4"/>
+    <!-- Long tail streamer -->
+    <path d="M 0,40 Q 30,120 0,180 T 30,280" fill="none" stroke="#fb923c" stroke-width="12" stroke-linecap="round"/>
+    <ellipse cx="20" cy="110" rx="8" ry="4" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+    <ellipse cx="28" cy="160" rx="8" ry="4" fill="#facc15" stroke="#d97706" stroke-width="1"/>
+    <ellipse cx="20" cy="210" rx="8" ry="4" fill="#4ade80" stroke="#16a34a" stroke-width="1"/>
+  </g>
+  
+  <!-- KITE 3: Bee Shape (Top Right) -->
+  <g transform="translate(310, 240) scale(1.4) rotate(20)">
+    <ellipse cx="0" cy="0" rx="40" ry="25" fill="#facc15" stroke="#ca8a04" stroke-width="4"/>
+    <path d="M -30,-15 L 10,-22 M -15,-20 L 20,-25 Q 40,-35 40,-5 Z M -30,15 L 10,22 M -15,20 L 20,25 Q 40,35 40,5 Z" fill="#94a3b8" opacity="0.6" stroke="#475569" stroke-width="2"/>
+    <path d="M -15,-22 L -15,22 M 0,-25 L 0,25 M 15,-22 L 15,22" fill="none" stroke="#ca8a04" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="-20" cy="-6" rx="5" ry="6" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <circle cx="-21" cy="-7" r="2.5" fill="#000000"/>
+    <circle cx="21" cy="-7" r="2.5" fill="#000000"/>
+    <ellipse cx="20" cy="-6" rx="5" ry="6" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+    <!-- Simpler tail -->
+    <path d="M 0,25 Q -15,70 0,100 T 15,140" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  
+  <!-- KITE 4: Octopus (Bottom Left) -->
+  <g transform="translate(100, 310) scale(1.3)">
+    <ellipse cx="0" cy="0" rx="35" ry="30" fill="#ef4444" stroke="#b91c1c" stroke-width="4"/>
+    <circle cx="-12" cy="-5" r="7" fill="#ffffff"/><circle cx="-12" cy="-5" r="3" fill="#000000"/>
+    <circle cx="12" cy="-5" r="7" fill="#ffffff"/><circle cx="12" cy="-5" r="3" fill="#000000"/>
+    <path d="M -10,12 Q 0,18 10,12" fill="none" stroke="#b91c1c" stroke-width="2" stroke-linecap="round"/>
+    <!-- Tentacles as tails -->
+    <path d="M -25,20 Q -40,60 -30,100 T -35,160" fill="none" stroke="#ef4444" stroke-width="10" stroke-linecap="round" />
+    <path d="M -10,28 Q -10,65 -5,110 T -10,155" fill="none" stroke="#f87171" stroke-width="10" stroke-linecap="round" />
+    <path d="M 10,28 Q 10,65 5,110 T 10,155" fill="none" stroke="#f87171" stroke-width="10" stroke-linecap="round" />
+    <path d="M 25,20 Q 40,60 30,100 T 35,160" fill="none" stroke="#ef4444" stroke-width="10" stroke-linecap="round" />
+  </g>
+
+  <!-- KITE 5: Blue Fish (Bottom Right) -->
+  <g transform="translate(330, 350) scale(1.1) rotate(15)">
+    <path d="M -30,0 Q 0,-25 30,0 Q 0,25 -30,0 M 30,0 L 45,-15 L 45,15 L 30,0 Z" fill="#3b82f6" stroke="#1d4ed8" stroke-width="4"/>
+    <ellipse cx="-15" cy="-5" rx="6" ry="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <circle cx="-15" cy="-5" r="3" fill="#000000"/>
+    <line x1="0" y1="-15" x2="0" y2="15" stroke="#1d4ed8" stroke-width="2"/>
+    <!-- String and tail ribbons -->
+    <path d="M -30,0 Q -50,30 -70,50" fill="none" stroke="#475569" stroke-width="2" />
+    <path d="M 45,15 L 55,40 M 45,15 L 65,30 M 45,15 L 55,50" fill="none" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+  
+  <!-- BOTTOM FOREGROUND GRASS/HILLOCKS (easy identification points) -->
+  <g>
+    <path d="M -20,380 Q 80,365 180,385 T 420,375 L 420,420 L -20,420 Z" fill="#4ade80" stroke="#16a34a" stroke-width="2" />
+    <path d="M 120,395 Q 260,380 420,400 L 420,420 L 120,420 Z" fill="#22c55e" opacity="0.6" />
+  </g>
+  
+  <!-- LITTLE STARS (small identifying details) -->
+  <g transform="translate(30, 30) scale(0.6)">
+    <polygon points="0,-18 5,-5 18,-5 8,3 12,16 0,8 -12,16 -8,3 -18,-5 -5,-5" fill="#fde047" stroke="#eab308" stroke-width="2" />
+  </g>
+</svg>
