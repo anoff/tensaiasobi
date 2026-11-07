@@ -337,10 +337,16 @@ export function addPage(save: StickerSave, background: PageBackground): StickerS
   };
 }
 
-/** A new seed for a themed page (the dice): its stickers keep their positions. No-op on a blank page. */
+/** Removing placements frees their existing copies; ownership and per-copy accessories never change. */
+export function deletePage(save: StickerSave, pageId: string): StickerSave {
+  if (!save.pages.some((page) => page.id === pageId)) return save;
+  return { ...save, pages: save.pages.filter((page) => page.id !== pageId) };
+}
+
+/** A new seed for an empty themed page (the dice). Populated or blank pages are unchanged. */
 export function setPageSeed(save: StickerSave, pageId: string, seed: number): StickerSave {
   const page = save.pages.find((p) => p.id === pageId);
-  if (!page || page.background === 'blank' || !isSeed(seed) || page.background.seed === seed) return save;
+  if (!page || page.stickers.length > 0 || page.background === 'blank' || !isSeed(seed) || page.background.seed === seed) return save;
   const background = { theme: page.background.theme, seed };
   return { ...save, pages: save.pages.map((p) => (p === page ? { ...p, background } : p)) };
 }
