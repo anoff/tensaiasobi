@@ -168,7 +168,8 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onN
             className={`${action} min-w-11 disabled:opacity-30`} style={actionStyle}
             onClick={() => onIndex(index + 1)}>›</button>
           {page.background !== 'blank' && <button type="button" data-testid="page-reroll" aria-label={t.stickerBook.reroll}
-            className={action} style={actionStyle} onClick={() => edits.reroll(page.id)}>🎲</button>}
+            disabled={page.stickers.length > 0}
+            className={`${action} disabled:cursor-not-allowed disabled:opacity-40`} style={actionStyle} onClick={() => edits.reroll(page.id)}>🎲</button>}
         </div>
       </>}
       <div ref={areaRef} className="flex min-h-0 flex-1 flex-col items-center gap-2 md:flex-row md:items-start md:justify-center">

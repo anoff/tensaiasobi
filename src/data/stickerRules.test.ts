@@ -259,14 +259,23 @@ describe('my pages', () => {
     expect(addPage(save, 'blank')).toBe(save);
   });
 
-  it('re-rolls a themed page with a new seed; its stickers keep their positions', () => {
-    let save = placeOnPage(addPage(owned, { theme: 'park', seed: 5 }), 'p1', 'n1', 0.3, 0.6);
-    const before = save.pages[0].stickers;
+  it('re-rolls only empty themed pages, including after the last sticker is removed', () => {
+    let save = addPage(owned, { theme: 'park', seed: 5 });
     save = setPageSeed(save, 'p1', 99);
-    expect(save.pages[0]).toEqual({ id: 'p1', background: { theme: 'park', seed: 99 }, stickers: before });
+    expect(save.pages[0]).toEqual({ id: 'p1', background: { theme: 'park', seed: 99 }, stickers: [] });
     expect(setPageSeed(save, 'p1', 99)).toBe(save);
     expect(setPageSeed(save, 'p1', 0)).toBe(save);
     expect(setPageSeed(withPage, 'p1', 3)).toBe(withPage);
+    expect(setPageSeed(save, 'missing', 3)).toBe(save);
+    save = placeOnPage(save, 'p1', 'n1', 0.3, 0.6);
+    save = placeOnPage(save, 'p1', 'n1', 0.7, 0.4);
+    expect(setPageSeed(save, 'p1', 100)).toBe(save);
+    save = removeFromPage(save, 'p1', 'c1');
+    expect(setPageSeed(save, 'p1', 100)).toBe(save);
+    save = removeFromPage(save, 'p1', 'c2');
+    save = setPageSeed(save, 'p1', 100);
+    expect(save.pages[0]).toEqual({ id: 'p1', background: { theme: 'park', seed: 100 }, stickers: [] });
+    expect(save.copies).toEqual(owned.copies);
     expect(parseStickerSave(JSON.stringify(save))).toEqual(save);
   });
 

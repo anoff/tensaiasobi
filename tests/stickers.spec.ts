@@ -327,15 +327,28 @@ test.describe('Sticker Book', () => {
     await expect(board).toHaveAttribute('data-background', 'playground');
     const scene = board.getByTestId('scene-background');
     await expect(scene).toHaveAttribute('data-scene', /^playground:\d+$/);
-    // Dice: a new seed, a new scene; the stickers stay where they are.
+    // Only an empty page can change design. The native disabled state also visibly dims the dice.
+    const reroll = page.getByTestId('page-reroll');
+    await expect(reroll).toBeEnabled();
+    const emptySeed = await scene.getAttribute('data-scene');
+    await reroll.click();
+    await expect(scene).not.toHaveAttribute('data-scene', emptySeed!);
     await page.locator('[data-testid="tray-sticker"][data-sticker="numbers_02"]').click();
     const placed = board.getByTestId('page-sticker');
     const before = (await placed.boundingBox())!;
     const seedBefore = await scene.getAttribute('data-scene');
-    await page.getByTestId('page-reroll').click();
+    await expect(reroll).toBeDisabled();
+    await expect(reroll).toHaveCSS('opacity', '0.4');
+    await reroll.evaluate((button) => button.click());
+    await expect(scene).toHaveAttribute('data-scene', seedBefore!);
+    expect((await placed.boundingBox())!).toEqual(before);
+    await dragTo(page, placed, page.getByTestId('page-tray'));
+    await expect(board.getByTestId('page-sticker')).toHaveCount(0);
+    await expect(reroll).toBeEnabled();
+    await expect(reroll).toHaveCSS('opacity', '1');
+    await reroll.click();
     await expect(scene).not.toHaveAttribute('data-scene', seedBefore!);
     await expect(scene).toHaveAttribute('data-scene', /^playground:\d+$/);
-    expect((await placed.boundingBox())!).toEqual(before);
     const rolled = Number((await scene.getAttribute('data-scene'))!.split(':')[1]);
     await page.getByTestId('page-prev').click();
     await expect(page.getByTestId('page-label')).toHaveText('1/2');

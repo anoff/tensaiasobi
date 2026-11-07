@@ -343,10 +343,10 @@ export function deletePage(save: StickerSave, pageId: string): StickerSave {
   return { ...save, pages: save.pages.filter((page) => page.id !== pageId) };
 }
 
-/** A new seed for a themed page (the dice): its stickers keep their positions. No-op on a blank page. */
+/** A new seed for an empty themed page (the dice). Populated or blank pages are unchanged. */
 export function setPageSeed(save: StickerSave, pageId: string, seed: number): StickerSave {
   const page = save.pages.find((p) => p.id === pageId);
-  if (!page || page.background === 'blank' || !isSeed(seed) || page.background.seed === seed) return save;
+  if (!page || page.stickers.length > 0 || page.background === 'blank' || !isSeed(seed) || page.background.seed === seed) return save;
   const background = { theme: page.background.theme, seed };
   return { ...save, pages: save.pages.map((p) => (p === page ? { ...p, background } : p)) };
 }

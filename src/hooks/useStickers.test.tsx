@@ -45,6 +45,28 @@ describe('useStickers my pages autosave', () => {
     expect(parseStickerSave(localStorage.getItem(STICKER_STORAGE_KEY)).pages[0].stickers).toEqual([]);
     b.unmount();
   });
+  it('saves rerolls only while the page is empty and allows them again after peeling the last copy', () => {
+    const a = mount();
+    act(() => a.hook().pages.addPage({ theme: 'park', seed: 7 }));
+    act(() => a.hook().pages.reroll('p1'));
+    expect(a.hook().book.pages[0].background).not.toEqual({ theme: 'park', seed: 7 });
+    act(() => a.hook().pages.place('p1', 'numbers_01', 0.25, 0.75));
+    const populated = a.hook().book;
+    const stored = localStorage.getItem(STICKER_STORAGE_KEY);
+    const writes = vi.spyOn(Storage.prototype, 'setItem');
+    act(() => a.hook().pages.reroll('p1'));
+    expect(a.hook().book).toBe(populated);
+    expect(localStorage.getItem(STICKER_STORAGE_KEY)).toBe(stored);
+    expect(writes).not.toHaveBeenCalled();
+    act(() => a.hook().pages.remove('p1', 'c1'));
+    const emptyBackground = a.hook().book.pages[0].background;
+    act(() => a.hook().pages.reroll('p1'));
+    expect(a.hook().book.pages[0].background).not.toEqual(emptyBackground);
+    expect(a.hook().book.copies).toEqual(populated.copies);
+    expect(parseStickerSave(localStorage.getItem(STICKER_STORAGE_KEY))).toEqual(a.hook().book);
+    a.unmount();
+  });
+
   it('deletes one page in one write, returning exact plain/shiny copies with accessories and reloading', () => {
     const base = emptyStickerSave();
     const original = {

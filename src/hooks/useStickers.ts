@@ -75,7 +75,7 @@ export interface UseStickersReturn {
     place: (pageId: string, stickerId: string, x: number, y: number) => void;
     update: (pageId: string, uid: string, patch: Partial<Pick<PagePlacement, 'x' | 'y' | 'size' | 'rotation'>>) => void;
     remove: (pageId: string, uid: string) => void;
-    /** The dice on a themed page: a new seed, stickers stay put. */
+    /** The dice rerolls only empty themed pages; placed stickers lock the design. */
     reroll: (pageId: string) => void;
   };
   markSeen: () => void;
