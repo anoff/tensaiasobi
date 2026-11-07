@@ -242,7 +242,8 @@ test.describe('Sticker Book', () => {
     // No page yet: "New page" opens the Scenes picker, which starts with Blank.
     await expect(page.getByTestId('page-choose')).toBeVisible();
     await page.getByTestId('page-new').click();
-    await expect(page.getByTestId('book-tab-scenes')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('book-tab-scenes')).toHaveCount(0);
+    await expect(page.getByTestId('book-scenes')).toBeVisible();
     await page.getByTestId('page-bg-blank').click();
     await expect(page.getByTestId('book-tab-pages')).toHaveAttribute('aria-selected', 'true');
     const board = page.getByTestId('page-board');
@@ -253,7 +254,7 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('page-reroll')).toHaveCount(0);
     await expect(board.getByTestId('page-empty-hint')).toHaveText('Drag stickers onto your page');
     await expect(page.getByTestId('page-label')).toHaveText('1/1');
-    await expect(page.getByTestId('page-prev')).toHaveCount(0);
+    await expect(page.getByTestId('page-prev')).toBeDisabled();
     const tray1 = page.locator('[data-testid="tray-sticker"][data-sticker="numbers_01"]');
     await expect(tray1).toHaveAttribute('data-free', '2');
     await expect(tray1.getByTestId('tray-count')).toHaveText('×2');
@@ -319,7 +320,7 @@ test.describe('Sticker Book', () => {
     await expect(tray1).toHaveAttribute('data-free', '1');
 
     // On the last page the right arrow is "+": the picker again, then a second page on a scene theme.
-    await expect(page.getByTestId('page-next')).toHaveCount(0);
+    await expect(page.getByTestId('page-next')).toBeDisabled();
     await page.getByTestId('page-new').click();
     await page.getByTestId('page-bg-playground').click();
     await expect(page.getByTestId('page-label')).toHaveText('2/2');
@@ -339,7 +340,7 @@ test.describe('Sticker Book', () => {
     await page.getByTestId('page-prev').click();
     await expect(page.getByTestId('page-label')).toHaveText('1/2');
     await expect(page.getByTestId('page-next')).toBeVisible();
-    await expect(page.getByTestId('page-new')).toHaveCount(0);
+    await expect(page.getByTestId('page-new')).toBeVisible();
     const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
     expect(stored.version).toBe(2);
     expect(stored.pages.map((p: { background: unknown }) => p.background)).toEqual([
@@ -433,7 +434,8 @@ test.describe('Sticker Book', () => {
 
   /** On the Scenes tab only the whole page (main) scrolls; the last theme card scrolls into view inside the screen. */
   async function pickerScrollsAsOnePage(page: Page, height: number) {
-    await page.getByTestId('book-tab-scenes').click();
+    await page.getByTestId('book-tab-pages').click();
+    await page.getByTestId('page-new').click();
     await expect(page.getByTestId('page-bg-blank')).toBeVisible();
     await expect(page.locator('[data-testid^="page-bg-"]')).toHaveCount(21);
     const scrollers = await page.evaluate<string[]>(SCROLLED);
@@ -450,121 +452,47 @@ test.describe('Sticker Book', () => {
     await page.evaluate("document.querySelector('main').scrollTop = 0");
   }
 
-  test('my pages is mostly page: 48 px bar, 40 px tabs, a 9:16 page (343x610), 8 px gaps, 72 px tray, no scroll; fits 320x568', async ({
-    page,
-  }) => {
-    const pages = Array.from({ length: 3 }, (_, i) => ({
-      id: `p${i + 1}`,
-      background: 'paper',
-      stickers: i === 0 ? [{ uid: 'c1', x: 0.5, y: 0.5, size: 1, rotation: 0 }] : [],
-    }));
-    await seed(page, {
-      [KEY]: save({ copies: copies(['numbers_01', 'numbers_02', 'logic_01']), pages, seenCount: 3 }),
-    });
+  test('binder and outside controls fit 375, 320 and desktop without changing normalized coordinates', async ({ page }) => {
+    await seed(page, { [KEY]: save({ copies: copies(['numbers_01', 'numbers_02']), seenCount: 2,
+      pages: [{ id: 'p1', background: 'blank', stickers: [{ uid: 'c1', x: 0.3, y: 0.4, size: 1, rotation: 0 }] }] }) });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
-    const bar = (await page.getByTestId('book-top-bar').boundingBox())!;
-    expect(bar.height).toBe(48);
-    for (const id of ['home-button', 'page-print', 'stars-total']) {
-      const b = (await page.getByTestId(id).boundingBox())!;
-      expect(b.y).toBeGreaterThanOrEqual(bar.y);
-      expect(b.y + b.height).toBeLessThanOrEqual(bar.y + bar.height);
+    await page.getByTestId('book-tab-pages').click();
+    for (const viewport of [{ width: 375, height: 812 }, { width: 320, height: 568 }, { width: 1280, height: 800 }]) {
+      await page.setViewportSize(viewport);
+      await expect(async () => {
+        const board = (await page.getByTestId('page-board').boundingBox())!;
+        const binder = (await page.getByTestId('page-binder').boundingBox())!;
+        const rail = (await page.getByTestId('binder-rail').boundingBox())!;
+        const tray = (await page.getByTestId('page-tray').boundingBox())!;
+        const actions = (await page.getByTestId('page-actions').boundingBox())!;
+        const navigation = (await page.getByTestId('page-navigation').boundingBox())!;
+        expect(board.height / board.width).toBeCloseTo(16 / 9, 2);
+        expect(rail.x + rail.width).toBeLessThan(board.x);
+        expect(rail.width).toBe(viewport.width === 320 ? 14 : 20);
+        expect(binder.x).toBeGreaterThanOrEqual(0);
+        expect(binder.x + binder.width).toBeLessThanOrEqual(viewport.width);
+        expect(actions.y + actions.height).toBeLessThan(board.y);
+        expect(navigation.y + navigation.height).toBeLessThanOrEqual(board.y);
+        if (viewport.width < 768) {
+          expect(tray.y).toBeGreaterThanOrEqual(board.y + board.height);
+          expect(tray.height).toBe(72);
+        } else expect(tray.x).toBeGreaterThanOrEqual(binder.x + binder.width);
+        expect(tray.y + tray.height).toBeLessThanOrEqual(viewport.height);
+        expect(await page.evaluate<number>('document.documentElement.scrollWidth')).toBeLessThanOrEqual(viewport.width);
+        expect(await page.evaluate<string[]>(SCROLLED)).toEqual([]);
+      }).toPass();
+      expect(await page.evaluate<number>(TRUNCATED_TABS)).toBe(0);
+      await page.getByTestId('page-sticker').click();
+      await expect(page.getByTestId('handle-size')).toBeVisible();
+      await page.getByTestId('handle-size').click();
+      await expect(page.getByTestId('tray-sticker')).toHaveAttribute('data-free', '1');
+      await page.getByTestId('page-sticker').click();
     }
-    const tabs = (await page.getByRole('tablist').boundingBox())!;
-    expect(tabs.height).toBe(40);
-    expect(await page.evaluate<number>(TRUNCATED_TABS)).toBe(0);
-    expect(tabs.y).toBeCloseTo(bar.y + bar.height, 0);
-    // Collection starts right under the same header.
-    const shelf = (await page.getByTestId('book-shelf-numbers').boundingBox())!;
-    expect(shelf.y - (tabs.y + tabs.height)).toBeLessThanOrEqual(12);
-
-    await page.getByTestId('book-tab-pages').click();
-    const board = page.getByTestId('page-board');
-    await expect(page.getByTestId('page-label')).toHaveText('3/3');
-    const bb = (await board.boundingBox())!;
-    const tray = (await page.getByTestId('page-tray').boundingBox())!;
-    expect(bb.width).toBe(343);
-    expect(bb.height).toBe(610);
-    expect(bb.height / bb.width).toBeCloseTo(16 / 9, 2);
-    expect(Math.abs(bb.x + bb.width / 2 - 375 / 2)).toBeLessThanOrEqual(1);
-    // 8 px under the tabs, the tray 8 px under the page, and the spare space below the tray.
-    expect(bb.y - (tabs.y + tabs.height)).toBeCloseTo(8, 0);
-    expect(tray.y - (bb.y + bb.height)).toBeCloseTo(8, 0);
-    expect(tray.height).toBe(72);
-    expect(tray.width).toBe(343);
-    expect(tray.x).toBe(bb.x);
-    expect(tray.y + tray.height).toBeLessThanOrEqual(812);
-    // Nothing scrolls on My pages: no scroll container (other than the sideways tray) has hidden content.
-    expect(await page.evaluate<number>('document.documentElement.scrollHeight')).toBeLessThanOrEqual(812);
-    expect(await page.evaluate<string[]>(SCROLLED)).toEqual([]);
-    // Arrows sit on the page edges, mid-height, with the "n/N" label inside the bottom corner.
-    const prev = (await page.getByTestId('page-prev').boundingBox())!;
-    const plus = (await page.getByTestId('page-new').boundingBox())!;
-    const label = (await page.getByTestId('page-label').boundingBox())!;
-    expect(prev.width).toBe(36);
-    expect(prev.x).toBeGreaterThanOrEqual(bb.x);
-    expect(plus.x + plus.width).toBeLessThanOrEqual(bb.x + bb.width);
-    expect(Math.abs(prev.y + prev.height / 2 - (bb.y + bb.height / 2))).toBeLessThanOrEqual(2);
-    expect(label.y + label.height).toBeLessThanOrEqual(bb.y + bb.height);
-    expect(label.y).toBeGreaterThan(bb.y + bb.height - 30);
-    await page.getByTestId('page-prev').click();
-    await expect(page.getByTestId('page-label')).toHaveText('2/3');
-    await page.getByTestId('page-prev').click();
-    await expect(page.getByTestId('page-empty-hint')).toHaveCount(0);
-
-    // The Scenes tab (the "New page" picker) scrolls as one page: no inner scroll bar.
-    await pickerScrollsAsOnePage(page, 812);
-    await page.getByTestId('book-tab-pages').click();
-
-    // The grab handle folds the tray to 24 px and the page keeps its size.
-    await page.getByTestId('tray-handle').click();
-    await expect(page.getByTestId('page-tray')).toHaveAttribute('data-open', 'false');
-    expect((await page.getByTestId('page-tray').boundingBox())!.height).toBe(24);
-    await page.getByTestId('tray-handle').click();
-    await expect(page.getByTestId('tray-sticker').first()).toBeVisible();
-    expect((await page.getByTestId('tray-sticker').first().boundingBox())!.width).toBe(56);
-
-    // 320x568: the same layout shrinks, no sideways scroll, tray as wide as the page.
-    await page.setViewportSize({ width: 320, height: 568 });
-    await expect(async () => {
-      const small = (await board.boundingBox())!;
-      const t2 = (await page.getByTestId('page-tray').boundingBox())!;
-      const tabs2 = (await page.getByRole('tablist').boundingBox())!;
-      expect(small.x).toBeGreaterThanOrEqual(0);
-      expect(small.x + small.width).toBeLessThanOrEqual(320);
-      // Height-bound here: the page shrinks but stays 9:16.
-      expect(small.height).toBeGreaterThan(300);
-      expect(small.height / small.width).toBeCloseTo(16 / 9, 1);
-      expect(small.y - (tabs2.y + tabs2.height)).toBeCloseTo(8, 0);
-      expect(t2.y - (small.y + small.height)).toBeCloseTo(8, 0);
-      expect(t2.y + t2.height).toBeLessThanOrEqual(568);
-      // The tray is exactly as wide as the narrower page and centred under it.
-      expect(small.width).toBeLessThan(300);
-      expect(t2.width).toBeCloseTo(small.width, 0);
-      expect(t2.x + t2.width / 2).toBeCloseTo(small.x + small.width / 2, 0);
-    }).toPass();
-    expect(await page.evaluate<string[]>(SCROLLED)).toEqual([]);
-    for (const tab of ['collection', 'scenes', 'pages']) {
-      const box = (await page.getByTestId(`book-tab-${tab}`).boundingBox())!;
-      expect(box.x + box.width).toBeLessThanOrEqual(320);
-    }
-    expect(await page.evaluate<number>(TRUNCATED_TABS)).toBe(0);
-    const star = (await page.getByTestId('stars-total').boundingBox())!;
-    expect(star.x + star.width).toBeLessThanOrEqual(320);
-    expect(await page.evaluate<number>('document.documentElement.scrollWidth')).toBeLessThanOrEqual(320);
-    expect(await page.evaluate<number>('document.documentElement.scrollHeight')).toBeLessThanOrEqual(568);
-    await pickerScrollsAsOnePage(page, 568);
-    await page.getByTestId('book-tab-pages').click();
-    await expect(board).toBeVisible();
-
-    // Wide screens: the same portrait page, centred, with the tray beside it.
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await expect(async () => {
-      const wide = (await board.boundingBox())!;
-      const t3 = (await page.getByTestId('page-tray').boundingBox())!;
-      expect(wide.height / wide.width).toBeCloseTo(16 / 9, 1);
-      expect(t3.x).toBeGreaterThanOrEqual(wide.x + wide.width);
-    }).toPass();
+    const saved = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
+    expect(saved.pages[0].stickers[0]).toMatchObject({ x: 0.3, y: 0.4 });
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.getByTestId('binder-rail')).toBeHidden();
   });
 
   test('my pages stop at 20: no "+" on the last page', async ({ page }) => {
@@ -575,13 +503,15 @@ test.describe('Sticker Book', () => {
     await page.getByTestId('book-tab-pages').click();
     await expect(page.getByTestId('page-label')).toHaveText('20/20');
     await expect(page.getByTestId('page-new')).toHaveCount(0);
-    await expect(page.getByTestId('page-next')).toHaveCount(0);
+    await expect(page.getByTestId('page-next')).toBeDisabled();
     await expect(page.getByTestId('page-prev')).toBeVisible();
-    // The picker says the book is full and hides the New page cards.
-    await page.getByTestId('book-tab-scenes').click();
-    await expect(page.getByTestId('scene-picker-full')).toHaveText('Your book is full');
-    await expect(page.getByTestId('scene-picker')).toHaveCount(0);
-    await expect(page.getByTestId('page-bg-park')).toHaveCount(0);
+    await expect(page.getByTestId('book-tab-scenes')).toHaveCount(0);
+    await page.getByTestId('page-delete').click();
+    await page.getByTestId('page-delete-confirm').click();
+    await expect(page.getByTestId('page-label')).toHaveText('19/19');
+    await page.getByTestId('page-new').click();
+    await expect(page.getByTestId('scene-picker')).toBeVisible();
+    await page.getByTestId('page-bg-park').click();
     const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
     expect(stored.pages).toHaveLength(20);
   });
@@ -598,7 +528,8 @@ test.describe('Sticker Book', () => {
     // Bottom middle and a third down on the left: empty page, no sticker.
     expect(await pixelAt(page, b.x + b.width / 2, b.y + b.height - 40)).toEqual([255, 255, 255, 255]);
     expect(await pixelAt(page, b.x + 20, b.y + b.height / 3)).toEqual([255, 255, 255, 255]);
-    await page.getByTestId('book-tab-scenes').click();
+    await page.getByTestId('book-tab-pages').click();
+    await page.getByTestId('page-new').click();
     const card = (await page.getByTestId('page-bg-blank').boundingBox())!;
     expect(await pixelAt(page, card.x + card.width / 2, card.y + card.height / 2)).toEqual([255, 255, 255, 255]);
   });
@@ -616,10 +547,16 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('page-new')).toHaveCount(0);
     await page.getByTestId('page-prev').click();
     await expect(page.getByTestId('page-board').locator('[data-testid="page-sticker"][data-sticker="scene_logic_tortoise"]')).toBeVisible();
-    await page.getByTestId('book-tab-scenes').click();
-    // No page number in the note: it is true at 22 pages too.
-    await expect(page.getByTestId('scene-picker-full')).toHaveText('Your book is full');
-    await expect(page.getByTestId('scene-picker')).toHaveCount(0);
+    await expect(page.getByTestId('page-new')).toHaveCount(0);
+    for (const count of [21, 20, 19]) {
+      await page.getByTestId('page-delete').click();
+      await page.getByTestId('page-delete-confirm').click();
+      const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
+      expect(stored.pages).toHaveLength(count);
+      expect(stored.copies).toHaveLength(6);
+      if (count >= 20) await expect(page.getByTestId('page-new')).toHaveCount(0);
+    }
+    await expect(page.getByTestId('page-new')).toBeVisible();
   });
 
   test('an old book: scene pieces snapped on the retired outline pages land on a blank page where they sat, and old pages become blank', async ({
@@ -669,7 +606,7 @@ test.describe('Sticker Book', () => {
     expect(stored.pages[1].stickers).toHaveLength(4);
   });
 
-  test('one character per shelf, 4 moods and 4 scene stickers each in the Collection; Scenes is Blank plus 20 themes', async ({ page }) => {
+  test('one character per shelf, 4 moods and 4 scene stickers each in the Collection; Add page is Blank plus 20 themes', async ({ page }) => {
     await seed(page, { [KEY]: save({ copies: copies(['scene_logic_tortoise']), seenCount: 1 }) });
     await page.goto('/');
     await page.getByTestId('launch-sticker-book').click();
@@ -686,9 +623,10 @@ test.describe('Sticker Book', () => {
     await expect(page.getByTestId('book-stickers-play').locator('[data-silhouette="true"]')).toHaveCount(18);
     await expect(page.getByTestId('book-shelf-count-play')).toContainText('0 / 26');
     await expect(page.getByTestId('book-shelf-count-logic')).toContainText('1 / 26');
-    // Scenes belong to no shelf: Blank plus 20 themes, each card drawn from seed 1.
-    await page.getByTestId('book-tab-scenes').click();
-    await expect(page.getByTestId('book-tab-scenes')).toHaveAttribute('aria-selected', 'true');
+    // Add page belongs to no shelf; its nested picker scrolls as one page.
+    await pickerScrollsAsOnePage(page, 812);
+    await expect(page.getByTestId('book-tab-scenes')).toHaveCount(0);
+    await expect(page.getByTestId('book-scenes')).toBeVisible();
     await expect(page.getByTestId('book-shelf-numbers')).toHaveCount(0);
     await expect(page.getByTestId('book-scenes').locator('[data-testid^="page-bg-"]')).toHaveCount(21);
     await expect(page.getByTestId('page-bg-park').getByTestId('scene-background')).toHaveAttribute('data-scene', 'park:1');

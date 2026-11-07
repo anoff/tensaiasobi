@@ -137,6 +137,7 @@ function AppContent() {
         }
         return;
       }
+      if (current === 'stickers' && !window.dispatchEvent(new Event('app-back', { cancelable: true }))) return;
       if (!hasHashRoute(current)) return;
       // A game with an inner screen (Magic Puzzle) takes Back first, like the hardware Back button.
       if (isGameId(current) && !window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
@@ -212,7 +213,7 @@ function AppContent() {
         return;
       }
       // A game with its own inner screen (Magic Puzzle's gallery) can take Back by cancelling this event.
-      if (isGameId(currentScreen) && !window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
+      if ((isGameId(currentScreen) || currentScreen === 'stickers') && !window.dispatchEvent(new Event('app-back', { cancelable: true }))) {
         return;
       }
       if (currentScreen !== 'menu') {

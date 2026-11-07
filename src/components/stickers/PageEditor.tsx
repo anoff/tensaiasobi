@@ -16,9 +16,11 @@ import { BLANK_PAGE_FILL } from '../../data/sceneArt';
 import { SceneBackground } from './SceneBackground';
 import { CountBadge, StickerImage } from './StickerImage';
 import { usePointerDrag } from './usePointerDrag';
+import { DeletePageDialog } from './DeletePageDialog';
 
 export interface PageEdits {
-  addPage: (background: PageBackground) => void;
+  addPage: (background: PageBackground) => boolean;
+  deletePage: (pageId: string) => boolean;
   place: (pageId: string, stickerId: string, x: number, y: number) => void;
   update: (pageId: string, uid: string, patch: Partial<Pick<PagePlacement, 'x' | 'y' | 'size' | 'rotation'>>) => void;
   remove: (pageId: string, uid: string) => void;
@@ -35,6 +37,7 @@ interface PageEditorProps {
   onDress: (uid: string) => void;
   /** Opens the New page picker. */
   onNewPage: () => void;
+  onDeleted: (nextIndex: number) => void;
   playPop: () => void;
 }
 
@@ -49,10 +52,11 @@ const GAP = 8;
 const WIDE_QUERY = '(min-width: 768px)';
 
 /** My pages: the biggest 9:16 page that fits, arrows on its edges, and a docked tray of free copies. */
-export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onNewPage, playPop }: PageEditorProps) {
+export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onNewPage, onDeleted, playPop }: PageEditorProps) {
   const { t } = useTranslation();
   const index = Math.max(0, Math.min(rawIndex, book.pages.length - 1));
   const [selected, setSelected] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [trayOpen, setTrayOpen] = useState(true);
   const areaRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -61,8 +65,9 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onN
   const [area, setArea] = useState({ w: 0, h: 0, wide: false });
   // The 9:16 page takes whatever the tray and the 8 px gap leave, limited by width or height, whichever bites first.
   const trayExtent = (trayOpen ? TRAY_OPEN : TRAY_SHUT) + GAP;
-  const fitW = area.wide ? area.w - trayExtent : area.w;
-  const fitH = area.wide ? area.h : area.h - trayExtent;
+  const binderGutter = area.w <= 288 ? 22 : 28;
+  const fitW = (area.wide ? area.w - trayExtent : area.w) - binderGutter - 4;
+  const fitH = area.wide ? area.h - 4 : area.h - trayExtent - 4;
   const boardWidth = Math.max(0, Math.floor(Math.min(fitW, fitH * PAGE_ASPECT)));
   const boardHeight = Math.max(0, Math.min(Math.round(boardWidth / PAGE_ASPECT), Math.floor(fitH)));
   const page = book.pages[index];
@@ -134,24 +139,47 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onN
 
   const canAdd = canAddPage(book);
 
-  const arrow =
-    'absolute top-1/2 z-[3] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border-[3px] text-xl font-black leading-none';
-  const arrowStyle = { backgroundColor: 'rgba(255, 248, 236, 0.85)', borderColor: INK, color: INK };
-  const isLast = index >= book.pages.length - 1;
+  const actionStyle = { backgroundColor: CHALK, borderColor: INK, color: INK, boxShadow: hardShadow(2, 3) };
+  const action = 'min-h-11 rounded-xl border-[3px] px-3 text-sm font-black focus-visible:ring-4 focus-visible:ring-amber-400/70';
 
   const draggedTray = drag?.moved && drag.item.kind === 'tray' ? collectibleById(drag.item.id) : undefined;
   const draggedPlaced = drag?.moved && drag.item.kind === 'placed' ? drag.item.uid : null;
 
   return (
-    // 8 px under the tabs: the page, 8 px, the tray; any space left over stays below the tray.
-    <div
-      ref={areaRef}
-      className="mt-2 flex min-h-0 flex-1 flex-col items-center gap-2 md:flex-row md:items-start md:justify-center"
-      data-testid="my-pages"
-    >
-      <div className="relative shrink-0">
+    <div className="mt-2 flex min-h-0 flex-1 flex-col gap-2" data-testid="my-pages">
+      {page && <>
+        <div className="flex shrink-0 items-center justify-between gap-3 pb-1 pr-1" data-testid="page-actions">
+          {canAdd ? <button type="button" data-testid="page-new" className={action}
+            style={{ ...actionStyle, backgroundColor: BUTTER }} onClick={onNewPage}>
+            + {t.stickerBook.newPage}
+          </button> : <span className="text-xs font-extrabold">{t.stickerBook.pagesFull}</span>}
+          <button type="button" data-testid="page-delete" className={action} style={actionStyle}
+            onClick={() => setDeleting(true)}>🗑 {t.stickerBook.deletePage}</button>
+        </div>
+        <div className="flex h-10 shrink-0 items-center justify-center gap-3" data-testid="page-navigation">
+          <button type="button" data-testid="page-prev" aria-label="‹" disabled={index === 0}
+            className={`${action} min-w-11 disabled:opacity-30`} style={actionStyle}
+            onClick={() => onIndex(index - 1)}>‹</button>
+          <span data-testid="page-label" className="text-xs font-black tabular-nums"
+            aria-label={t.stickerBook.pageLabel.replace('{n}', String(index + 1)).replace('{total}', String(book.pages.length))}>
+            {index + 1}/{book.pages.length}
+          </span>
+          <button type="button" data-testid="page-next" aria-label="›" disabled={index >= book.pages.length - 1}
+            className={`${action} min-w-11 disabled:opacity-30`} style={actionStyle}
+            onClick={() => onIndex(index + 1)}>›</button>
+          {page.background !== 'blank' && <button type="button" data-testid="page-reroll" aria-label={t.stickerBook.reroll}
+            className={action} style={actionStyle} onClick={() => edits.reroll(page.id)}>🎲</button>}
+        </div>
+      </>}
+      <div ref={areaRef} className="flex min-h-0 flex-1 flex-col items-center gap-2 md:flex-row md:items-start md:justify-center">
+      <div className="relative shrink-0" style={{ paddingLeft: binderGutter, paddingRight: 4, paddingBottom: 4 }} data-testid="page-binder">
+        <div aria-hidden="true" data-testid="binder-rail" className="pointer-events-none absolute left-0 top-0 rounded-l-xl border-[3px] print:hidden"
+          style={{ width: binderGutter - 8, height: boardHeight, backgroundColor: BUTTER, borderColor: INK, boxShadow: hardShadow(2, 3) }}>
+          {[20, 50, 80].map((top) => <span key={top} className="absolute rounded-full border-[3px]"
+            style={{ top: `${top}%`, left: '25%', width: binderGutter - 12, height: 12, transform: 'translateY(-50%)', backgroundColor: CHALK, borderColor: INK, boxShadow: hardShadow(1, 2) }} />)}
+        </div>
         {!page ? (
-          // No page yet: an empty page that leads to the New page picker (Scenes tab).
+          // Empty books stay empty until a theme is picked.
           <div
             className="relative flex flex-col items-center justify-center gap-3 rounded-2xl border-[3px] border-dashed p-4"
             style={{ width: boardWidth, height: boardHeight, backgroundColor: PAPER, borderColor: INK }}
@@ -190,19 +218,6 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onN
             {page.background !== 'blank' && (
               <>
                 <SceneBackground background={page.background} width={boardWidth - 6} height={boardHeight - 6} />
-                <button
-                  type="button"
-                  data-testid="page-reroll"
-                  aria-label={t.stickerBook.reroll}
-                  className="absolute right-1.5 top-1.5 z-[3] flex h-9 w-9 items-center justify-center rounded-full border-[3px] text-lg leading-none"
-                  style={arrowStyle}
-                  onClick={() => {
-                    playPop();
-                    edits.reroll(page.id);
-                  }}
-                >
-                  🎲
-                </button>
               </>
             )}
             {page.stickers.length === 0 && (
@@ -309,63 +324,6 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onN
                 </div>
               );
             })}
-            {index > 0 && (
-              <button
-                type="button"
-                data-testid="page-prev"
-                aria-label="‹"
-                className={`${arrow} left-1.5`}
-                style={arrowStyle}
-                onClick={() => {
-                  onIndex(index - 1);
-                  setSelected(null);
-                }}
-              >
-                ‹
-              </button>
-            )}
-            {!isLast ? (
-              <button
-                type="button"
-                data-testid="page-next"
-                aria-label="›"
-                className={`${arrow} right-1.5`}
-                style={arrowStyle}
-                onClick={() => {
-                  onIndex(index + 1);
-                  setSelected(null);
-                }}
-              >
-                ›
-              </button>
-            ) : (
-              canAdd && (
-                <button
-                  type="button"
-                  data-testid="page-new"
-                  aria-label={t.stickerBook.newPage}
-                  className={`${arrow} right-1.5`}
-                  style={arrowStyle}
-                  onClick={() => {
-                    playPop();
-                    setSelected(null);
-                    onNewPage();
-                  }}
-                >
-                  +
-                </button>
-              )
-            )}
-            <span
-              data-testid="page-label"
-              aria-label={t.stickerBook.pageLabel
-                .replace('{n}', String(index + 1))
-                .replace('{total}', String(book.pages.length))}
-              className="pointer-events-none absolute bottom-1 right-2.5 z-[3] text-xs font-black tabular-nums"
-              style={{ color: INK, opacity: 0.6 }}
-            >
-              {index + 1}/{book.pages.length}
-            </span>
           </div>
         )}
       </div>
@@ -435,6 +393,14 @@ export function PageEditor({ book, edits, index: rawIndex, onIndex, onDress, onN
         )}
       </div>
 
+      </div>
+      {page && deleting && <DeletePageDialog book={book} page={page}
+        onCancel={() => setDeleting(false)}
+        onConfirm={() => {
+          if (!edits.deletePage(page.id)) return false;
+          onDeleted(Math.max(0, Math.min(index, book.pages.length - 2)));
+          return true;
+        }} />}
       {draggedTray?.src && drag && (
         <img
           src={draggedTray.src}
