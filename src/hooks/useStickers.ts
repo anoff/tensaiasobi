@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   STICKER_STORAGE_KEY,
   addOwnedAccessory,
   addPage,
   copyCount,
+  deletePage,
   grantOnce,
   localDay,
   parseStickerSave,
@@ -30,8 +31,10 @@ export const LEGACY_TOWN_KEY = 'gamification_town';
 function persist(save: StickerSave) {
   try {
     localStorage.setItem(STICKER_STORAGE_KEY, JSON.stringify(save));
+    return true;
   } catch (e) {
     console.error('Error saving stickers', e);
+    return false;
   }
 }
 
@@ -67,7 +70,8 @@ export interface UseStickersReturn {
   removeAccessory: (uid: string, accessoryId: string) => void;
   /** My pages edits; every change is saved straight away. */
   pages: {
-    addPage: (background: PageBackground) => void;
+    addPage: (background: PageBackground) => boolean;
+    deletePage: (pageId: string) => boolean;
     place: (pageId: string, stickerId: string, x: number, y: number) => void;
     update: (pageId: string, uid: string, patch: Partial<Pick<PagePlacement, 'x' | 'y' | 'size' | 'rotation'>>) => void;
     remove: (pageId: string, uid: string) => void;
@@ -81,12 +85,17 @@ export interface UseStickersReturn {
 export function useStickers(): UseStickersReturn {
   const [book, setBook] = useState<StickerSave>(loadStickers);
 
+  // Synchronous edits use the latest committed book, including multiple edits in one event.
+  // Persist the whole transaction before publishing it; a failed write leaves both states intact.
+  const currentBook = useRef(book);
   const update = useCallback((fn: (s: StickerSave) => StickerSave) => {
-    setBook((prev) => {
-      const next = fn(prev);
-      if (next !== prev) persist(next);
-      return next;
-    });
+    const prev = currentBook.current;
+    const next = fn(prev);
+    if (next === prev) return false;
+    if (!persist(next)) return false;
+    currentBook.current = next;
+    setBook(next);
+    return true;
   }, []);
 
   const completeRound = useCallback((shelf: Shelf) => {
@@ -94,14 +103,14 @@ export function useStickers(): UseStickersReturn {
     const current = parseStickerSave(localStorage.getItem(STICKER_STORAGE_KEY));
     const { save, copy } = rollCapsule(current, shelf, localDay(new Date()), AWARD_POOLS);
     if (!copy) return null;
-    persist(save);
-    setBook(save);
+    if (!update(() => save)) return null;
     return { copy, count: copyCount(save, copy.id) };
-  }, []);
+  }, [update]);
 
   const pages = useMemo<UseStickersReturn['pages']>(
     () => ({
       addPage: (bg) => update((s) => addPage(s, bg)),
+      deletePage: (pageId) => update((s) => deletePage(s, pageId)),
       place: (pageId, id, x, y) => update((s) => placeOnPage(s, pageId, id, x, y)),
       update: (pageId, uid, patch) => update((s) => updatePlacement(s, pageId, uid, patch)),
       remove: (pageId, uid) => update((s) => removeFromPage(s, pageId, uid)),
@@ -134,8 +143,7 @@ export function useStickers(): UseStickersReturn {
     ),
     resetStickers: useCallback(() => {
       const fresh = parseStickerSave(null);
-      persist(fresh);
-      setBook(fresh);
-    }, []),
+      update(() => fresh);
+    }, [update]),
   };
 }

@@ -46,8 +46,8 @@ interface StickerBookProps {
 }
 
 const SLOT_PX = 68;
-type Tab = 'pages' | 'collection' | 'scenes';
-const TABS: Tab[] = ['pages', 'collection', 'scenes'];
+type Tab = 'pages' | 'collection';
+const TABS: Tab[] = ['pages', 'collection'];
 
 export default function StickerBook({
   book,
@@ -67,12 +67,19 @@ export default function StickerBook({
   /** Placed copy whose accessories are being edited. */
   const [dressUid, setDressUid] = useState<string | null>(null);
   const [pageIndex, setPageIndex] = useState(Math.max(0, book.pages.length - 1));
+  const [adding, setAdding] = useState(false);
+  const [removed, setRemoved] = useState(false);
   const [printing, setPrinting] = useState(false);
   // Remember what was new when the book opened, then mark it seen.
   const [newIds] = useState(() => new Set(book.copies.slice(book.seenCount).map((c) => c.id)));
   useEffect(() => {
     onSeen();
   }, [onSeen]);
+  useEffect(() => {
+    if (!removed) return;
+    const timer = window.setTimeout(() => setRemoved(false), 3000);
+    return () => window.clearTimeout(timer);
+  }, [removed]);
 
   const earned = new Set(ownedIds(book));
   const totals = bookTotals(book);
@@ -128,12 +135,11 @@ export default function StickerBook({
   const scroll = 'min-h-0 w-full flex-1 space-y-4 overflow-y-auto overscroll-y-contain pb-4 md:mx-auto md:max-w-md';
 
   return (
-    // The book fills the screen under its own 48 px bar and 40 px tabs. Collection scrolls inside; the New page
-    // picker (Scenes) grows instead and the whole screen scrolls (data-page-scroll lets <main> scroll).
+    // Collection scrolls inside; the nested Add page picker uses the whole screen's scroll area.
     <div
-      className={`mx-auto flex w-full max-w-md flex-1 flex-col select-none md:max-w-3xl ${tab === 'scenes' ? '' : 'min-h-0'}`}
+      className={`mx-auto flex w-full max-w-md flex-1 flex-col select-none md:max-w-3xl ${adding ? '' : 'min-h-0'}`}
       data-testid="sticker-book"
-      data-page-scroll={tab === 'scenes' ? 'true' : undefined}
+      data-page-scroll={adding ? 'true' : undefined}
     >
       <div className="flex h-12 shrink-0 items-center gap-1.5 narrow:gap-1" data-testid="book-top-bar">
         <HomeButton data-testid="home-button" onClick={onHome} className="!h-10 !w-10 shrink-0 !p-0 !text-lg" />
@@ -167,7 +173,7 @@ export default function StickerBook({
       </div>
 
       <div
-        className="grid h-10 shrink-0 grid-cols-3 gap-1 rounded-full border-[3px] p-0.5"
+        className="grid h-10 shrink-0 grid-cols-2 gap-1 rounded-full border-[3px] p-0.5"
         role="tablist"
         style={{ borderColor: INK, backgroundColor: CHALK }}
       >
@@ -182,6 +188,7 @@ export default function StickerBook({
               data-testid={`book-tab-${id}`}
               onClick={() => {
                 if (!on) playPop();
+                setAdding(false);
                 setTab(id);
               }}
               className="flex min-w-0 items-center justify-center gap-1 rounded-full border-2 px-1 text-xs font-black leading-none narrow:gap-0.5 narrow:px-0.5 narrow:text-[11px] narrow:tracking-tight"
@@ -195,25 +202,28 @@ export default function StickerBook({
                 <img src={BOOK_TAB_ICONS[id]} alt="" aria-hidden className="pointer-events-none h-6 w-6 shrink-0 narrow:h-[18px] narrow:w-[18px]" />
               )}
               <span className="min-w-0 truncate">
-                {t.stickerBook[id === 'pages' ? 'tabPages' : id === 'collection' ? 'tabCollection' : 'tabScenes']}
+                {t.stickerBook[id === 'pages' ? 'tabPages' : 'tabCollection']}
               </span>
             </button>
           );
         })}
       </div>
 
-      {tab === 'pages' && (
+      {tab === 'pages' && !adding && (
         <PageEditor
+          key={book.pages[pageIndex]?.id ?? 'empty'}
           book={book}
           edits={pageEdits}
           index={pageIndex}
           onIndex={setPageIndex}
           playPop={playPop}
           onDress={(uid) => setDressUid(uid)}
-          onNewPage={() => setTab('scenes')}
+          onNewPage={() => { setRemoved(false); setAdding(true); }}
+          onDeleted={(nextIndex) => { setDressUid(null); setPageIndex(nextIndex); setRemoved(true); }}
         />
       )}
 
+      {removed && tab === 'pages' && !adding && <p role="status" className="shrink-0 py-1 text-center text-xs font-extrabold">{t.stickerBook.pageRemoved}</p>}
       {tab === 'collection' && (
         <div className={`${scroll} mt-2`} data-testid="book-collection">
           {SHELVES.map((shelf) => {
@@ -304,14 +314,16 @@ export default function StickerBook({
         </div>
       )}
 
-      {tab === 'scenes' && (
+      {adding && (
         <ScenePicker
           book={book}
+          onCancel={() => setAdding(false)}
           onPick={(bg) => {
+            if (!pageEdits.addPage(bg)) return false;
             playPop();
-            pageEdits.addPage(bg);
             setPageIndex(book.pages.length);
-            setTab('pages');
+            setAdding(false);
+            return true;
           }}
         />
       )}

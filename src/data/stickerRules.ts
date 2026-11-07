@@ -337,6 +337,12 @@ export function addPage(save: StickerSave, background: PageBackground): StickerS
   };
 }
 
+/** Removing placements frees their existing copies; ownership and per-copy accessories never change. */
+export function deletePage(save: StickerSave, pageId: string): StickerSave {
+  if (!save.pages.some((page) => page.id === pageId)) return save;
+  return { ...save, pages: save.pages.filter((page) => page.id !== pageId) };
+}
+
 /** A new seed for a themed page (the dice): its stickers keep their positions. No-op on a blank page. */
 export function setPageSeed(save: StickerSave, pageId: string, seed: number): StickerSave {
   const page = save.pages.find((p) => p.id === pageId);
