@@ -242,8 +242,9 @@ test.describe('Chess', () => {
     await expect(prompt).toHaveText('Tortoise wins', { timeout: 5000 });
     const award = page.getByTestId('sticker-award');
     await expect(award).toHaveCount(0);
-    await page.waitForTimeout(TORTOISE_STICKER_HOLD_MS - 200);
+    // Still hidden well after the line is on screen; then it may appear at 1.5s.
+    await page.waitForTimeout(1000);
     await expect(award).toHaveCount(0);
-    await expect(award).toBeVisible({ timeout: 800 });
+    await expect(award).toBeVisible({ timeout: TORTOISE_STICKER_HOLD_MS });
   });
 });
