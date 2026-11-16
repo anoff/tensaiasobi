@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { TORTOISE_STICKER_HOLD_MS } from '../src/games/chessTortoise';
+import { FOX_STICKER_HOLD_MS } from '../src/games/chessFox';
 
 
 async function openChess(page: Page, search = '') {
@@ -7,6 +7,13 @@ async function openChess(page: Page, search = '') {
   await page.getByTestId('age-mode-big').click();
   await page.getByTestId('launch-chess').click();
   await expect(page.getByTestId('chess-root')).toHaveAttribute('data-phase', 'pick');
+}
+
+/** Install a fake clock, let the page load, then freeze time so later waits are deterministic. */
+async function openChessFrozen(page: Page, search = '') {
+  await page.clock.install({ time: new Date('2024-06-01T12:00:00Z') });
+  await openChess(page, search);
+  await page.clock.pauseAt(new Date('2024-06-01T12:01:00Z'));
 }
 
 test.describe('Chess', () => {
@@ -20,20 +27,25 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-mode-moves')).toBeVisible();
     await expect(page.getByTestId('chess-mode-capture')).toBeVisible();
     await expect(page.getByTestId('chess-mode-hotseat')).toBeVisible();
-    await expect(page.getByTestId('chess-mode-tortoise')).toBeVisible();
+    await expect(page.getByTestId('chess-mode-fox')).toBeVisible();
+    const foxTile = page.getByTestId('chess-mode-fox');
+    await expect(foxTile).toHaveAttribute('aria-label', 'Play against the fox');
+    await expect(foxTile.locator('img')).toBeVisible();
+    await expect(foxTile.getByText('vs Fox')).toHaveCount(0);
+    await expect(foxTile.getByText('Play against the fox')).toHaveCount(0);
     for (const btn of await page.locator('[data-testid^="chess-mode-"]').all()) {
       const box = await btn.boundingBox();
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(96);
     }
-    const levels = page.getByTestId('chess-tortoise-levels');
+    const levels = page.getByTestId('chess-fox-levels');
     await expect(levels).toBeVisible();
     await expect(page.getByTestId('difficulty-easy')).toBeVisible();
     await expect(page.getByTestId('difficulty-medium')).toBeVisible();
     await expect(page.getByTestId('difficulty-hard')).toHaveCount(0);
     await expect(levels.getByText('Gentle')).toBeVisible();
     await expect(levels.getByText('Clever')).toBeVisible();
-    const levelLabel = page.getByTestId('chess-tortoise-level-label');
-    await expect(levelLabel).toHaveText('Tortoise level');
+    const levelLabel = page.getByTestId('chess-fox-level-label');
+    await expect(levelLabel).toHaveText('Fox level');
     const labelBox = await levelLabel.boundingBox();
     const rowBox = await page.getByTestId('difficulty-easy').boundingBox();
     expect(labelBox).toBeTruthy();
@@ -184,26 +196,32 @@ test.describe('Chess', () => {
     }
   });
 
-  test('vs Tortoise starts from the standard setup with no Hint button', async ({ page }) => {
+  test('vs Fox starts from the standard setup with no Hint button', async ({ page }) => {
     await openChess(page);
-    await page.getByTestId('chess-mode-tortoise').click();
+    await page.getByTestId('chess-mode-fox').click();
     const root = page.getByTestId('chess-root');
-    await expect(root).toHaveAttribute('data-mode', 'tortoise');
+    await expect(root).toHaveAttribute('data-mode', 'fox');
     const board = page.getByTestId('chess-board');
     await expect(board).toBeVisible();
     await expect(board).toHaveAttribute('data-fen', /rnbqkbnr\/pppppppp\/8\/8\/8\/8\/PPPPPPPP\/RNBQKBNR w/);
     await expect(page.getByTestId('chess-prompt')).toHaveText('White to move');
     await expect(page.getByTestId('chess-hint')).toHaveCount(0);
     await expect(page.getByTestId('chess-won-trays')).toBeVisible();
+    await expect(page.getByTestId('chess-tortoise')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox')).toBeVisible();
+    await expect(page.getByTestId('chess-thought-bubble')).toHaveCount(0);
   });
 
-  test('vs Tortoise shows a one-line thinking banner, then a last-move tint', async ({ page }) => {
-    await openChess(page);
-    await page.getByTestId('chess-mode-tortoise').click();
+  test('vs Fox shows a one-line thinking banner, the fox and bubble, then a last-move tint', async ({ page }) => {
+    await openChessFrozen(page, 'foxThinkMs=1000');
+    await page.getByTestId('chess-mode-fox').click();
     await page.getByTestId('chess-sq-e2').click();
     await page.getByTestId('chess-sq-e4').click();
     const prompt = page.getByTestId('chess-prompt');
-    await expect(prompt).toHaveText('⚫ Tortoise is thinking…');
+    await expect(prompt).toHaveText('⚫ Fox is thinking…');
+    await expect(page.getByTestId('chess-thought-bubble')).toBeVisible();
+    await expect(page.getByTestId('chess-fox')).toBeVisible();
+    await expect(page.getByTestId('chess-tortoise')).toHaveCount(0);
     await expect(page.getByTestId('chess-thinking')).toHaveCount(0);
     await expect(page.getByTestId('chess-side-dot')).toHaveCount(0);
     const box = await prompt.boundingBox();
@@ -211,16 +229,34 @@ test.describe('Chess', () => {
     expect(box!.width).toBeLessThanOrEqual(375);
     // One line of text-lg / leading-tight is well under 40px; a wrap would be taller.
     expect(box!.height).toBeLessThan(40);
-    await expect(page.getByTestId('chess-last-move').first()).toBeVisible({ timeout: 3000 });
+    await page.clock.runFor(1);
+    const board = page.getByTestId('chess-board');
+    await expect(board).toHaveAttribute('data-locked', 'true');
+    const fenBefore = await board.getAttribute('data-fen');
+    await page.getByTestId('chess-sq-d2').click({ force: true });
+    await expect(board).toHaveAttribute('data-fen', fenBefore!);
+    await page.clock.runFor(1000);
+    await expect(page.getByTestId('chess-fox-highlight')).toBeVisible();
+    await page.clock.runFor(500);
+    await page.clock.runFor(200);
+    await expect(page.getByTestId('chess-last-move').first()).toBeVisible();
     await expect(prompt).toHaveText('White to move');
     await expect(page.getByTestId('chess-side-dot')).toHaveText('⚪');
+    await expect(page.getByTestId('chess-thought-bubble')).toHaveCount(0);
   });
 
-  test("vs Tortoise shows a calm Tortoise wins after the king is captured", async ({ page }) => {
+  test("vs Fox shows a calm Fox wins after the king is captured", async ({ page }) => {
     const fen = encodeURIComponent('4k3/8/8/8/8/8/4q3/4K3 b - - 0 1');
-    await openChess(page, `tortoiseFen=${fen}&tortoiseLevel=clever`);
-    await page.getByTestId('chess-mode-tortoise').click();
-    await expect(page.getByTestId('chess-prompt')).toHaveText('Tortoise wins', { timeout: 5000 });
+    await openChessFrozen(page, `foxFen=${fen}&foxLevel=clever&foxThinkMs=1000`);
+    await page.getByTestId('chess-mode-fox').click();
+    await expect(page.getByTestId('chess-prompt')).toHaveText('⚫ Fox is thinking…');
+    await page.clock.runFor(1);
+    await page.clock.runFor(1000);
+    await expect(page.getByTestId('chess-fox-highlight')).toBeVisible();
+    await page.clock.runFor(500);
+    await page.clock.runFor(100);
+    await page.clock.runFor(400);
+    await expect(page.getByTestId('chess-prompt')).toHaveText('Fox wins');
     await expect(page.getByTestId('chess-play-again')).toBeVisible();
     await expect(page.getByTestId('chess-new-game')).toHaveCount(0);
     const award = page.getByTestId('sticker-award');
@@ -230,21 +266,29 @@ test.describe('Chess', () => {
       if (await award.isVisible().catch(() => false)) await award.click();
       await expect(award).toHaveCount(0);
     }
-    await expect(page.getByTestId('chess-prompt')).toHaveText('Tortoise wins');
+    await expect(page.getByTestId('chess-prompt')).toHaveText('Fox wins');
     await expect(page.locator('.animate-confetti, [data-testid="chess-confetti"]')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox')).toBeVisible();
+    await expect(page.getByTestId('chess-thought-bubble')).toHaveCount(0);
   });
 
-  test('vs Tortoise holds the Logic sticker popup until the end line has been visible for 1.5s', async ({ page }) => {
+  test('vs Fox holds the Logic sticker popup until the end line has been visible for 1.5s', async ({ page }) => {
     const fen = encodeURIComponent('4k3/8/8/8/8/8/4q3/4K3 b - - 0 1');
-    await openChess(page, `tortoiseFen=${fen}&tortoiseLevel=clever`);
-    await page.getByTestId('chess-mode-tortoise').click();
+    await openChessFrozen(page, `foxFen=${fen}&foxLevel=clever&foxThinkMs=1000`);
+    await page.getByTestId('chess-mode-fox').click();
     const prompt = page.getByTestId('chess-prompt');
-    await expect(prompt).toHaveText('Tortoise wins', { timeout: 5000 });
+    await expect(prompt).toHaveText('⚫ Fox is thinking…');
+    await page.clock.runFor(1);
+    for (let i = 0; i < 40; i += 1) {
+      if ((await prompt.textContent()) === 'Fox wins') break;
+      await page.clock.runFor(50);
+    }
+    await expect(prompt).toHaveText('Fox wins');
     const award = page.getByTestId('sticker-award');
     await expect(award).toHaveCount(0);
-    // Still hidden well after the line is on screen; then it may appear at 1.5s.
-    await page.waitForTimeout(1000);
+    await page.clock.runFor(FOX_STICKER_HOLD_MS - 50);
     await expect(award).toHaveCount(0);
-    await expect(award).toBeVisible({ timeout: TORTOISE_STICKER_HOLD_MS });
+    await page.clock.runFor(100);
+    await expect(award).toBeVisible();
   });
 });

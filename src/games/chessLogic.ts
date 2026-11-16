@@ -2,7 +2,7 @@ export type Color = 'w' | 'b';
 export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k';
 export type Square = `${'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h'}${'1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'}`;
 
-export type ChessMode = 'moves' | 'capture' | 'hotseat' | 'tortoise';
+export type ChessMode = 'moves' | 'capture' | 'hotseat' | 'fox';
 export type PieceKind = PieceSymbol;
 
 export interface BoardPiece {
@@ -695,7 +695,7 @@ export function tryHotseatMove(
 }
 
 export function modeStars(mode: ChessMode): number {
-  return mode === 'moves' ? 2 : mode === 'capture' ? 3 : 4; // hotseat and tortoise
+  return mode === 'moves' ? 2 : mode === 'capture' ? 3 : 4; // hotseat and fox
 }
 
 /** Exported for tests. */

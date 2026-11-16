@@ -1,3 +1,4 @@
+import foxThink from '../assets/characters/fox_think.png';
 import boardLight from '../assets/chess/chess_board_light.png';
 import boardDark from '../assets/chess/chess_board_dark.png';
 import launcher from '../assets/chess/chess_launcher.png';
@@ -42,3 +43,6 @@ export function pieceSrc(color: Color, type: PieceSymbol): string {
 }
 
 export const PROMOTION_PIECES: readonly PieceSymbol[] = ['q', 'r', 'b', 'n'];
+
+/** Fox think pose. Swap `src/assets/characters/fox_think.png` to update. */
+export const FOX_THINK_SRC = foxThink;
