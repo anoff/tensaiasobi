@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import type { PieceSymbol, Square } from 'chess.js';
 import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
 import ConfirmWipeButton from '../components/ConfirmWipeButton';
@@ -21,18 +20,21 @@ import {
   type CapturedPiece,
   type HotseatState,
   type MovesPrompt,
+  type PieceSymbol,
+  type Square,
+  hotseatBanner,
   FILES,
   RANKS,
   applyCaptureMove,
   applyMove,
   gradeMovesTap,
+  kingsInDanger,
+  legalMoves,
   nextCapturePuzzle,
   nextMovesPrompt,
   piecesFromFen,
   pieceAt,
   startHotseat,
-  tryHotseatMove,
-  hotseatMoves,
   modeStars,
   sq,
   visibleCaptureSquares,
@@ -40,6 +42,11 @@ import {
 
 const CREAM = '#fff8ec';
 const INK_SOFT = '#6b5a4c';
+
+function tipDuration(): number {
+  if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 0;
+  return 400;
+}
 
 type Phase = 'pick' | 'play';
 
@@ -65,10 +72,11 @@ export default function ChessGame() {
   const [promo, setPromo] = useState<{ from: Square; to: Square } | null>(null);
   const [wonWhite, setWonWhite] = useState<CapturedPiece[]>([]);
   const [wonBlack, setWonBlack] = useState<CapturedPiece[]>([]);
+  const [tippingKing, setTippingKing] = useState<{ square: Square; color: 'w' | 'b'; mover?: 'w' | 'b' } | null>(null);
 
   const tortoise = characterArt('tortoise', 'idle');
-  const tortoiseCheer = characterArt('tortoise', 'cheer');
   const panda = characterArt('panda', 'idle');
+  const pandaCheer = characterArt('panda', 'cheer');
 
   const fen = mode === 'hotseat'
     ? hotseat?.fen
@@ -86,7 +94,7 @@ export default function ChessGame() {
 
   const legalHints = useMemo(() => {
     if (mode === 'hotseat' && selected && fen) {
-      return hotseatMoves(fen, selected).map((m) => m.to);
+      return legalMoves(fen, selected).map((m) => m.to);
     }
     if (!hintOn) return [] as Square[];
     if (mode === 'moves' && movesPrompt) return movesPrompt.legalTargets;
@@ -96,7 +104,7 @@ export default function ChessGame() {
   const captureTargets = useMemo(() => {
     if (!fen) return new Set<Square>();
     if (mode === 'hotseat' && selected) {
-      return new Set(hotseatMoves(fen, selected).filter((m) => m.captured).map((m) => m.to));
+      return new Set(legalMoves(fen, selected).filter((m) => m.captured).map((m) => m.to));
     }
     if (mode === 'capture' && hintOn && currentCapture) {
       return new Set<Square>([currentCapture.to]);
@@ -104,20 +112,34 @@ export default function ChessGame() {
     return new Set<Square>();
   }, [fen, selected, mode, hintOn, currentCapture]);
 
+  const dangerSquares = useMemo(() => {
+    if (mode !== 'hotseat' || !fen || tippingKing) return [] as Square[];
+    return kingsInDanger(fen);
+  }, [mode, fen, tippingKing]);
+
   const promptText = (() => {
     if (phase === 'pick') return t.chessGame.pickMode;
     if (mode === 'moves' && movesPrompt) {
       const name = t.chessGame.pieces[movesPrompt.piece];
       return t.chessGame.movesPrompt.replace('{piece}', name);
     }
+    if (mode === 'capture' && capturePuzzle && currentCapture && fen) {
+      const target = pieceAt(fen, currentCapture.to);
+      if (target?.type === 'k') return t.chessGame.takeKing;
+      return t.chessGame.capturePrompt;
+    }
     if (mode === 'capture') return t.chessGame.capturePrompt;
     if (mode === 'hotseat' && hotseat) {
-      if (hotseat.status === 'checkmate') {
-        return hotseat.winner === 'w' ? t.chessGame.whiteWins : t.chessGame.blackWins;
-      }
-      if (hotseat.status === 'stalemate' || hotseat.status === 'draw') return t.chessGame.draw;
-      if (hotseat.status === 'check') return t.chessGame.check;
-      return hotseat.turn === 'w' ? t.chessGame.whiteToMove : t.chessGame.blackToMove;
+      const ownKing = pieces.find((p) => p.type === 'k' && p.color === hotseat.turn);
+      const banner = hotseatBanner(
+        hotseat,
+        tippingKing?.mover ?? null,
+        Boolean(ownKing && dangerSquares.includes(ownKing.square)),
+      );
+      if (banner.kind === 'won') return banner.side === 'w' ? t.chessGame.whiteWins : t.chessGame.blackWins;
+      if (banner.kind === 'draw') return t.chessGame.draw;
+      if (banner.kind === 'watchKing') return t.chessGame.watchKing;
+      return banner.side === 'w' ? t.chessGame.whiteToMove : t.chessGame.blackToMove;
     }
     return '';
   })();
@@ -132,6 +154,7 @@ export default function ChessGame() {
     setShake(null);
     setLocked(false);
     setPromo(null);
+    setTippingKing(null);
     setShowConfetti(false);
     setMoveStep(0);
     setCaptureStep(0);
@@ -168,6 +191,7 @@ export default function ChessGame() {
     setShake(null);
     setLocked(false);
     setPromo(null);
+    setTippingKing(null);
     setShowConfetti(false);
     setWonWhite([]);
     setWonBlack([]);
@@ -197,10 +221,15 @@ export default function ChessGame() {
         return;
       }
       if (gradeMovesTap(movesPrompt, square) === 'hit') {
+        const moved = applyMove(movesPrompt.fen, movesPrompt.from, square);
+        if (!moved.ok || moved.needsPromotion) {
+          flashMiss(square);
+          return;
+        }
         setLocked(true);
         setSelected(movesPrompt.from);
         setHintOn(false);
-        setPlayFen(applyMove(movesPrompt.fen, movesPrompt.from, square));
+        setPlayFen(moved.state.fen);
         later(() => {
           awardHit('moves');
           later(() => {
@@ -241,11 +270,12 @@ export default function ChessGame() {
         return;
       }
       if (selected === currentCapture.from && square === currentCapture.to) {
+        const target = pieceAt(fen, square);
         setLocked(true);
         setHintOn(false);
         setPlayFen(applyCaptureMove(fen, currentCapture.from, square, capturePuzzle.side));
         setSelected(null);
-        later(() => {
+        const afterTake = () => {
           const nextIdx = captureStep + 1;
           setCaptureStep(nextIdx);
           if (nextIdx < capturePuzzle.steps.length) {
@@ -262,7 +292,16 @@ export default function ChessGame() {
               setLocked(false);
             }, 700);
           }
-        }, 450);
+        };
+        if (target?.type === 'k') {
+          setTippingKing({ square, color: target.color });
+          later(() => {
+            setTippingKing(null);
+            afterTake();
+          }, tipDuration());
+        } else {
+          later(afterTake, 450);
+        }
       } else {
         flashMiss(square);
       }
@@ -270,7 +309,7 @@ export default function ChessGame() {
     }
 
     if (mode === 'hotseat' && hotseat && fen) {
-      if (hotseat.status === 'checkmate' || hotseat.status === 'stalemate' || hotseat.status === 'draw') return;
+      if (hotseat.status === 'won' || hotseat.status === 'draw') return;
       const piece = pieceAt(fen, square);
       if (!selected) {
         if (piece && piece.color === hotseat.turn) {
@@ -284,7 +323,7 @@ export default function ChessGame() {
         setSelected(square);
         return;
       }
-      const result = tryHotseatMove(fen, selected, square);
+      const result = applyMove(fen, selected, square);
       if (!result.ok) {
         flashMiss(square);
         return;
@@ -294,19 +333,7 @@ export default function ChessGame() {
         return;
       }
       playPop();
-      setHotseat(result.state);
-      setSelected(null);
-      recordCapture(result.captured);
-      if (result.state.status === 'checkmate') {
-        setLocked(true);
-        later(() => {
-          setShowConfetti(true);
-          onStarEarned?.(modeStars('hotseat'));
-          tallyRound();
-          later(() => setShowConfetti(false), 900);
-          setLocked(false);
-        }, 450);
-      }
+      finishHotseatMove(result, square);
     }
   };
 
@@ -316,32 +343,54 @@ export default function ChessGame() {
     else setWonBlack((prev) => [...prev, piece]);
   };
 
+  const celebrateWin = () => {
+    setShowConfetti(true);
+    onStarEarned?.(modeStars('hotseat'));
+    tallyRound();
+    later(() => setShowConfetti(false), 900);
+  };
+
+  const finishHotseatMove = (
+    result: Extract<ReturnType<typeof applyMove>, { ok: true; needsPromotion: false }>,
+    dest: Square,
+  ) => {
+    setSelected(null);
+    if (result.captured?.type === 'k') {
+      setLocked(true);
+      setHotseat({ ...result.state, status: 'playing', winner: null });
+      setTippingKing({ square: dest, color: result.captured.color, mover: result.state.winner ?? (result.state.turn === 'w' ? 'b' : 'w') });
+      later(() => {
+        setTippingKing(null);
+        recordCapture(result.captured);
+        setHotseat(result.state);
+        celebrateWin();
+      }, tipDuration());
+      return;
+    }
+    setHotseat(result.state);
+    recordCapture(result.captured);
+    if (result.state.status === 'won') {
+      setLocked(true);
+      celebrateWin();
+    }
+  };
+
   const confirmPromo = (promoPiece: PieceSymbol) => {
     if (!promo || !hotseat) return;
-    const result = tryHotseatMove(hotseat.fen, promo.from, promo.to, promoPiece);
+    const result = applyMove(hotseat.fen, promo.from, promo.to, promoPiece);
     setPromo(null);
     if (!result.ok || result.needsPromotion) return;
     playPop();
-    setHotseat(result.state);
-    setSelected(null);
-    recordCapture(result.captured);
-    if (result.state.status === 'checkmate') {
-      setLocked(true);
-      later(() => {
-        setShowConfetti(true);
-        onStarEarned?.(modeStars('hotseat'));
-        tallyRound();
-        later(() => setShowConfetti(false), 900);
-        setLocked(false);
-      }, 450);
-    }
+    finishHotseatMove(result, promo.to);
   };
 
   const newHotseat = () => {
     playPop();
+    setLocked(false);
     setHotseat(startHotseat());
     setSelected(null);
     setPromo(null);
+    setTippingKing(null);
     setShowConfetti(false);
     setHintOn(false);
     setWonWhite([]);
@@ -350,14 +399,17 @@ export default function ChessGame() {
 
   const cream = CREAM;
 
+  const hotseatSide = hotseat
+    ? hotseatBanner(hotseat, tippingKing?.mover ?? null, false).side
+    : null;
   const sideToPlay = mode === 'capture' && capturePuzzle
     ? capturePuzzle.side
     : mode === 'hotseat' && hotseat
-      ? hotseat.turn
+      ? hotseatSide
       : null;
   const showSideDot = Boolean(
     (mode === 'capture' && capturePuzzle) ||
-    (mode === 'hotseat' && hotseat && hotseat.status !== 'checkmate' && hotseat.status !== 'stalemate' && hotseat.status !== 'draw'),
+    (mode === 'hotseat' && hotseat && hotseat.status !== 'draw'),
   );
 
   return (
@@ -367,7 +419,7 @@ export default function ChessGame() {
       <div className="w-full flex items-center gap-2 min-h-[52px]">
         {tortoise && (
           <img
-            src={hotseat?.status === 'checkmate' ? (tortoiseCheer ?? tortoise) : tortoise}
+            src={tortoise}
             alt=""
             className="h-12 w-12 shrink-0 object-contain pointer-events-none"
             data-testid="chess-tortoise"
@@ -433,11 +485,8 @@ export default function ChessGame() {
             hints={legalHints}
             captureTargets={captureTargets}
             shake={shake}
-            checkSquare={
-              mode === 'hotseat' && hotseat && (hotseat.status === 'check' || hotseat.status === 'checkmate')
-                ? pieces.find((p) => p.type === 'k' && p.color === hotseat.turn)?.square ?? null
-                : null
-            }
+            dangerSquares={dangerSquares}
+            tippingKing={tippingKing}
             onSquare={onSquare}
           />
 
@@ -490,7 +539,7 @@ export default function ChessGame() {
 
           {panda && (
             <img
-              src={panda}
+              src={hotseat?.status === 'won' ? (pandaCheer ?? panda) : panda}
               alt=""
               aria-hidden
               className="pointer-events-none absolute bottom-2 left-2 h-[76px] w-[76px] object-contain short:hidden tiny:hidden"
@@ -551,7 +600,8 @@ function ChessBoardView({
   hints,
   captureTargets,
   shake,
-  checkSquare,
+  dangerSquares,
+  tippingKing,
   onSquare,
 }: {
   fen: string;
@@ -560,7 +610,8 @@ function ChessBoardView({
   hints: Square[];
   captureTargets: Set<Square>;
   shake: Square | null;
-  checkSquare: Square | null;
+  dangerSquares: Square[];
+  tippingKing: { square: Square; color: 'w' | 'b' } | null;
   onSquare: (s: Square) => void;
 }) {
   const pieceMap = useMemo(() => {
@@ -590,7 +641,8 @@ function ChessBoardView({
               const isHint = hintSet.has(square);
               const isCapture = captureTargets.has(square);
               const isShake = shake === square;
-              const isCheck = checkSquare === square;
+              const isDanger = dangerSquares.includes(square);
+              const isTip = tippingKing?.square === square;
               return (
                 <button
                   key={square}
@@ -614,11 +666,11 @@ function ChessBoardView({
                       data-testid="chess-selected"
                     />
                   )}
-                  {isCheck && (
+                  {isDanger && (
                     <span
                       className="absolute inset-[1px] rounded-sm pointer-events-none"
                       style={{ boxShadow: `inset 0 0 0 3px ${INK}` }}
-                      data-testid="chess-check-ring"
+                      data-testid="chess-danger-ring"
                     />
                   )}
                   {isHint && !piece && (
@@ -643,6 +695,15 @@ function ChessBoardView({
                       src={pieceSrc(piece.color, piece.type)}
                       alt=""
                       className="relative z-[1] mx-auto h-[84%] w-[84%] object-contain pointer-events-none"
+                      draggable={false}
+                    />
+                  )}
+                  {isTip && tippingKing && (
+                    <img
+                      src={pieceSrc(tippingKing.color, 'k')}
+                      alt=""
+                      className="absolute inset-0 z-[2] m-auto h-[84%] w-[84%] object-contain pointer-events-none animate-king-tip"
+                      data-testid="chess-king-tip"
                       draggable={false}
                     />
                   )}
