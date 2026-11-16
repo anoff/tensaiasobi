@@ -13,7 +13,7 @@ import blackRook from '../assets/chess/chess_black_rook.png';
 import blackBishop from '../assets/chess/chess_black_bishop.png';
 import blackKnight from '../assets/chess/chess_black_knight.png';
 import blackPawn from '../assets/chess/chess_black_pawn.png';
-import type { Color, PieceSymbol } from 'chess.js';
+import type { Color, PieceSymbol } from './chessLogic';
 
 export const CHESS_BOARD_LIGHT = boardLight;
 export const CHESS_BOARD_DARK = boardDark;

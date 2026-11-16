@@ -1,4 +1,6 @@
-import { Chess, type Color, type PieceSymbol, type Square } from 'chess.js';
+export type Color = 'w' | 'b';
+export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k';
+export type Square = `${'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h'}${'1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'}`;
 
 export type ChessMode = 'moves' | 'capture' | 'hotseat';
 export type PieceKind = PieceSymbol;
@@ -8,6 +10,27 @@ export interface BoardPiece {
   type: PieceSymbol;
   color: Color;
 }
+
+export interface ChessMove {
+  from: Square;
+  to: Square;
+  promotion?: PieceSymbol;
+  captured: PieceSymbol | null;
+  castle?: 'k' | 'q';
+  enPassant?: boolean;
+}
+
+export type PlayStatus = 'playing' | 'won' | 'draw';
+
+export interface PlayState {
+  fen: string;
+  turn: Color;
+  status: PlayStatus;
+  winner: Color | null;
+}
+
+export type HotseatStatus = PlayStatus;
+export type HotseatState = PlayState;
 
 export interface MovesPrompt {
   id: string;
@@ -32,8 +55,34 @@ export interface CapturePuzzle {
   steps: CaptureStep[];
 }
 
+export type CapturedPiece = { type: PieceSymbol; color: Color };
+
 export const FILES = 'abcdefgh';
 export const RANKS = '12345678';
+export const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+const PROMOTIONS: PieceSymbol[] = ['q', 'r', 'b', 'n'];
+const KNIGHT_DELTAS: Array<[number, number]> = [
+  [1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2],
+];
+const KING_DELTAS: Array<[number, number]> = [
+  [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1],
+];
+const BISHOP_DELTAS: Array<[number, number]> = [
+  [1, 1], [1, -1], [-1, 1], [-1, -1],
+];
+const ROOK_DELTAS: Array<[number, number]> = [
+  [1, 0], [-1, 0], [0, 1], [0, -1],
+];
+
+interface Position {
+  board: (BoardPiece | null)[];
+  turn: Color;
+  castling: string;
+  ep: Square | null;
+  halfmove: number;
+  fullmove: number;
+}
 
 export function sq(file: number, rank: number): Square {
   return `${FILES[file]}${RANKS[rank]}` as Square;
@@ -43,53 +92,386 @@ export function parseSq(s: Square): { file: number; rank: number } {
   return { file: FILES.indexOf(s[0]), rank: RANKS.indexOf(s[1]) };
 }
 
-export function piecesFromFen(fen: string): BoardPiece[] {
-  const chess = new Chess(fen);
-  const out: BoardPiece[] = [];
-  for (const file of FILES) {
-    for (const rank of RANKS) {
-      const square = `${file}${rank}` as Square;
-      const p = chess.get(square);
-      if (p) out.push({ square, type: p.type, color: p.color });
+function idx(file: number, rank: number): number {
+  return rank * 8 + file;
+}
+
+function other(color: Color): Color {
+  return color === 'w' ? 'b' : 'w';
+}
+
+function inBoard(file: number, rank: number): boolean {
+  return file >= 0 && file < 8 && rank >= 0 && rank < 8;
+}
+
+function parseFen(fen: string): Position {
+  const parts = fen.trim().split(/\s+/);
+  const board: (BoardPiece | null)[] = Array(64).fill(null);
+  const ranks = (parts[0] ?? '').split('/');
+  if (ranks.length !== 8) throw new Error(`bad fen ${fen}`);
+  for (let r = 0; r < 8; r++) {
+    const rank = 7 - r;
+    let file = 0;
+    for (const ch of ranks[r]) {
+      if (ch >= '1' && ch <= '8') {
+        file += Number(ch);
+        continue;
+      }
+      const color: Color = ch === ch.toUpperCase() ? 'w' : 'b';
+      const type = ch.toLowerCase() as PieceSymbol;
+      if (!'pnbrqk'.includes(type) || file > 7) throw new Error(`bad fen ${fen}`);
+      const square = sq(file, rank);
+      board[idx(file, rank)] = { square, type, color };
+      file += 1;
     }
+  }
+  const turn: Color = parts[1] === 'b' ? 'b' : 'w';
+  const castling = !parts[2] || parts[2] === '-' ? '' : parts[2];
+  const ep = !parts[3] || parts[3] === '-' ? null : (parts[3] as Square);
+  const halfmove = Number(parts[4] ?? 0);
+  const fullmove = Number(parts[5] ?? 1);
+  return { board, turn, castling, ep, halfmove, fullmove };
+}
+
+function fenOf(pos: Position): string {
+  const ranks: string[] = [];
+  for (let r = 7; r >= 0; r--) {
+    let row = '';
+    let empty = 0;
+    for (let f = 0; f < 8; f++) {
+      const piece = pos.board[idx(f, r)];
+      if (!piece) {
+        empty += 1;
+        continue;
+      }
+      if (empty) {
+        row += String(empty);
+        empty = 0;
+      }
+      const ch = piece.color === 'w' ? piece.type.toUpperCase() : piece.type;
+      row += ch;
+    }
+    if (empty) row += String(empty);
+    ranks.push(row);
+  }
+  const castling = pos.castling || '-';
+  const ep = pos.ep ?? '-';
+  return `${ranks.join('/')} ${pos.turn} ${castling} ${ep} ${pos.halfmove} ${pos.fullmove}`;
+}
+
+function at(pos: Position, file: number, rank: number): BoardPiece | null {
+  return inBoard(file, rank) ? pos.board[idx(file, rank)] : null;
+}
+
+function findKing(pos: Position, color: Color): Square | null {
+  for (const piece of pos.board) {
+    if (piece?.type === 'k' && piece.color === color) return piece.square;
+  }
+  return null;
+}
+
+function pushMove(
+  moves: ChessMove[],
+  from: Square,
+  to: Square,
+  captured: PieceSymbol | null,
+  extra: Partial<ChessMove> = {},
+): void {
+  moves.push({ from, to, captured, ...extra });
+}
+
+function addPawnMoves(pos: Position, from: Square, color: Color, moves: ChessMove[]): void {
+  const { file, rank } = parseSq(from);
+  const dir = color === 'w' ? 1 : -1;
+  const start = color === 'w' ? 1 : 6;
+  const last = color === 'w' ? 7 : 0;
+  const one = rank + dir;
+  if (inBoard(file, one) && !at(pos, file, one)) {
+    if (one === last) {
+      for (const promotion of PROMOTIONS) pushMove(moves, from, sq(file, one), null, { promotion });
+    } else {
+      pushMove(moves, from, sq(file, one), null);
+      const two = rank + dir * 2;
+      if (rank === start && inBoard(file, two) && !at(pos, file, two)) {
+        pushMove(moves, from, sq(file, two), null);
+      }
+    }
+  }
+  for (const df of [-1, 1]) {
+    const f = file + df;
+    const t = one;
+    if (!inBoard(f, t)) continue;
+    const target = at(pos, f, t);
+    const to = sq(f, t);
+    if (target && target.color !== color) {
+      if (t === last) {
+        for (const promotion of PROMOTIONS) pushMove(moves, from, to, target.type, { promotion });
+      } else {
+        pushMove(moves, from, to, target.type);
+      }
+    } else if (!target && pos.ep === to) {
+      pushMove(moves, from, to, 'p', { enPassant: true });
+    }
+  }
+}
+
+function addStepMoves(
+  pos: Position,
+  from: Square,
+  color: Color,
+  deltas: Array<[number, number]>,
+  moves: ChessMove[],
+): void {
+  const { file, rank } = parseSq(from);
+  for (const [df, dr] of deltas) {
+    const f = file + df;
+    const r = rank + dr;
+    if (!inBoard(f, r)) continue;
+    const target = at(pos, f, r);
+    if (target && target.color === color) continue;
+    pushMove(moves, from, sq(f, r), target?.type ?? null);
+  }
+}
+
+function addSlideMoves(
+  pos: Position,
+  from: Square,
+  color: Color,
+  deltas: Array<[number, number]>,
+  moves: ChessMove[],
+): void {
+  const { file, rank } = parseSq(from);
+  for (const [df, dr] of deltas) {
+    let f = file + df;
+    let r = rank + dr;
+    while (inBoard(f, r)) {
+      const target = at(pos, f, r);
+      if (!target) {
+        pushMove(moves, from, sq(f, r), null);
+      } else {
+        if (target.color !== color) pushMove(moves, from, sq(f, r), target.type);
+        break;
+      }
+      f += df;
+      r += dr;
+    }
+  }
+}
+
+function addCastling(pos: Position, from: Square, color: Color, moves: ChessMove[]): void {
+  const home = color === 'w' ? 0 : 7;
+  const { file, rank } = parseSq(from);
+  if (file !== 4 || rank !== home) return;
+  const rights = pos.castling;
+  const kingRight = color === 'w' ? 'K' : 'k';
+  const queenRight = color === 'w' ? 'Q' : 'q';
+  if (rights.includes(kingRight) && !at(pos, 5, home) && !at(pos, 6, home)) {
+    const rook = at(pos, 7, home);
+    if (rook?.type === 'r' && rook.color === color) {
+      pushMove(moves, from, sq(6, home), null, { castle: 'k' });
+    }
+  }
+  if (rights.includes(queenRight) && !at(pos, 3, home) && !at(pos, 2, home) && !at(pos, 1, home)) {
+    const rook = at(pos, 0, home);
+    if (rook?.type === 'r' && rook.color === color) {
+      pushMove(moves, from, sq(2, home), null, { castle: 'q' });
+    }
+  }
+}
+
+function movesFrom(pos: Position, from: Square): ChessMove[] {
+  const { file, rank } = parseSq(from);
+  const piece = at(pos, file, rank);
+  if (!piece || piece.color !== pos.turn) return [];
+  const moves: ChessMove[] = [];
+  if (piece.type === 'p') addPawnMoves(pos, from, piece.color, moves);
+  else if (piece.type === 'n') addStepMoves(pos, from, piece.color, KNIGHT_DELTAS, moves);
+  else if (piece.type === 'b') addSlideMoves(pos, from, piece.color, BISHOP_DELTAS, moves);
+  else if (piece.type === 'r') addSlideMoves(pos, from, piece.color, ROOK_DELTAS, moves);
+  else if (piece.type === 'q') {
+    addSlideMoves(pos, from, piece.color, BISHOP_DELTAS, moves);
+    addSlideMoves(pos, from, piece.color, ROOK_DELTAS, moves);
+  } else if (piece.type === 'k') {
+    addStepMoves(pos, from, piece.color, KING_DELTAS, moves);
+    addCastling(pos, from, piece.color, moves);
+  }
+  return moves;
+}
+
+/** Movement-only destinations for `from`, or every move for the side to play. */
+export function legalMoves(fen: string, from?: Square): ChessMove[] {
+  const pos = parseFen(fen);
+  if (from) return movesFrom(pos, from);
+  const all: ChessMove[] = [];
+  for (const piece of pos.board) {
+    if (piece && piece.color === pos.turn) all.push(...movesFrom(pos, piece.square));
+  }
+  return all;
+}
+
+export function legalTargets(fen: string, from: Square): Square[] {
+  return [...new Set(legalMoves(fen, from).map((m) => m.to))];
+}
+
+function pawnAttacks(color: Color, file: number, rank: number, target: Square): boolean {
+  const dir = color === 'w' ? 1 : -1;
+  const t = parseSq(target);
+  return t.rank === rank + dir && (t.file === file - 1 || t.file === file + 1);
+}
+
+export function squareAttackedBy(fen: string, square: Square, by: Color): boolean {
+  const pos = parseFen(fen);
+  const target = parseSq(square);
+  for (const piece of pos.board) {
+    if (!piece || piece.color !== by) continue;
+    const { file, rank } = parseSq(piece.square);
+    if (piece.type === 'p') {
+      if (pawnAttacks(by, file, rank, square)) return true;
+      continue;
+    }
+    const probe: Position = { ...pos, turn: by };
+    const hits = movesFrom(probe, piece.square);
+    if (hits.some((m) => m.to === square && !m.castle)) return true;
+    void target;
+  }
+  return false;
+}
+
+/** Squares of kings that a movement-rule capture could take on the next turn. */
+export function kingsInDanger(fen: string): Square[] {
+  const pos = parseFen(fen);
+  const out: Square[] = [];
+  for (const color of ['w', 'b'] as const) {
+    const king = findKing(pos, color);
+    if (king && squareAttackedBy(fen, king, other(color))) out.push(king);
   }
   return out;
 }
 
-export function legalTargets(fen: string, from: Square): Square[] {
-  const chess = new Chess(fen);
-  return chess.moves({ square: from, verbose: true }).map((m) => m.to);
+function stripCastling(castling: string, drop: string): string {
+  return [...castling].filter((ch) => !drop.includes(ch)).join('');
 }
 
-export function applyMove(fen: string, from: Square, to: Square): string {
-  const chess = new Chess(fen);
-  const move = chess.move({ from, to });
-  if (!move) throw new Error(`illegal ${from}->${to} in ${fen}`);
-  return chess.fen();
-}
-
-/** Apply a capture and keep `side` to move so a sequence can continue without an opponent reply. */
-export function applyCaptureMove(fen: string, from: Square, to: Square, side: Color): string {
-  const chess = new Chess(fen);
-  const move = chess.move({ from, to });
-  if (!move?.captured) throw new Error(`illegal capture ${from}->${to} in ${fen}`);
-  const natural = chess.fen();
-  const parts = natural.split(' ');
-  parts[1] = side;
-  const flipped = parts.join(' ');
-  try {
-    // Invalid if the opposite king is left in check while `side` still moves (often the last take).
-    new Chess(flipped);
-    return flipped;
-  } catch {
-    return natural;
+function applyOn(pos: Position, move: ChessMove): Position {
+  const next: Position = {
+    board: pos.board.map((p) => (p ? { ...p } : null)),
+    turn: other(pos.turn),
+    castling: pos.castling,
+    ep: null,
+    halfmove: move.captured || move.promotion || pos.board[idx(parseSq(move.from).file, parseSq(move.from).rank)]?.type === 'p'
+      ? 0
+      : pos.halfmove + 1,
+    fullmove: pos.turn === 'b' ? pos.fullmove + 1 : pos.fullmove,
+  };
+  const from = parseSq(move.from);
+  const to = parseSq(move.to);
+  const mover = next.board[idx(from.file, from.rank)];
+  if (!mover) throw new Error(`empty ${move.from}`);
+  next.board[idx(from.file, from.rank)] = null;
+  if (move.enPassant) {
+    const capRank = mover.color === 'w' ? to.rank - 1 : to.rank + 1;
+    next.board[idx(to.file, capRank)] = null;
   }
+  const placedType = move.promotion ?? mover.type;
+  next.board[idx(to.file, to.rank)] = { square: move.to, type: placedType, color: mover.color };
+
+  if (move.castle) {
+    const home = from.rank;
+    if (move.castle === 'k') {
+      next.board[idx(7, home)] = null;
+      next.board[idx(5, home)] = { square: sq(5, home), type: 'r', color: mover.color };
+    } else {
+      next.board[idx(0, home)] = null;
+      next.board[idx(3, home)] = { square: sq(3, home), type: 'r', color: mover.color };
+    }
+  }
+
+  if (mover.type === 'k') {
+    next.castling = stripCastling(next.castling, mover.color === 'w' ? 'KQ' : 'kq');
+  }
+  if (mover.type === 'r') {
+    if (move.from === 'a1') next.castling = stripCastling(next.castling, 'Q');
+    if (move.from === 'h1') next.castling = stripCastling(next.castling, 'K');
+    if (move.from === 'a8') next.castling = stripCastling(next.castling, 'q');
+    if (move.from === 'h8') next.castling = stripCastling(next.castling, 'k');
+  }
+  if (move.captured) {
+    if (move.to === 'a1') next.castling = stripCastling(next.castling, 'Q');
+    if (move.to === 'h1') next.castling = stripCastling(next.castling, 'K');
+    if (move.to === 'a8') next.castling = stripCastling(next.castling, 'q');
+    if (move.to === 'h8') next.castling = stripCastling(next.castling, 'k');
+  }
+
+  if (mover.type === 'p' && Math.abs(to.rank - from.rank) === 2) {
+    next.ep = sq(from.file, (from.rank + to.rank) / 2);
+  }
+
+  return next;
+}
+
+function playState(pos: Position, winner: Color | null = null): PlayState {
+  const fen = fenOf(pos);
+  if (winner) return { fen, turn: pos.turn, status: 'won', winner };
+  if (legalMoves(fen).length === 0) return { fen, turn: pos.turn, status: 'draw', winner: null };
+  return { fen, turn: pos.turn, status: 'playing', winner: null };
+}
+
+export function snapshotFromFen(fen: string): PlayState {
+  return playState(parseFen(fen));
+}
+
+export type ApplyMoveResult =
+  | { ok: true; state: PlayState; needsPromotion: false; captured: CapturedPiece | null }
+  | { ok: true; state: PlayState; needsPromotion: true; from: Square; to: Square }
+  | { ok: false };
+
+export function applyMove(
+  fen: string,
+  from: Square,
+  to: Square,
+  promotion?: PieceSymbol,
+): ApplyMoveResult {
+  const pos = parseFen(fen);
+  const options = movesFrom(pos, from).filter((m) => m.to === to);
+  if (options.length === 0) return { ok: false };
+  const needsPromo = options.some((m) => m.promotion);
+  if (needsPromo && !promotion) {
+    return { ok: true, state: playState(pos), needsPromotion: true, from, to };
+  }
+  const move = options.find((m) => (m.promotion ? m.promotion === promotion : !needsPromo)) ?? null;
+  if (!move) return { ok: false };
+  const next = applyOn(pos, move);
+  const winner = move.captured === 'k' ? pos.turn : null;
+  const captured: CapturedPiece | null = move.captured
+    ? { type: move.captured, color: other(pos.turn) }
+    : null;
+  return { ok: true, state: playState(next, winner), needsPromotion: false, captured };
+}
+
+export function piecesFromFen(fen: string): BoardPiece[] {
+  return parseFen(fen).board.filter((p): p is BoardPiece => p !== null).map((p) => ({ ...p }));
+}
+
+export function pieceAt(fen: string, square: Square): BoardPiece | null {
+  const { file, rank } = parseSq(square);
+  const piece = at(parseFen(fen), file, rank);
+  return piece ? { ...piece } : null;
 }
 
 function assertLegal(fen: string, from: Square): Square[] {
   const targets = legalTargets(fen, from);
   if (targets.length === 0) throw new Error(`no legal moves from ${from} in ${fen}`);
   return targets;
+}
+
+/** Apply a capture and keep `side` to move so a sequence can continue without an opponent reply. */
+export function applyCaptureMove(fen: string, from: Square, to: Square, side: Color): string {
+  const result = applyMove(fen, from, to);
+  if (!result.ok || result.needsPromotion) throw new Error(`illegal capture ${from}->${to} in ${fen}`);
+  if (result.state.status === 'won' || result.state.turn === side) return result.state.fen;
+  const pos = parseFen(result.state.fen);
+  pos.turn = side;
+  return fenOf(pos);
 }
 
 /** Easy piece-moves: one piece (optional blocker), no castling/en passant/promotion. */
@@ -110,7 +492,6 @@ const MOVES_POOL: MovesPrompt[] = [
     return { id: 'rook-open', piece: 'r', color: 'w', from, fen, legalTargets: assertLegal(fen, from) };
   })(),
   (() => {
-    // Rook blocked north by a friendly pawn.
     const fen = '4k3/8/3P4/3R4/8/8/8/4K3 w - - 0 1';
     const from = 'd5' as Square;
     return { id: 'rook-block', piece: 'r', color: 'w', from, fen, legalTargets: assertLegal(fen, from) };
@@ -230,17 +611,24 @@ export const CAPTURE_PUZZLES: CapturePuzzle[] = [
       { from: 'd5', to: 'c6' },
     ],
   },
+  {
+    id: 'queen-then-king',
+    fen: '4k3/3p4/8/8/8/8/8/3QK3 w - - 0 1',
+    side: 'w',
+    steps: [
+      { from: 'd1', to: 'd7' },
+      { from: 'd7', to: 'e8' },
+    ],
+  },
 ];
 
-// Validate each step is a legal capture after previous steps are applied.
 for (const p of CAPTURE_PUZZLES) {
   if (p.steps.length < 2 || p.steps.length > 3) {
     throw new Error(`bad capture puzzle ${p.id}: need 2–3 steps`);
   }
   let fen = p.fen;
   for (const step of p.steps) {
-    const chess = new Chess(fen);
-    const move = chess.moves({ square: step.from, verbose: true }).find((m) => m.to === step.to && Boolean(m.captured));
+    const move = legalMoves(fen, step.from).find((m) => m.to === step.to && m.captured);
     if (!move) {
       throw new Error(`bad capture puzzle ${p.id}: ${step.from}->${step.to} not a capture in ${fen}`);
     }
@@ -256,9 +644,9 @@ export function visibleCaptureSquares(puzzle: CapturePuzzle, stepIndex: number):
     visible.add(puzzle.steps[puzzle.steps.length - 1].to);
     return visible;
   }
-  const idx = Math.max(0, stepIndex);
-  visible.add(puzzle.steps[idx].from);
-  for (let i = idx; i < puzzle.steps.length; i++) visible.add(puzzle.steps[i].to);
+  const idxStep = Math.max(0, stepIndex);
+  visible.add(puzzle.steps[idxStep].from);
+  for (let i = idxStep; i < puzzle.steps.length; i++) visible.add(puzzle.steps[i].to);
   return visible;
 }
 
@@ -267,69 +655,21 @@ export function nextCapturePuzzle(prevId: string | null): CapturePuzzle {
   return pool[Math.floor(Math.random() * pool.length)] ?? CAPTURE_PUZZLES[0];
 }
 
-
-export type HotseatStatus = 'playing' | 'check' | 'checkmate' | 'stalemate' | 'draw';
-
-export interface HotseatState {
-  fen: string;
-  turn: Color;
-  status: HotseatStatus;
-  winner: Color | null;
+export function startHotseat(): PlayState {
+  return snapshotFromFen(START_FEN);
 }
 
-export function startHotseat(): HotseatState {
-  const chess = new Chess();
-  return snapshot(chess);
+export function hotseatMoves(fen: string, from: Square): ChessMove[] {
+  return legalMoves(fen, from);
 }
-
-export function snapshot(chess: Chess): HotseatState {
-  let status: HotseatStatus = 'playing';
-  let winner: Color | null = null;
-  if (chess.isCheckmate()) {
-    status = 'checkmate';
-    winner = chess.turn() === 'w' ? 'b' : 'w';
-  } else if (chess.isStalemate()) {
-    status = 'stalemate';
-  } else if (chess.isDraw()) {
-    status = 'draw';
-  } else if (chess.inCheck()) {
-    status = 'check';
-  }
-  return { fen: chess.fen(), turn: chess.turn(), status, winner };
-}
-
-export function hotseatMoves(fen: string, from: Square) {
-  const chess = new Chess(fen);
-  return chess.moves({ square: from, verbose: true });
-}
-
-export type CapturedPiece = { type: PieceSymbol; color: Color };
 
 export function tryHotseatMove(
   fen: string,
   from: Square,
   to: Square,
   promotion?: PieceSymbol,
-): { ok: true; state: HotseatState; needsPromotion: false; captured: CapturedPiece | null } | { ok: true; state: HotseatState; needsPromotion: true; from: Square; to: Square } | { ok: false } {
-  const chess = new Chess(fen);
-  const options = chess.moves({ square: from, verbose: true }).filter((m) => m.to === to);
-  if (options.length === 0) return { ok: false };
-  const needsPromo = options.some((m) => m.promotion);
-  if (needsPromo && !promotion) {
-    return { ok: true, state: snapshot(chess), needsPromotion: true, from, to };
-  }
-  const move = chess.move({ from, to, promotion: promotion ?? undefined });
-  if (!move) return { ok: false };
-  const captured: CapturedPiece | null = move.captured
-    ? { type: move.captured, color: move.color === 'w' ? 'b' : 'w' }
-    : null;
-  return { ok: true, state: snapshot(chess), needsPromotion: false, captured };
-}
-
-export function pieceAt(fen: string, square: Square): BoardPiece | null {
-  const chess = new Chess(fen);
-  const p = chess.get(square);
-  return p ? { square, type: p.type, color: p.color } : null;
+): ApplyMoveResult {
+  return applyMove(fen, from, to, promotion);
 }
 
 export function modeStars(mode: ChessMode): number {
