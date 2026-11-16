@@ -1,14 +1,14 @@
 import { test, expect, type Page } from '@playwright/test';
 
-async function openChess(page: Page) {
-  await page.goto('/');
+async function openChess(page: Page, search = '') {
+  await page.goto('/' + (search ? `?${search}` : ''));
   await page.getByTestId('age-mode-big').click();
   await page.getByTestId('launch-chess').click();
   await expect(page.getByTestId('chess-root')).toHaveAttribute('data-phase', 'pick');
 }
 
 test.describe('Chess', () => {
-  test('launcher uses drawn Staunton art and opens three modes', async ({ page }) => {
+  test('launcher uses drawn Staunton art and opens four modes', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('age-mode-big').click();
     const launch = page.getByTestId('launch-chess');
@@ -18,10 +18,18 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-mode-moves')).toBeVisible();
     await expect(page.getByTestId('chess-mode-capture')).toBeVisible();
     await expect(page.getByTestId('chess-mode-hotseat')).toBeVisible();
+    await expect(page.getByTestId('chess-mode-tortoise')).toBeVisible();
     for (const btn of await page.locator('[data-testid^="chess-mode-"]').all()) {
       const box = await btn.boundingBox();
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(96);
     }
+    const levels = page.getByTestId('chess-tortoise-levels');
+    await expect(levels).toBeVisible();
+    await expect(page.getByTestId('difficulty-easy')).toBeVisible();
+    await expect(page.getByTestId('difficulty-medium')).toBeVisible();
+    await expect(page.getByTestId('difficulty-hard')).toHaveCount(0);
+    await expect(levels.getByText('Gentle')).toBeVisible();
+    await expect(levels.getByText('Clever')).toBeVisible();
   });
 
   test('moves mode: hint reveals legal squares, miss does not, hit moves the piece', async ({ page }) => {
@@ -92,7 +100,8 @@ test.describe('Chess', () => {
     await expect(progress).toBeVisible();
     await expect(progress).toHaveText(/0 \/ [23]/);
     await expect(page.locator('[data-piece="wk"]')).toHaveCount(0);
-    await expect(page.locator('[data-piece="bk"]')).toHaveCount(0);
+    // A sequence may end on the king, so that king stays visible. Spectator kings do not.
+    expect(await page.locator('[data-piece="bk"]').count()).toBeLessThanOrEqual(1);
     await expect(page.getByTestId('chess-won-trays')).toHaveCount(0);
     const whites = page.getByTestId('chess-board').locator('[data-piece^="w"]');
     const count = await whites.count();
@@ -105,7 +114,7 @@ test.describe('Chess', () => {
     await page.getByTestId(`chess-sq-${capSq}`).click();
     await expect.poll(async () => progress.textContent()).toMatch(/1 \/ [23]/);
     await expect(page.locator('[data-piece="wk"]')).toHaveCount(0);
-    await expect(page.locator('[data-piece="bk"]')).toHaveCount(0);
+    expect(await page.locator('[data-piece="bk"]').count()).toBeLessThanOrEqual(1);
   });
 
   test('hot-seat starts from the standard setup with turn banner', async ({ page }) => {
@@ -164,5 +173,48 @@ test.describe('Chess', () => {
       await expect(page.getByTestId('chess-panda')).toBeHidden();
       await page.getByTestId('chess-done').click();
     }
+  });
+
+  test('vs Tortoise starts from the standard setup with no Hint button', async ({ page }) => {
+    await openChess(page);
+    await page.getByTestId('chess-mode-tortoise').click();
+    const root = page.getByTestId('chess-root');
+    await expect(root).toHaveAttribute('data-mode', 'tortoise');
+    const board = page.getByTestId('chess-board');
+    await expect(board).toBeVisible();
+    await expect(board).toHaveAttribute('data-fen', /rnbqkbnr\/pppppppp\/8\/8\/8\/8\/PPPPPPPP\/RNBQKBNR w/);
+    await expect(page.getByTestId('chess-prompt')).toHaveText('White to move');
+    await expect(page.getByTestId('chess-hint')).toHaveCount(0);
+    await expect(page.getByTestId('chess-won-trays')).toBeVisible();
+  });
+
+  test('vs Tortoise shows Thinking… then a last-move tint after White moves', async ({ page }) => {
+    await openChess(page);
+    await page.getByTestId('chess-mode-tortoise').click();
+    await page.getByTestId('chess-sq-e2').click();
+    await page.getByTestId('chess-sq-e4').click();
+    await expect(page.getByTestId('chess-thinking')).toBeVisible();
+    await expect(page.getByTestId('chess-prompt')).toHaveText("Tortoise's move");
+    await expect(page.getByTestId('chess-thinking')).toHaveText('Thinking…');
+    await expect(page.getByTestId('chess-last-move').first()).toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId('chess-thinking')).toHaveCount(0);
+    await expect(page.getByTestId('chess-prompt')).toHaveText('White to move');
+  });
+
+  test("vs Tortoise shows a calm Tortoise wins after the king is captured", async ({ page }) => {
+    const fen = encodeURIComponent('4k3/8/8/8/8/8/4q3/4K3 b - - 0 1');
+    await openChess(page, `tortoiseFen=${fen}&tortoiseLevel=clever`);
+    await page.getByTestId('chess-mode-tortoise').click();
+    await expect(page.getByTestId('chess-prompt')).toHaveText('Tortoise wins', { timeout: 5000 });
+    await expect(page.getByTestId('chess-play-again')).toBeVisible();
+    await expect(page.getByTestId('chess-new-game')).toHaveCount(0);
+    const award = page.getByTestId('sticker-award');
+    if (await award.count()) {
+      await award.click();
+      if (await award.isVisible().catch(() => false)) await award.click();
+      await expect(award).toHaveCount(0);
+    }
+    await expect(page.getByTestId('chess-prompt')).toHaveText('Tortoise wins');
+    await expect(page.locator('.animate-confetti, [data-testid="chess-confetti"]')).toHaveCount(0);
   });
 });

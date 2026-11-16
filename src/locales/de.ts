@@ -498,6 +498,13 @@ export const de: TranslationSchema = {
     hint: "Hinweis",
     newGame: "Neu",
     newGameConfirm: "Neu?",
+    modeTortoise: "vs Schildkröte",
+    levelGentle: "Sanft",
+    levelClever: "Klug",
+    tortoiseToMove: "Schildkröte zieht",
+    thinking: "Ich denke…",
+    tortoiseWins: "Schildkröte gewinnt",
+    playAgain: "Nochmal",
     pieces: {
       p: "Bauern",
       r: "Turm",

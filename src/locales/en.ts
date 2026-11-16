@@ -498,6 +498,13 @@ export const en = {
     hint: "Hint",
     newGame: "New Game",
     newGameConfirm: "New?",
+    modeTortoise: "vs Tortoise",
+    levelGentle: "Gentle",
+    levelClever: "Clever",
+    tortoiseToMove: "Tortoise's move",
+    thinking: "Thinking…",
+    tortoiseWins: "Tortoise wins",
+    playAgain: "Play again",
     pieces: {
       p: "pawn",
       r: "rook",

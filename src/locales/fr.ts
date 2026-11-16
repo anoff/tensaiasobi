@@ -498,6 +498,13 @@ export const fr: TranslationSchema = {
     hint: "Indice",
     newGame: "Nouveau",
     newGameConfirm: "Nouveau ?",
+    modeTortoise: "vs Tortue",
+    levelGentle: "Douce",
+    levelClever: "Maligne",
+    tortoiseToMove: "La tortue joue",
+    thinking: "Je réfléchis…",
+    tortoiseWins: "La tortue gagne",
+    playAgain: "Rejouer",
     pieces: {
       p: "pion",
       r: "tour",

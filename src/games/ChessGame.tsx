@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
+import DifficultySelector from '../components/DifficultySelector';
+import type { GameDifficulty } from '../types/game';
 import ConfirmWipeButton from '../components/ConfirmWipeButton';
 import { useGameFX } from '../hooks/gameFXContext';
 import { useLater } from '../hooks/useLater';
@@ -35,13 +37,34 @@ import {
   piecesFromFen,
   pieceAt,
   startHotseat,
+  snapshotFromFen,
   modeStars,
   sq,
   visibleCaptureSquares,
 } from './chessLogic';
+import {
+  chooseTortoiseMove,
+  plannedThinkMs,
+  tortoiseThinkMs,
+  type TortoiseLevel,
+} from './chessTortoise';
 
 const CREAM = '#fff8ec';
 const INK_SOFT = '#6b5a4c';
+
+/** Test-only hook for e2e and screenshots (`?tortoiseFen=&tortoiseLevel=`). Not shown in the UI. */
+function bootTortoise(fallback: GameDifficulty): { state: ReturnType<typeof snapshotFromFen>; level: GameDifficulty } {
+  if (typeof window === 'undefined') return { state: startHotseat(), level: fallback };
+  const params = new URLSearchParams(window.location.search);
+  const fen = params.get('tortoiseFen');
+  const raw = params.get('tortoiseLevel');
+  const level: GameDifficulty =
+    raw === 'medium' || raw === 'clever' ? 'medium'
+    : raw === 'easy' || raw === 'gentle' ? 'easy'
+    : fallback;
+  return { state: fen ? snapshotFromFen(fen) : startHotseat(), level };
+}
+
 
 function tipDuration(): number {
   if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 0;
@@ -52,7 +75,7 @@ type Phase = 'pick' | 'play';
 
 export default function ChessGame() {
   const { t } = useTranslation();
-  const { playPop, playSuccess, playError, onStarEarned } = useGameFX();
+  const { playPop, playSuccess, playError, onStarEarned, onRoundComplete } = useGameFX();
   const tallyRound = useRoundTally();
   const { later, cancelAll } = useLater();
 
@@ -73,14 +96,35 @@ export default function ChessGame() {
   const [wonWhite, setWonWhite] = useState<CapturedPiece[]>([]);
   const [wonBlack, setWonBlack] = useState<CapturedPiece[]>([]);
   const [tippingKing, setTippingKing] = useState<{ square: Square; color: 'w' | 'b'; mover?: 'w' | 'b' } | null>(null);
+  const [tortoiseLevel, setTortoiseLevel] = useState<GameDifficulty>('easy');
+  const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null);
+  const tortoiseAwarded = useRef(false);
 
-  const tortoise = characterArt('tortoise', 'idle');
-  const panda = characterArt('panda', 'idle');
+
+  const tortoiseIdle = characterArt('tortoise', 'idle');
+  const tortoiseCheer = characterArt('tortoise', 'cheer');
+  const pandaIdle = characterArt('panda', 'idle');
   const pandaCheer = characterArt('panda', 'cheer');
 
-  const fen = mode === 'hotseat'
+
+  const fen = mode === 'hotseat' || mode === 'tortoise'
     ? hotseat?.fen
     : playFen ?? (mode === 'moves' ? movesPrompt?.fen : capturePuzzle?.fen);
+
+  const vsOver = mode === 'tortoise' && (hotseat?.status === 'won' || hotseat?.status === 'draw');
+  const thinking = Boolean(
+    mode === 'tortoise' &&
+      hotseat &&
+      hotseat.turn === 'b' &&
+      hotseat.status === 'playing' &&
+      !tippingKing &&
+      !promo,
+  );
+  const childWon = mode === 'tortoise' && hotseat?.status === 'won' && hotseat.winner === 'w';
+  const tortoiseWon = mode === 'tortoise' && hotseat?.status === 'won' && hotseat.winner === 'b';
+  const tortoiseArt = childWon ? (tortoiseCheer ?? tortoiseIdle) : tortoiseIdle;
+  const pandaArt = childWon ? (pandaCheer ?? pandaIdle) : pandaIdle;
+
 
   const pieces = useMemo(() => (fen ? piecesFromFen(fen) : []), [fen]);
 
@@ -93,29 +137,29 @@ export default function ChessGame() {
   const currentCapture = capturePuzzle?.steps[captureStep];
 
   const legalHints = useMemo(() => {
-    if (mode === 'hotseat' && selected && fen) {
+    if ((mode === 'hotseat' || (mode === 'tortoise' && !thinking && !vsOver && !tippingKing && hotseat?.turn === 'w')) && selected && fen) {
       return legalMoves(fen, selected).map((m) => m.to);
     }
     if (!hintOn) return [] as Square[];
     if (mode === 'moves' && movesPrompt) return movesPrompt.legalTargets;
     return [] as Square[];
-  }, [hintOn, mode, selected, fen, movesPrompt]);
+  }, [hintOn, mode, selected, fen, movesPrompt, thinking, vsOver, tippingKing, hotseat?.turn]);
 
   const captureTargets = useMemo(() => {
     if (!fen) return new Set<Square>();
-    if (mode === 'hotseat' && selected) {
+    if ((mode === 'hotseat' || (mode === 'tortoise' && !thinking && !vsOver && !tippingKing && hotseat?.turn === 'w')) && selected) {
       return new Set(legalMoves(fen, selected).filter((m) => m.captured).map((m) => m.to));
     }
     if (mode === 'capture' && hintOn && currentCapture) {
       return new Set<Square>([currentCapture.to]);
     }
     return new Set<Square>();
-  }, [fen, selected, mode, hintOn, currentCapture]);
+  }, [fen, selected, mode, hintOn, currentCapture, thinking, vsOver, tippingKing, hotseat?.turn]);
 
   const dangerSquares = useMemo(() => {
-    if (mode !== 'hotseat' || !fen || tippingKing) return [] as Square[];
+    if ((mode !== 'hotseat' && mode !== 'tortoise') || !fen || tippingKing || vsOver) return [] as Square[];
     return kingsInDanger(fen);
-  }, [mode, fen, tippingKing]);
+  }, [mode, fen, tippingKing, vsOver]);
 
   const promptText = (() => {
     if (phase === 'pick') return t.chessGame.pickMode;
@@ -129,6 +173,19 @@ export default function ChessGame() {
       return t.chessGame.capturePrompt;
     }
     if (mode === 'capture') return t.chessGame.capturePrompt;
+    if (mode === 'tortoise' && hotseat) {
+      const ownKing = pieces.find((p) => p.type === 'k' && p.color === 'w');
+      const banner = hotseatBanner(
+        hotseat,
+        tippingKing?.mover ?? null,
+        Boolean(ownKing && dangerSquares.includes(ownKing.square)),
+      );
+      if (banner.kind === 'won') return banner.side === 'w' ? t.chessGame.whiteWins : t.chessGame.tortoiseWins;
+      if (banner.kind === 'draw') return t.chessGame.draw;
+      if (thinking || banner.side === 'b') return t.chessGame.tortoiseToMove;
+      if (banner.kind === 'watchKing') return t.chessGame.watchKing;
+      return t.chessGame.whiteToMove;
+    }
     if (mode === 'hotseat' && hotseat) {
       const ownKing = pieces.find((p) => p.type === 'k' && p.color === hotseat.turn);
       const banner = hotseatBanner(
@@ -172,12 +229,50 @@ export default function ChessGame() {
       setPlayFen(p.fen);
       setMovesPrompt(null);
       setHotseat(null);
-    } else {
+    } else if (m === 'hotseat') {
+      setLastMove(null);
       setHotseat(startHotseat());
       setPlayFen(null);
       setMovesPrompt(null);
       setCapturePuzzle(null);
+    } else {
+      tortoiseAwarded.current = false;
+      setLastMove(null);
+      const boot = bootTortoise(tortoiseLevel);
+      setTortoiseLevel(boot.level);
+      setHotseat(boot.state);
+      setPlayFen(null);
+      setMovesPrompt(null);
+      setCapturePuzzle(null);
+      settleTortoise(boot.state);
     }
+  };
+
+  const resetTortoiseBoard = (state = startHotseat()) => {
+    tortoiseAwarded.current = false;
+    setLastMove(null);
+    setSelected(null);
+    setPromo(null);
+    setTippingKing(null);
+    setShowConfetti(false);
+    setHintOn(false);
+    setWonWhite([]);
+    setWonBlack([]);
+    setLocked(false);
+    setHotseat(state);
+  };
+
+  const settleTortoise = (state: HotseatState) => {
+    if (state.status !== 'won' && state.status !== 'draw') return;
+    if (tortoiseAwarded.current) return;
+    tortoiseAwarded.current = true;
+    onStarEarned?.(modeStars('tortoise'));
+    onRoundComplete?.();
+    if (state.status === 'won' && state.winner === 'w') {
+      setShowConfetti(true);
+      later(() => setShowConfetti(false), 900);
+    }
+    setLocked(false);
   };
 
   const backToModes = () => {
@@ -195,6 +290,8 @@ export default function ChessGame() {
     setShowConfetti(false);
     setWonWhite([]);
     setWonBlack([]);
+    setLastMove(null);
+    tortoiseAwarded.current = false;
   };
 
   const flashMiss = (square: Square) => {
@@ -308,6 +405,36 @@ export default function ChessGame() {
       return;
     }
 
+    if (mode === 'tortoise' && hotseat && fen) {
+      setLastMove(null);
+      if (vsOver || thinking || tippingKing || hotseat.turn !== 'w') return;
+      const piece = pieceAt(fen, square);
+      if (!selected) {
+        if (piece && piece.color === 'w') {
+          playPop();
+          setSelected(square);
+        }
+        return;
+      }
+      if (piece && piece.color === 'w') {
+        playPop();
+        setSelected(square);
+        return;
+      }
+      const result = applyMove(fen, selected, square);
+      if (!result.ok) {
+        flashMiss(square);
+        return;
+      }
+      if (result.needsPromotion) {
+        setPromo({ from: result.from, to: result.to });
+        return;
+      }
+      playPop();
+      finishBoardMove(result, square, 'tortoise');
+      return;
+    }
+
     if (mode === 'hotseat' && hotseat && fen) {
       if (hotseat.status === 'won' || hotseat.status === 'draw') return;
       const piece = pieceAt(fen, square);
@@ -333,7 +460,7 @@ export default function ChessGame() {
         return;
       }
       playPop();
-      finishHotseatMove(result, square);
+      finishBoardMove(result, square, 'hotseat');
     }
   };
 
@@ -350,26 +477,35 @@ export default function ChessGame() {
     later(() => setShowConfetti(false), 900);
   };
 
-  const finishHotseatMove = (
+  const finishBoardMove = (
     result: Extract<ReturnType<typeof applyMove>, { ok: true; needsPromotion: false }>,
     dest: Square,
+    kind: 'hotseat' | 'tortoise',
   ) => {
     setSelected(null);
+    const afterTip = () => {
+      recordCapture(result.captured);
+      setHotseat(result.state);
+      if (kind === 'tortoise') settleTortoise(result.state);
+      else if (result.state.status === 'won') {
+        setLocked(true);
+        celebrateWin();
+      }
+    };
     if (result.captured?.type === 'k') {
       setLocked(true);
       setHotseat({ ...result.state, status: 'playing', winner: null });
       setTippingKing({ square: dest, color: result.captured.color, mover: result.state.winner ?? (result.state.turn === 'w' ? 'b' : 'w') });
       later(() => {
         setTippingKing(null);
-        recordCapture(result.captured);
-        setHotseat(result.state);
-        celebrateWin();
+        afterTip();
       }, tipDuration());
       return;
     }
     setHotseat(result.state);
     recordCapture(result.captured);
-    if (result.state.status === 'won') {
+    if (kind === 'tortoise') settleTortoise(result.state);
+    else if (result.state.status === 'won') {
       setLocked(true);
       celebrateWin();
     }
@@ -381,11 +517,15 @@ export default function ChessGame() {
     setPromo(null);
     if (!result.ok || result.needsPromotion) return;
     playPop();
-    finishHotseatMove(result, promo.to);
+    finishBoardMove(result, promo.to, mode === 'tortoise' ? 'tortoise' : 'hotseat');
   };
 
   const newHotseat = () => {
     playPop();
+    if (mode === 'tortoise') {
+      resetTortoiseBoard();
+      return;
+    }
     setLocked(false);
     setHotseat(startHotseat());
     setSelected(null);
@@ -395,7 +535,44 @@ export default function ChessGame() {
     setHintOn(false);
     setWonWhite([]);
     setWonBlack([]);
+    setLastMove(null);
   };
+
+  const playAgainTortoise = () => {
+    playPop();
+    resetTortoiseBoard();
+  };
+
+  useEffect(() => {
+    if (mode !== 'tortoise' || !hotseat || tippingKing || promo) return;
+    if (hotseat.status !== 'playing' || hotseat.turn !== 'b') return;
+    let cancelled = false;
+    const fen = hotseat.fen;
+    const level: TortoiseLevel = tortoiseLevel === 'medium' ? 'clever' : 'gentle';
+    let inner = 0;
+    const outer = window.setTimeout(() => {
+      if (cancelled) return;
+      const planned = plannedThinkMs(Math.random);
+      const started = Date.now();
+      const choice = chooseTortoiseMove(fen, level, Math.random);
+      const wait = tortoiseThinkMs({ plannedMs: planned, searchMs: Date.now() - started });
+      inner = window.setTimeout(() => {
+        if (cancelled) return;
+        const result = applyMove(fen, choice.from, choice.to, choice.promotion ?? 'q');
+        if (result.ok && !result.needsPromotion) {
+          setLastMove({ from: choice.from, to: choice.to });
+          finishBoardMove(result, choice.to, 'tortoise');
+        }
+      }, wait);
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(outer);
+      window.clearTimeout(inner);
+    };
+    // The move applier is recreated each render; the fen/turn guards above are the real inputs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, hotseat, tortoiseLevel, tippingKing, promo]);
 
   const cream = CREAM;
 
@@ -404,22 +581,29 @@ export default function ChessGame() {
     : null;
   const sideToPlay = mode === 'capture' && capturePuzzle
     ? capturePuzzle.side
-    : mode === 'hotseat' && hotseat
+    : (mode === 'hotseat' || mode === 'tortoise') && hotseat
       ? hotseatSide
       : null;
   const showSideDot = Boolean(
     (mode === 'capture' && capturePuzzle) ||
-    (mode === 'hotseat' && hotseat && hotseat.status !== 'draw'),
+    (mode === 'hotseat' && hotseat && hotseat.status !== 'draw') ||
+    (mode === 'tortoise' && hotseat && !vsOver),
   );
 
   return (
-    <div className="relative flex-1 flex flex-col items-center w-full select-none max-w-lg mx-auto px-3 pt-2 pb-3 gap-2" data-testid="chess-root" data-phase={phase} data-mode={mode ?? 'pick'}>
-      {showConfetti && <GameConfetti pieces={120} />}
+    <div
+      className="relative flex-1 flex flex-col items-center w-full select-none max-w-lg mx-auto px-3 pt-2 pb-3 gap-2"
+      data-testid="chess-root"
+      data-phase={phase}
+      data-mode={mode ?? 'pick'}
+      data-thinking={thinking ? 'true' : 'false'}
+    >
+      {showConfetti && !tortoiseWon && <GameConfetti pieces={120} />}
 
       <div className="w-full flex items-center gap-2 min-h-[52px]">
-        {tortoise && (
+        {tortoiseArt && (
           <img
-            src={tortoise}
+            src={mode === 'tortoise' ? tortoiseArt : tortoiseIdle}
             alt=""
             className="h-12 w-12 shrink-0 object-contain pointer-events-none"
             data-testid="chess-tortoise"
@@ -437,6 +621,15 @@ export default function ChessGame() {
         >
           {promptText}
         </p>
+        {thinking && (
+          <span
+            className="shrink-0 rounded-full px-3 py-1 text-sm font-black"
+            style={{ backgroundColor: CREAM, color: INK, boxShadow: hardShadow(2, 2) }}
+            data-testid="chess-thinking"
+          >
+            {t.chessGame.thinking}
+          </span>
+        )}
         {mode === 'capture' && capturePuzzle && (
           <span
             className="shrink-0 text-lg font-black tabular-nums"
@@ -449,29 +642,41 @@ export default function ChessGame() {
       </div>
 
       {phase === 'pick' && (
-        <div className="w-full grid grid-cols-1 gap-3 mt-2" data-testid="chess-mode-picker">
-          {([
-            ['moves', t.chessGame.modeMoves],
-            ['capture', t.chessGame.modeCapture],
-            ['hotseat', t.chessGame.modeHotseat],
-          ] as const).map(([id, label]) => (
-            <KidButton
-              key={id}
-              color="green"
-              size="lg"
-              className="w-full min-h-24"
-              data-testid={`chess-mode-${id}`}
-              onClick={() => startMode(id)}
-            >
-              {label}
-            </KidButton>
-          ))}
+        <div className="w-full flex flex-col gap-3 mt-2" data-testid="chess-mode-picker">
+          <div className="w-full grid grid-cols-2 gap-3">
+            {([
+              ['moves', t.chessGame.modeMoves],
+              ['capture', t.chessGame.modeCapture],
+              ['hotseat', t.chessGame.modeHotseat],
+              ['tortoise', t.chessGame.modeTortoise],
+            ] as const).map(([id, label]) => (
+              <KidButton
+                key={id}
+                color="green"
+                size="lg"
+                className="w-full min-h-24"
+                data-testid={`chess-mode-${id}`}
+                onClick={() => startMode(id)}
+              >
+                {label}
+              </KidButton>
+            ))}
+          </div>
+          <div data-testid="chess-tortoise-levels">
+            <DifficultySelector
+              selected={tortoiseLevel}
+              options={['easy', 'medium']}
+              locked={null}
+              labels={{ easy: t.chessGame.levelGentle, medium: t.chessGame.levelClever }}
+              onChange={setTortoiseLevel}
+            />
+          </div>
         </div>
       )}
 
       {phase === 'play' && fen && (
         <>
-          {mode === 'hotseat' && (
+          {(mode === 'hotseat' || mode === 'tortoise') && (
             <div className="w-full flex items-start gap-3 px-1" data-testid="chess-won-trays">
               <WonTray side="w" taken={wonWhite} />
               <WonTray side="b" taken={wonBlack} />
@@ -487,6 +692,7 @@ export default function ChessGame() {
             shake={shake}
             dangerSquares={dangerSquares}
             tippingKing={tippingKing}
+            lastMove={mode === 'tortoise' ? lastMove : null}
             onSquare={onSquare}
           />
 
@@ -535,11 +741,32 @@ export default function ChessGame() {
                 onConfirm={newHotseat}
               />
             )}
+            {mode === 'tortoise' && !vsOver && (
+              <ConfirmWipeButton
+                label={t.chessGame.newGame}
+                confirmLabel={t.chessGame.newGameConfirm}
+                size="md"
+                className="min-h-24 min-w-[6.5rem]"
+                data-testid="chess-new-game"
+                onConfirm={newHotseat}
+              />
+            )}
+            {mode === 'tortoise' && vsOver && (
+              <KidButton
+                color="green"
+                size="md"
+                className="min-h-24 min-w-[6.5rem]"
+                data-testid="chess-play-again"
+                onClick={playAgainTortoise}
+              >
+                {t.chessGame.playAgain}
+              </KidButton>
+            )}
           </div>
 
-          {panda && (
+          {(mode === 'tortoise' ? pandaArt : pandaIdle) && (
             <img
-              src={hotseat?.status === 'won' ? (pandaCheer ?? panda) : panda}
+              src={mode === 'tortoise' ? pandaArt : (hotseat?.status === 'won' ? (pandaCheer ?? pandaIdle) : pandaIdle)}
               alt=""
               aria-hidden
               className="pointer-events-none absolute bottom-2 left-2 h-[76px] w-[76px] object-contain short:hidden tiny:hidden"
@@ -602,6 +829,7 @@ function ChessBoardView({
   shake,
   dangerSquares,
   tippingKing,
+  lastMove,
   onSquare,
 }: {
   fen: string;
@@ -611,7 +839,8 @@ function ChessBoardView({
   captureTargets: Set<Square>;
   shake: Square | null;
   dangerSquares: Square[];
-  tippingKing: { square: Square; color: 'w' | 'b' } | null;
+  tippingKing: { square: Square; color: 'w' | 'b'; mover?: 'w' | 'b' } | null;
+  lastMove: { from: Square; to: Square } | null;
   onSquare: (s: Square) => void;
 }) {
   const pieceMap = useMemo(() => {
@@ -664,6 +893,13 @@ function ChessBoardView({
                       className="absolute inset-[2px] rounded-sm pointer-events-none"
                       style={{ boxShadow: `inset 0 0 0 2px ${LEAF}` }}
                       data-testid="chess-selected"
+                    />
+                  )}
+                  {lastMove && (square === lastMove.from || square === lastMove.to) && (
+                    <span
+                      className="absolute inset-0 pointer-events-none"
+                      style={{ backgroundColor: `${LEAF}33` }}
+                      data-testid="chess-last-move"
                     />
                   )}
                   {isDanger && (

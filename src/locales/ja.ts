@@ -498,6 +498,13 @@ export const ja: TranslationSchema = {
     hint: "ヒント",
     newGame: "はじめから",
     newGameConfirm: "いい？",
+    modeTortoise: "かめと",
+    levelGentle: "やさしい",
+    levelClever: "かしこい",
+    tortoiseToMove: "かめのばん",
+    thinking: "かんがえちゅう…",
+    tortoiseWins: "かめのかち",
+    playAgain: "もういちど",
     pieces: {
       p: "ポーン",
       r: "ルーク",
