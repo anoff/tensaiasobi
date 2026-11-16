@@ -1,0 +1,265 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Sky Gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fbcfe8" />
+      <stop offset="100%" stop-color="#e9d5ff" />
+    </linearGradient>
+
+    <!-- Far Hill Gradient (Checkered feel / Golden Green) -->
+    <linearGradient id="farHillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#84cc16" />
+    </linearGradient>
+
+    <!-- Near Hill Gradient (Minty Green) -->
+    <linearGradient id="nearHillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+
+    <!-- Dress Gradient -->
+    <linearGradient id="dressGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="100%" stop-color="#e9d5ff" />
+    </linearGradient>
+
+    <!-- Hair Gradient -->
+    <linearGradient id="hairGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#92400e" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+
+    <!-- Bunny Fur Gradient -->
+    <linearGradient id="bunnyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#fffbeb" />
+    </linearGradient>
+
+    <!-- Blanket Pattern -->
+    <pattern id="picnicPattern" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+      <rect width="10" height="20" fill="#f472b6" />
+      <rect x="10" width="10" height="20" fill="#ffffff" />
+    </pattern>
+
+    <!-- Background Checkerboard Pattern for Puzzle Texture -->
+    <pattern id="hillChecker" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#a3e635" opacity="0.3" />
+      <rect x="10" y="10" width="10" height="10" fill="#a3e635" opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- 1. BACKGROUND / SKY -->
+  <rect width="400" height="400" fill="url(#skyGrad)" />
+
+  <!-- Fluffy Cloud 1 -->
+  <g fill="#ffffff" opacity="0.95">
+    <circle cx="70" cy="50" r="22" />
+    <circle cx="95" cy="45" r="28" />
+    <circle cx="125" cy="55" r="20" />
+    <circle cx="100" cy="65" r="20" />
+  </g>
+
+  <!-- Fluffy Cloud 2 -->
+  <g fill="#ffffff" opacity="0.9">
+    <circle cx="290" cy="65" r="18" />
+    <circle cx="315" cy="55" r="24" />
+    <circle cx="340" cy="65" r="18" />
+  </g>
+
+  <!-- Sun with Friendly Face -->
+  <circle cx="50" cy="50" r="30" fill="#fde047" stroke="#f59e0b" stroke-width="2" />
+  <circle cx="42" cy="45" r="3" fill="#1e293b" />
+  <circle cx="58" cy="45" r="3" fill="#1e293b" />
+  <circle cx="38" cy="53" r="4" fill="#fda4af" />
+  <circle cx="62" cy="53" r="4" fill="#fda4af" />
+  <path d="M 45 56 Q 50 62 55 56" fill="none" stroke="#be123c" stroke-width="2" stroke-linecap="round" />
+
+  <!-- Sun Rays -->
+  <path d="M 50 12 L 50 2 M 50 88 L 50 98 M 12 50 L 2 50 M 88 50 L 98 50 M 23 23 L 16 16 M 77 77 L 84 84 M 23 77 L 16 84 M 77 23 L 84 16" stroke="#fef08a" stroke-width="3" stroke-linecap="round" />
+
+  <!-- Rainbow Arc in Top Corner -->
+  <path d="M 220 0 A 160 160 0 0 1 400 180" fill="none" stroke="#f43f5e" stroke-width="6" opacity="0.6" />
+  <path d="M 226 0 A 154 154 0 0 1 400 174" fill="none" stroke="#fb923c" stroke-width="6" opacity="0.6" />
+  <path d="M 232 0 A 148 148 0 0 1 400 168" fill="none" stroke="#facc15" stroke-width="6" opacity="0.6" />
+  <path d="M 238 0 A 142 142 0 0 1 400 162" fill="none" stroke="#4ade80" stroke-width="6" opacity="0.6" />
+  <path d="M 244 0 A 136 136 0 0 1 400 156" fill="none" stroke="#3b82f6" stroke-width="6" opacity="0.6" />
+
+  <!-- 2. MIDGROUND HILLS -->
+  <!-- Far Hill -->
+  <path d="M -20 220 Q 120 130 280 180 T 420 160 L 420 400 L -20 400 Z" fill="url(#farHillGrad)" />
+  <path d="M -20 220 Q 120 130 280 180 T 420 160 L 420 400 L -20 400 Z" fill="url(#hillChecker)" />
+
+  <!-- Candy Tree on Far Hill -->
+  <g transform="translate(200, 100)">
+    <!-- Trunk -->
+    <path d="M 15 70 Q 20 40 20 20 Q 10 30 5 20 Q 20 10 25 -10 Q 30 10 45 20 Q 40 30 30 20 Q 30 40 35 70 Z" fill="#78350f" />
+    <!-- Lollipop Tops -->
+    <circle cx="0" cy="-10" r="18" fill="#f43f5e" />
+    <circle cx="0" cy="-10" r="12" fill="#fda4af" />
+    <circle cx="0" cy="-10" r="6" fill="#ffffff" />
+
+    <circle cx="50" cy="0" r="15" fill="#3b82f6" />
+    <circle cx="50" cy="0" r="10" fill="#93c5fd" />
+    <circle cx="50" cy="0" r="5" fill="#ffffff" />
+
+    <circle cx="25" cy="-35" r="22" fill="#facc15" />
+    <circle cx="25" cy="-35" r="15" fill="#fef08a" />
+    <circle cx="25" cy="-35" r="8" fill="#ffffff" />
+  </g>
+
+  <!-- Near Hill (Foreground Slope) -->
+  <path d="M -20 260 Q 150 210 420 260 L 420 400 L -20 400 Z" fill="url(#nearHillGrad)" />
+
+  <!-- Decorative Polka Dots on Near Hill for Visual Interest -->
+  <g fill="#a7f3d0" opacity="0.6">
+    <circle cx="40" cy="270" r="8" />
+    <circle cx="90" cy="290" r="12" />
+    <circle cx="150" cy="260" r="6" />
+    <circle cx="280" cy="270" r="10" />
+    <circle cx="360" cy="280" r="14" />
+    <circle cx="320" cy="300" r="7" />
+  </g>
+
+  <!-- 3. PICNIC SETTING (Center) -->
+  <!-- Picnic Blanket -->
+  <ellipse cx="200" cy="325" rx="140" ry="45" fill="url(#picnicPattern)" stroke="#ec4899" stroke-width="3" />
+
+  <!-- Teapot & Treats Spread -->
+  <g transform="translate(170, 290)">
+    <!-- Tray / Mat -->
+    <ellipse cx="30" cy="25" rx="35" ry="15" fill="#fef08a" stroke="#f59e0b" stroke-width="1.5" />
+    
+    <!-- Teapot -->
+    <path d="M 15 15 C 15 0, 45 0, 45 15 C 45 30, 15 30, 15 15 Z" fill="#a855f7" stroke="#7e22ce" stroke-width="1.5" />
+    <path d="M 45 15 Q 55 10 52 22 Q 45 22 45 15" fill="none" stroke="#7e22ce" stroke-width="2" /> <!-- Spout -->
+    <path d="M 15 10 C 5 10, 5 22, 15 22" fill="none" stroke="#7e22ce" stroke-width="2" /> <!-- Handle -->
+    <circle cx="30" cy="0" r="4" fill="#f472b6" /> <!-- Lid Knob -->
+
+    <!-- Cupcake -->
+    <path d="M 2 25 L 5 35 L 15 35 L 18 25 Z" fill="#f97316" /> <!-- Base -->
+    <path d="M 0 25 Q 10 15 20 25 Z" fill="#f472b6" /> <!-- Frosting -->
+    <circle cx="10" cy="17" r="3" fill="#ef4444" /> <!-- Cherry -->
+  </g>
+
+  <!-- 4. KEY CHARACTERS -->
+  <!-- CHARACTER 1: THE GIRL (Left) -->
+  <g transform="translate(45, 180)">
+    <!-- Hair -->
+    <path d="M 20 30 Q 0 70 20 110 Q 60 120 100 110 Q 120 70 100 30" fill="url(#hairGrad)" />
+
+    <!-- Face -->
+    <circle cx="60" cy="60" r="35" fill="#ffedd5" />
+    <circle cx="48" cy="55" r="4" fill="#1e293b" />
+    <circle cx="72" cy="55" r="4" fill="#1e293b" />
+    <circle cx="45" cy="65" r="6" fill="#fecdd3" opacity="0.8" />
+    <circle cx="75" cy="65" r="6" fill="#fecdd3" opacity="0.8" />
+    <path d="M 52 70 Q 60 78 68 70" fill="none" stroke="#be123c" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Sun Hat (Dome in Foreground) -->
+    <g transform="translate(0, 0)">
+      <ellipse cx="60" cy="30" rx="60" ry="18" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+      <path d="M 30 25 Q 60 -10 90 25 Z" fill="#fde68a" stroke="#f59e0b" stroke-width="2"/>
+      <path d="M 30 25 Q 60 35 90 25" fill="none" stroke="#f472b6" stroke-width="5" />
+    </g>
+
+    <!-- Dress -->
+    <path d="M 25 90 L 10 170 Q 60 190 110 170 L 95 90 Z" fill="url(#dressGrad)" stroke="#a855f7" stroke-width="2"/>
+    <path d="M 15 90 Q 20 80 25 90 Q 30 80 35 90" fill="none" stroke="#e9d5ff" stroke-width="2" />
+    <path d="M 10 170 Q 20 160 30 170 Q 40 160 50 170 Q 60 160 70 170 Q 80 160 90 170 Q 100 160 110 170" fill="none" stroke="#e9d5ff" stroke-width="2" />
+    
+    <!-- Arm holding Teacup -->
+    <ellipse cx="80" cy="115" rx="15" ry="7" fill="#ffedd5" transform="rotate(20 80 115)" />
+    <path d="M 85 105 Q 90 100 95 105 L 100 120 Q 90 125 80 120 Z" fill="#f9a8d4" stroke="#ec4899" stroke-width="1.5" />
+    <path d="M 85 110 A 5 5 0 0 1 80 105" fill="none" stroke="#ec4899" stroke-width="1.5" />
+  </g>
+
+  <!-- CHARACTER 2: THE BUNNY (Right) -->
+  <g transform="translate(265, 195)">
+    <!-- Ears -->
+    <ellipse cx="-20" cy="-30" rx="10" ry="35" fill="url(#bunnyGrad)" transform="rotate(-15 -20 -30)" />
+    <ellipse cx="20" cy="-30" rx="10" ry="35" fill="url(#bunnyGrad)" transform="rotate(15 20 -30)" />
+    <ellipse cx="-20" cy="-30" rx="5" ry="25" fill="#fecdd3" transform="rotate(-15 -20 -30)" />
+    <ellipse cx="20" cy="-30" rx="5" ry="25" fill="#fecdd3" transform="rotate(15 20 -30)" />
+
+    <!-- Head -->
+    <circle cx="0" cy="20" r="35" fill="url(#bunnyGrad)" />
+    <circle cx="-12" cy="15" r="3.5" fill="#1e293b" />
+    <circle cx="12" cy="15" r="3.5" fill="#1e293b" />
+    <ellipse cx="0" cy="25" rx="4" ry="2.5" fill="#f472b6" />
+    <path d="M -8 32 Q 0 40 8 32" fill="none" stroke="#a16207" stroke-width="1.5" stroke-linecap="round" />
+
+    <!-- Body -->
+    <ellipse cx="0" cy="80" rx="30" ry="40" fill="url(#bunnyGrad)" />
+    
+    <!-- Bow Tie -->
+    <g transform="translate(0, 50)">
+      <path d="M -15 -8 L -15 8 L 0 2 L 15 8 L 15 -8 Z" fill="#6ee7b7" stroke="#059669" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="4" fill="#34d399" stroke="#059669" stroke-width="1.5"/>
+    </g>
+
+    <!-- Arms & Saucer -->
+    <ellipse cx="-25" cy="85" rx="12" ry="6" fill="#fffbeb" transform="rotate(-40 -25 85)" />
+    <ellipse cx="25" cy="85" rx="12" ry="6" fill="#fffbeb" transform="rotate(40 25 85)" />
+    <ellipse cx="-15" cy="88" rx="22" ry="7" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" />
+  </g>
+
+  <!-- 5. FOREGROUND DETAILS & ACCENTS -->
+  <!-- Friendly Snail (Bottom Right) -->
+  <g transform="translate(330, 340)">
+    <!-- Body -->
+    <path d="M -10 20 Q 15 20 30 15 Q 35 5 30 -5 Q 25 5 15 10 Q 0 10 -10 20 Z" fill="#fbbf24" />
+    <!-- Crown -->
+    <path d="M 27 -8 L 24 -15 L 28 -12 L 31 -17 L 34 -12 L 38 -15 L 35 -8 Z" fill="#facc15" stroke="#d97706" stroke-width="0.8" />
+    <!-- Shell -->
+    <circle cx="5" cy="5" r="14" fill="#f472b6" stroke="#db2777" stroke-width="1.5" />
+    <path d="M 5 5 A 8 8 0 1 1 11 9" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />
+    <!-- Eye & Smile -->
+    <circle cx="28" cy="-2" r="1" fill="#1e293b" />
+    <path d="M 26 2 Q 28 4 30 2" fill="none" stroke="#1e293b" stroke-width="0.8" />
+  </g>
+
+  <!-- Oversized Foreground Flowers (Bottom Left) -->
+  <g transform="translate(30, 330)">
+    <!-- Stem & Leaves -->
+    <path d="M 20 50 Q 10 30 20 10" fill="none" stroke="#059669" stroke-width="4" stroke-linecap="round" />
+    <path d="M 16 35 Q 0 30 5 20 Q 15 25 16 35 Z" fill="#34d399" />
+    <!-- Flower Petals -->
+    <circle cx="20" cy="10" r="12" fill="#3b82f6" />
+    <circle cx="8" cy="10" r="12" fill="#3b82f6" />
+    <circle cx="20" cy="-2" r="12" fill="#3b82f6" />
+    <circle cx="32" cy="10" r="12" fill="#3b82f6" />
+    <circle cx="20" cy="22" r="12" fill="#3b82f6" />
+    <!-- Center -->
+    <circle cx="20" cy="10" r="8" fill="#fef08a" />
+  </g>
+
+  <!-- Smaller Pink Flower (Bottom Center-Left) -->
+  <g transform="translate(100, 360)">
+    <circle cx="0" cy="0" r="7" fill="#ec4899" />
+    <circle cx="-6" cy="-4" r="5" fill="#f472b6" />
+    <circle cx="6" cy="-4" r="5" fill="#f472b6" />
+    <circle cx="-6" cy="4" r="5" fill="#f472b6" />
+    <circle cx="6" cy="4" r="5" fill="#f472b6" />
+    <circle cx="0" cy="0" r="4" fill="#fde047" />
+  </g>
+
+  <!-- Butterflies in Air -->
+  <!-- Butterfly 1 (Top Left) -->
+  <g transform="translate(130, 110) rotate(-15) scale(0.7)">
+    <ellipse cx="0" cy="0" rx="2" ry="10" fill="#1e293b" />
+    <path d="M -2 -2 C -15 -15, -20 0, -2 3 C -15 10, -10 20, -2 5" fill="#f43f5e" />
+    <path d="M 2 -2 C 15 -15, 20 0, 2 3 C 15 10, 10 20, 2 5" fill="#f43f5e" />
+    <circle cx="-8" cy="-5" r="2" fill="#fde047" />
+    <circle cx="8" cy="-5" r="2" fill="#fde047" />
+  </g>
+
+  <!-- Butterfly 2 (Near Tea Party) -->
+  <g transform="translate(260, 140) rotate(20) scale(0.6)">
+    <ellipse cx="0" cy="0" rx="2" ry="10" fill="#1e293b" />
+    <path d="M -2 -2 C -15 -15, -20 0, -2 3 C -15 10, -10 20, -2 5" fill="#a855f7" />
+    <path d="M 2 -2 C 15 -15, 20 0, 2 3 C 15 10, 10 20, 2 5" fill="#a855f7" />
+    <circle cx="-8" cy="-5" r="2" fill="#ffffff" />
+    <circle cx="8" cy="-5" r="2" fill="#ffffff" />
+  </g>
+</svg>
