@@ -22,6 +22,7 @@ import {
   type MovesPrompt,
   type PieceSymbol,
   type Square,
+  hotseatBanner,
   FILES,
   RANKS,
   applyCaptureMove,
@@ -71,7 +72,7 @@ export default function ChessGame() {
   const [promo, setPromo] = useState<{ from: Square; to: Square } | null>(null);
   const [wonWhite, setWonWhite] = useState<CapturedPiece[]>([]);
   const [wonBlack, setWonBlack] = useState<CapturedPiece[]>([]);
-  const [tippingKing, setTippingKing] = useState<{ square: Square; color: 'w' | 'b' } | null>(null);
+  const [tippingKing, setTippingKing] = useState<{ square: Square; color: 'w' | 'b'; mover?: 'w' | 'b' } | null>(null);
 
   const tortoise = characterArt('tortoise', 'idle');
   const panda = characterArt('panda', 'idle');
@@ -129,13 +130,16 @@ export default function ChessGame() {
     }
     if (mode === 'capture') return t.chessGame.capturePrompt;
     if (mode === 'hotseat' && hotseat) {
-      if (hotseat.status === 'won') {
-        return hotseat.winner === 'w' ? t.chessGame.whiteWins : t.chessGame.blackWins;
-      }
-      if (hotseat.status === 'draw') return t.chessGame.draw;
       const ownKing = pieces.find((p) => p.type === 'k' && p.color === hotseat.turn);
-      if (ownKing && dangerSquares.includes(ownKing.square) && !tippingKing) return t.chessGame.watchKing;
-      return hotseat.turn === 'w' ? t.chessGame.whiteToMove : t.chessGame.blackToMove;
+      const banner = hotseatBanner(
+        hotseat,
+        tippingKing?.mover ?? null,
+        Boolean(ownKing && dangerSquares.includes(ownKing.square)),
+      );
+      if (banner.kind === 'won') return banner.side === 'w' ? t.chessGame.whiteWins : t.chessGame.blackWins;
+      if (banner.kind === 'draw') return t.chessGame.draw;
+      if (banner.kind === 'watchKing') return t.chessGame.watchKing;
+      return banner.side === 'w' ? t.chessGame.whiteToMove : t.chessGame.blackToMove;
     }
     return '';
   })();
@@ -354,7 +358,7 @@ export default function ChessGame() {
     if (result.captured?.type === 'k') {
       setLocked(true);
       setHotseat({ ...result.state, status: 'playing', winner: null });
-      setTippingKing({ square: dest, color: result.captured.color });
+      setTippingKing({ square: dest, color: result.captured.color, mover: result.state.winner ?? (result.state.turn === 'w' ? 'b' : 'w') });
       later(() => {
         setTippingKing(null);
         recordCapture(result.captured);
@@ -395,10 +399,13 @@ export default function ChessGame() {
 
   const cream = CREAM;
 
+  const hotseatSide = hotseat
+    ? hotseatBanner(hotseat, tippingKing?.mover ?? null, false).side
+    : null;
   const sideToPlay = mode === 'capture' && capturePuzzle
     ? capturePuzzle.side
     : mode === 'hotseat' && hotseat
-      ? (hotseat.status === 'won' && hotseat.winner ? hotseat.winner : hotseat.turn)
+      ? hotseatSide
       : null;
   const showSideDot = Boolean(
     (mode === 'capture' && capturePuzzle) ||

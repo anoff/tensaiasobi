@@ -5,6 +5,7 @@ import {
   applyCaptureMove,
   applyMove,
   gradeMovesTap,
+  hotseatBanner,
   kingsInDanger,
   legalMoves,
   legalTargets,
@@ -210,6 +211,23 @@ describe('chessLogic', () => {
         expect(mate.state.status).toBe('won');
         expect(mate.state.winner).toBe('b');
       }
+    });
+
+    it('keeps the mover on the banner during a king tip-over, then the winner', () => {
+      const fen = '4k3/8/8/8/8/8/4Q3/4K3 w - - 0 1';
+      const result = applyMove(fen, 'e2', 'e8');
+      expect(result.ok && !result.needsPromotion).toBe(true);
+      if (!result.ok || result.needsPromotion) return;
+      expect(result.state.winner).toBe('w');
+      expect(result.state.turn).toBe('b');
+      const duringTip = hotseatBanner(
+        { ...result.state, status: 'playing', winner: null },
+        result.state.winner,
+        false,
+      );
+      expect(duringTip).toEqual({ kind: 'toMove', side: 'w' });
+      const afterTip = hotseatBanner(result.state, null, false);
+      expect(afterTip).toEqual({ kind: 'won', side: 'w' });
     });
   });
 });

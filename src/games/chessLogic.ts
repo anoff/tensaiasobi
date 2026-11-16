@@ -32,6 +32,28 @@ export interface PlayState {
 export type HotseatStatus = PlayStatus;
 export type HotseatState = PlayState;
 
+/** Banner for 2-player: during a king tip-over, keep showing the mover, not the loser. */
+export function hotseatBanner(
+  state: Pick<PlayState, 'status' | 'turn' | 'winner'>,
+  tippingMover: Color | null,
+  ownKingInDanger: boolean,
+): { kind: 'won' | 'draw' | 'watchKing' | 'toMove'; side: Color } {
+  if (state.status === 'won') {
+    return { kind: 'won', side: state.winner ?? state.turn };
+  }
+  if (state.status === 'draw') {
+    return { kind: 'draw', side: state.turn };
+  }
+  if (tippingMover) {
+    return { kind: 'toMove', side: tippingMover };
+  }
+  if (ownKingInDanger) {
+    return { kind: 'watchKing', side: state.turn };
+  }
+  return { kind: 'toMove', side: state.turn };
+}
+
+
 export interface MovesPrompt {
   id: string;
   piece: PieceSymbol;
