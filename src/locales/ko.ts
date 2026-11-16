@@ -501,8 +501,10 @@ export const ko: TranslationSchema = {
     modeTortoise: "거북이와",
     levelGentle: "쉬운",
     levelClever: "영리한",
+    tortoiseLevel: "거북이 레벨",
     tortoiseToMove: "거북이 차례",
     thinking: "생각 중…",
+    tortoiseThinking: "거북이가 생각 중…",
     tortoiseWins: "거북이 승리",
     playAgain: "다시 하기",
     pieces: {

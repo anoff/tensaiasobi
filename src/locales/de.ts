@@ -501,8 +501,10 @@ export const de: TranslationSchema = {
     modeTortoise: "vs Schildkröte",
     levelGentle: "Sanft",
     levelClever: "Klug",
+    tortoiseLevel: "Schildkröten-Stufe",
     tortoiseToMove: "Schildkröte zieht",
     thinking: "Ich denke…",
+    tortoiseThinking: "Schildkröte denkt…",
     tortoiseWins: "Schildkröte gewinnt",
     playAgain: "Nochmal",
     pieces: {

@@ -46,6 +46,7 @@ import {
   chooseTortoiseMove,
   plannedThinkMs,
   tortoiseThinkMs,
+  TORTOISE_STICKER_HOLD_MS,
   type TortoiseLevel,
 } from './chessTortoise';
 
@@ -99,6 +100,8 @@ export default function ChessGame() {
   const [tortoiseLevel, setTortoiseLevel] = useState<GameDifficulty>('easy');
   const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null);
   const tortoiseAwarded = useRef(false);
+  const stickerHold = useRef<number | null>(null);
+
 
 
   const tortoiseIdle = characterArt('tortoise', 'idle');
@@ -182,7 +185,8 @@ export default function ChessGame() {
       );
       if (banner.kind === 'won') return banner.side === 'w' ? t.chessGame.whiteWins : t.chessGame.tortoiseWins;
       if (banner.kind === 'draw') return t.chessGame.draw;
-      if (thinking || banner.side === 'b') return t.chessGame.tortoiseToMove;
+      if (thinking) return `⚫ ${t.chessGame.tortoiseThinking}`;
+      if (banner.side === 'b') return t.chessGame.tortoiseToMove;
       if (banner.kind === 'watchKing') return t.chessGame.watchKing;
       return t.chessGame.whiteToMove;
     }
@@ -262,17 +266,25 @@ export default function ChessGame() {
     setHotseat(state);
   };
 
+  useEffect(() => () => {
+    if (stickerHold.current != null) window.clearTimeout(stickerHold.current);
+  }, []);
+
   const settleTortoise = (state: HotseatState) => {
     if (state.status !== 'won' && state.status !== 'draw') return;
     if (tortoiseAwarded.current) return;
     tortoiseAwarded.current = true;
     onStarEarned?.(modeStars('tortoise'));
-    onRoundComplete?.();
     if (state.status === 'won' && state.winner === 'w') {
       setShowConfetti(true);
       later(() => setShowConfetti(false), 900);
     }
     setLocked(false);
+    if (stickerHold.current != null) window.clearTimeout(stickerHold.current);
+    stickerHold.current = window.setTimeout(() => {
+      stickerHold.current = null;
+      onRoundComplete?.();
+    }, TORTOISE_STICKER_HOLD_MS);
   };
 
   const backToModes = () => {
@@ -587,7 +599,7 @@ export default function ChessGame() {
   const showSideDot = Boolean(
     (mode === 'capture' && capturePuzzle) ||
     (mode === 'hotseat' && hotseat && hotseat.status !== 'draw') ||
-    (mode === 'tortoise' && hotseat && !vsOver),
+    (mode === 'tortoise' && hotseat && !vsOver && !thinking),
   );
 
   return (
@@ -615,21 +627,12 @@ export default function ChessGame() {
           </span>
         )}
         <p
-          className="flex-1 text-center text-lg font-black leading-tight"
+          className={`flex-1 text-center text-lg font-black leading-tight ${thinking ? 'whitespace-nowrap' : ''}`}
           style={{ color: INK }}
           data-testid="chess-prompt"
         >
           {promptText}
         </p>
-        {thinking && (
-          <span
-            className="shrink-0 rounded-full px-3 py-1 text-sm font-black"
-            style={{ backgroundColor: CREAM, color: INK, boxShadow: hardShadow(2, 2) }}
-            data-testid="chess-thinking"
-          >
-            {t.chessGame.thinking}
-          </span>
-        )}
         {mode === 'capture' && capturePuzzle && (
           <span
             className="shrink-0 text-lg font-black tabular-nums"
@@ -662,7 +665,14 @@ export default function ChessGame() {
               </KidButton>
             ))}
           </div>
-          <div data-testid="chess-tortoise-levels">
+          <div className="w-full flex flex-col gap-2" data-testid="chess-tortoise-levels">
+            <p
+              className="w-full text-center text-lg font-black leading-tight"
+              style={{ color: INK }}
+              data-testid="chess-tortoise-level-label"
+            >
+              {t.chessGame.tortoiseLevel}
+            </p>
             <DifficultySelector
               selected={tortoiseLevel}
               options={['easy', 'medium']}

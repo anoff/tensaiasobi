@@ -12,6 +12,8 @@ export type TortoiseChoice = {
 export const THINK_MIN_MS = 700;
 export const THINK_MAX_MS = 1400;
 export const THINK_CAP_MS = 2000;
+/** Hold the Logic sticker popup until the end line has been visible this long. */
+export const TORTOISE_STICKER_HOLD_MS = 1500;
 const CLOSE_PAWN = 1;
 const KING_TAKEN_SCORE = 1000;
 const KING_LEFT_OPEN_SCORE = -1000;

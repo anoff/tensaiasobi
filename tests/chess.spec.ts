@@ -1,4 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
+import { TORTOISE_STICKER_HOLD_MS } from '../src/games/chessTortoise';
+
 
 async function openChess(page: Page, search = '') {
   await page.goto('/' + (search ? `?${search}` : ''));
@@ -30,6 +32,13 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('difficulty-hard')).toHaveCount(0);
     await expect(levels.getByText('Gentle')).toBeVisible();
     await expect(levels.getByText('Clever')).toBeVisible();
+    const levelLabel = page.getByTestId('chess-tortoise-level-label');
+    await expect(levelLabel).toHaveText('Tortoise level');
+    const labelBox = await levelLabel.boundingBox();
+    const rowBox = await page.getByTestId('difficulty-easy').boundingBox();
+    expect(labelBox).toBeTruthy();
+    expect(rowBox).toBeTruthy();
+    expect(labelBox!.y + labelBox!.height).toBeLessThanOrEqual(rowBox!.y + 1);
   });
 
   test('moves mode: hint reveals legal squares, miss does not, hit moves the piece', async ({ page }) => {
@@ -188,17 +197,23 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-won-trays')).toBeVisible();
   });
 
-  test('vs Tortoise shows Thinking… then a last-move tint after White moves', async ({ page }) => {
+  test('vs Tortoise shows a one-line thinking banner, then a last-move tint', async ({ page }) => {
     await openChess(page);
     await page.getByTestId('chess-mode-tortoise').click();
     await page.getByTestId('chess-sq-e2').click();
     await page.getByTestId('chess-sq-e4').click();
-    await expect(page.getByTestId('chess-thinking')).toBeVisible();
-    await expect(page.getByTestId('chess-prompt')).toHaveText("Tortoise's move");
-    await expect(page.getByTestId('chess-thinking')).toHaveText('Thinking…');
-    await expect(page.getByTestId('chess-last-move').first()).toBeVisible({ timeout: 3000 });
+    const prompt = page.getByTestId('chess-prompt');
+    await expect(prompt).toHaveText('⚫ Tortoise is thinking…');
     await expect(page.getByTestId('chess-thinking')).toHaveCount(0);
-    await expect(page.getByTestId('chess-prompt')).toHaveText('White to move');
+    await expect(page.getByTestId('chess-side-dot')).toHaveCount(0);
+    const box = await prompt.boundingBox();
+    expect(box).toBeTruthy();
+    expect(box!.width).toBeLessThanOrEqual(375);
+    // One line of text-lg / leading-tight is well under 40px; a wrap would be taller.
+    expect(box!.height).toBeLessThan(40);
+    await expect(page.getByTestId('chess-last-move').first()).toBeVisible({ timeout: 3000 });
+    await expect(prompt).toHaveText('White to move');
+    await expect(page.getByTestId('chess-side-dot')).toHaveText('⚪');
   });
 
   test("vs Tortoise shows a calm Tortoise wins after the king is captured", async ({ page }) => {
@@ -209,6 +224,7 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-play-again')).toBeVisible();
     await expect(page.getByTestId('chess-new-game')).toHaveCount(0);
     const award = page.getByTestId('sticker-award');
+    await expect(award).toHaveCount(0);
     if (await award.count()) {
       await award.click();
       if (await award.isVisible().catch(() => false)) await award.click();
@@ -216,5 +232,18 @@ test.describe('Chess', () => {
     }
     await expect(page.getByTestId('chess-prompt')).toHaveText('Tortoise wins');
     await expect(page.locator('.animate-confetti, [data-testid="chess-confetti"]')).toHaveCount(0);
+  });
+
+  test('vs Tortoise holds the Logic sticker popup until the end line has been visible for 1.5s', async ({ page }) => {
+    const fen = encodeURIComponent('4k3/8/8/8/8/8/4q3/4K3 b - - 0 1');
+    await openChess(page, `tortoiseFen=${fen}&tortoiseLevel=clever`);
+    await page.getByTestId('chess-mode-tortoise').click();
+    const prompt = page.getByTestId('chess-prompt');
+    await expect(prompt).toHaveText('Tortoise wins', { timeout: 5000 });
+    const award = page.getByTestId('sticker-award');
+    await expect(award).toHaveCount(0);
+    await page.waitForTimeout(TORTOISE_STICKER_HOLD_MS - 200);
+    await expect(award).toHaveCount(0);
+    await expect(award).toBeVisible({ timeout: 800 });
   });
 });

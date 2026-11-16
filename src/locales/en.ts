@@ -501,8 +501,10 @@ export const en = {
     modeTortoise: "vs Tortoise",
     levelGentle: "Gentle",
     levelClever: "Clever",
+    tortoiseLevel: "Tortoise level",
     tortoiseToMove: "Tortoise's move",
     thinking: "Thinking…",
+    tortoiseThinking: "Tortoise is thinking…",
     tortoiseWins: "Tortoise wins",
     playAgain: "Play again",
     pieces: {
