@@ -14,6 +14,7 @@ export const THINK_MAX_MS = 3000;
 export const THINK_CAP_MS = THINK_MAX_MS;
 export const FOX_HIGHLIGHT_MS = 500;
 export const FOX_STEP_MS = 100;
+export const FOX_OVERLAY_MS = 200;
 /** Hold the Logic sticker popup until the end line has been visible this long. */
 export const FOX_STICKER_HOLD_MS = 1500;
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import GameConfetti from '../components/GameConfetti';
 import KidButton from '../components/KidButton';
 import DifficultySelector from '../components/DifficultySelector';
@@ -54,6 +54,7 @@ import {
   plannedThinkMs,
   FOX_HIGHLIGHT_MS,
   FOX_STEP_MS,
+  FOX_OVERLAY_MS,
   FOX_STICKER_HOLD_MS,
   type FoxLevel,
 } from './chessFox';
@@ -109,6 +110,10 @@ function squareOffset(square: Square): { left: string; top: string } {
   return { left: `${file * 12.5}%`, top: `${(7 - rank) * 12.5}%` };
 }
 
+function reduceMotion(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 type Phase = 'pick' | 'play';
 
 export default function ChessGame() {
@@ -137,6 +142,7 @@ export default function ChessGame() {
   const [foxLevel, setFoxLevel] = useState<GameDifficulty>('easy');
   const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null);
   const [foxAnim, setFoxAnim] = useState<FoxAnim | null>(null);
+  const [foxExiting, setFoxExiting] = useState(false);
   const foxAwarded = useRef(false);
   const stickerHold = useRef<number | null>(null);
   const foxBoot = useRef(bootFox('easy'));
@@ -161,11 +167,9 @@ export default function ChessGame() {
       !foxAnim,
   );
   const foxBusy = thinking || Boolean(foxAnim);
-  const childWon = mode === 'fox' && hotseat?.status === 'won' && hotseat.winner === 'w';
   const foxWon = mode === 'fox' && hotseat?.status === 'won' && hotseat.winner === 'b';
-  const pandaArt = childWon ? (pandaCheer ?? pandaIdle) : pandaIdle;
-  const foxPose = (thinking || foxAnim) ? FOX_THINK_SRC : foxIdle;
   const foxPhase = foxAnim?.phase ?? (thinking ? 'think' : null);
+  const foxOverlay = { mounted: thinking, visible: thinking && !foxExiting };
 
   const pieces = useMemo(() => (fen ? piecesFromFen(fen) : []), [fen]);
 
@@ -260,6 +264,7 @@ export default function ChessGame() {
     setWonWhite([]);
     setWonBlack([]);
     setFoxAnim(null);
+    setFoxExiting(false);
     if (m === 'moves') {
       const p = nextMovesPrompt(null, 0);
       setMovesPrompt(p);
@@ -304,6 +309,7 @@ export default function ChessGame() {
     setWonBlack([]);
     setLocked(false);
     setFoxAnim(null);
+    setFoxExiting(false);
     setHotseat(state);
   };
 
@@ -345,6 +351,7 @@ export default function ChessGame() {
     setWonBlack([]);
     setLastMove(null);
     setFoxAnim(null);
+    setFoxExiting(false);
     foxAwarded.current = false;
   };
 
@@ -691,7 +698,16 @@ export default function ChessGame() {
       const wait = boot.thinkMs ?? foxThinkMs({ plannedMs: plannedThinkMs(Math.random), searchMs: 0 });
       choice = chooseFoxMove(fenNow, level, Math.random);
       move = findFoxMove(fenNow, choice);
-      timer = window.setTimeout(startHighlight, wait);
+      timer = window.setTimeout(() => {
+        if (cancelled) return;
+        const outMs = reduceMotion() ? 0 : FOX_OVERLAY_MS;
+        setFoxExiting(true);
+        timer = window.setTimeout(() => {
+          if (cancelled) return;
+          setFoxExiting(false);
+          startHighlight();
+        }, outMs);
+      }, wait);
     }, 0);
     return () => {
       cancelled = true;
@@ -830,6 +846,35 @@ export default function ChessGame() {
             lastMove={mode === 'fox' ? lastMove : null}
             foxAnim={mode === 'fox' ? foxAnim : null}
             locked={foxBusy}
+            overlay={foxOverlay.mounted ? (
+              <>
+                <div
+                  className="chess-fox-dim pointer-events-none absolute inset-0 z-[4] rounded-[0.7rem]"
+                  data-testid="chess-fox-dim"
+                  data-visible={foxOverlay.visible ? 'true' : 'false'}
+                />
+                <div
+                  className="chess-fox-overlay pointer-events-none absolute inset-0 z-[5] flex items-center justify-center overflow-visible"
+                  data-testid="chess-fox-overlay"
+                  data-visible={foxOverlay.visible ? 'true' : 'false'}
+                >
+                  <div className="relative w-[60%] aspect-square">
+                    <div
+                      className="absolute overflow-visible"
+                      style={{ left: '-40%', top: '-18%', width: '80%', height: '60%' }}
+                    >
+                      <FoxThoughtBubble />
+                    </div>
+                    <img
+                      src={FOX_THINK_SRC}
+                      alt=""
+                      className="h-full w-full object-contain"
+                      data-testid="chess-fox"
+                    />
+                  </div>
+                </div>
+              </>
+            ) : null}
             onSquare={onSquare}
           />
 
@@ -901,9 +946,9 @@ export default function ChessGame() {
             )}
           </div>
 
-          {(mode === 'fox' ? pandaArt : pandaIdle) && (
+          {mode !== 'fox' && pandaIdle && (
             <img
-              src={mode === 'fox' ? pandaArt : (hotseat?.status === 'won' ? (pandaCheer ?? pandaIdle) : pandaIdle)}
+              src={hotseat?.status === 'won' ? (pandaCheer ?? pandaIdle) : pandaIdle}
               alt=""
               aria-hidden
               className="pointer-events-none absolute bottom-2 left-2 h-[76px] w-[76px] object-contain short:hidden tiny:hidden"
@@ -911,20 +956,15 @@ export default function ChessGame() {
             />
           )}
 
-          {mode === 'fox' && foxPose && (
+          {mode === 'fox' && foxIdle && (!foxOverlay.mounted || foxExiting) && (
             <div
-              className="pointer-events-none absolute bottom-2 right-2 short:hidden tiny:hidden"
+              className="pointer-events-none absolute bottom-2 right-2"
               data-testid="chess-fox-corner"
             >
-              {thinking && (
-                <div className="absolute" style={{ left: -48, top: -22 }}>
-                  <FoxThoughtBubble />
-                </div>
-              )}
               <img
-                src={foxPose}
+                src={foxIdle}
                 alt=""
-                className="h-[120px] w-[120px] object-contain"
+                className="h-[72px] w-[72px] object-contain"
                 data-testid="chess-fox"
               />
             </div>
@@ -988,6 +1028,7 @@ function ChessBoardView({
   lastMove,
   foxAnim,
   locked,
+  overlay,
   onSquare,
 }: {
   fen: string;
@@ -1001,6 +1042,7 @@ function ChessBoardView({
   lastMove: { from: Square; to: Square } | null;
   foxAnim: FoxAnim | null;
   locked: boolean;
+  overlay?: ReactNode;
   onSquare: (s: Square) => void;
 }) {
   const pieceMap = useMemo(() => {
@@ -1020,7 +1062,7 @@ function ChessBoardView({
   return (
     <div className="w-full max-w-[min(100%,360px)] mx-auto" data-testid="chess-board" data-fen={fen} data-locked={locked ? 'true' : 'false'}>
       <div
-        className="relative w-full aspect-square rounded-[1.1rem] border-4 p-[3px]"
+        className="relative w-full aspect-square overflow-visible rounded-[1.1rem] border-4 p-[3px]"
         style={{ borderColor: INK, backgroundColor: COAL, boxShadow: hardShadow(5, 6) }}
       >
         <div className={`relative w-full h-full${locked ? ' pointer-events-none' : ''}`}>
@@ -1163,6 +1205,7 @@ function ChessBoardView({
             </div>
           )}
         </div>
+        {overlay}
       </div>
       <div className="mt-1 flex justify-between px-1 text-[12px] font-extrabold" style={{ color: INK_SOFT }} aria-hidden>
         {[...FILES].map((f) => (

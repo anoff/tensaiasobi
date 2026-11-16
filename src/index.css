@@ -87,6 +87,47 @@
     .chess-thought-dot-3 { animation: none; opacity: 1; }
   }
 
+  @keyframes chess-fox-dim-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes chess-fox-dim-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @keyframes chess-fox-overlay-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes chess-fox-overlay-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.9); }
+  }
+  .chess-fox-dim {
+    background: rgba(42, 28, 20, 0.3);
+    opacity: 0;
+    animation: chess-fox-dim-in 200ms ease-out forwards;
+  }
+  .chess-fox-dim[data-visible="false"] {
+    animation: chess-fox-dim-out 200ms ease-out forwards;
+  }
+  .chess-fox-overlay {
+    opacity: 0;
+    transform: scale(0.9);
+    animation: chess-fox-overlay-in 200ms ease-out forwards;
+  }
+  .chess-fox-overlay[data-visible="false"] {
+    animation: chess-fox-overlay-out 200ms ease-out forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chess-fox-dim,
+    .chess-fox-overlay { animation: none; }
+    .chess-fox-overlay[data-visible="true"] { opacity: 1; transform: none; }
+    .chess-fox-overlay[data-visible="false"] { opacity: 0; transform: none; }
+    .chess-fox-dim[data-visible="true"] { opacity: 1; }
+    .chess-fox-dim[data-visible="false"] { opacity: 0; }
+  }
+
   
   .preserve-3d {
     transform-style: preserve-3d;

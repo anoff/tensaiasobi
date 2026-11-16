@@ -129,6 +129,7 @@ Pages belong to no shelf and no game. "Add page" offers **Blank** plus **20 scen
 Rules:
 - One panda per screen, in one of three sizes: **24 px head chip** (speech chips, header), **72–80 px corner** (in game), **120 px+** only on the award overlay and the session-end screen.
 - Placement: the **bottom-left corner slot**, outside the play area. It is never inside or over the stage, an answer or a tile, and never between the child and a target. On `short:` and `tiny:` screens the corner slot is dropped, and the panda appears only as the head chip and on the award overlay.
+- **Exception: vs Fox (chess).** The panda is not shown in vs Fox; the fox is the only character on screen. While the fox thinks, `fox_think` may sit over the board (centred, 60% of board width, board dimmed to 70%, board taps blocked). It must fade out before the move highlight starts, so it never covers a move. This is the only case where a character may cover the play area. Spec: chess-feel.md §4a.
 - `pointer-events: none`. The panda is never a tap target, so it can't be mis-tapped.
 - It reacts only to positive or neutral events. It never frowns, cries or shakes its head. After a miss it shows `think` (a hint is coming), not sadness.
 - Motion: the existing `card-in` pop (0.35 s) to appear, and a 2-frame bounce for cheer. Under `prefers-reduced-motion` the pose swaps with no movement.

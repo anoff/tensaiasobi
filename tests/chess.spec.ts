@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { FOX_STICKER_HOLD_MS } from '../src/games/chessFox';
+import { FOX_OVERLAY_MS, FOX_STICKER_HOLD_MS } from '../src/games/chessFox';
 
 
 async function openChess(page: Page, search = '') {
@@ -208,8 +208,11 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-hint')).toHaveCount(0);
     await expect(page.getByTestId('chess-won-trays')).toBeVisible();
     await expect(page.getByTestId('chess-tortoise')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-corner')).toBeVisible();
     await expect(page.getByTestId('chess-fox')).toBeVisible();
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
     await expect(page.getByTestId('chess-thought-bubble')).toHaveCount(0);
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
   });
 
   test('vs Fox shows a one-line thinking banner, the fox and bubble, then a last-move tint', async ({ page }) => {
@@ -219,8 +222,16 @@ test.describe('Chess', () => {
     await page.getByTestId('chess-sq-e4').click();
     const prompt = page.getByTestId('chess-prompt');
     await expect(prompt).toHaveText('⚫ Fox is thinking…');
+    await page.clock.runFor(1);
+    await page.clock.runFor(FOX_OVERLAY_MS);
+    const overlay = page.getByTestId('chess-fox-overlay');
+    await expect(overlay).toBeVisible();
+    await expect(overlay).toHaveAttribute('data-visible', 'true');
+    await expect(page.getByTestId('chess-fox-dim')).toHaveAttribute('data-visible', 'true');
     await expect(page.getByTestId('chess-thought-bubble')).toBeVisible();
-    await expect(page.getByTestId('chess-fox')).toBeVisible();
+    await expect(overlay.getByTestId('chess-fox')).toBeVisible();
+    await expect(page.getByTestId('chess-fox-corner')).toHaveCount(0);
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
     await expect(page.getByTestId('chess-tortoise')).toHaveCount(0);
     await expect(page.getByTestId('chess-thinking')).toHaveCount(0);
     await expect(page.getByTestId('chess-side-dot')).toHaveCount(0);
@@ -229,20 +240,29 @@ test.describe('Chess', () => {
     expect(box!.width).toBeLessThanOrEqual(375);
     // One line of text-lg / leading-tight is well under 40px; a wrap would be taller.
     expect(box!.height).toBeLessThan(40);
-    await page.clock.runFor(1);
     const board = page.getByTestId('chess-board');
     await expect(board).toHaveAttribute('data-locked', 'true');
     const fenBefore = await board.getAttribute('data-fen');
     await page.getByTestId('chess-sq-d2').click({ force: true });
     await expect(board).toHaveAttribute('data-fen', fenBefore!);
-    await page.clock.runFor(1000);
+    // Remaining think time after the fade-in already consumed FOX_OVERLAY_MS.
+    await page.clock.runFor(1000 - FOX_OVERLAY_MS);
+    await expect(page.getByTestId('chess-fox-highlight')).toHaveCount(0);
+    await expect(overlay).toHaveCount(1);
+    await page.clock.runFor(FOX_OVERLAY_MS);
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
     await expect(page.getByTestId('chess-fox-highlight')).toBeVisible();
+    await expect(page.getByTestId('chess-fox-corner')).toBeVisible();
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
     await page.clock.runFor(500);
     await page.clock.runFor(200);
     await expect(page.getByTestId('chess-last-move').first()).toBeVisible();
     await expect(prompt).toHaveText('White to move');
     await expect(page.getByTestId('chess-side-dot')).toHaveText('⚪');
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-corner')).toBeVisible();
     await expect(page.getByTestId('chess-thought-bubble')).toHaveCount(0);
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
   });
 
   test("vs Fox shows a calm Fox wins after the king is captured", async ({ page }) => {
@@ -250,9 +270,15 @@ test.describe('Chess', () => {
     await openChessFrozen(page, `foxFen=${fen}&foxLevel=clever&foxThinkMs=1000`);
     await page.getByTestId('chess-mode-fox').click();
     await expect(page.getByTestId('chess-prompt')).toHaveText('⚫ Fox is thinking…');
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
     await page.clock.runFor(1);
     await page.clock.runFor(1000);
+    await expect(page.getByTestId('chess-fox-highlight')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(1);
+    await page.clock.runFor(FOX_OVERLAY_MS);
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
     await expect(page.getByTestId('chess-fox-highlight')).toBeVisible();
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
     await page.clock.runFor(500);
     await page.clock.runFor(100);
     await page.clock.runFor(400);
@@ -268,8 +294,10 @@ test.describe('Chess', () => {
     }
     await expect(page.getByTestId('chess-prompt')).toHaveText('Fox wins');
     await expect(page.locator('.animate-confetti, [data-testid="chess-confetti"]')).toHaveCount(0);
-    await expect(page.getByTestId('chess-fox')).toBeVisible();
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-corner')).toBeVisible();
     await expect(page.getByTestId('chess-thought-bubble')).toHaveCount(0);
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
   });
 
   test('vs Fox holds the Logic sticker popup until the end line has been visible for 1.5s', async ({ page }) => {
@@ -279,7 +307,7 @@ test.describe('Chess', () => {
     const prompt = page.getByTestId('chess-prompt');
     await expect(prompt).toHaveText('⚫ Fox is thinking…');
     await page.clock.runFor(1);
-    for (let i = 0; i < 40; i += 1) {
+    for (let i = 0; i < 60; i += 1) {
       if ((await prompt.textContent()) === 'Fox wins') break;
       await page.clock.runFor(50);
     }
