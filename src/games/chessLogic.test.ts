@@ -121,4 +121,96 @@ describe('chessLogic', () => {
       expect(result.captured).toEqual({ type: 'p', color: 'b' });
     }
   });
+
+  describe('hotseat allows every legal move and blocks only self-check', () => {
+    const dests = (fen: string, from: Parameters<typeof tryHotseatMove>[1]) =>
+      hotseatMoves(fen, from).map((m) => m.to).sort();
+
+    it('allows a move that gives checkmate and records it as a win', () => {
+      // Back-rank mate: Qd8#.
+      const fen = '6k1/5ppp/8/8/8/8/8/3QK3 w - - 0 1';
+      expect(dests(fen, 'd1')).toContain('d8');
+      const result = tryHotseatMove(fen, 'd1', 'd8');
+      expect(result.ok && !result.needsPromotion).toBe(true);
+      if (result.ok && !result.needsPromotion) {
+        expect(result.state.status).toBe('checkmate');
+        expect(result.state.winner).toBe('w');
+      }
+    });
+
+    it('when in check, allows every escape (king move, block, capture) and nothing else', () => {
+      // Black rook on e8 checks the white king. Queen can capture or block; rook can block; king can flee.
+      const fen = '1k2r3/8/8/7Q/8/8/R7/4K3 w - - 0 1';
+      expect(dests(fen, 'e1').sort()).toEqual(['d1', 'd2', 'f1', 'f2']);
+      expect(dests(fen, 'h5').sort()).toEqual(['e2', 'e5', 'e8']);
+      expect(dests(fen, 'a2')).toEqual(['e2']);
+
+      for (const [from, to] of [
+        ['e1', 'd1'],
+        ['e1', 'd2'],
+        ['e1', 'f1'],
+        ['e1', 'f2'],
+        ['h5', 'e2'],
+        ['h5', 'e5'],
+        ['h5', 'e8'],
+        ['a2', 'e2'],
+      ] as const) {
+        const result = tryHotseatMove(fen, from, to);
+        expect(result.ok && !result.needsPromotion, `${from}->${to}`).toBe(true);
+        if (result.ok && !result.needsPromotion) {
+          expect(result.state.turn).toBe('b');
+          expect(result.state.fen).not.toBe(fen);
+        }
+      }
+
+      // Staying in check, or moving a piece that does not resolve it, is rejected.
+      expect(tryHotseatMove(fen, 'e1', 'e2').ok).toBe(false);
+      expect(tryHotseatMove(fen, 'a2', 'a8').ok).toBe(false);
+      expect(tryHotseatMove(fen, 'a2', 'a1').ok).toBe(false);
+      expect(tryHotseatMove(fen, 'h5', 'h6').ok).toBe(false);
+      expect(tryHotseatMove(fen, 'h5', 'a5').ok).toBe(false);
+
+      // Querying legal moves does not apply one; every escape is still available.
+      expect(dests(fen, 'e1').length + dests(fen, 'h5').length + dests(fen, 'a2').length).toBe(8);
+    });
+
+    it('keeps a pinned piece on the pin line and allows capturing the pinner', () => {
+      const fen = 'k3r3/8/8/8/4R3/8/8/4K3 w - - 0 1';
+      expect(dests(fen, 'e4')).toEqual(['e2', 'e3', 'e5', 'e6', 'e7', 'e8'].sort());
+
+      expect(tryHotseatMove(fen, 'e4', 'e8').ok).toBe(true);
+      expect(tryHotseatMove(fen, 'e4', 'e2').ok).toBe(true);
+      expect(tryHotseatMove(fen, 'e4', 'e7').ok).toBe(true);
+
+      expect(tryHotseatMove(fen, 'e4', 'd4').ok).toBe(false);
+      expect(tryHotseatMove(fen, 'e4', 'f4').ok).toBe(false);
+      expect(tryHotseatMove(fen, 'e4', 'a4').ok).toBe(false);
+      expect(tryHotseatMove(fen, 'e4', 'h4').ok).toBe(false);
+    });
+
+    it('allows a move that lets the opponent mate on the next turn', () => {
+      const start = startHotseat();
+      const f3 = tryHotseatMove(start.fen, 'f2', 'f3');
+      expect(f3.ok && !f3.needsPromotion).toBe(true);
+      if (!f3.ok || f3.needsPromotion) return;
+      expect(f3.state.status).toBe('playing');
+
+      const e5 = tryHotseatMove(f3.state.fen, 'e7', 'e5');
+      expect(e5.ok && !e5.needsPromotion).toBe(true);
+      if (!e5.ok || e5.needsPromotion) return;
+
+      const g4 = tryHotseatMove(e5.state.fen, 'g2', 'g4');
+      expect(g4.ok && !g4.needsPromotion).toBe(true);
+      if (!g4.ok || g4.needsPromotion) return;
+      expect(g4.state.status).toBe('playing');
+      expect(dests(g4.state.fen, 'd8')).toContain('h4');
+
+      const mate = tryHotseatMove(g4.state.fen, 'd8', 'h4');
+      expect(mate.ok && !mate.needsPromotion).toBe(true);
+      if (mate.ok && !mate.needsPromotion) {
+        expect(mate.state.status).toBe('checkmate');
+        expect(mate.state.winner).toBe('b');
+      }
+    });
+  });
 });
