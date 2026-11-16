@@ -849,12 +849,12 @@ export default function ChessGame() {
             overlay={foxOverlay.mounted ? (
               <>
                 <div
-                  className="chess-fox-dim pointer-events-none absolute inset-0 z-[4] rounded-[0.7rem]"
+                  className="chess-fox-dim pointer-events-none absolute inset-0 z-10 rounded-[0.7rem]"
                   data-testid="chess-fox-dim"
                   data-visible={foxOverlay.visible ? 'true' : 'false'}
                 />
                 <div
-                  className="chess-fox-overlay pointer-events-none absolute inset-0 z-[5] flex items-center justify-center overflow-visible"
+                  className="chess-fox-overlay pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-visible"
                   data-testid="chess-fox-overlay"
                   data-visible={foxOverlay.visible ? 'true' : 'false'}
                 >
@@ -958,7 +958,7 @@ export default function ChessGame() {
 
           {mode === 'fox' && foxIdle && (!foxOverlay.mounted || foxExiting) && (
             <div
-              className="pointer-events-none absolute bottom-2 right-2"
+              className="pointer-events-none absolute bottom-2 right-2 tiny:hidden"
               data-testid="chess-fox-corner"
             >
               <img
@@ -1065,7 +1065,7 @@ function ChessBoardView({
         className="relative w-full aspect-square overflow-visible rounded-[1.1rem] border-4 p-[3px]"
         style={{ borderColor: INK, backgroundColor: COAL, boxShadow: hardShadow(5, 6) }}
       >
-        <div className={`relative w-full h-full${locked ? ' pointer-events-none' : ''}`}>
+        <div className={`relative z-0 w-full h-full${locked ? ' pointer-events-none' : ''}`}>
           <div className="grid grid-cols-8 grid-rows-8 w-full h-full overflow-hidden rounded-[0.7rem]">
             {ranks.map((_, rankIdx) =>
               [...FILES].map((_, fileIdx) => {

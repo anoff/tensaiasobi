@@ -104,7 +104,8 @@
     to { opacity: 0; transform: scale(0.9); }
   }
   .chess-fox-dim {
-    background: rgba(42, 28, 20, 0.3);
+    /* cream `#fff8ec` at 30% — washes the board, does not darken it */
+    background-color: rgb(255 248 236 / 0.3);
     opacity: 0;
     animation: chess-fox-dim-in 200ms ease-out forwards;
   }
