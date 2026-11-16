@@ -1,14 +1,36 @@
 import { test, expect, type Page } from '@playwright/test';
+import { FOX_OVERLAY_MS, FOX_STICKER_HOLD_MS } from '../src/games/chessFox';
 
-async function openChess(page: Page) {
-  await page.goto('/');
+
+async function openChess(page: Page, search = '') {
+  await page.goto('/' + (search ? `?${search}` : ''));
   await page.getByTestId('age-mode-big').click();
   await page.getByTestId('launch-chess').click();
   await expect(page.getByTestId('chess-root')).toHaveAttribute('data-phase', 'pick');
 }
 
+/** Install a fake clock, let the page load, then freeze time so later waits are deterministic. */
+async function openChessFrozen(page: Page, search = '') {
+  await page.clock.install({ time: new Date('2024-06-01T12:00:00Z') });
+  await openChess(page, search);
+  await page.clock.pauseAt(new Date('2024-06-01T12:01:00Z'));
+}
+
+/** Advance the fake clock through the 200 ms fade and finish the fox/dim CSS animations. */
+async function afterFoxFadeIn(page: Page) {
+  await page.clock.runFor(FOX_OVERLAY_MS);
+  await page.evaluate(`(() => {
+    for (const anim of document.getAnimations()) {
+      const el = anim.effect && 'target' in anim.effect ? anim.effect.target : null;
+      if (!(el instanceof Element)) continue;
+      if (!el.classList.contains('chess-fox-overlay') && !el.classList.contains('chess-fox-dim')) continue;
+      try { anim.finish(); } catch { /* already ended */ }
+    }
+  })()`);
+}
+
 test.describe('Chess', () => {
-  test('launcher uses drawn Staunton art and opens three modes', async ({ page }) => {
+  test('launcher uses drawn Staunton art and opens four modes', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('age-mode-big').click();
     const launch = page.getByTestId('launch-chess');
@@ -18,10 +40,30 @@ test.describe('Chess', () => {
     await expect(page.getByTestId('chess-mode-moves')).toBeVisible();
     await expect(page.getByTestId('chess-mode-capture')).toBeVisible();
     await expect(page.getByTestId('chess-mode-hotseat')).toBeVisible();
+    await expect(page.getByTestId('chess-mode-fox')).toBeVisible();
+    const foxTile = page.getByTestId('chess-mode-fox');
+    await expect(foxTile).toHaveAttribute('aria-label', 'Play against the fox');
+    await expect(foxTile.locator('img')).toBeVisible();
+    await expect(foxTile.getByText('vs Fox')).toHaveCount(0);
+    await expect(foxTile.getByText('Play against the fox')).toHaveCount(0);
     for (const btn of await page.locator('[data-testid^="chess-mode-"]').all()) {
       const box = await btn.boundingBox();
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(96);
     }
+    const levels = page.getByTestId('chess-fox-levels');
+    await expect(levels).toBeVisible();
+    await expect(page.getByTestId('difficulty-easy')).toBeVisible();
+    await expect(page.getByTestId('difficulty-medium')).toBeVisible();
+    await expect(page.getByTestId('difficulty-hard')).toHaveCount(0);
+    await expect(levels.getByText('Gentle')).toBeVisible();
+    await expect(levels.getByText('Clever')).toBeVisible();
+    const levelLabel = page.getByTestId('chess-fox-level-label');
+    await expect(levelLabel).toHaveText('Fox level');
+    const labelBox = await levelLabel.boundingBox();
+    const rowBox = await page.getByTestId('difficulty-easy').boundingBox();
+    expect(labelBox).toBeTruthy();
+    expect(rowBox).toBeTruthy();
+    expect(labelBox!.y + labelBox!.height).toBeLessThanOrEqual(rowBox!.y + 1);
   });
 
   test('moves mode: hint reveals legal squares, miss does not, hit moves the piece', async ({ page }) => {
@@ -92,7 +134,8 @@ test.describe('Chess', () => {
     await expect(progress).toBeVisible();
     await expect(progress).toHaveText(/0 \/ [23]/);
     await expect(page.locator('[data-piece="wk"]')).toHaveCount(0);
-    await expect(page.locator('[data-piece="bk"]')).toHaveCount(0);
+    // A sequence may end on the king, so that king stays visible. Spectator kings do not.
+    expect(await page.locator('[data-piece="bk"]').count()).toBeLessThanOrEqual(1);
     await expect(page.getByTestId('chess-won-trays')).toHaveCount(0);
     const whites = page.getByTestId('chess-board').locator('[data-piece^="w"]');
     const count = await whites.count();
@@ -105,7 +148,7 @@ test.describe('Chess', () => {
     await page.getByTestId(`chess-sq-${capSq}`).click();
     await expect.poll(async () => progress.textContent()).toMatch(/1 \/ [23]/);
     await expect(page.locator('[data-piece="wk"]')).toHaveCount(0);
-    await expect(page.locator('[data-piece="bk"]')).toHaveCount(0);
+    expect(await page.locator('[data-piece="bk"]').count()).toBeLessThanOrEqual(1);
   });
 
   test('hot-seat starts from the standard setup with turn banner', async ({ page }) => {
@@ -164,5 +207,172 @@ test.describe('Chess', () => {
       await expect(page.getByTestId('chess-panda')).toBeHidden();
       await page.getByTestId('chess-done').click();
     }
+  });
+
+  test('vs Fox starts from the standard setup with no Hint button', async ({ page }) => {
+    await openChess(page);
+    await page.getByTestId('chess-mode-fox').click();
+    const root = page.getByTestId('chess-root');
+    await expect(root).toHaveAttribute('data-mode', 'fox');
+    const board = page.getByTestId('chess-board');
+    await expect(board).toBeVisible();
+    await expect(board).toHaveAttribute('data-fen', /rnbqkbnr\/pppppppp\/8\/8\/8\/8\/PPPPPPPP\/RNBQKBNR w/);
+    await expect(page.getByTestId('chess-prompt')).toHaveText('White to move');
+    await expect(page.getByTestId('chess-hint')).toHaveCount(0);
+    await expect(page.getByTestId('chess-won-trays')).toBeVisible();
+    await expect(page.getByTestId('chess-tortoise')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-corner')).toBeVisible();
+    await expect(page.getByTestId('chess-fox')).toBeVisible();
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
+    await expect(page.getByTestId('chess-thought-bubble')).toHaveCount(0);
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
+  });
+
+  test('vs Fox hides the corner fox on tiny screens and keeps it on short', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await openChess(page);
+    await page.getByTestId('chess-mode-fox').click();
+    await expect(page.getByTestId('chess-fox-corner')).toBeVisible();
+
+    await page.setViewportSize({ width: 320, height: 568 });
+    await expect(page.getByTestId('chess-fox-corner')).toBeHidden();
+  });
+
+  test('vs Fox shows a one-line thinking banner, the fox and bubble, then a last-move tint', async ({ page }) => {
+    await openChessFrozen(page, 'foxThinkMs=1000');
+    await page.getByTestId('chess-mode-fox').click();
+    await page.getByTestId('chess-sq-e2').click();
+    await page.getByTestId('chess-sq-e4').click();
+    const prompt = page.getByTestId('chess-prompt');
+    await expect(prompt).toHaveText('⚫ Fox is thinking…');
+    await page.clock.runFor(1);
+    await afterFoxFadeIn(page);
+    const overlay = page.getByTestId('chess-fox-overlay');
+    const dim = page.getByTestId('chess-fox-dim');
+    await expect(overlay).toBeVisible();
+    await expect(overlay).toHaveAttribute('data-visible', 'true');
+    await expect(overlay).toHaveCSS('opacity', '1');
+    await expect(dim).toHaveAttribute('data-visible', 'true');
+    await expect(dim).toHaveCSS('opacity', '1');
+    await expect(dim).toHaveCSS('background-color', 'rgba(255, 248, 236, 0.3)');
+    await expect(page.getByTestId('chess-thought-bubble')).toBeVisible();
+    await expect(overlay.getByTestId('chess-fox')).toBeVisible();
+    const e4 = await page.getByTestId('chess-sq-e4').boundingBox();
+    expect(e4).toBeTruthy();
+    const x = e4!.x + e4!.width / 2;
+    const y = e4!.y + e4!.height / 2;
+    // The board is pointer-events-none while the fox thinks, so temporarily
+    // re-enable hits on the overlay, the dim and the e4 square's ancestors.
+    const stack = await page.evaluate<string[]>(`(() => {
+      const targets = [
+        document.querySelector('[data-testid="chess-fox-overlay"]'),
+        document.querySelector('[data-testid="chess-fox-dim"]'),
+      ];
+      let square = document.querySelector('[data-testid="chess-sq-e4"]');
+      while (square) {
+        targets.push(square);
+        if (square.getAttribute('data-testid') === 'chess-board') break;
+        square = square.parentElement;
+      }
+      const prev = targets.map((el) => el && el.style.pointerEvents);
+      for (const el of targets) if (el) el.style.pointerEvents = 'auto';
+      const ids = document.elementsFromPoint(${x}, ${y}).map((el) => el.dataset.testid || el.tagName.toLowerCase());
+      targets.forEach((el, i) => { if (el) el.style.pointerEvents = prev[i]; });
+      return ids;
+    })()`);
+    const foxIdx = stack.findIndex((id) => id === 'chess-fox' || id === 'chess-fox-overlay');
+    const dimIdx = stack.findIndex((id) => id === 'chess-fox-dim');
+    const squareIdx = stack.findIndex((id) => id === 'chess-sq-e4');
+    expect(foxIdx).toBeGreaterThanOrEqual(0);
+    expect(dimIdx).toBeGreaterThan(foxIdx);
+    expect(squareIdx).toBeGreaterThan(dimIdx);
+    await expect(page.getByTestId('chess-fox-corner')).toHaveCount(0);
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
+    await expect(page.getByTestId('chess-tortoise')).toHaveCount(0);
+    await expect(page.getByTestId('chess-thinking')).toHaveCount(0);
+    await expect(page.getByTestId('chess-side-dot')).toHaveCount(0);
+    const box = await prompt.boundingBox();
+    expect(box).toBeTruthy();
+    expect(box!.width).toBeLessThanOrEqual(375);
+    // One line of text-lg / leading-tight is well under 40px; a wrap would be taller.
+    expect(box!.height).toBeLessThan(40);
+    const board = page.getByTestId('chess-board');
+    await expect(board).toHaveAttribute('data-locked', 'true');
+    const fenBefore = await board.getAttribute('data-fen');
+    await page.getByTestId('chess-sq-d2').click({ force: true });
+    await expect(board).toHaveAttribute('data-fen', fenBefore!);
+    // Remaining think time after the fade-in already consumed FOX_OVERLAY_MS.
+    await page.clock.runFor(1000 - FOX_OVERLAY_MS);
+    await expect(page.getByTestId('chess-fox-highlight')).toHaveCount(0);
+    await expect(overlay).toHaveCount(1);
+    await page.clock.runFor(FOX_OVERLAY_MS);
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-highlight')).toBeVisible();
+    await expect(page.getByTestId('chess-fox-corner')).toBeVisible();
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
+    await page.clock.runFor(500);
+    await page.clock.runFor(200);
+    await expect(page.getByTestId('chess-last-move').first()).toBeVisible();
+    await expect(prompt).toHaveText('White to move');
+    await expect(page.getByTestId('chess-side-dot')).toHaveText('⚪');
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-corner')).toBeVisible();
+    await expect(page.getByTestId('chess-thought-bubble')).toHaveCount(0);
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
+  });
+
+  test("vs Fox shows a calm Fox wins after the king is captured", async ({ page }) => {
+    const fen = encodeURIComponent('4k3/8/8/8/8/8/4q3/4K3 b - - 0 1');
+    await openChessFrozen(page, `foxFen=${fen}&foxLevel=clever&foxThinkMs=1000`);
+    await page.getByTestId('chess-mode-fox').click();
+    await expect(page.getByTestId('chess-prompt')).toHaveText('⚫ Fox is thinking…');
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
+    await page.clock.runFor(1);
+    await page.clock.runFor(1000);
+    await expect(page.getByTestId('chess-fox-highlight')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(1);
+    await page.clock.runFor(FOX_OVERLAY_MS);
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-highlight')).toBeVisible();
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
+    await page.clock.runFor(500);
+    await page.clock.runFor(100);
+    await page.clock.runFor(400);
+    await expect(page.getByTestId('chess-prompt')).toHaveText('Fox wins');
+    await expect(page.getByTestId('chess-play-again')).toBeVisible();
+    await expect(page.getByTestId('chess-new-game')).toHaveCount(0);
+    const award = page.getByTestId('sticker-award');
+    await expect(award).toHaveCount(0);
+    if (await award.count()) {
+      await award.click();
+      if (await award.isVisible().catch(() => false)) await award.click();
+      await expect(award).toHaveCount(0);
+    }
+    await expect(page.getByTestId('chess-prompt')).toHaveText('Fox wins');
+    await expect(page.locator('.animate-confetti, [data-testid="chess-confetti"]')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-overlay')).toHaveCount(0);
+    await expect(page.getByTestId('chess-fox-corner')).toBeVisible();
+    await expect(page.getByTestId('chess-thought-bubble')).toHaveCount(0);
+    await expect(page.getByTestId('chess-panda')).toHaveCount(0);
+  });
+
+  test('vs Fox holds the Logic sticker popup until the end line has been visible for 1.5s', async ({ page }) => {
+    const fen = encodeURIComponent('4k3/8/8/8/8/8/4q3/4K3 b - - 0 1');
+    await openChessFrozen(page, `foxFen=${fen}&foxLevel=clever&foxThinkMs=1000`);
+    await page.getByTestId('chess-mode-fox').click();
+    const prompt = page.getByTestId('chess-prompt');
+    await expect(prompt).toHaveText('⚫ Fox is thinking…');
+    await page.clock.runFor(1);
+    for (let i = 0; i < 60; i += 1) {
+      if ((await prompt.textContent()) === 'Fox wins') break;
+      await page.clock.runFor(50);
+    }
+    await expect(prompt).toHaveText('Fox wins');
+    const award = page.getByTestId('sticker-award');
+    await expect(award).toHaveCount(0);
+    await page.clock.runFor(FOX_STICKER_HOLD_MS - 50);
+    await expect(award).toHaveCount(0);
+    await page.clock.runFor(100);
+    await expect(award).toBeVisible();
   });
 });

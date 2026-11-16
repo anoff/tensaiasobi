@@ -55,6 +55,80 @@
     }
   }
 
+  @keyframes thought-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  .chess-thought-cloud {
+    animation: thought-bob 1.2s ease-in-out infinite;
+  }
+  @keyframes thought-dot-1 {
+    0%, 24% { opacity: 0; }
+    25%, 90% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes thought-dot-2 {
+    0%, 49% { opacity: 0; }
+    50%, 90% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes thought-dot-3 {
+    0%, 74% { opacity: 0; }
+    75%, 90% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .chess-thought-dot-1 { animation: thought-dot-1 1.2s linear infinite; }
+  .chess-thought-dot-2 { animation: thought-dot-2 1.2s linear infinite; }
+  .chess-thought-dot-3 { animation: thought-dot-3 1.2s linear infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .chess-thought-cloud { animation: none; }
+    .chess-thought-dot-1,
+    .chess-thought-dot-2,
+    .chess-thought-dot-3 { animation: none; opacity: 1; }
+  }
+
+  @keyframes chess-fox-dim-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes chess-fox-dim-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @keyframes chess-fox-overlay-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes chess-fox-overlay-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.9); }
+  }
+  .chess-fox-dim {
+    /* cream `#fff8ec` at 30% — washes the board, does not darken it */
+    background-color: rgb(255 248 236 / 0.3);
+    opacity: 0;
+    animation: chess-fox-dim-in 200ms ease-out forwards;
+  }
+  .chess-fox-dim[data-visible="false"] {
+    animation: chess-fox-dim-out 200ms ease-out forwards;
+  }
+  .chess-fox-overlay {
+    opacity: 0;
+    transform: scale(0.9);
+    animation: chess-fox-overlay-in 200ms ease-out forwards;
+  }
+  .chess-fox-overlay[data-visible="false"] {
+    animation: chess-fox-overlay-out 200ms ease-out forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chess-fox-dim,
+    .chess-fox-overlay { animation: none; }
+    .chess-fox-overlay[data-visible="true"] { opacity: 1; transform: none; }
+    .chess-fox-overlay[data-visible="false"] { opacity: 0; transform: none; }
+    .chess-fox-dim[data-visible="true"] { opacity: 1; }
+    .chess-fox-dim[data-visible="false"] { opacity: 0; }
+  }
+
   
   .preserve-3d {
     transform-style: preserve-3d;

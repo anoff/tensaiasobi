@@ -17,6 +17,8 @@ interface DifficultySelectorProps {
    * three open (Math Pop has its own ladder per age).
    */
   locked?: GameDifficulty | null;
+  /** Optional visible name under the stars. Existing call sites stay star-only. */
+  labels?: Partial<Record<GameDifficulty, string>>;
 }
 
 const STARS: Record<GameDifficulty, string> = {
@@ -33,6 +35,7 @@ export function DifficultySelector({
   className = '',
   variant = 'candy',
   locked: lockedOverride,
+  labels,
 }: DifficultySelectorProps) {
   const paper = variant === 'paper';
   // The level that doesn't fit the home age switch stays visible but locked.
@@ -68,7 +71,10 @@ export function DifficultySelector({
             `}
             style={isActive && !paper ? { backgroundColor: BUTTER, borderColor: INK, boxShadow: hardShadow(2, 2) } : undefined}
           >
-            <span className={opt === locked ? 'grayscale opacity-50' : undefined}>{STARS[opt]}</span>
+            <span className={opt === locked ? 'grayscale opacity-50' : undefined}>
+              {STARS[opt]}
+              {labels?.[opt] ? <span className="block text-xs font-black mt-0.5">{labels[opt]}</span> : null}
+            </span>
           </button>
         );
       })}
