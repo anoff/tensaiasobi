@@ -35,6 +35,8 @@ import { useCoupons } from './hooks/useCoupons';
 import { useChallenge } from './hooks/useChallenge';
 import { formatRemaining, useSessionTimer } from './hooks/useSessionTimer';
 import { routeFromHash, routeHash, type HashRoute } from './games/gameLink';
+import { usePwaUpdate } from './hooks/usePwaUpdate';
+import { PwaUpdateBar } from './components/PwaUpdateBar';
 
 type Screen = 'menu' | 'stickers' | 'coupons' | 'settings' | 'session' | 'guide' | GameId;
 /** Grown-up screens reached through the parent gate: no Home button, never covered by the session lock. */
@@ -79,6 +81,7 @@ function AppContent() {
   const [parentGateNext, setParentGateNext] = useState<ParentGateNext>('settings');
 
   const { playPop, playSuccess, playError, playSimonTone, playCue } = useSound(soundEnabled, vibrationEnabled);
+  const { updateAvailable, applyUpdate } = usePwaUpdate();
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -521,7 +524,7 @@ function AppContent() {
         }
       >
         {currentScreen === 'menu' ? (
-          <div className="min-h-full flex flex-col justify-between max-w-md mx-auto w-full shrink-0 pt-6 pb-4 select-none">
+          <div className={`min-h-full flex flex-col justify-between max-w-md mx-auto w-full shrink-0 pt-6 select-none ${updateAvailable ? 'pb-20' : 'pb-4'}`}>
             <div className="text-center space-y-2 mt-4">
               <div className="flex items-center justify-center gap-[14px]">
                 <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">tensaiasobi</h1>
@@ -786,6 +789,8 @@ function AppContent() {
           <StickerAward key={copy.uid} sticker={sticker} shiny={copy.shiny} count={count} onDone={finishAward} playCue={playCue} />
         ) : null;
       })()}
+
+      <PwaUpdateBar visible={currentScreen === 'menu' && updateAvailable} onUpdate={applyUpdate} />
 
       {sessionLocked && !isParentScreen(currentScreen) && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/70 p-6" data-testid="session-locked">

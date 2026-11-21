@@ -18,6 +18,7 @@ export const fr: TranslationSchema = {
     themes: { animals: "Animaux", space: "Espace", ocean: "Océan" },
     session: "Défi",
     language: "Langue",
+    updateAvailable: "Nouvelle version ! Appuyez pour mettre à jour",
     math: "Math Pop",
     odd: "L'intrus",
     doodle: "Dessin",

@@ -27,8 +27,9 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       // WKWebView can't register service workers on capacitor://, and the app ships its files anyway.
       disable: mode === 'ios',
-      registerType: 'autoUpdate',
-      injectRegister: 'inline',
+      // Prompt so a waiting worker never auto-reloads mid-game; the home-screen bar applies it.
+      registerType: 'prompt',
+      injectRegister: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         // Printing is a rare grown-up action: keep its art and the PDF libraries out of the install-time
