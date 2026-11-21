@@ -6,7 +6,7 @@ import { I18nProvider } from '../hooks/useTranslation';
 import { usePwaUpdate } from '../hooks/usePwaUpdate';
 import type { PwaUpdateWatch } from '../platform/pwa';
 import { PwaUpdateBar } from './PwaUpdateBar';
-import { updateBarLauncherPadding } from './updateBarPadding';
+import { updateBarScrollPadding } from './updateBarPadding';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -29,10 +29,11 @@ function Harness({ isHome, watch }: { isHome: boolean; watch: PwaUpdateWatch }) 
   return (
     <>
       <div
-        data-testid="home-launcher"
-        className={barReserve ? '' : 'pb-4'}
+        data-testid="home-scroll"
         style={barReserve ? { paddingBottom: barReserve } : undefined}
-      />
+      >
+        <div data-testid="home-launcher" className={barReserve ? '' : 'pb-4'} />
+      </div>
       <PwaUpdateBar
         visible={isHome && updateAvailable}
         onUpdate={applyUpdate}
@@ -58,6 +59,7 @@ function mount(isHome: boolean, watch: PwaUpdateWatch) {
   render(isHome);
   return {
     bar: () => el.querySelector<HTMLButtonElement>('[data-testid="pwa-update-bar"]'),
+    scroll: () => el.querySelector<HTMLElement>('[data-testid="home-scroll"]')!,
     launcher: () => el.querySelector<HTMLElement>('[data-testid="home-launcher"]')!,
     rerender: render,
     unmount: () => {
@@ -67,10 +69,10 @@ function mount(isHome: boolean, watch: PwaUpdateWatch) {
   };
 }
 
-describe('updateBarLauncherPadding', () => {
-  it('is the bar height plus the 12 px offset and the safe-area inset', () => {
-    expect(updateBarLauncherPadding(44)).toBe(
-      'calc(56px + env(safe-area-inset-bottom, 0px))',
+describe('updateBarScrollPadding', () => {
+  it('is the bar height plus the 12 px offset, 4 px shadow, 12 px gap and the safe-area inset', () => {
+    expect(updateBarScrollPadding(44)).toBe(
+      'calc(72px + env(safe-area-inset-bottom, 0px))',
     );
   });
 });
@@ -112,26 +114,27 @@ describe('PwaUpdateBar', () => {
     ui.unmount();
   });
 
-  it('pads the launcher by the bar height, offset and safe-area while the bar is showing, and drops that padding when it is hidden', () => {
+  it('pads the scroll container by the bar height, offset, shadow, gap and safe-area while the bar is showing, and drops that padding when it is hidden', () => {
     stubBarHeight();
     const watch: PwaUpdateWatch = (onWaiting) => {
       onWaiting(() => {});
       return () => {};
     };
-    const expected = updateBarLauncherPadding(BAR_HEIGHT);
+    const expected = updateBarScrollPadding(BAR_HEIGHT);
 
     const ui = mount(true, watch);
     expect(ui.bar()).not.toBeNull();
-    expect(ui.launcher().style.paddingBottom).toBe(expected);
+    expect(ui.scroll().style.paddingBottom).toBe(expected);
+    expect(ui.launcher().style.paddingBottom).toBe('');
     expect(ui.launcher().className).not.toContain('pb-4');
 
     ui.rerender(false);
     expect(ui.bar()).toBeNull();
-    expect(ui.launcher().style.paddingBottom).toBe('');
+    expect(ui.scroll().style.paddingBottom).toBe('');
     expect(ui.launcher().className).toContain('pb-4');
 
     ui.rerender(true);
-    expect(ui.launcher().style.paddingBottom).toBe(expected);
+    expect(ui.scroll().style.paddingBottom).toBe(expected);
     expect(ui.launcher().className).not.toContain('pb-4');
     ui.unmount();
   });

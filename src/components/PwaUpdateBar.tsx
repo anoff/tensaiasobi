@@ -1,12 +1,12 @@
 import { useLayoutEffect, useRef } from 'react';
 import { BUTTER, INK, hardShadow } from '../theme/blockTable';
 import { useTranslation } from '../hooks/useTranslation';
-import { UPDATE_BAR_OFFSET_PX, updateBarLauncherPadding } from './updateBarPadding';
+import { UPDATE_BAR_OFFSET_PX, updateBarScrollPadding } from './updateBarPadding';
 
 interface PwaUpdateBarProps {
   visible: boolean;
   onUpdate: () => void;
-  /** Called with the launcher padding to reserve, or null when the bar is hidden. */
+  /** Called with the scroll-container padding to reserve, or null when the bar is hidden. */
   onReserveChange?: (padding: string | null) => void;
 }
 
@@ -21,7 +21,7 @@ export function PwaUpdateBar({ visible, onUpdate, onReserveChange }: PwaUpdateBa
       return;
     }
     const el = barRef.current;
-    const report = () => onReserveChange?.(updateBarLauncherPadding(el.offsetHeight));
+    const report = () => onReserveChange?.(updateBarScrollPadding(el.offsetHeight));
     report();
     if (typeof ResizeObserver === 'undefined') return undefined;
     const ro = new ResizeObserver(() => report());

@@ -517,6 +517,7 @@ function AppContent() {
       )}
 
       <main
+        data-testid={currentScreen === 'menu' ? 'home-scroll' : undefined}
         className={
           currentScreen === 'stickers'
             ? 'flex-1 flex flex-col min-h-0 overflow-hidden [&:has([data-page-scroll])]:overflow-y-auto overscroll-y-contain px-4 pt-1.5 pb-2'
@@ -524,12 +525,12 @@ function AppContent() {
               ? 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4'
               : 'flex-1 flex flex-col overflow-y-auto overscroll-y-contain px-4 pb-6 short:pb-2'
         }
+        style={currentScreen === 'menu' && barReserve ? { paddingBottom: barReserve } : undefined}
       >
         {currentScreen === 'menu' ? (
           <div
             data-testid="home-launcher"
             className={`min-h-full flex flex-col justify-between max-w-md mx-auto w-full shrink-0 pt-6 select-none ${barReserve ? '' : 'pb-4'}`}
-            style={barReserve ? { paddingBottom: barReserve } : undefined}
           >
             <div className="text-center space-y-2 mt-4">
               <div className="flex items-center justify-center gap-[14px]">
