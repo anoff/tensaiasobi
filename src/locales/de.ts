@@ -18,6 +18,7 @@ export const de: TranslationSchema = {
     themes: { animals: "Tiere", space: "Weltraum", ocean: "Meer" },
     session: "Challenge",
     language: "Sprache",
+    updateAvailable: "Neue Version! Tippen zum Aktualisieren",
     math: "Mathe Pop",
     odd: "Finde das Andere",
     doodle: "Malen",

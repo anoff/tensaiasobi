@@ -18,6 +18,7 @@ export const ja: TranslationSchema = {
     themes: { animals: "どうぶつ", space: "うちゅう", ocean: "うみ" },
     session: "チャレンジ",
     language: "げんご",
+    updateAvailable: "あたらしいバージョン！タップして更新",
     math: "さんすうポップ",
     odd: "なかまはずれ",
     doodle: "おえかき",

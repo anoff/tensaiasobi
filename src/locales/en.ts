@@ -18,6 +18,7 @@ export const en = {
     themes: { animals: "Animals", space: "Space", ocean: "Ocean" },
     session: "Challenge",
     language: "Language",
+    updateAvailable: "New version! Tap to update",
     math: "Math Pop",
     odd: "Odd One",
     doodle: "Doodle",

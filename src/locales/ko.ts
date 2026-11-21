@@ -18,6 +18,7 @@ export const ko: TranslationSchema = {
     themes: { animals: "동물", space: "우주", ocean: "바다" },
     session: "도전",
     language: "언어",
+    updateAvailable: "새 버전! 탭하여 업데이트",
     math: "수학 팝",
     odd: "다른 그림 찾기",
     doodle: "낙서장",
