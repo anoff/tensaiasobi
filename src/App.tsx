@@ -82,6 +82,8 @@ function AppContent() {
 
   const { playPop, playSuccess, playError, playSimonTone, playCue } = useSound(soundEnabled, vibrationEnabled);
   const { updateAvailable, applyUpdate } = usePwaUpdate();
+  const [barReserve, setBarReserve] = useState<string | null>(null);
+  const onBarReserveChange = useCallback((padding: string | null) => setBarReserve(padding), []);
   const { language, setLanguage, t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -524,7 +526,11 @@ function AppContent() {
         }
       >
         {currentScreen === 'menu' ? (
-          <div className={`min-h-full flex flex-col justify-between max-w-md mx-auto w-full shrink-0 pt-6 select-none ${updateAvailable ? 'pb-20' : 'pb-4'}`}>
+          <div
+            data-testid="home-launcher"
+            className={`min-h-full flex flex-col justify-between max-w-md mx-auto w-full shrink-0 pt-6 select-none ${barReserve ? '' : 'pb-4'}`}
+            style={barReserve ? { paddingBottom: barReserve } : undefined}
+          >
             <div className="text-center space-y-2 mt-4">
               <div className="flex items-center justify-center gap-[14px]">
                 <h1 className="text-4xl font-black tracking-tight text-[#2a1c14]">tensaiasobi</h1>
@@ -790,7 +796,7 @@ function AppContent() {
         ) : null;
       })()}
 
-      <PwaUpdateBar visible={currentScreen === 'menu' && updateAvailable} onUpdate={applyUpdate} />
+      <PwaUpdateBar visible={currentScreen === 'menu' && updateAvailable} onUpdate={applyUpdate} onReserveChange={onBarReserveChange} />
 
       {sessionLocked && !isParentScreen(currentScreen) && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/70 p-6" data-testid="session-locked">
